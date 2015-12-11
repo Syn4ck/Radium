@@ -112,7 +112,7 @@ namespace Ra
 //					system.second->handleFileLoading(entity, filename);
 //	            }
 				
-				getSystem("FancyMeshSystem")->handleFileLoading(entity, filename);
+                getSystem("FancyMeshSystem")->handleFileLoading(entity, filename);
 				
 				return true;
 			}
@@ -152,7 +152,7 @@ namespace Ra
 						system->second->handleDataLoading( entity, rootFolder, systemData.data );
 					}
 				}
-			}
+            }
 
 			return true;
 		}

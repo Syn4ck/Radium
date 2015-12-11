@@ -44,8 +44,6 @@ namespace Ra
             for (int i = 0; i < data.size(); ++i)
                 indices[i] = i;
 
-LOG(logWARNING) << "Prepared indirections" ;
-
             // Stack of pointers to the sorted indices, such that
             // data indexed by the range of indices between a couple <begin,end>
             // is contained in the equivalent node of stackNodes
@@ -59,9 +57,7 @@ LOG(logWARNING) << "Prepared indirections" ;
             // TODO Switch for longest axis based on AABB ?
             int axis = 1 % m_dim; // For 3D : 0 is x-aligned, 1 is y-aligned and 2 is z-aligned
 
-LOG(logWARNING) << "Starting computation of nodes" ;
             while (!stackNodes.empty()) {
-LOG(logWARNING) << "New node" ;
                 auto current = stackNodes.back();
                 stackNodes.pop_back();
                 auto begin = stackBegins.back();
@@ -95,11 +91,17 @@ LOG(logWARNING) << "Very best !" ;
                     stackNodes.push_back(&m_nodes.back());
                     stackBegins.push_back(begin);
                     stackEnds.push_back(begin+median_range);
+
 LOG(logWARNING) << "Pushed left node between " << *(begin) << " and " << *(begin+median_range) ;
+
                 } else {
+
 LOG(logWARNING) << "Created a left leaf with " << median_range << " primitives" ;
-                    m_nodes.back().addPrimitives(std::vector<Vector3>(begin, begin+median_range)) ;
+
+                    for (auto i = begin; i != begin+median_range; ++i)
+                        m_nodes.back().addPrimitive(data[*i]) ;
                 }
+
 
                 m_nodes.push_back(KDNode(current->depth()+1)) ;
                 if ((range-median_range) > m_prims_per_leaf) {
@@ -107,16 +109,19 @@ LOG(logWARNING) << "Created a left leaf with " << median_range << " primitives" 
                     stackNodes.push_back(&m_nodes.back());
                     stackBegins.push_back(begin+median_range);
                     stackEnds.push_back(end);
+
 LOG(logWARNING) << "Pushed right node between " << *(begin+median_range) << " and " << *(end) ;
+
                 } else {
+
 LOG(logWARNING) << "Created a right leaf with " << (range-median_range) << " primitives" ;
-                    m_nodes.back().addPrimitives(std::vector<Vector3>(begin+median_range, end)) ;
+
+                    for (auto i = begin+median_range; i != end; ++i)
+                        m_nodes.back().addPrimitive(data[*i]) ;
                 }
 
                 axis += 1 % m_dim;
             }
-
-LOG(logWARNING) << "Tchuss" ;
 
             m_root_aabb = m_nodes[0].m_aabb ;
 

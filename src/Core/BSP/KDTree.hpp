@@ -12,17 +12,16 @@ namespace Ra
         class KDNode
         {
         public:
-            KDNode(int depth)
-                :m_is_leaf(true), m_depth(depth) {}
-
-            KDNode(const KDNode & n)
-                :m_is_leaf(n.m_is_leaf), m_depth(n.m_depth) {}
+            KDNode(int depth = 0)
+                :m_is_leaf(true), m_depth(depth), m_points(3) {}
 
             int depth() const { return m_depth; }
 
             void setIsNotLeaf() { m_is_leaf = false ; }
 
-            void addPrimitives(std::vector<Vector3> data) { m_points.insert(m_points.end(), data.begin(), data.end()) ; }
+            void addPrimitive(Vector3 data) { m_points.push_back(data); }
+
+            //void addPrimitives(std::vector<Vector3> data) { m_points.insert(m_points.end(), data.begin(), data.end()) ; }
 
         public:
             std::vector<Vector3> m_points;
@@ -34,6 +33,9 @@ namespace Ra
         class KDTree : public BSP
         {
         public:
+
+            KDTree(int estimated_size = 32)
+                :m_nodes(estimated_size) {}
 
             bool build(const VectorArray<Vector3> & data) override;
 
