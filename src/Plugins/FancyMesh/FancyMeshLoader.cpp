@@ -81,7 +81,7 @@ namespace FancyMeshPlugin
 
         runThroughNodes( scene->mRootNode, scene, Ra::Core::Matrix4::Identity() );
 
-        //LOG(DEBUG) << "File " << name << " loaded successfully (" << dataVector.size() << " items to load).";
+        LOG( logINFO ) << "File " << name << " loaded successfully (" << dataVector.size() << " items to load).";
 
         return dataVector;
     }
