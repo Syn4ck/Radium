@@ -20,6 +20,12 @@
 #include <Engine/Renderer/Light/SpotLight.hpp>
 #include <Engine/Renderer/Light/PointLight.hpp>
 #include <iostream>
+
+
+// FIXME TEST COMPIL
+#include <Core/BSP/KDTree.hpp>
+
+
 namespace FancyMeshPlugin
 {
     namespace
@@ -215,6 +221,11 @@ namespace FancyMeshPlugin
             data.bitangents = bitangents;
             data.texcoords = texcoords;
             data.indices = indices;
+
+
+            // FIX ME TEST KD TREE
+            Ra::Core::KDTree bla ;
+            bla.build(triangleMesh.m_vertices) ;
         }
 
         void loadRenderTechnique( const aiMaterial* mat, FancyComponentData& data )
