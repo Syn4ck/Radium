@@ -24,7 +24,7 @@ namespace Ra
 
             /// Build the BSP based on the given data
             /// Return false if the tree couldn't be built, true else.
-            virtual bool build(const VectorArray<Vector3f> & data) = 0;
+            virtual bool build(const VectorArray<Vector4> & data) = 0;
 
             virtual void clear() = 0;
 

@@ -12,7 +12,7 @@ namespace Ra
     {
         struct FindMedian : public std::binary_function<int, int, bool> {
         public :
-            inline FindMedian(const VectorArray<Vector3> & data, int axis)
+            inline FindMedian(const VectorArray<Vector4> & data, int axis)
                 : m_data(data)
                 , m_axis(axis) {}
 
@@ -20,12 +20,12 @@ namespace Ra
                 return m_data[i1][m_axis] < m_data[i2][m_axis] ;
             }
 
-            const VectorArray<Vector3> & m_data;
+            const VectorArray<Vector4> & m_data;
             int m_axis;
         };
 
 
-        inline bool KDTree::build(const VectorArray<Vector3f> & data) {
+        inline bool KDTree::build(const VectorArray<Vector4> & data) {
 
             long sorting_time = 0.0 ;
 
@@ -75,7 +75,7 @@ namespace Ra
                 // TODO Is there any more optimal way to compute it based on parent's AABB ?
                 for (auto it = begin; it != end; ++it) 
                 {
-                    current->m_aabb.extend(data[*it]);
+                    current->m_aabb.extend((data[*it]).head<3>());
                 }
 
                 int range = (end - begin);

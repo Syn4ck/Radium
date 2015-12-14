@@ -128,7 +128,7 @@ namespace Ra
              * framebuffer, and restores it before drawing the last final texture.
              * If no framebuffer was bound, it draws into GL_BACK.
              */
-            void render( const RenderData& renderData );
+            virtual void render( const RenderData& renderData );
 
             /**
              * @brief Resize the viewport and all the screen textures, fbos.
@@ -210,7 +210,7 @@ namespace Ra
              */
             virtual void postProcessInternal( const RenderData& renderData );
 
-        private:
+        protected:
 
             // 0.
             void saveExternalFBOInternal();
@@ -274,6 +274,10 @@ namespace Ra
             RenderQueue m_debugRenderQueue;
             RenderQueue m_uiRenderQueue;
 
+            TimerData m_timerData;
+
+            std::mutex m_renderMutex;
+
         private:
             enum RenderPassTextures
             {
@@ -309,10 +313,6 @@ namespace Ra
 
             std::array<std::unique_ptr<Texture>, RENDERPASS_TEXTURE_COUNT> m_renderpassTextures;
             std::array<std::unique_ptr<Texture>, OITPASS_TEXTURE_COUNT> m_oitTextures;
-
-            TimerData m_timerData;
-
-            std::mutex m_renderMutex;
 
             // PICKING STUFF
             std::unique_ptr<FBO>        m_pickingFbo;
