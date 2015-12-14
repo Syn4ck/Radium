@@ -78,8 +78,6 @@ namespace Ra
                     current->m_aabb.extend(data[*it]);
                 }
 
-
-
                 int range = (end - begin);
                 int median_range = range/2 ;
 
@@ -132,8 +130,8 @@ namespace Ra
 
             m_root_aabb = m_nodes[0].m_aabb ;
 
-            LOG(logWARNING) << "KDTree built in " << Timer::getIntervalMicro(start, clock.now()) << "μs, with "
-                            << sorting_time << "μs to sort. Data partitioned in " << m_nodes.size() << " nodes." ;
+            LOG(logWARNING) << "KDTree built in " << Timer::getIntervalMicro(start, clock.now()) / 1000.0 << "ms, with "
+                            << sorting_time / 1000.0 << "ms to sort. Data partitioned in " << m_nodes.size() << " nodes." ;
 
             return true;
         }

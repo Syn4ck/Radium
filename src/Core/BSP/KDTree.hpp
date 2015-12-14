@@ -21,7 +21,7 @@ namespace Ra
             }
 
             KDNode(const KDNode & node)
-                :m_points(), m_is_leaf(node.m_is_leaf), m_depth(node.m_depth), m_nb_points(0)  {
+                :m_is_leaf(node.m_is_leaf), m_depth(node.m_depth), m_nb_points(0)  {
             }
 
             ~KDNode() {
@@ -34,9 +34,7 @@ namespace Ra
             void setIsNotLeaf() { m_is_leaf = false ; }
 
             void addPrimitive(const Vector3f & data) {
-                m_points[m_nb_points++] = data.data()[0] ;
-                m_points[m_nb_points++] = data.data()[1]  ;
-                m_points[m_nb_points++] = data.data()[2]  ;
+                m_points[m_nb_points++] = data;
             }
 
             //void addPrimitives(std::vector<Vector3> data) { m_points.insert(m_points.end(), data.begin(), data.end()) ; }
@@ -45,7 +43,8 @@ namespace Ra
         public:
             bool m_is_leaf;
             int m_depth;
-            float m_points[24];
+            // FIX ME : either a dynamic array or give a size based on KDTree's m_prims_per_leaf (STL structures are crashing, maybe because of Eigen
+            Vector3f m_points[8];
             int m_nb_points ;
         };
 
