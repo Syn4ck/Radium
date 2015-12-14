@@ -15,13 +15,16 @@ namespace Ra
         class BSP
         {
         public:
+
+            RA_CORE_ALIGNED_NEW
+
             /*using Data                      = _Data;
             static constexpr int dim        = Data::Cols;
             static_assert(dim == 3, "BSP dimension invalid");*/
 
             /// Build the BSP based on the given data
             /// Return false if the tree couldn't be built, true else.
-            virtual bool build(const VectorArray<Vector3> & data) = 0;
+            virtual bool build(const VectorArray<Vector3f> & data) = 0;
 
             virtual void clear() = 0;
 
