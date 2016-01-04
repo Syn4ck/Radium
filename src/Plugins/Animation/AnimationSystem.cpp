@@ -13,6 +13,9 @@
 #include <Plugins/FancyMesh/FancyMeshSystem.hpp>
 #include <Plugins/FancyMesh/FancyMeshComponent.hpp>
 
+#include <Engine/Assets/FileData.hpp>
+#include <Engine/Assets/HandleData.hpp>
+
 namespace AnimationPlugin
 {
     void AnimationSystem::initialize()
@@ -51,7 +54,7 @@ namespace AnimationPlugin
         return component;
     }
 
-    void AnimationSystem::handleFileLoading(Ra::Engine::Entity *entity, const std::string &filename)
+/*    void AnimationSystem::handleFileLoading(Ra::Engine::Entity *entity, const std::string &filename)
     {
 //		LOG( logDEBUG ) << "AnimationSystem : loading the file " << filename << "...";
 
@@ -61,7 +64,7 @@ namespace AnimationPlugin
 //        component->handleLoading(componentData);
 
 //        callOnComponentCreationDependencies(component);
-    }
+    }*/
 
     void AnimationSystem::reset()
     {
@@ -90,6 +93,7 @@ namespace AnimationPlugin
         //std::cout << "Mesh component received by the Animation system" << std::endl;
         FancyMeshPlugin::FancyMeshComponent* meshComponent = (FancyMeshPlugin::FancyMeshComponent*) component;
 
+        /*
         AnimationLoader::AnimationData componentData = AnimationLoader::loadFile(meshComponent->getLoadingInfo().filename, meshComponent->getLoadingInfo());
         if (componentData.hasLoaded)
         {
@@ -99,5 +103,21 @@ namespace AnimationPlugin
 
             callOnComponentCreationDependencies(animationComponent);
         }
+        */
+    }
+
+    void AnimationSystem::handleAssetLoading( Ra::Engine::Entity* entity, const Ra::Asset::FileData* fileData ) {
+        // FIXME(Charly): Does not compile
+#if 0
+        auto skelData = fileData->getHandleData();
+
+        // FIXME(Charly): One component of a given type by entity ?
+        for ( const auto& skel : skelData )
+        {
+            // FIXME(Charly): Certainly not the best way to do this
+            AnimationComponent* component = static_cast<AnimationComponent*>(addComponentToEntity(entity));
+            component->handleSkeletonLoading( skel );
+        }
+#endif
     }
 }

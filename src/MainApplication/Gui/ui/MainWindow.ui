@@ -40,7 +40,7 @@
      <x>0</x>
      <y>0</y>
      <width>1204</width>
-     <height>24</height>
+     <height>25</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFILE">
@@ -302,9 +302,9 @@
               <item>
                <layout class="QHBoxLayout" name="horizontalLayout_2">
                 <item>
-                 <widget class="QPushButton" name="m_refreshRenderObjectButton">
+                 <widget class="QPushButton" name="m_editRenderObjectButton">
                   <property name="text">
-                   <string>Refresh</string>
+                   <string>Edit</string>
                   </property>
                  </widget>
                 </item>
@@ -758,7 +758,7 @@
   </widget>
   <action name="actionOpenMesh">
    <property name="text">
-    <string>&amp;Open...</string>
+    <string>Open...</string>
    </property>
    <property name="toolTip">
     <string>Open...</string>
@@ -769,15 +769,15 @@
   </action>
   <action name="actionExit">
    <property name="text">
-    <string>&amp;Exit</string>
+    <string>Exit</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+E</string>
+    <string>Ctrl+Q</string>
    </property>
   </action>
   <action name="actionReload_Shaders">
    <property name="text">
-    <string>&amp;Reload Shaders</string>
+    <string>Reload Shaders</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+R</string>

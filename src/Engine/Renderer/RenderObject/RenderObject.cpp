@@ -20,6 +20,7 @@ namespace Ra
             , m_type( Type::RO_OPAQUE )
             , m_renderTechnique( nullptr )
             , m_mesh( nullptr )
+            , m_visible( true )
             , m_isDirty( true )
         {
             Engine::RenderParameters params;
@@ -30,7 +31,7 @@ namespace Ra
 
         RenderObject::~RenderObject()
         {
-            
+
         }
 
         void RenderObject::updateGL()
@@ -53,6 +54,11 @@ namespace Ra
 
         void RenderObject::feedRenderQueue( RenderQueue& queue, const Core::Matrix4& view, const Core::Matrix4& proj )
         {
+            if ( !m_visible )
+            {
+                return;
+            }
+
             Core::Transform model =  m_component->getEntity()->getTransform() * m_localTransform;
 
             ShaderKey shader( m_renderTechnique->shader );

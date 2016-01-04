@@ -23,6 +23,7 @@ namespace Ra
     {
         class EntityTreeModel;
         class Viewer;
+        class MaterialEditor;
     }
 }
 
@@ -86,6 +87,10 @@ namespace Ra
             void renderObjectListItemClicked( int item );
             void changeRenderObjectShader( const QString& shaderName );
 
+            void toggleRO();
+            void removeRO();
+            void editRO();
+
         signals:
             void closed();
             void fileLoading( const QString path );
@@ -109,6 +114,8 @@ namespace Ra
 
             void displayRenderObjects( Engine::Component* component );
 
+            std::shared_ptr<Engine::RenderObject> getSelectedRO();
+
         public:
             // Accept viewer mouse events.
             inline void viewerMousePressEvent( QMouseEvent* event );
@@ -127,6 +134,8 @@ namespace Ra
             std::vector<Core::KeyEvent>   m_keyEvents;
 
             EntityTreeModel* m_entityTreeModel;
+
+            MaterialEditor* m_materialEditor;
         };
 
     } // namespace Gui

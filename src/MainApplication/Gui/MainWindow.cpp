@@ -13,7 +13,9 @@
 #include <MainApplication/MainApplication.hpp>
 #include <MainApplication/Gui/EntityTreeModel.hpp>
 #include <MainApplication/Gui/EntityTreeItem.hpp>
+#include <MainApplication/Gui/MaterialEditor.hpp>
 #include <MainApplication/Viewer/CameraInterface.hpp>
+
 #include <Plugins/Animation/AnimationSystem.hpp>
 #include <assimp/Importer.hpp>
 
@@ -35,6 +37,8 @@ namespace Ra
         headers << tr( "Entities -> Components" );
         m_entityTreeModel = new EntityTreeModel( headers );
         m_entitiesTreeView->setModel( m_entityTreeModel );
+
+        m_materialEditor = new MaterialEditor();
 
         createConnections();
 
@@ -118,6 +122,11 @@ namespace Ra
         connect( m_renderObjectsListView, &QListWidget::currentRowChanged, this, &MainWindow::renderObjectListItemClicked );
         connect( m_currentShaderBox, static_cast<void (QComboBox::*)(const QString&)>( &QComboBox::currentIndexChanged ),
                  this, &MainWindow::changeRenderObjectShader );
+
+        // RO Stuff
+        connect( m_toggleRenderObjectButton, &QPushButton::clicked, this, &MainWindow::toggleRO );
+        connect( m_removeRenderObjectButton, &QPushButton::clicked, this, &MainWindow::removeRO );
+        connect( m_editRenderObjectButton, &QPushButton::clicked, this, &MainWindow::editRO );
     }
 
     void Gui::MainWindow::playAnimation()
@@ -396,6 +405,16 @@ namespace Ra
             }
             m_entitiesTreeView->setExpanded( entityIdx, true );
             m_entitiesTreeView->selectionModel()->select( treeIdx, QItemSelectionModel::SelectCurrent );
+
+            auto foundItems = m_renderObjectsListView->findItems( QString( ro->getName().c_str() ), Qt::MatchExactly );
+            if  ( foundItems.size() > 0 )
+            {
+                m_renderObjectsListView->setCurrentItem( foundItems.at( 0 ) );
+            }
+            else
+            {
+                LOG( logERROR ) << "Not found";
+            }
         }
         else
         {
@@ -544,17 +563,11 @@ namespace Ra
             return;
         }
 
-        QListWidgetItem* item = m_renderObjectsListView->currentItem();
-
-        if ( nullptr == item )
+        auto ro = getSelectedRO();
+        if ( ro == nullptr )
         {
             return;
         }
-
-        Core::Index itemIdx( item->data( 1 ).toInt() );
-
-        auto roMgr = Engine::RadiumEngine::getInstance()->getRenderObjectManager();
-        auto ro = roMgr->getRenderObject( itemIdx );
 
         if ( ro->getRenderTechnique()->shader->getBasicConfiguration().getName() == shaderName.toStdString() )
         {
@@ -576,6 +589,46 @@ namespace Ra
         }
 
         ro->getRenderTechnique()->changeShader( config );
+    }
+
+    void Gui::MainWindow::toggleRO()
+    {
+        auto ro = getSelectedRO();
+
+        if ( ro == nullptr )
+        {
+            return;
+        }
+
+        ro->setVisible( !ro->isVisible() );
+    }
+
+    void Gui::MainWindow::removeRO()
+    {
+        LOG( logINFO ) << "Not implemented yet";
+    }
+
+    void Gui::MainWindow::editRO()
+    {
+        m_materialEditor->changeRenderObject( getSelectedRO()->idx );
+        m_materialEditor->show();
+    }
+
+    std::shared_ptr<Engine::RenderObject> Gui::MainWindow::getSelectedRO()
+    {
+        QListWidgetItem* item = m_renderObjectsListView->currentItem();
+
+        if ( nullptr == item )
+        {
+            return nullptr;
+        }
+
+        Core::Index itemIdx( item->data( 1 ).toInt() );
+
+        auto roMgr = Engine::RadiumEngine::getInstance()->getRenderObjectManager();
+        auto ro = roMgr->getRenderObject( itemIdx );
+
+        return ro;
     }
 
 } // namespace Ra
