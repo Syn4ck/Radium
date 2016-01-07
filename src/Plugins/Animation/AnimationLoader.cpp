@@ -259,13 +259,13 @@ namespace AnimationPlugin
 
         void getUniqueKeyTimes(aiAnimation* animation, std::vector<double>& times)
         {
-            int channelCount = animation->mNumChannels;
+            uint channelCount = animation->mNumChannels;
             std::set<double> timeSet;
             for(uint i = 0; i < channelCount; ++i)
             {
                 aiNodeAnim* currentNodeAnim = animation->mChannels[i];
 
-                int channelKeyCount = currentNodeAnim->mNumRotationKeys;
+                uint channelKeyCount = currentNodeAnim->mNumRotationKeys;
                 for(uint j = 0; j < channelKeyCount; ++j)
                 {
                     const aiVectorKey& positionKey = currentNodeAnim->mPositionKeys[j];
