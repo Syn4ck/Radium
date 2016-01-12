@@ -107,8 +107,8 @@ namespace FancyMeshPlugin
             Ra::Core::Vector4Array texcoords;
             Ra::Core::Vector4Array colors;
 
-            for ( const auto& v : data->getVertices() )     positions.push_back( v );
-            for ( const auto& v : data->getNormals() )      normals.push_back( v );
+            for ( const auto& v : data->getVertices() )     positions.push_back( data->getFrame() * v );
+            for ( const auto& v : data->getNormals() )      normals.push_back( data->getFrame().rotation() * v );
             for ( const auto& v : data->getTangents() )     tangents.push_back( v );
             for ( const auto& v : data->getBiTangents() )   bitangents.push_back( v );
             for ( const auto& v : data->getTexCoords() )    texcoords.push_back( v );
@@ -165,12 +165,12 @@ namespace FancyMeshPlugin
             renderObject->setRenderTechnique( rt );
         }
     }
-    
+
     Ra::Core::Index FancyMeshComponent::getMeshIndex() const
     {
         return m_meshIndex;
     }
-    
+
     Ra::Core::TriangleMesh FancyMeshComponent::getMesh() const
     {
         return m_mesh;
