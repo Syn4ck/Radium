@@ -1,4 +1,3 @@
-
 #include <Engine/Assets/AssimpHandleDataLoader.hpp>
 
 #include <set>
@@ -6,11 +5,10 @@
 #include <Engine/Assets/AssimpWrapper.hpp>
 #include <Engine/Assets/HandleData.hpp>
 
-// FIXME(Charly): Needs to be fixed to be compiled
-#ifdef DEBUG_LOAD_HANDLE
-
 namespace Ra {
 namespace Asset {
+
+
 
 /// CONSTRUCTOR
 AssimpHandleDataLoader::AssimpHandleDataLoader( const bool VERBOSE_MODE ) : DataLoader< HandleData > ( VERBOSE_MODE ) { }
@@ -221,7 +219,8 @@ void AssimpHandleDataLoader::fetchVertexSize( HandleData& data ) const {
         }
     }
 }
-#endif
+
+
 
 } // namespace Asset
 } // namespace Ra
