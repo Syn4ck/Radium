@@ -44,10 +44,10 @@ void main()
     normalValue = normalValue.xyz != vec3(0) ? normalValue / 2 + 0.5 : vec4(0);
 
     oitRevealageValue.rgb = vec3(oitRevealageValue.r);
-	
+
     if (pickingValue.rgb != vec3(1, 1, 1))
     {
-	    pickingValue.rgb *= 20;
+        pickingValue.rgb *= 20;
     }
 
     // Uncomment this to see the picking FBO instead of the normal display.
