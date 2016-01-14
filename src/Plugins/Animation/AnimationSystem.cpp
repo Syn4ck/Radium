@@ -110,6 +110,7 @@ namespace AnimationPlugin
         // FIXME(Charly): Does not compile
 #if 1
         auto skelData = fileData->getHandleData();
+        auto animData = fileData->getAnimationData();
 
         // FIXME(Charly): One component of a given type by entity ?
         for ( const auto& skel : skelData )
@@ -117,6 +118,7 @@ namespace AnimationPlugin
             // FIXME(Charly): Certainly not the best way to do this
             AnimationComponent* component = static_cast<AnimationComponent*>(addComponentToEntity(entity));
             component->handleSkeletonLoading( skel );
+            component->handleAnimationLoading( animData );
         }
 #endif
     }
