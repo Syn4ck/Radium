@@ -109,11 +109,16 @@ namespace Ra
             std::string entityName = Core::StringUtils::getBaseName( filename, false );
 
             Entity* entity = m_entityManager->getOrCreateEntity( entityName );
-            //getSystem("FancyMeshSystem")->handleAssetLoading( entity, &fileData );
-            //getSystem("AnimationSystem")->handleAssetLoading( entity, &fileData );
-            for( auto& system : m_systems ) {
-                system.second->handleAssetLoading( entity, &fileData );
-            }
+            getSystem("FancyMeshSystem")->handleAssetLoading( entity, &fileData );
+            getSystem("AnimationSystem")->handleAssetLoading( entity, &fileData );
+
+            getSystem("FancyMeshSystem")->manageDependencyOfComponent();
+            getSystem("AnimationSystem")->manageDependencyOfComponent();
+
+
+            //for( auto& system : m_systems ) {
+            //    system.second->handleAssetLoading( entity, &fileData );
+            //}
 
 #if 0
             if (Ra::Core::StringUtils::getFileExt(filename) != "json")
