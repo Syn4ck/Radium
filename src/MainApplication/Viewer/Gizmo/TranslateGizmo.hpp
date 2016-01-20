@@ -6,13 +6,14 @@ namespace Ra
 {
     namespace Gui
     {
+        /// A gizmo with 3 arrows to drag an object along 3 axis.
         class TranslateGizmo : public Gizmo
         {
         public:
             // Draw a frame with : 3 RGB arrows
-            TranslateGizmo(Engine::Component* c, const Core::Transform& t, Mode mode);
+            TranslateGizmo(Engine::Component* c, const Core::Transform& worldTo, const Core::Transform& t, Mode mode);
 
-            void updateTransform(const Core::Transform& t) override;
+            void updateTransform(const Core::Transform& worldTo, const Core::Transform& t) override;
             void selectConstraint( int drawableIndex ) override;
             void setInitialState( const Engine::Camera& cam, const Core::Vector2& initialXY);
             Core::Transform mouseMove( const Engine::Camera& cam, const Core::Vector2& nextXY);
