@@ -1,14 +1,14 @@
 #include <Plugins/Animation/AnimationComponent.hpp>
 
 #include <queue>
-
-
-#include <assimp/scene.h>
 #include <iostream>
-#include <Plugins/Animation/Drawing/SkeletonBoneDrawable.hpp>
-#include <Core/Utils/Graph/AdjacencyListOperation.hpp>
-#include <Core/Animation/Pose/Pose.hpp>
+#include <assimp/scene.h>
+#include <Core/Containers/AlignedStdVector.hpp>
 
+#include <Core/Utils/Graph/AdjacencyListOperation.hpp>
+
+#include <Core/Animation/Pose/Pose.hpp>
+#include <Core/Animation/Handle/HandleWeightOperation.hpp>
 #include <Core/Animation/Handle/SkeletonUtils.hpp>
 
 
@@ -16,7 +16,7 @@
 #include <Engine/Assets/KeyFrame/KeyTransform.hpp>
 #include <Engine/Assets/KeyFrame/KeyPose.hpp>
 
-#include <Core/Animation/Handle/HandleWeightOperation.hpp>
+#include <Plugins/Animation/Drawing/SkeletonBoneDrawable.hpp>
 
 namespace AnimationPlugin
 {
@@ -313,8 +313,8 @@ namespace AnimationPlugin
 
     void AnimationComponent::addBone( const int parent,
                                       const uint dataID,
-                                      const std::vector< Ra::Asset::HandleComponentData >& data,
-                                      const std::vector< Ra::Core::Vector2i >& edgeList,
+                                      const Ra::Core::AlignedStdVector< Ra::Asset::HandleComponentData >& data,
+                                      const Ra::Core::AlignedStdVector< Ra::Core::Vector2i >& edgeList,
                                       std::vector< bool >& processed,
                                       std::map< uint, uint >& indexTable ) {
         if( !processed[dataID] ) {
