@@ -6,6 +6,7 @@
 namespace Ra {
 namespace Core {
 
+/*
 template < typename OBJECT >
 class VIterator : public Iterator< OBJECT > {
 public:
@@ -31,6 +32,30 @@ public:
 protected:
     /// VARIABLE
     Vertex_ptr   m_v;
+};
+*/
+
+template < typename TO_OBJECT >
+class VIterator : public DCEL_Iterator< Vertex_ptr, TO_OBJECT > {
+public:
+    /// CONSTRUCTOR
+    VIterator( Vertex_ptr& v );
+    VIterator( const VIterator& it ) = default;
+
+    /// DESTRUCTOR
+    ~VIterator();
+
+    /// SIZE
+    inline uint size() const override;
+
+    /// RESET
+    inline void reset() override;
+
+    /// OPERATOR
+    inline VIterator& operator= ( const VIterator& it );
+    inline VIterator& operator++() override;
+    inline VIterator& operator--() override;
+    inline bool       operator==( const VIterator& it ) const;
 };
 
 } // namespace Core

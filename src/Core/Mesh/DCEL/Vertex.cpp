@@ -8,22 +8,6 @@ namespace Core {
 
 
 /// CONSTRUCTOR
-Vertex::Vertex( const Index& index ) :
-    IndexedObject( index ),
-    m_p( Vector3::Zero() ),
-    m_n( Vector3::Zero() ),
-    m_he( nullptr ) { }
-
-
-
-Vertex::Vertex( const HalfEdge_ptr& he ) :
-    IndexedObject(),
-    m_p( Vector3::Zero() ),
-    m_n( Vector3::Zero() ),
-    m_he( he ) { }
-
-
-
 Vertex::Vertex( const Vector3&      p,
                 const Vector3&      n,
                 const HalfEdge_ptr& he,
@@ -38,6 +22,81 @@ Vertex::Vertex( const Vector3&      p,
 /// DESTRUCTOR
 Vertex::~Vertex() { }
 
+
+/*
+/// BINDABLE
+void Vertex::bind() {
+    HalfEdge_ptr it = m_he;
+    if( it != nullptr ) {
+        do {
+            it->setV( this );
+            if( it->Prev() != nullptr ) {
+                if( it->Prev()->Twin() != nullptr ) {
+                    it = it->Prev()->Twin();
+                } else {
+                    it = nullptr;
+                }
+            } else {
+                it = nullptr;
+            }
+        } while( ( it != m_he ) && ( it != nullptr ) );
+        if( it == nullptr ) {
+            it = m_he;
+            do {
+                it->setV( this );
+                if( it->Twin() != nullptr ) {
+                    if( it->Twin()->Next() != nullptr ) {
+                        it = it->Twin()->Next();
+                    } else {
+                        it = nullptr;
+                    }
+                } else {
+                    it = nullptr;
+                }
+            } while( ( it != m_he ) && ( it != nullptr ) );
+        }
+    }
+}
+
+void Vertex::unbind() {
+    HalfEdge_ptr it = m_he;
+    if( it != nullptr ) {
+        do {
+            if( it->V() == this ) {
+                it->setV( nullptr );
+            }
+            if( it->Prev() != nullptr ) {
+                if( it->Prev()->Twin() != nullptr ) {
+                    it = it->Prev()->Twin();
+                } else {
+                    it = nullptr;
+                }
+            } else {
+                it = nullptr;
+            }
+        } while( ( it != m_he ) && ( it != nullptr ) );
+        if( it == nullptr ) {
+            it = m_he;
+            do {
+                if( it->V() == this ) {
+                    it->setV( nullptr );
+                }
+                if( it->Twin() != nullptr ) {
+                    if( it->Twin()->Next() != nullptr ) {
+                        it = it->Twin()->Next();
+                    } else {
+                        it = nullptr;
+                    }
+                } else {
+                    it = nullptr;
+                }
+            } while( ( it != m_he ) && ( it != nullptr ) );
+        }
+    }
+    m_he = nullptr;
+}
+
+*/
 
 
 } // namespace Core

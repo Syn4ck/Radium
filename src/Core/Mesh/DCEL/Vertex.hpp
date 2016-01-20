@@ -1,9 +1,8 @@
 #ifndef RADIUMENGINE_DCEL_VERTEX_HPP
 #define RADIUMENGINE_DCEL_VERTEX_HPP
 
-#include <Core/Math/LinearAlgebra.hpp>
-#include <Core/Index/Index.hpp>
 #include <Core/Index/IndexedObject.hpp>
+#include <Core/Math/LinearAlgebra.hpp>
 #include <Core/Mesh/DCEL/Definition.hpp>
 
 namespace Ra {
@@ -23,10 +22,8 @@ namespace Core {
 class Vertex : public IndexedObject {
 public:
     /// CONSTRUCTOR
-    Vertex( const Index& index = Index::INVALID_IDX() );        // Build a vertex with a given index
-    Vertex( const HalfEdge_ptr& he );                           // Build a vertex having he as its halfedge
-    Vertex( const Vector3&      p,
-            const Vector3&      n,
+    Vertex( const Vector3&      p     = Vector3::Zero(),
+            const Vector3&      n     = Vector3::Zero(),
             const HalfEdge_ptr& he    = nullptr,
             const Index&        index = Index::INVALID_IDX() ); // Build a complete vertex
     Vertex( const Vertex& v ) = default;                        // Copy constructor

@@ -1,7 +1,6 @@
 #ifndef RADIUMENGINE_DCEL_FACE_HPP
 #define RADIUMENGINE_DCEL_FACE_HPP
 
-#include <Core/Index/Index.hpp>
 #include <Core/Index/IndexedObject.hpp>
 #include <Core/Mesh/DCEL/Definition.hpp>
 
@@ -20,13 +19,12 @@ namespace Core {
 * Chapter 2, Paragraph 2.2, Page 29
 *
 */
-class Face : public IndexedObject  {
+class Face : public IndexedObject {
 public:
     /// CONSTRUCTOR
-    Face( const Index& index = Index::INVALID_IDX() );       // Build a Face with the given index
-    Face( const HalfEdge_ptr& he,
-          const Index&        index = Index::INVALID_IDX()); // Build a Face with the given index and having he as its first halfedge
-    Face( const Face& f ) = default;                         // Copy constructor
+    Face( const HalfEdge_ptr& he    = nullptr,
+          const Index&        index = Index::INVALID_IDX() ); // Build a Face with the given index and having he as its first halfedge
+    Face( const Face& f ) = default;                          // Copy constructor
 
     /// DESTRUCTOR
     ~Face();

@@ -7,7 +7,7 @@ namespace Ra {
 namespace Core {
 
 /// CONSTRUCTOR
-VHEIterator::VHEIterator( Vertex_ptr& v ) : VIterator< HalfEdge >( v ) { }
+VHEIterator::VHEIterator( Vertex_ptr& v ) : VIterator< HalfEdge_ptr >( v ) { }
 
 
 
@@ -19,19 +19,19 @@ VHEIterator::~VHEIterator() { }
 /// LIST
 inline HalfEdgeList VHEIterator::list() const {
     HalfEdgeList L;
-    HalfEdge_ptr it = m_v->HE();
+    HalfEdge_ptr it = m_object->HE();
     do {
         L.push_back( it );
         it = it->Prev()->Twin();
-    } while( it != m_v->HE() );
+    } while( it != m_object->HE() );
     return L;
 }
 
 
 
 /// OPERATOR
-inline HalfEdge* VHEIterator::operator->() const {
-    return m_he.get();
+inline HalfEdge_ptr VHEIterator::operator->() const {
+    return m_he;
 }
 
 

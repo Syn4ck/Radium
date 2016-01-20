@@ -1,7 +1,6 @@
 #ifndef RADIUMENGINE_DCEL_EDGE_HPP
 #define RADIUMENGINE_DCEL_EDGE_HPP
 
-#include <Core/Index/Index.hpp>
 #include <Core/Index/IndexedObject.hpp>
 #include <Core/Mesh/DCEL/Definition.hpp>
 
@@ -15,11 +14,10 @@ namespace Core {
 * It is possible to sort edges in lexicographical order,
 * based on the vertices indices.
 */
-class FullEdge : public IndexedObject  {
+class FullEdge : public IndexedObject {
 public:
     /// CONSTRUCTOR
-    FullEdge( const Index& index = Index::INVALID_IDX() );        // Build an Edge with the given index
-    FullEdge( const HalfEdge_ptr& he,
+    FullEdge( const HalfEdge_ptr& he    = nullptr,
               const Index&        index = Index::INVALID_IDX() ); // Build an Edge with the given index, having he as its halfedge
     FullEdge( const FullEdge& edge ) = default;                   // Copy constructor
 
@@ -27,19 +25,19 @@ public:
     ~FullEdge();
 
     /// VERTEX
-    inline Vertex_ptr V( const uint i ) const; // Return the reference to the vertex
+    inline Vertex_ptr V( const uint i = 0 ) const; // Return the reference to the vertex
 
     /// HALFEDGE
-    inline HalfEdge_ptr  HE( const uint i ) const; // Return the reference to the halfedge
-    inline HalfEdge_ptr& HE( const uint i );       // Return the reference to the halfedge
+    inline HalfEdge_ptr  HE( const uint i = 0 ) const; // Return the reference to the halfedge
+    inline HalfEdge_ptr& HE( const uint i = 0 );       // Return the reference to the halfedge
     inline void setHE( const HalfEdge_ptr& he );   // Set the HalfEdge reference to he
 
     /// FACE
-    inline Face_ptr F( const uint i ) const;
+    inline Face_ptr F( const uint i = 0 ) const;
 
     /// FULLEDGE
-    inline FullEdge_ptr Head( const uint i ) const;
-    inline FullEdge_ptr Tail( const uint i ) const;
+    inline FullEdge_ptr Head( const uint i = 0 ) const;
+    inline FullEdge_ptr Tail( const uint i = 0 ) const;
 
     /// OPERATOR
     inline bool operator==( const FullEdge& e ) const; // Return true if the two edges points to the same vertices ( index-wise ). False otherwise

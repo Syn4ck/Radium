@@ -6,7 +6,7 @@
 namespace Ra {
 namespace Core {
 
-class FFEIterator : public FIterator< FullEdge > {
+class FFEIterator : public FIterator< FullEdge_ptr > {
 public:
     /// CONSTRUCTOR
     FFEIterator( Face_ptr& f );
@@ -19,7 +19,7 @@ public:
     inline FullEdgeList list() const override;
 
     /// OPERATOR
-    inline FullEdge* operator->() const override;
+    inline FullEdge_ptr operator->() const override;
 };
 
 } // namespace Core

@@ -10,7 +10,7 @@ namespace Core {
 
 
 /// CONSTRUCTOR
-VFEIterator::VFEIterator( Vertex_ptr& v ) : VIterator< FullEdge >( v ) { }
+VFEIterator::VFEIterator( Vertex_ptr& v ) : VIterator< FullEdge_ptr >( v ) { }
 
 
 
@@ -22,19 +22,19 @@ VFEIterator::~VFEIterator() { }
 /// LIST
 inline FullEdgeList VFEIterator::list() const {
     FullEdgeList L;
-    HalfEdge_ptr it = m_v->HE();
+    HalfEdge_ptr it = m_object->HE();
     do {
         L.push_back( it->FE() );
         it = it->Prev()->Twin();
-    } while( it != m_v->HE() );
+    } while( it != m_object->HE() );
     return L;
 }
 
 
 
 /// OPERATOR
-inline FullEdge* VFEIterator::operator->() const {
-    return m_he->FE().get();
+inline FullEdge_ptr VFEIterator::operator->() const {
+    return m_he->FE();
 }
 
 

@@ -6,7 +6,7 @@
 namespace Ra {
 namespace Core {
 
-class VVIterator : public VIterator< Vertex > {
+class VVIterator : public VIterator< Vertex_ptr > {
 public:
     /// CONSTRUCTOR
     VVIterator( Vertex_ptr& v );
@@ -19,7 +19,7 @@ public:
     inline VertexList list() const override;
 
     /// OPERATOR
-    inline Vertex* operator->() const override;
+    inline Vertex_ptr operator->() const override;
 };
 
 } // namespace Core

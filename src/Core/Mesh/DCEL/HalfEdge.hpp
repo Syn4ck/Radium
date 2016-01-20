@@ -1,7 +1,6 @@
 #ifndef RADIUMENGINE_DCEL_HALFEDGE_HPP
 #define RADIUMENGINE_DCEL_HALFEDGE_HPP
 
-#include <Core/Index/Index.hpp>
 #include <Core/Index/IndexedObject.hpp>
 #include <Core/Mesh/DCEL/Definition.hpp>
 
@@ -24,11 +23,11 @@ namespace Core {
 class HalfEdge : public IndexedObject {
 public:
     /// CONSTRUCTOR
-    HalfEdge( const Index& index = Index::INVALID_IDX() );        // Build a HalfEdge with the given index
-    HalfEdge( const Vertex_ptr&   v,
+    HalfEdge( const Vertex_ptr&   v     = nullptr,
               const HalfEdge_ptr& next  = nullptr,
               const HalfEdge_ptr& prev  = nullptr,
               const HalfEdge_ptr& twin  = nullptr,
+              const FullEdge_ptr& fe    = nullptr,
               const Face_ptr&     f     = nullptr,
               const Index&        index = Index::INVALID_IDX() ); // Build a complete Halfedge
     HalfEdge( const HalfEdge& he ) = default;                     // Copy constructor
