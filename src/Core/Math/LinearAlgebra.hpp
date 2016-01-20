@@ -100,6 +100,8 @@ namespace Ra
         typedef Eigen::Translation3f         Translationf;
         typedef Eigen::Translation3d         Translationd;
 
+        inline void print( const MatrixN& matrix );
+
         // Todo : storage transform using quaternions ?
 
         /// An oriented bounding box.
