@@ -58,11 +58,15 @@ public:
     ANIM_PLUGIN_API Ra::Core::Animation::WeightMatrix getWeights() const;
     ANIM_PLUGIN_API Ra::Core::Animation::Pose getRefPose() const;
 
+    std::string getContentName() const;
+
 protected:
     // debug function
     void printSkeleton(const Ra::Core::Animation::Skeleton& skeleton);
 
 protected:
+    std::string m_contentName;
+
     Ra::Core::Animation::Skeleton m_skel;
     Ra::Core::Animation::RefPose m_refPose; // Ref pose in model space.
     std::vector<Ra::Core::Animation::Animation> m_animations;

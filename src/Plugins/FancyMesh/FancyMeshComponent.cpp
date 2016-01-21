@@ -86,7 +86,7 @@ namespace FancyMeshPlugin
         std::string matName = name;
         matName.append( "_Mat" );
 
-        m_name = m_name + "|" + data->getName();
+        m_contentName = data->getName();
 
         Ra::Engine::RenderObject* renderObject = new Ra::Engine::RenderObject( roName, this );
         renderObject->setVisible( true );
@@ -198,6 +198,10 @@ namespace FancyMeshPlugin
             LOG(logINFO) << " Hit triangle " << tidx;
             LOG(logINFO) << " Nearest vertex " << result.m_nearestVertex;
         }
+    }
+
+    std::string FancyMeshComponent::getContentName() const {
+        return m_contentName;
     }
 
 } // namespace FancyMeshPlugin
