@@ -7,16 +7,16 @@ namespace Ra {
 namespace Core {
 
 void   bind( const Vertex_ptr&   v  );
-void unbind( const Vertex_ptr&   v  );
+void unbind( Vertex_ptr&   v  );
 
 void   bind( const HalfEdge_ptr& he );
-void unbind( const HalfEdge_ptr& he );
+void unbind( HalfEdge_ptr& he );
 
 void   bind( const FullEdge_ptr& fe );
-void unbind( const FullEdge_ptr& fe );
+void unbind( FullEdge_ptr& fe );
 
 void   bind( const Face_ptr&     f  );
-void unbind( const Face_ptr&     f  );
+void unbind( Face_ptr&     f  );
 
 } // namespace Core
 } // namespace Ra
