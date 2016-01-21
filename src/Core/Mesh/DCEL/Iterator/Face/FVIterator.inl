@@ -10,7 +10,7 @@ namespace Core {
 
 
 /// CONSTRUCTOR
-FVIterator::FVIterator( Face_ptr& f ) : FIterator< Vertex_ptr >( f ) { }
+FVIterator::FVIterator( const Face_ptr& f ) : FIterator< Vertex_ptr >( f ) { }
 
 
 
@@ -22,11 +22,11 @@ FVIterator::~FVIterator() { }
 /// LIST
 inline VertexList FVIterator::list() const {
     VertexList L;
-    HalfEdge_ptr it = m_f->HE();
+    HalfEdge_ptr it = m_object->HE();
     do {
         L.push_back( it->V() );
         it = it->Next();
-    } while( it != m_f->HE() );
+    } while( it != m_object->HE() );
     return L;
 }
 
@@ -37,7 +37,9 @@ inline Vertex_ptr FVIterator::operator->() const {
     return m_he->V();
 }
 
-
+inline Vertex_ptr FVIterator::operator* () const {
+    return m_he->V();
+}
 
 } // namespace Core
 } // namespace Ra

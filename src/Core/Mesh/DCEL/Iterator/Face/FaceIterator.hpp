@@ -40,17 +40,14 @@ template < typename TO_OBJECT >
 class FIterator : public DCEL_Iterator< Face_ptr, TO_OBJECT > {
 public:
     /// CONSTRUCTOR
-    FIterator( Face_ptr& f );
-    FIterator( const FIterator& it ) = default;
+    inline FIterator( const Face_ptr& f );
+    inline FIterator( const FIterator& it ) = default;
 
     /// DESTRUCTOR
-    ~FIterator();
+    inline ~FIterator();
 
     /// SIZE
     inline uint size() const override;
-
-    /// RESET
-    inline void reset() override;
 
     /// OPERATOR
     inline FIterator& operator= ( const FIterator& it );

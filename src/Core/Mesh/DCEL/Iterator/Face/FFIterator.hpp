@@ -9,17 +9,18 @@ namespace Core {
 class FFIterator : public FIterator< Face_ptr > {
 public:
     /// CONSTRUCTOR
-    FFIterator( Face_ptr& f );
-    FFIterator( const FFIterator& it ) = default;
+    inline FFIterator( const Face_ptr& f );
+    inline FFIterator( const FFIterator& it ) = default;
 
     /// DESTRUCTOR
-    ~FFIterator();
+    inline ~FFIterator();
 
     /// LIST
     inline FaceList list() const override;
 
     /// OPERATOR
     inline Face_ptr operator->() const override;
+    inline Face_ptr operator* () const override;
 };
 
 } // namespace Core

@@ -68,6 +68,17 @@ DCEL_Iterator< FROM_OBJECT, TO_OBJECT >::~DCEL_Iterator() { }
 
 
 
+/// RESET
+template < typename FROM_OBJECT, typename TO_OBJECT >
+inline void DCEL_Iterator< FROM_OBJECT, TO_OBJECT >::reset() {
+    this->m_he = this->m_object->HE();
+}
+
+
+
+
+
+
 /// OPERATOR
 template < typename FROM_OBJECT, typename TO_OBJECT >
 inline DCEL_Iterator< FROM_OBJECT, TO_OBJECT >& DCEL_Iterator< FROM_OBJECT, TO_OBJECT >::operator+=( const uint n ) const {

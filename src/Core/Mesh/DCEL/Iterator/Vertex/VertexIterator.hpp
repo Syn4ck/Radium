@@ -39,17 +39,14 @@ template < typename TO_OBJECT >
 class VIterator : public DCEL_Iterator< Vertex_ptr, TO_OBJECT > {
 public:
     /// CONSTRUCTOR
-    VIterator( Vertex_ptr& v );
-    VIterator( const VIterator& it ) = default;
+    inline VIterator( const Vertex_ptr& v );
+    inline VIterator( const VIterator& it ) = default;
 
     /// DESTRUCTOR
-    ~VIterator();
+    inline ~VIterator();
 
     /// SIZE
     inline uint size() const override;
-
-    /// RESET
-    inline void reset() override;
 
     /// OPERATOR
     inline VIterator& operator= ( const VIterator& it );

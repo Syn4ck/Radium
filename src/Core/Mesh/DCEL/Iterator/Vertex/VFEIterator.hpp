@@ -9,17 +9,18 @@ namespace Core {
 class VFEIterator : public VIterator< FullEdge_ptr > {
 public:
     /// CONSTRUCTOR
-    VFEIterator( Vertex_ptr& v );
-    VFEIterator( const VFEIterator& it ) = default;
+    inline VFEIterator( const Vertex_ptr& v );
+    inline VFEIterator( const VFEIterator& it ) = default;
 
     /// DESTRUCTOR
-    ~VFEIterator();
+    inline ~VFEIterator();
 
     /// LIST
     inline FullEdgeList list() const override;
 
     /// OPERATOR
     inline FullEdge_ptr operator->() const override;
+    inline FullEdge_ptr operator* () const override;
 };
 
 } // namespace Core

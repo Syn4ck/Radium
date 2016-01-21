@@ -91,7 +91,7 @@ inline bool VIterator< OBJECT >::operator==( const VIterator& it ) const {
 
 /// CONSTRUCTOR
 template < typename TO_OBJECT >
-VIterator< TO_OBJECT >::VIterator( Vertex_ptr& v ) :
+VIterator< TO_OBJECT >::VIterator( const Vertex_ptr& v ) :
     DCEL_Iterator< Vertex_ptr, TO_OBJECT >( v ) { }
 
 
@@ -112,23 +112,23 @@ VIterator< TO_OBJECT >::~VIterator() { }
 template < typename TO_OBJECT >
 inline uint VIterator< TO_OBJECT >::size() const {
     uint i = 0;
-    HalfEdge_ptr it = m_object->HE();
-    do {
-        it = it->Prev()->Twin();
-        ++i;
-    } while( it != m_object->HE() );
+    HalfEdge_ptr it = this->m_object->HE();
+    if( it != nullptr ) {
+        do {
+            if( it->Prev() != nullptr ) {
+                it = it->Prev();
+                if( it->Twin() != nullptr ) {
+                    it = it->Twin();
+                    ++i;
+                } else {
+                    it = nullptr;
+                }
+            } else {
+                it = nullptr;
+            }
+        } while( ( it != this->m_object->HE() ) && ( it != nullptr ) );
+    }
     return i;
-}
-
-
-
-
-
-
-/// RESET
-template < typename TO_OBJECT >
-inline void VIterator< TO_OBJECT >::reset() {
-    this->m_he = m_object->HE();
 }
 
 
@@ -139,7 +139,7 @@ inline void VIterator< TO_OBJECT >::reset() {
 /// OPERATOR
 template < typename TO_OBJECT >
 inline VIterator< TO_OBJECT >& VIterator< TO_OBJECT >::operator=( const VIterator& it ) {
-    m_object = it.m_object;
+    this->m_object = it.m_object;
     this->m_he = it.m_he;
     return *this;
 }
@@ -164,7 +164,7 @@ inline VIterator< TO_OBJECT >& VIterator< TO_OBJECT >::operator--() {
 
 template < typename TO_OBJECT >
 inline bool VIterator< TO_OBJECT >::operator==( const VIterator& it ) const {
-    return ( ( m_object == it.m_object ) && ( this->m_he == it.m_he ) );
+    return ( ( this->m_object == it.m_object ) && ( this->m_he == it.m_he ) );
 }
 
 

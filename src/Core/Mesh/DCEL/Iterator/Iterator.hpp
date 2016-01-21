@@ -46,7 +46,7 @@ class DCEL_Iterator {
 public:
     /// CONSTRUCTOR
     DCEL_Iterator( const FROM_OBJECT& object );
-    DCEL_Iterator( const Iterator& it ) = default;
+    DCEL_Iterator( const DCEL_Iterator& it ) = default;
 
     /// DESTRUCTOR
     virtual ~DCEL_Iterator();
@@ -58,10 +58,11 @@ public:
     virtual std::vector< TO_OBJECT > list() const = 0;
 
     /// RESET
-    virtual void reset() = 0;
+    inline void reset();
 
     /// OPERATOR
     virtual TO_OBJECT      operator->() const = 0;
+    virtual TO_OBJECT      operator* () const = 0;
     virtual DCEL_Iterator& operator++() = 0;
     virtual DCEL_Iterator& operator--() = 0;
     inline  DCEL_Iterator& operator+=( const uint n ) const;

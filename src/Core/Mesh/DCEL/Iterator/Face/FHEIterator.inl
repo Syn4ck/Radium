@@ -9,7 +9,7 @@ namespace Core {
 
 
 /// CONSTRUCTOR
-FHEIterator::FHEIterator( Face_ptr& f ) : FIterator< HalfEdge_ptr >( f ) { }
+FHEIterator::FHEIterator( const Face_ptr& f ) : FIterator< HalfEdge_ptr >( f ) { }
 
 
 
@@ -21,11 +21,11 @@ FHEIterator::~FHEIterator() { }
 /// LIST
 inline HalfEdgeList FHEIterator::list() const {
     HalfEdgeList L;
-    HalfEdge_ptr it = m_f->HE();
+    HalfEdge_ptr it = m_object->HE();
     do {
         L.push_back( it );
         it = it->Next();
-    } while( it != m_f->HE() );
+    } while( it != m_object->HE() );
     return L;
 }
 
@@ -36,7 +36,9 @@ inline HalfEdge_ptr FHEIterator::operator->() const {
     return m_he;
 }
 
-
+inline HalfEdge_ptr FHEIterator::operator* () const {
+    return m_he;
+}
 
 } // namespace Core
 } // namespace Ra

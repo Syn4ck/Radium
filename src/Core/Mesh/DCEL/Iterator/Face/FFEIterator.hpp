@@ -9,17 +9,18 @@ namespace Core {
 class FFEIterator : public FIterator< FullEdge_ptr > {
 public:
     /// CONSTRUCTOR
-    FFEIterator( Face_ptr& f );
-    FFEIterator( const FFEIterator& it ) = default;
+    inline FFEIterator( const Face_ptr& f );
+    inline FFEIterator( const FFEIterator& it ) = default;
 
     /// DESTRUCTOR
-    ~FFEIterator();
+    inline ~FFEIterator();
 
     /// LIST
     inline FullEdgeList list() const override;
 
     /// OPERATOR
     inline FullEdge_ptr operator->() const override;
+    inline FullEdge_ptr operator* () const override;
 };
 
 } // namespace Core

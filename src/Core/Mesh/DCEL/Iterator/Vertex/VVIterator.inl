@@ -7,7 +7,7 @@ namespace Ra {
 namespace Core {
 
 /// CONSTRUCTOR
-VVIterator::VVIterator( Vertex_ptr& v ) : VIterator< Vertex_ptr >( v ) { }
+VVIterator::VVIterator( const Vertex_ptr& v ) : VIterator< Vertex_ptr >( v ) { }
 
 
 
@@ -34,7 +34,9 @@ inline Vertex_ptr VVIterator::operator->() const {
     return m_he->Next()->V();
 }
 
-
+inline Vertex_ptr VVIterator::operator* () const {
+    return m_he->Next()->V();
+}
 
 } // namespace Core
 } // namespace Ra

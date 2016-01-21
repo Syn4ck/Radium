@@ -10,7 +10,7 @@ namespace Core {
 
 
 /// CONSTRUCTOR
-VFIterator::VFIterator( Vertex_ptr& v ) : VIterator< Face_ptr >( v ) { }
+VFIterator::VFIterator( const Vertex_ptr& v ) : VIterator< Face_ptr >( v ) { }
 
 
 
@@ -37,7 +37,9 @@ inline Face_ptr VFIterator::operator->() const {
     return m_he->F();
 }
 
-
+inline Face_ptr VFIterator::operator* () const {
+    return m_he->F();
+}
 
 } // namespace Core
 } // namespace Ra

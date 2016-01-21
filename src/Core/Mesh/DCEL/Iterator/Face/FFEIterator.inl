@@ -10,7 +10,7 @@ namespace Core {
 
 
 /// CONSTRUCTOR
-FFEIterator::FFEIterator( Face_ptr& f ) : FIterator< FullEdge_ptr >( f ) { }
+FFEIterator::FFEIterator( const Face_ptr& f ) : FIterator< FullEdge_ptr >( f ) { }
 
 
 
@@ -22,11 +22,11 @@ FFEIterator::~FFEIterator() { }
 /// LIST
 inline FullEdgeList FFEIterator::list() const {
     FullEdgeList L;
-    HalfEdge_ptr it = m_f->HE();
+    HalfEdge_ptr it = m_object->HE();
     do {
         L.push_back( it->FE() );
         it = it->Next();
-    } while( it != m_f->HE() );
+    } while( it != m_object->HE() );
     return L;
 }
 
@@ -37,7 +37,9 @@ inline FullEdge_ptr FFEIterator::operator->() const {
     return m_he->FE();
 }
 
-
+inline FullEdge_ptr FFEIterator::operator* () const {
+    return m_he->FE();
+}
 
 } // namespace Core
 } // namespace Ra
