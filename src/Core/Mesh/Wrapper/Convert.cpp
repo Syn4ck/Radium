@@ -40,7 +40,7 @@ void convert( const TriangleMesh& mesh, Dcel& dcel ) {
     for( unsigned int i = 0; i < mesh.m_vertices.size(); ++i ) {
         Vector3 p = mesh.m_vertices.at( i );
         Vector3 n = mesh.m_normals.at( i );
-        Vertex_ptr v = std::shared_ptr< Vertex >( new Vertex( p, n ) );
+        Vertex_ptr v = ( new Vertex( p, n ) );
         CORE_ASSERT( ( v != nullptr ), "Vertex_ptr == nullptr" );
         CORE_ASSERT( dcel.m_vertex.insert( v, v->idx ) , "Vertex not inserted" );
     }
@@ -51,11 +51,11 @@ void convert( const TriangleMesh& mesh, Dcel& dcel ) {
         // Create the halfedges
         HalfEdgeList he;
         for( uint i = 0; i < 3; ++i ) {
-            he.push_back( std::shared_ptr< HalfEdge >( new HalfEdge() ) );
+            he.push_back( ( new HalfEdge() ) );
             CORE_ASSERT( ( he[i] != nullptr ), "HalfEdge_ptr == nullptr" );
         }
         // Create the face
-        Face_ptr f = std::make_shared< Face >( he[0] );
+        Face_ptr f = new Face( he[0] );
         CORE_ASSERT( ( f != nullptr ), "Face_ptr == nullptr" );
         CORE_ASSERT( dcel.m_face.insert( f, f->idx ), "Face not inserted" );
         // Create the connections
@@ -79,7 +79,7 @@ void convert( const TriangleMesh& mesh, Dcel& dcel ) {
                 he[i]->setTwin( dcel.m_halfedge[it->second] );
                 dcel.m_halfedge[it->second]->setTwin( he[i] );
                 // Create the fulledge
-                FullEdge_ptr fe = std::shared_ptr< FullEdge >( new FullEdge( he[i] ) );
+                FullEdge_ptr fe = ( new FullEdge( he[i] ) );
                 CORE_ASSERT( ( fe != nullptr ), "FullEdge_ptr == nullptr" );
                 CORE_ASSERT( dcel.m_fulledge.insert( fe, fe->idx ), "FUllEdge not inserted" );
                 he[i]->setFE( fe );
