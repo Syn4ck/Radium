@@ -9,6 +9,7 @@ namespace Ra {
 namespace Core {
 
 void fulledgeSplit( Dcel& dcel, const Index fulledge_id ) {
+    /*
     FullEdge_ptr ptr;
     if( dcel.m_fulledge.access( fulledge_id, ptr ) ) {
         // Declare the data
@@ -76,6 +77,7 @@ void fulledgeSplit( Dcel& dcel, const Index fulledge_id ) {
         CORE_ASSERT( dcel.m_face.insert( f[2], f[2]->idx ), "New face[2] not inserted" );
         CORE_ASSERT( dcel.m_face.insert( f[3], f[3]->idx ), "New face[3] not inserted" );
     }
+    */
 }
 
 
