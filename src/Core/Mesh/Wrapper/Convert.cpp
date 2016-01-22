@@ -42,7 +42,11 @@ void convert( const TriangleMesh& mesh, Dcel& dcel ) {
         Vector3 n = mesh.m_normals.at( i );
         Vertex_ptr v = ( new Vertex( p, n ) );
         CORE_ASSERT( ( v != nullptr ), "Vertex_ptr == nullptr" );
+#ifdef CORE_DEBUG
         CORE_ASSERT( dcel.m_vertex.insert( v, v->idx ) , "Vertex not inserted" );
+#else
+        dcel.m_vertex.insert( v, v->idx );
+#endif
     }
     /// TWIN DATA
     std::map< Twin, Index > he_table;
@@ -57,7 +61,11 @@ void convert( const TriangleMesh& mesh, Dcel& dcel ) {
         // Create the face
         Face_ptr f = new Face( he[0] );
         CORE_ASSERT( ( f != nullptr ), "Face_ptr == nullptr" );
+#ifdef CORE_DEBUG
         CORE_ASSERT( dcel.m_face.insert( f, f->idx ), "Face not inserted" );
+#else
+        dcel.m_face.insert( f, f->idx );
+#endif
         // Create the connections
         for( uint i = 0; i < 3; ++i ) {
             Vertex_ptr& v = dcel.m_vertex[ t[i] ];
@@ -66,7 +74,11 @@ void convert( const TriangleMesh& mesh, Dcel& dcel ) {
             he[i]->setNext( he[( i + 1 ) % 3] );
             he[i]->setPrev( he[( i + 2 ) % 3] );
             he[i]->setF( f );
+#ifdef CORE_DEBUG
             CORE_ASSERT( dcel.m_halfedge.insert( he[i], he[i]->idx ), "HalfEdge not inserted" );
+#else
+            dcel.m_halfedge.insert( he[i], he[i]->idx );
+#endif
             /// TWIN SEARCH
             Twin twin( t[i], t[( i + 1 ) % 3]);
             // Search the right twin
@@ -81,7 +93,11 @@ void convert( const TriangleMesh& mesh, Dcel& dcel ) {
                 // Create the fulledge
                 FullEdge_ptr fe = ( new FullEdge( he[i] ) );
                 CORE_ASSERT( ( fe != nullptr ), "FullEdge_ptr == nullptr" );
+#ifdef CORE_DEBUG
                 CORE_ASSERT( dcel.m_fulledge.insert( fe, fe->idx ), "FUllEdge not inserted" );
+#else
+                dcel.m_fulledge.insert( fe, fe->idx );
+#endif
                 he[i]->setFE( fe );
                 he[i]->Twin()->setFE( fe );
                 he_table.erase( it );

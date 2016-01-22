@@ -26,7 +26,11 @@ bool HESplit( Dcel& dcel, const Index& halfedge_id ) {
     if( ptr->F() == nullptr ) {
         LOG( logDEBUG ) << "HalfEdge " << halfedge_id.getValue() << " is a border HalfEdge";
         HalfEdge_ptr he = new HalfEdge();
+#ifdef CORE_DEBUG
         CORE_ASSERT( dcel.m_halfedge.insert( he, he->idx ), "new border HalfEdge not inserted" );
+#else
+        dcel.m_halfedge.insert( he, he->idx );
+#endif
         he->setNext( ptr->Next() );
         he->setPrev( ptr );
         bind( he );
@@ -62,11 +66,19 @@ bool HESplit( Dcel& dcel, const Index& halfedge_id ) {
         }
 
         // Insert data
+#ifdef CORE_DEBUG
         CORE_ASSERT( dcel.m_halfedge.insert( he[0][1], he[0][1]->idx ), "new HalfEdge[0][1] not inserted" );
         CORE_ASSERT( dcel.m_halfedge.insert( he[1][1], he[1][1]->idx ), "new HalfEdge[1][1] not inserted" );
         CORE_ASSERT( dcel.m_halfedge.insert( he[1][2], he[1][2]->idx ), "new HalfEdge[1][2] not inserted" );
         CORE_ASSERT( dcel.m_fulledge.insert( fe,       fe->idx       ), "new FullEdge not inserted" );
-        CORE_ASSERT( dcel.m_face.insert( f[1],     f[1]->idx     ), "new Face[1] not inserted" );
+        CORE_ASSERT(     dcel.m_face.insert( f[1],     f[1]->idx     ), "new Face[1] not inserted" );
+#else
+        dcel.m_halfedge.insert( he[0][1], he[0][1]->idx );
+        dcel.m_halfedge.insert( he[1][1], he[1][1]->idx );
+        dcel.m_halfedge.insert( he[1][2], he[1][2]->idx );
+        dcel.m_fulledge.insert( fe,       fe->idx       );
+        dcel.m_face.insert( f[1],     f[1]->idx     );
+#endif
     }
 
     return true;
@@ -88,7 +100,7 @@ bool FESplit( Dcel& dcel, const Index& fulledge_id ) {
     }
 
     if( !dcel.m_halfedge.contain( ptr->HE( 0 )->idx ) || !dcel.m_halfedge.contain( ptr->HE( 1 )->idx ) ) {
-        LOG( logDEBUG ) << "FullEdge " << fulledge_id.getValue() << " is bad.";
+        LOG( logDEBUG ) << "FullEdge " << fulledge_id.getValue() << ". It is not partially or fully contained in the DCEL.";
         return false;
     }
 
@@ -101,7 +113,11 @@ bool FESplit( Dcel& dcel, const Index& fulledge_id ) {
 
     if( status[0] && status[1] ) {
         FullEdge_ptr fe = new FullEdge( he[1] );
+#ifdef CORE_DEBUG
         CORE_ASSERT( dcel.m_fulledge.insert( fe, fe->idx ), "new FullEdge not inserted" );
+#else
+        dcel.m_fulledge.insert( fe, fe->idx );
+#endif
             if( isBorder( he[0] ) ) {
                 if( isBorder( he[1] ) ) {
                     he[0]->setTwin( he[1]->Next() );
@@ -121,7 +137,11 @@ bool FESplit( Dcel& dcel, const Index& fulledge_id ) {
             }
             if( ( he[0]->V() != nullptr ) && ( he[1]->V() != nullptr ) ) {
                 Vertex_ptr   v  = new Vertex();
+#ifdef CORE_DEBUG
                 CORE_ASSERT( dcel.m_vertex.insert( v,  v->idx  ), "new Vertex not inserted" );
+#else
+                dcel.m_vertex.insert( v,  v->idx  );
+#endif
                 v->setP( 0.5 * ( he[0]->V()->P() + he[1]->V()->P() ) );
                 v->setN( ( he[0]->V()->N() + he[1]->V()->N() ).normalized() );
                 v->setHE( he[0]->Next() );
@@ -153,10 +173,14 @@ bool HECollapse( Dcel& dcel, const Index& halfedge_id ) {
         return false;
     }
 
-    if( ptr->isBorder() ) {
+    if( isBorder( ptr ) ) {
         ptr->Prev()->setNext( ptr->Next() );
         ptr->Next()->setPrev( ptr->Prev() );
+#ifdef CORE_DEBUG
         CORE_ASSERT( dcel.m_halfedge.remove( halfedge_id ), "HalfEdge not removed" );
+#else
+        dcel.m_halfedge.remove( halfedge_id );
+#endif
         delete ptr;
     } else {
         // Declare the data
@@ -176,14 +200,22 @@ bool HECollapse( Dcel& dcel, const Index& halfedge_id ) {
         he[1]->Twin()->setTwin( he[2]->Twin() );
         he[2]->Twin()->setTwin( he[1]->Twin() );
         fe[0]->setHE( he[1]->Twin() );
-        fe[0]->bind();
+        bind( fe[0] );
 
         // Remove the data
+#ifdef CORE_DEBUG
         CORE_ASSERT( dcel.m_halfedge.remove( he[0]->idx ), "HalfEdge he[0] not removed" );
         CORE_ASSERT( dcel.m_halfedge.remove( he[1]->idx ), "HalfEdge he[1] not removed" );
         CORE_ASSERT( dcel.m_halfedge.remove( he[2]->idx ), "HalfEdge he[2] not removed" );
         CORE_ASSERT( dcel.m_fulledge.remove( fe[1]->idx ), "FullEdge fe[1] not removed" );
         CORE_ASSERT( dcel.m_face.remove( f->idx ), "Face was not removed");
+#else
+        dcel.m_halfedge.remove( he[0]->idx );
+        dcel.m_halfedge.remove( he[1]->idx );
+        dcel.m_halfedge.remove( he[2]->idx );
+        dcel.m_fulledge.remove( fe[1]->idx );
+        dcel.m_face.remove( f->idx );
+#endif
         delete he[0];
         delete he[1];
         delete he[2];
@@ -210,7 +242,7 @@ bool FECollapse( Dcel& dcel, const Index& fulledge_id ) {
     }
 
     if( !dcel.m_halfedge.contain( ptr->HE( 0 )->idx ) || !dcel.m_halfedge.contain( ptr->HE( 1 )->idx ) ) {
-        LOG( logDEBUG ) << "FullEdge " << fulledge_id.getValue() << " is bad.";
+        LOG( logDEBUG ) << "FullEdge " << fulledge_id.getValue() << ". It is not partially or fully contained in the DCEL.";
         return false;
     }
 
@@ -225,11 +257,19 @@ bool FECollapse( Dcel& dcel, const Index& fulledge_id ) {
         if( ( v[0] != nullptr ) && ( v[1] != nullptr ) ) {
             v[0]->setP( 0.5 * ( v[0]->P() + v[1]->P() ) );
             v[0]->setN( ( v[0]->N() + v[1]->N() ).normalized() );
-            v[0]->bind();
+            bind( v[0] );
+#ifdef CORE_DEBUG
             CORE_ASSERT( dcel.m_vertex.remove( v[1]->idx ), "Vertex v[1] not removed" );
+#else
+            dcel.m_vertex.remove( v[1]->idx );
+#endif
             delete v[1];
         }
+#ifdef CORE_DEBUG
         CORE_ASSERT( dcel.m_fulledge.remove( ptr->idx ), "FullEdge not removed" );
+#else
+        dcel.m_fulledge.remove( ptr->idx );
+#endif
         delete ptr;
     } else {
         LOG( logDEBUG ) << "Something went bad with FullEdge " << fulledge_id.getValue();
@@ -261,11 +301,11 @@ bool FEFlip( Dcel& dcel, const Index& fulledge_id ) {
     }
 
     if( !dcel.m_halfedge.contain( ptr->HE( 0 )->idx ) || !dcel.m_halfedge.contain( ptr->HE( 1 )->idx ) ) {
-        LOG( logDEBUG ) << "FullEdge " << fulledge_id.getValue() << " is bad.";
+        LOG( logDEBUG ) << "FullEdge " << fulledge_id.getValue() << ". It is not partially or fully contained in the DCEL.";
         return false;
     }
 
-    if( ptr->isBorder() ) {
+    if( isBorder( ptr ) ) {
         LOG( logDEBUG ) << "FullEdge " << fulledge_id.getValue() << " is a border FullEdge.";
         return false;
     }
