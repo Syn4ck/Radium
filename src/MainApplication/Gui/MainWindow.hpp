@@ -62,6 +62,8 @@ namespace Ra
             void stepAnimation();
             void resetAnimation();
 
+            void toggleXray( bool on ) const ;
+
         public slots:
             void onEntitiesUpdated();
 

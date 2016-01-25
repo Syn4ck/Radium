@@ -29,6 +29,8 @@ public:
 
     void updateLocalTransform(Ra::Engine::RenderObject *ro);
 
+    void toggleXray(bool on);
+
 private:
     const Ra::Core::Animation::Skeleton& m_skel;
     uint m_id;

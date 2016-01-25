@@ -93,4 +93,10 @@ namespace AnimationPlugin
         return mesh;
     }
 
+    void SkeletonBoneRenderObject::toggleXray(bool on)
+    {
+        std::shared_ptr<Ra::Engine::RenderObject> ro = m_roMgr->getRenderObject( idx );
+        ro->setType(on ? Ra::Engine::RenderObject::Type::RO_XRAY: Ra::Engine::RenderObject::Type::RO_OPAQUE);
+    }
+
 }

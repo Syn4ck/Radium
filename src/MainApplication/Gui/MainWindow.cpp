@@ -3,6 +3,8 @@
 #include <QFileDialog>
 #include <QToolButton>
 
+#include <assimp/Importer.hpp>
+
 #include <Engine/RadiumEngine.hpp>
 #include <Engine/Entity/Component.hpp>
 #include <Engine/Entity/Entity.hpp>
@@ -17,7 +19,7 @@
 #include <MainApplication/Viewer/CameraInterface.hpp>
 
 #include <Plugins/Animation/AnimationSystem.hpp>
-#include <assimp/Importer.hpp>
+#include <Plugins/Animation/AnimationComponent.hpp>
 
 namespace Ra
 {
@@ -68,7 +70,7 @@ namespace Ra
         connect( actionGizmoOff,            &QAction::triggered, this, &MainWindow::gizmoShowNone );
         connect( actionGizmoTranslate,      &QAction::triggered, this, &MainWindow::gizmoShowTranslate );
         connect( actionGizmoRotate,         &QAction::triggered, this, &MainWindow::gizmoShowRotate );
-        //connect( actionGizmoOff, &QAction::toggled, this, &gizmoShowNone);
+        connect(actionToggleXray,           &QAction::toggled,   this, &MainWindow::toggleXray);
 
         // Loading setup.
         connect( this, &MainWindow::fileLoading, mainApp, &MainApplication::loadFile );
@@ -635,6 +637,21 @@ namespace Ra
         auto ro = roMgr->getRenderObject( itemIdx );
 
         return ro;
+    }
+
+    void Gui::MainWindow::toggleXray(bool on) const 
+    {
+        for (const auto& ent : mainApp->getEngine()->getEntityManager()->getEntities())
+        {
+            for (const auto& comp : ent->getComponentsMap())
+            {
+                const std::string& name = comp.first;
+                if (name.find(std::string("Animation")) != std::string::npos ) 
+                {
+                    static_cast<AnimationPlugin::AnimationComponent*>(comp.second)->toggleXray(on);
+                }
+            }
+        }
     }
 
 } // namespace Ra
