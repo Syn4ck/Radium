@@ -40,6 +40,7 @@ typedef std::vector< Vertex_ptr >   VertexList;
 typedef std::vector< HalfEdge_ptr > HalfEdgeList;
 typedef std::vector< FullEdge_ptr > FullEdgeList;
 typedef std::vector< Face_ptr >     FaceList;
+typedef std::vector< Dcel_ptr >     DcelList;
 
 } // namespace Core
 } // namespace Ra
