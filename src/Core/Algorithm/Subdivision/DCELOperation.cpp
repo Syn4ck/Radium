@@ -5,6 +5,7 @@
 #include <Core/Mesh/DCEL/Vertex.hpp>
 #include <Core/Mesh/DCEL/HalfEdge.hpp>
 #include <Core/Mesh/DCEL/FullEdge.hpp>
+#include <Core/Mesh/DCEL/Face.hpp>
 #include <Core/Mesh/DCEL/Dcel.hpp>
 
 #include <Core/Mesh/DCEL/Operation/Bind.hpp>

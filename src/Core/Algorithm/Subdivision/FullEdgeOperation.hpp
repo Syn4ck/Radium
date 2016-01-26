@@ -7,8 +7,8 @@
 namespace Ra {
 namespace Core {
 
-void fulledgeSplit( Dcel& dcel, const Index fulledge_id );
-void fulledgeCollapse( Dcel& dcel, const Index fulledge_id );
+bool fulledgeSplit( Dcel& dcel, const Index& fulledge_id );
+bool fulledgeCollapse( Dcel& dcel, const Index& fulledge_id );
 
 } // namespace Core
 } // namespace Ra
