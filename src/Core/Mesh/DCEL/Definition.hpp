@@ -8,6 +8,7 @@
 namespace Ra {
 namespace Core {
 
+#if 0
 #ifdef CORE_DEBUG
 enum DcelComponentType {
     DCEL_UNDEFINED,
@@ -17,6 +18,7 @@ enum DcelComponentType {
     DCEL_FACE,
     DCEL_DCEL
 };
+#endif
 #endif
 
 
