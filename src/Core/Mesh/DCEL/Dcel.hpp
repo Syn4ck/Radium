@@ -35,6 +35,18 @@ public:
     inline bool empty() const;
     inline bool compact() const;
 
+    /// INSERT
+    inline void insert( const Vertex_ptr&   v  );
+    inline void insert( const HalfEdge_ptr& he );
+    inline void insert( const FullEdge_ptr& fe );
+    inline void insert( const Face_ptr&     f  );
+
+    /// REMOVE
+    inline void removeVertex  ( const Index& index );
+    inline void removeHalfEdge( const Index& index );
+    inline void removeFullEdge( const Index& index );
+    inline void removeFace    ( const Index& index );
+
     /// VARIABLE
     IndexMap< Vertex_ptr >   m_vertex;   // Vertices  Data
     IndexMap< HalfEdge_ptr > m_halfedge; // HalfEdges Data
