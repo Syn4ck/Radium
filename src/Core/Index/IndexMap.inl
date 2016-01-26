@@ -3,6 +3,37 @@
 namespace Ra {
 namespace Core {
 
+//=========================================================
+// IndexMap Entry =========================================
+//=========================================================
+
+/// CONSTRUCTOR
+template < typename T >
+IndexMap< T >::IndexMapEntry::IndexMapEntry( const Index& index ) :
+    m_idx( index ) { }
+
+template < typename T >
+IndexMap< T >::IndexMapEntry::IndexMapEntry( const Index& index, const T& object ) :
+    m_idx( index ),
+    m_obj( object ) { }
+
+/// OPERATOR
+template < typename T >
+bool IndexMap< T >::IndexMapEntry::operator<( const IndexMapEntry& imp ) const {
+    if( m_idx != imp.m_idx ) {
+        return m_idx < imp.m_idx;
+    }
+    return false;
+}
+
+template < typename T >
+bool IndexMap< T >::IndexMapEntry::operator==( const IndexMapEntry& imp ) const {
+    return ( m_idx == imp.m_idx );
+}
+
+//=========================================================
+//=========================================================
+//=========================================================
 
 
 /// CONSTRUCTOR
@@ -230,7 +261,7 @@ inline bool IndexMap< T >::contain( const Index& idx ) const {
 
 template < typename T >
 inline bool IndexMap< T >::compact() const {
-    return ( m_free.front() > m_data.size() );
+    return ( m_free.front() > static_cast< int >( m_data.size() ) );
 }
 
 
@@ -264,7 +295,7 @@ inline T& IndexMap< T >::operator[]( const uint i ) {
 
 
 template < typename T >
-inline Index& IndexMap< T >::operator<<( const T& obj ) {
+inline Index IndexMap< T >::operator<<( const T& obj ) {
     return insert( obj );
 }
 

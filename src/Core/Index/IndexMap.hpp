@@ -54,31 +54,23 @@ public:
     /// OPERATOR
     inline T&         operator[]( const Index& idx );
     inline T&         operator[]( const uint     i );
-    inline Index&     operator<<( const T&     obj );
+    inline Index      operator<<( const T&     obj );
     inline IndexMap&  operator>>( const Index& idx );
 
 protected:
     /// MAP ENTRY CLASS
     struct IndexMapEntry {
         /// CONSTRUCTOR
-        IndexMapEntry( const Index& index = Index::INVALID_IDX() ) : m_idx( index ) { }
-        IndexMapEntry( const Index& index, const T& object ) : m_idx( index ), m_obj( object ) { }
+        IndexMapEntry( const Index& index = Index::INVALID_IDX() );
+        IndexMapEntry( const Index& index, const T& object );
 
         /// VARIABLE
         Index m_idx;
         T     m_obj;
 
         /// OPERATOR
-        bool operator< ( const IndexMapEntry& imp ) const {
-            if ( m_idx != imp.m_idx ) {
-                return m_idx <  imp.m_idx;
-            }
-            return false;
-        }
-
-        bool operator== ( const IndexMapEntry& imp ) const {
-            return ( m_idx == imp.m_idx );
-        }
+        bool operator==( const IndexMapEntry& imp ) const;
+        bool operator< ( const IndexMapEntry& imp ) const;
     };
 
     /// VARIABLE
