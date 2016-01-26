@@ -7,5 +7,6 @@
     <file>Assets/Images/select.png</file>
     <file>Assets/Images/translate.png</file>
     <file>Assets/Images/xray.png</file>
+    <file>Assets/Images/fitting.png</file>
 </qresource>
 </RCC>

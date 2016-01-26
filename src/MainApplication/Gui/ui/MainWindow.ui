@@ -756,6 +756,7 @@
    <addaction name="actionGizmoRotate"/>
    <addaction name="separator"/>
    <addaction name="actionToggleXray"/>
+   <addaction name="actionToggleIS"/>
   </widget>
   <action name="actionOpenMesh">
    <property name="text">
@@ -858,6 +859,11 @@
    <property name="checked">
     <bool>true</bool>
    </property>
+   <property name="icon">
+    <iconset>
+     <normalon>:/Assets/Images/xray.png</normalon>
+    </iconset>
+   </property>
    <property name="text">
     <string>toggleXray</string>
    </property>
@@ -867,10 +873,27 @@
    <property name="shortcut">
     <string>X</string>
    </property>
-    <property name="icon">
+  </action>
+  <action name="actionToggleIS">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
     <iconset>
-     <normalon>:/Assets/Images/xray.png</normalon>
+     <normalon>:/Assets/Images/fitting.png</normalon>
     </iconset>
+   </property>
+   <property name="text">
+    <string>Toggle Implicit Skinning</string>
+   </property>
+   <property name="toolTip">
+    <string>Enable or Disable Implicit Skinning correction</string>
+   </property>
+   <property name="shortcut">
+    <string>I</string>
    </property>
   </action>
  </widget>

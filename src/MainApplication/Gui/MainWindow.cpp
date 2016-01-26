@@ -20,6 +20,7 @@
 
 #include <Plugins/Animation/AnimationSystem.hpp>
 #include <Plugins/Animation/AnimationComponent.hpp>
+#include <Plugins/Implicit/ImplicitComponent.hpp>
 
 namespace Ra
 {
@@ -71,6 +72,7 @@ namespace Ra
         connect( actionGizmoTranslate,      &QAction::triggered, this, &MainWindow::gizmoShowTranslate );
         connect( actionGizmoRotate,         &QAction::triggered, this, &MainWindow::gizmoShowRotate );
         connect(actionToggleXray,           &QAction::toggled,   this, &MainWindow::toggleXray);
+        connect(actionToggleIS,             &QAction::toggled,   this, &MainWindow::toggleIS);
 
         // Loading setup.
         connect( this, &MainWindow::fileLoading, mainApp, &MainApplication::loadFile );
@@ -639,16 +641,31 @@ namespace Ra
         return ro;
     }
 
-    void Gui::MainWindow::toggleXray(bool on) const 
+    void Gui::MainWindow::toggleXray(bool on) const
     {
         for (const auto& ent : mainApp->getEngine()->getEntityManager()->getEntities())
         {
             for (const auto& comp : ent->getComponentsMap())
             {
                 const std::string& name = comp.first;
-                if (name.find(std::string("Animation")) != std::string::npos ) 
+                if (name.find(std::string("Animation")) != std::string::npos )
                 {
                     static_cast<AnimationPlugin::AnimationComponent*>(comp.second)->toggleXray(on);
+                }
+            }
+        }
+    }
+
+    void Gui::MainWindow::toggleIS(bool on) const
+    {
+        for (const auto& ent : mainApp->getEngine()->getEntityManager()->getEntities())
+        {
+            for (const auto& comp : ent->getComponentsMap())
+            {
+                const std::string& name = comp.first;
+                if (name.find(std::string("Implicit")) != std::string::npos )
+                {
+                    static_cast<ImplicitPlugin::ImplicitComponent*>(comp.second)->toggleIS(on);
                 }
             }
         }

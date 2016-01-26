@@ -63,6 +63,8 @@ namespace Ra
             void resetAnimation();
 
             void toggleXray( bool on ) const ;
+            void toggleIS( bool on ) const ;
+
 
         public slots:
             void onEntitiesUpdated();
