@@ -28,6 +28,8 @@ public:
     /// REMOVE
     inline bool  remove( const Index& idx );
     inline bool  remove( const uint     i );
+    inline bool  remove( const Index& idx, T& obj );
+    inline bool  remove( const uint     i, T& obj );
 
     /// ACCESS
     inline T     at( const Index& idx ) const;

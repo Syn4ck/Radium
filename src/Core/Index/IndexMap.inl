@@ -105,13 +105,41 @@ inline bool IndexMap< T >::remove( const uint i ) {
     if( i >= m_data.size() ) {
         return false;
     }
-    IndexMapEntry imp( m_data[i].idx );
+    IndexMapEntry imp( m_data[i].m_idx );
     typename std::deque<IndexMapEntry>::iterator data_it = std::find( m_data.begin(), m_data.end(), imp );
-    insert_free_index( m_data[i].idx );
+    insert_free_index( m_data[i].m_idx );
     m_data.erase( data_it );
     return true;
 }
 
+
+
+inline bool IndexMap< T >::remove( const Index& idx, T& obj ) {
+    IndexMapEntry imp( idx );
+    typename std::deque<IndexMapEntry>::iterator data_it = std::find( m_data.begin(), m_data.end(), imp );
+    if( data_it == m_data.end() ) {
+        return false;
+    }
+    obj = data_it->m_obj;
+    m_data.erase( data_it );
+    insert_free_index( idx );
+    return true;
+}
+
+
+
+template < typename T >
+inline bool IndexMap< T >::remove( const uint i, T& obj ) {
+    if( i >= m_data.size() ) {
+        return false;
+    }
+    IndexMapEntry imp( m_data[i].m_idx );
+    typename std::deque<IndexMapEntry>::iterator data_it = std::find( m_data.begin(), m_data.end(), imp );
+    obj = data_it->m_obj;
+    m_data.erase( data_it );
+    insert_free_index( m_data[i].m_idx );
+    return true;
+}
 
 
 
