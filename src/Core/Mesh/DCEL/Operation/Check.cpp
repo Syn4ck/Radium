@@ -6,10 +6,15 @@
 #include <Core/Mesh/DCEL/Face.hpp>
 #include <Core/Mesh/DCEL/Dcel.hpp>
 
+#include <Core/Mesh/DCEL/Iterator/Vertex/VHEIterator.hpp>
+#include <Core/Mesh/DCEL/Iterator/Face/FHEIterator.hpp>
+
 #include <Core/Log/Log.hpp>
 
 namespace Ra {
 namespace Core {
+
+#define CORE_DEBUG
 
 //=====================================================================
 //=====================================================================
@@ -18,10 +23,12 @@ void check( const Vertex_ptr& v, const uint flag ) {
 #ifdef CORE_DEBUG
     bool isVerbose = ( flag & DCEL_CHECK_VERBOSE ) || ( flag & DCEL_CHECK_VERBOSE_REC );
 
-
     if( isVerbose ) {
         LOG( logDEBUG ) << "Checking vertex...";
     }
+
+    /// POINTER
+    CORE_ASSERT( ( v != nullptr ), "Nullptr received.");
 
     /// INDEX
     if( flag & DCEL_CHECK_INDEX ) {
@@ -57,6 +64,21 @@ void check( const Vertex_ptr& v, const uint flag ) {
         }
     }
 
+    /// CONSISTENCY
+    if( flag & DCEL_CHECK_CONSISTENCY ) {
+        CORE_ASSERT( ( v->HE() != nullptr ), "HalfEdge is nullptr." );
+        CORE_ASSERT( ( v == v->HE()->V() ), "Vertex is not consistent." );
+        VHEIterator it( v );
+        const uint size = it.size();
+        for( uint i = 0; i < size; ++i ) {
+            CORE_ASSERT( ( v == it->V() ), "Vertex is not consistent." );
+            ++it;
+        }
+        if( isVerbose ) {
+            LOG( logDEBUG ) << "\tConsistent...[Y]";
+        }
+    }
+
     if( isVerbose ) {
         LOG( logDEBUG ) << "Checking vertex done.";
     }
@@ -73,6 +95,10 @@ void check( const HalfEdge_ptr& he, const uint flag ) {
     if( isVerbose ) {
         LOG( logDEBUG ) << "Checking halfedge...";
     }
+
+    /// POINTER
+    CORE_ASSERT( ( he != nullptr ), "Nullptr received.");
+
 
     /// INDEX
     if( flag & DCEL_CHECK_INDEX ) {
@@ -130,6 +156,41 @@ void check( const HalfEdge_ptr& he, const uint flag ) {
         }
     }
 
+    /// CONSISTENCY
+    if( flag & DCEL_CHECK_CONSISTENCY ) {
+        CORE_ASSERT( ( he->V() != nullptr ), "Vertex is nullptr." );
+
+        VHEIterator vit( he->V() );
+        const uint vsize = vit.size();
+        bool status = false;
+        for( uint i = 0; i < vsize; ++i ) {
+            if( *vit == he ) {
+                status = true;
+                break;
+            }
+            ++vit;
+        }
+        CORE_ASSERT( status, "HalfEdge is not consistent." );
+
+        if( he->F() != nullptr ) {
+            FHEIterator fit( he->F() );
+            const uint fsize = fit.size();
+            status = false;
+            for( uint i = 0; i < fsize; ++i ) {
+                if( *fit == he ) {
+                    status = true;
+                    break;
+                }
+                ++fit;
+            }
+            CORE_ASSERT( status, "HalfEdge is not consistent." );
+        }
+
+        if( isVerbose ) {
+            LOG( logDEBUG ) << "\Consistent...\t\t[Y]";
+        }
+    }
+
     if( isVerbose ) {
         LOG( logDEBUG ) << "Checking halfedge done.";
     }
@@ -146,6 +207,10 @@ void check( const FullEdge_ptr& fe, const uint flag ) {
     if( isVerbose ) {
         LOG( logDEBUG ) << "Checking fullfedge...";
     }
+
+    /// POINTER
+    CORE_ASSERT( ( fe != nullptr ), "Nullptr received.");
+
 
     /// INDEX
     if( flag & DCEL_CHECK_INDEX ) {
@@ -171,6 +236,16 @@ void check( const FullEdge_ptr& fe, const uint flag ) {
         }
     }
 
+    /// CONSISTENCY
+    if( flag & DCEL_CHECK_CONSISTENCY ) {
+        CORE_ASSERT( ( fe->HE( 0 ) != nullptr ), "HalfEdge is nullptr." );
+        CORE_ASSERT( ( ( fe == he->FE() ) && ( fe == he->Twin()->FE() ) ), "FullEdge is not consistent." );
+        if( isVerbose ) {
+            LOG( logDEBUG ) << "\tConsistent...\t\t[Y]";
+        }
+    }
+
+
     if( isVerbose ) {
         LOG( logDEBUG ) << "Checking fullfedge done.";
     }
@@ -188,6 +263,10 @@ void check( const Face_ptr& f, const uint flag ) {
         LOG( logDEBUG ) << "Checking face...";
     }
 
+    /// POINTER
+    CORE_ASSERT( ( f != nullptr ), "Nullptr received.");
+
+
     /// INDEX
     if( flag & DCEL_CHECK_INDEX ) {
         CORE_ASSERT( f->idx.isValid(), "Index is invalid." );
@@ -204,6 +283,26 @@ void check( const Face_ptr& f, const uint flag ) {
         }
     }
 
+    /// CONSISTENCY
+    if( flag & DCEL_CHECK_CONSISTENCY ) {
+        CORE_ASSERT( ( f->HE() != nullptr ), "HalfEdge is nullptr." );
+        CORE_ASSERT( ( f == f->HE()->F() ), "Face is not consistent." );
+
+        FHEIterator it( f );
+        const uint size = it.size();
+        for( uint i = 0; i < size; ++i ) {
+            CORE_ASSERT( ( f == it->F() ), "Face is not consistent." );
+            ++it;
+        }
+        it.reset();
+        it += size - 1;
+        CORE_ASSERT( ( *it == f->HE()->Prev() ), "Face is not consistent." );
+
+        if( isVerbose ) {
+            LOG( logDEBUG ) << "\tConsistent...\t\t[Y]";
+        }
+    }
+
     if( isVerbose ) {
         LOG( logDEBUG ) << "Checking face done.";
     }
@@ -215,12 +314,17 @@ void check( const Face_ptr& f, const uint flag ) {
 
 void check( const Dcel_ptr& dcel, const uint flag ) {
 #ifdef CORE_DEBUG
-    bool isVerbose = flag & DCEL_CHECK_VERBOSE;
-    uint verbosity = ( flag & DCEL_CHECK_VERBOSE_REC ) ? DCEL_CHECK_VERBOSE : DCEL_CHECK_NOP;
+    bool isVerbose   = flag & DCEL_CHECK_VERBOSE;
+    uint verbosity   = ( flag & DCEL_CHECK_VERBOSE_REC ) ? DCEL_CHECK_VERBOSE : DCEL_CHECK_NOP;
+    uint consistency = flag & DCEL_CHECK_CONSISTENCY;
 
     if( isVerbose ) {
         LOG( logDEBUG ) << "Checking DCEL...";
     }
+
+    /// POINTER
+    CORE_ASSERT( ( dcel != nullptr ), "Nullptr received.");
+
 
     /// INDEX
     if( flag & DCEL_CHECK_INDEX ) {
@@ -237,7 +341,7 @@ void check( const Dcel_ptr& dcel, const uint flag ) {
             LOG( logDEBUG ) << "Checking Vertex List...";
         }
         for( uint i = 0; i < v_size; ++i ) {
-            check( dcel->m_vertex.at( i ), verbosity | DCEL_CHECK_VERTEX_DEFAULT );
+            check( dcel->m_vertex.at( i ), verbosity | consistency | DCEL_CHECK_VERTEX_DEFAULT );
         }
         if( isVerbose ) {
             LOG( logDEBUG ) << "\tVertex List...\t[Y]";
@@ -252,7 +356,7 @@ void check( const Dcel_ptr& dcel, const uint flag ) {
             LOG( logDEBUG ) << "Checking HalfEdge List...";
         }
         for( uint i = 0; i < he_size; ++i ) {
-            check( dcel->m_halfedge.at( i ), verbosity | DCEL_CHECK_HALFEDGE_DEFAULT );
+            check( dcel->m_halfedge.at( i ), verbosity | consistency | DCEL_CHECK_HALFEDGE_DEFAULT );
         }
         if( isVerbose ) {
             LOG( logDEBUG ) << "\tHalfEdge List...\t[Y]";
@@ -270,7 +374,7 @@ void check( const Dcel_ptr& dcel, const uint flag ) {
         CORE_ASSERT( ( fe_size == ( he_size / 2 ) ), "Fulledges or halfedges missing." );
 
         for( uint i = 0; i < fe_size; ++i ) {
-            check( dcel->m_fulledge.at( i ), verbosity | DCEL_CHECK_FULLEDGE_DEFAULT );
+            check( dcel->m_fulledge.at( i ), verbosity | consistency | DCEL_CHECK_FULLEDGE_DEFAULT );
         }
         if( isVerbose ) {
             LOG( logDEBUG ) << "\tFullEdge List...\t[Y]";
@@ -285,7 +389,7 @@ void check( const Dcel_ptr& dcel, const uint flag ) {
             LOG( logDEBUG ) << "Checking Face List...";
         }
         for( uint i = 0; i < f_size; ++i ) {
-            check( dcel->m_face.at( i ), verbosity | DCEL_CHECK_FACE_DEFAULT );
+            check( dcel->m_face.at( i ), verbosity | consistency | DCEL_CHECK_FACE_DEFAULT );
         }
         if( isVerbose ) {
             LOG( logDEBUG ) << "\tFace List...\t[Y]";
@@ -293,8 +397,11 @@ void check( const Dcel_ptr& dcel, const uint flag ) {
         }
     }
 
+    if( consistency ) {
+        LOG( logDEBUG ) << "\tConsistent...\t[Y]";
+    }
+
     if( isVerbose ) {
-        LOG( logDEBUG ) << "\tDCEL...\t[Y]";
         LOG( logDEBUG ) << "Checking DCEL done.";
     }
 #endif
