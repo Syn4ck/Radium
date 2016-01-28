@@ -184,3 +184,4 @@ target_link_libraries(
 if (WIN32)
     include(CMakeGenerateTrees.txt)
 endif(WIN32)
+include(CMakeGenerateVersion.txt)

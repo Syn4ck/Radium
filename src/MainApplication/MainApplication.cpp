@@ -11,6 +11,7 @@
 #include <Core/Math/ColorPresets.hpp>
 #include <Core/Tasks/Task.hpp>
 #include <Core/Tasks/TaskQueue.hpp>
+
 #include <Engine/RadiumEngine.hpp>
 #include <Engine/Renderer/Renderer.hpp>
 #include <Engine/Renderer/RenderTechnique/RenderTechnique.hpp>
@@ -18,12 +19,14 @@
 #include <Engine/Renderer/RenderTechnique/ShaderConfiguration.hpp>
 #include <Engine/Entity/Entity.hpp>
 #include <Engine/SystemDisplay/SystemDisplay.hpp>
+
 #include <MainApplication/Gui/MainWindow.hpp>
 
 #include <Plugins/FancyMesh/FancyMeshSystem.hpp>
+#include <MainApplication/Version.hpp>
 
 #include <Core/Animation/Handle/Skeleton.hpp>
-#include "Plugins/Animation/AnimationComponent.hpp"
+#include <Plugins/Animation/AnimationComponent.hpp>
 
 
 // Const parameters : TODO : make config / command line options
@@ -66,6 +69,12 @@ namespace Ra
 #else
         config << "single precision" ;
 #endif
+
+        LOG( logINFO ) << config.str();
+
+        config.str( std::string() );
+        config<<"build: "<<Version::compiler<<" - "<<Version::compileDate<<" "<<Version::compileTime;
+
 
         LOG( logINFO ) << config.str();
 
