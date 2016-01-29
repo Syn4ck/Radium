@@ -85,13 +85,13 @@ Dcel::~Dcel() {
     for( uint i = 0; i < m_vertex.size(); ++i ) {
         delete m_vertex[i];
     }
-    for( uint i = 0; i < m_vertex.size(); ++i ) {
+    for( uint i = 0; i < m_halfedge.size(); ++i ) {
         delete m_halfedge[i];
     }
-    for( uint i = 0; i < m_vertex.size(); ++i ) {
+    for( uint i = 0; i < m_fulledge.size(); ++i ) {
         delete m_fulledge[i];
     }
-    for( uint i = 0; i < m_vertex.size(); ++i ) {
+    for( uint i = 0; i < m_face.size(); ++i ) {
         delete m_face[i];
     }
 }

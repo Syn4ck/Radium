@@ -1,5 +1,10 @@
 #include <Core/Mesh/DCEL/Dcel.hpp>
 
+#include <Core/Mesh/DCEL/Vertex.hpp>
+#include <Core/Mesh/DCEL/HalfEdge.hpp>
+#include <Core/Mesh/DCEL/FullEdge.hpp>
+#include <Core/Mesh/DCEL/Face.hpp>
+
 namespace Ra {
 namespace Core {
 
@@ -34,7 +39,7 @@ inline bool Dcel::compact() const {
 
 
 /// INSERT
-inline void insert( const Vertex_ptr& v ) {
+inline void Dcel::insert( const Vertex_ptr& v ) {
     CORE_ASSERT( ( v != nullptr ), "Nullptr received." );
     if( !m_vertex.insert( v, v->idx ) ) {
         CORE_ASSERT( false, "Insertion failed." );
@@ -43,7 +48,7 @@ inline void insert( const Vertex_ptr& v ) {
 
 
 
-inline void insert( const HalfEdge_ptr& he ) {
+inline void Dcel::insert( const HalfEdge_ptr& he ) {
     CORE_ASSERT( ( he != nullptr ), "Nullptr received." );
     if( !m_halfedge.insert( he, he->idx ) ) {
         CORE_ASSERT( false, "Insertion failed." );
@@ -52,7 +57,7 @@ inline void insert( const HalfEdge_ptr& he ) {
 
 
 
-inline void insert( const FullEdge_ptr& fe ) {
+inline void Dcel::insert( const FullEdge_ptr& fe ) {
     CORE_ASSERT( ( fe != nullptr ), "Nullptr received." );
     if( !m_fulledge.insert( fe, fe->idx ) ) {
         CORE_ASSERT( false, "Insertion failed." );
@@ -61,7 +66,7 @@ inline void insert( const FullEdge_ptr& fe ) {
 
 
 
-inline void insert( const Face_ptr& f ) {
+inline void Dcel::insert( const Face_ptr& f ) {
     CORE_ASSERT( ( f != nullptr ), "Nullptr received." );
     if( !m_face.insert( f, f->idx ) ) {
         CORE_ASSERT( false, "Insertion failed." );
@@ -71,7 +76,7 @@ inline void insert( const Face_ptr& f ) {
 
 
 /// REMOVE
-inline void removeVertex( const Index& index ) {
+inline void Dcel::removeVertex( const Index& index ) {
     Vertex_ptr v;
     if( m_vertex.remove( index, v ) ) {
         v->idx.setInvalid();
@@ -82,7 +87,7 @@ inline void removeVertex( const Index& index ) {
 
 
 
-inline void removeHalfEdge( const Index& index ) {
+inline void Dcel::removeHalfEdge( const Index& index ) {
     HalfEdge_ptr he;
     if( m_halfedge.remove( index, he ) ) {
         he->idx.setInvalid();
@@ -93,7 +98,7 @@ inline void removeHalfEdge( const Index& index ) {
 
 
 
-inline void removeFullEdge( const Index& index ) {
+inline void Dcel::removeFullEdge( const Index& index ) {
     FullEdge_ptr fe;
     if( m_fulledge.remove( index, fe ) ) {
         fe->idx.setInvalid();
@@ -104,7 +109,7 @@ inline void removeFullEdge( const Index& index ) {
 
 
 
-inline void removeFace( const Index& index ) {
+inline void Dcel::removeFace( const Index& index ) {
     Face_ptr f;
     if( m_face.remove( index, f ) ) {
         f->idx.setInvalid();
