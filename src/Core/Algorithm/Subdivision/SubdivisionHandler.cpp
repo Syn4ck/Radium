@@ -8,12 +8,14 @@
 
 #include <Core/Mesh/DCEL/Operation/Valid.hpp>
 #include <Core/Mesh/DCEL/Operation/Check.hpp>
+#include <Core/Mesh/DCEL/Operation/Bind.hpp>
+#include <Core/Mesh/DCEL/Operation/Border.hpp>
 
 namespace Ra {
 namespace Core {
 
 /// CONSTRUCTOR
-SubdivisionHandler::SubdivisionHandler( const Dcel_ptr& dcel = nullptr ) :
+SubdivisionHandler::SubdivisionHandler( const Dcel_ptr& dcel ) :
     m_dcel( dcel ) { }
 
 
@@ -23,6 +25,7 @@ SubdivisionHandler::~SubdivisionHandler() { }
 
 
 
+#ifdef DEBUG_SPLIT
 /// SPLIT
 bool SubdivisionHandler::splitFullEdge( const FullEdge_ptr& ptr ) {
     // Check the fulledge data
@@ -77,20 +80,29 @@ bool SubdivisionHandler::splitFullEdge( const FullEdge_ptr& ptr ) {
     he[y]->setF( f[1] );
 
     // Binding
-    bind( v[n] );
     bind( he[x] );
     bind( he[y] );
+    bind( v[n] );
+
+    // Set the starting halfedge of the twin face
+    if( f[1] != nullptr ) f[1]->setHE( he[1] );
 
     // Insertion
-    m_dcel.insert( v[n] );
-    m_dcel.insert( he[x] );
-    m_dcel.insert( he[y] );
+    m_dcel->insert( v[n] );
+    m_dcel->insert( he[x] );
+    m_dcel->insert( he[y] );
+    m_dcel->insert( fe[1] );
 
     // Handle face splitting
-    splitFace( m_dcel, f[0] );
-    splitFace( m_dcel, f[1] );
+    bool splitStatus = true;
 
-    return true;
+    splitStatus &= splitFace( f[0] );
+    CORE_ASSERT( splitStatus, "splitFace on f[0] has failed." );
+
+    splitStatus &= splitFace( f[1] );
+    CORE_ASSERT( splitStatus, "splitFace on f[1] has failed." );
+
+    return splitStatus;
 }
 
 
@@ -125,10 +137,10 @@ bool SubdivisionHandler::splitFace( const Face_ptr& ptr ) {
     v[0]  = he[0]->V();
     v[1]  = he[1]->V();
     v[2]  = he[2]->V();
-    v[3]  = he[2]->Next()->V();
+    v[3]  = he[n]->V();
     fe    = new FullEdge( he[x] );
     f[0]  = ptr;
-    f[1]  = new Face( h_y );
+    f[1]  = new Face( he[y] );
 
     // Set data
     he[x]->setV( v[2] );
@@ -152,16 +164,17 @@ bool SubdivisionHandler::splitFace( const Face_ptr& ptr ) {
     bind( f[1] );
 
     // Insertion
-    m_dcel.insert( he[x] );
-    m_dcel.insert( he[y] );
-    m_dcel.insert( fe );
-    m_dcel.insert( f[1] );
+    m_dcel->insert( he[x] );
+    m_dcel->insert( he[y] );
+    m_dcel->insert( fe );
+    m_dcel->insert( f[1] );
 
     return true;
 }
+#endif
 
 
-
+#ifdef DEBUG_COLLAPSE
 /// COLLAPSE
 bool SubdivisionHandler::collapseFullEdge( const FullEdge_ptr& ptr ) {
     // Check the fulledge data
@@ -283,9 +296,10 @@ bool SubdivisionHandler::collapseFace( const Face_ptr& ptr ) {
 
     return true;
 }
+#endif
 
 
-
+#ifdef DEBUG_FLIP
 /// FLIP
 bool SubdivisionHandler::flipFullEdge( const FullEdge_ptr& fulledge ) {
     // Check the fulledge data
@@ -295,6 +309,9 @@ bool SubdivisionHandler::flipFullEdge( const FullEdge_ptr& fulledge ) {
 #ifndef CORE_DEBUG
     if( !isValid( fulledge ) ) return false;
 #endif
+
+    // In case of a border fulledge, do not flip
+    if( isBorder( fulledge ) ) return false;
 
     // Useful names
     const uint x = 4; // HalfEdge to flip
@@ -322,13 +339,17 @@ bool SubdivisionHandler::flipFullEdge( const FullEdge_ptr& fulledge ) {
     f[1]  = he[y]->F();
 
     // Set data
+    v[0]->setHE( he[0] );
+    v[1]->setHE( he[1] );
+    v[2]->setHE( he[2] );
+    v[3]->setHE( he[3] );
     he[0]->setNext( he[x] );
     he[0]->setPrev( he[3] );
     he[1]->setNext( he[2] );
     he[1]->setPrev( he[y] );
     he[2]->setNext( he[y] );
     he[2]->setPrev( he[1] );
-    he[3]->setNext( he[1] );
+    he[3]->setNext( he[0] );
     he[3]->setPrev( he[x] );
     he[x]->setV( v[1] );
     he[x]->setNext( he[3] );
@@ -343,9 +364,14 @@ bool SubdivisionHandler::flipFullEdge( const FullEdge_ptr& fulledge ) {
     bind( f[0] );
     bind( f[1] );
 
+    check( v[0], DCEL_CHECK_CONSISTENCY );
+    check( v[1], DCEL_CHECK_CONSISTENCY );
+    check( v[2], DCEL_CHECK_CONSISTENCY );
+    check( v[3], DCEL_CHECK_CONSISTENCY );
+
     return true;
 }
-
+#endif
 
 
 } // namespace Core
