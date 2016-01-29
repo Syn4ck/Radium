@@ -10,11 +10,13 @@ namespace Ra {
 namespace Core {
 
 bool isValid( const Vertex_ptr& v ) {
+    if( v == nullptr ) return false;
     return ( ( v->idx.isValid()   ) &&
              ( v->HE() != nullptr ) );
 }
 
 bool isValid( const HalfEdge_ptr& he ) {
+    if( he == nullptr ) return false;
     return ( ( he->idx.isValid()     ) &&
              ( he->V()    != nullptr ) &&
              ( he->Next() != nullptr ) &&
@@ -24,17 +26,20 @@ bool isValid( const HalfEdge_ptr& he ) {
 }
 
 bool isValid( const FullEdge_ptr& fe ) {
+    if( fe == nullptr ) return false;
     return ( ( fe->idx.isValid()      ) &&
              ( fe->HE( 0 ) != nullptr ) &&
              ( fe->HE( 1 ) != nullptr ) );
 }
 
 bool isValid( const Face_ptr& f ) {
+    if( f == nullptr ) return false;
     return ( ( f->idx.isValid()   ) &&
              ( f->HE() != nullptr ) );
 }
 
 bool isValid( const Dcel_ptr& dcel ) {
+    if( dcel == nullptr ) return false;
     /// VERTEX
     const uint v_size = dcel->m_vertex.size();
     for( uint i = 0; i < v_size; ++i ) {
