@@ -187,7 +187,7 @@ void check( const HalfEdge_ptr& he, const uint flag ) {
         }
 
         if( isVerbose ) {
-            LOG( logDEBUG ) << "\Consistent...\t\t[Y]";
+            LOG( logDEBUG ) << "\tConsistent...\t\t[Y]";
         }
     }
 
@@ -239,7 +239,7 @@ void check( const FullEdge_ptr& fe, const uint flag ) {
     /// CONSISTENCY
     if( flag & DCEL_CHECK_CONSISTENCY ) {
         CORE_ASSERT( ( fe->HE( 0 ) != nullptr ), "HalfEdge is nullptr." );
-        CORE_ASSERT( ( ( fe == he->FE() ) && ( fe == he->Twin()->FE() ) ), "FullEdge is not consistent." );
+        CORE_ASSERT( ( ( fe == fe->HE( 0 )->FE() ) && ( fe == fe->HE( 0 )->Twin()->FE() ) ), "FullEdge is not consistent." );
         if( isVerbose ) {
             LOG( logDEBUG ) << "\tConsistent...\t\t[Y]";
         }
@@ -397,11 +397,10 @@ void check( const Dcel_ptr& dcel, const uint flag ) {
         }
     }
 
-    if( consistency ) {
-        LOG( logDEBUG ) << "\tConsistent...\t[Y]";
-    }
-
     if( isVerbose ) {
+        if( consistency ) {
+            LOG( logDEBUG ) << "\tConsistent...\t[Y]";
+        }
         LOG( logDEBUG ) << "Checking DCEL done.";
     }
 #endif
