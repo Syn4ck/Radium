@@ -11,7 +11,7 @@ void print( const Vertex_ptr&   v    );
 void print( const HalfEdge_ptr& he   );
 void print( const FullEdge_ptr& fe   );
 void print( const Face_ptr&     f    );
-void print( const Dcel_ptr&     dcel );
+void print( const Dcel_ptr&     dcel, const bool recursive = false );
 
 #if 0
 std::string to_string( const Vertex_ptr&   v    );
