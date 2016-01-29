@@ -11,40 +11,8 @@
 namespace Ra {
 namespace Core {
 
+/// BIND
 void bind( const Vertex_ptr& v ) {
-    /*
-    HalfEdge_ptr it = v.HE();
-    if( it != nullptr ) {
-        do {
-            it->setV( v );
-            if( it->Prev() != nullptr ) {
-                if( it->Prev()->Twin() != nullptr ) {
-                    it = it->Prev()->Twin();
-                } else {
-                    it = nullptr;
-                }
-            } else {
-                it = nullptr;
-            }
-        } while( ( it != v.HE() ) && ( it != nullptr ) );
-        if( it == nullptr ) {
-            it = v.HE();
-            do {
-                it->setV( v );
-                if( it->Twin() != nullptr ) {
-                    if( it->Twin()->Next() != nullptr ) {
-                        it = it->Twin()->Next();
-                    } else {
-                        it = nullptr;
-                    }
-                } else {
-                    it = nullptr;
-                }
-            } while( ( it != v.HE() ) && ( it != nullptr ) );
-        }
-    }
-    */
-
     VHEIterator it( v );
     if( ( *it ) != nullptr ) {
         const uint size = it.size();
@@ -53,88 +21,9 @@ void bind( const Vertex_ptr& v ) {
             ++it;
         }
     }
-}
-
-void unbind( Vertex_ptr& v ) {
-    /*
-    HalfEdge_ptr it = m_he;
-    if( it != nullptr ) {
-        do {
-            if( it->V() == this ) {
-                it->setV( nullptr );
-            }
-            if( it->Prev() != nullptr ) {
-                if( it->Prev()->Twin() != nullptr ) {
-                    it = it->Prev()->Twin();
-                } else {
-                    it = nullptr;
-                }
-            } else {
-                it = nullptr;
-            }
-        } while( ( it != m_he ) && ( it != nullptr ) );
-        if( it == nullptr ) {
-            it = m_he;
-            do {
-                if( it->V() == this ) {
-                    it->setV( nullptr );
-                }
-                if( it->Twin() != nullptr ) {
-                    if( it->Twin()->Next() != nullptr ) {
-                        it = it->Twin()->Next();
-                    } else {
-                        it = nullptr;
-                    }
-                } else {
-                    it = nullptr;
-                }
-            } while( ( it != m_he ) && ( it != nullptr ) );
-        }
-    }
-    m_he = nullptr;
-    */
-
-    VHEIterator it( v );
-    if( ( *it ) != nullptr ) {
-        const uint size = it.size();
-        for( uint i = 0; i < size; ++i ) {
-            if( it->V() == v ) {
-                it->setV( nullptr );
-            }
-            ++it;
-        }
-    }
-    v->setHE( nullptr );
 }
 
 void bind( const HalfEdge_ptr& he ) {
-    /*
-    if( m_v != nullptr ) {
-        m_v->setHE( this );
-    }
-
-    if( m_next != nullptr ) {
-        m_next->setPrev( this );
-    }
-
-
-    if( m_prev != nullptr ) {
-        m_prev->setNext( this );
-    }
-
-    if( m_twin != nullptr ) {
-        m_twin->setTwin( this );
-    }
-
-    if( m_fe != nullptr ) {
-        m_fe->setHE( this );
-    }
-
-    if( m_f != nullptr ) {
-        m_f->setHE( this );
-    }
-    */
-
     if( he->V() != nullptr ) {
         he->V()->setHE( he );
     }
@@ -161,81 +50,44 @@ void bind( const HalfEdge_ptr& he ) {
     }
 }
 
+void bind( const FullEdge_ptr& fe ) {
+    if( fe->HE() != nullptr ) {
+        fe->HE()->setFE( fe );
+        if( fe->HE()->Twin() != nullptr ) {
+            fe->HE()->Twin()->setFE( fe );
+        }
+    }
+}
+
+void bind( const Face_ptr& f ) {
+    FHEIterator it( f );
+    if( ( *it ) != nullptr ) {
+        const uint size = it.size();
+        for( uint i = 0; i < size; ++i ) {
+            it->setF( f );
+            ++it;
+        }
+    }
+}
+
+
+
+/// UNBIND
+void unbind( Vertex_ptr& v ) {
+    VHEIterator it( v );
+    if( ( *it ) != nullptr ) {
+        const uint size = it.size();
+        for( uint i = 0; i < size; ++i ) {
+            if( it->V() == v ) {
+                it->setV( nullptr );
+            }
+            ++it;
+        }
+    }
+    v->setHE( nullptr );
+}
+
 void unbind( HalfEdge_ptr& he ) {
-    /*
-    if( m_v != nullptr ) {
-        if( m_v->HE() == this ) {
-            if( m_twin != nullptr ) {
-                m_v->setHE( m_twin->Next() );
-            } else {
-                m_v->setHE( nullptr );
-            }
-        }
-    }
-
-    if( m_next != nullptr ) {
-        if( m_next->Prev() == this ) {
-            m_next->setPrev( nullptr );
-        }
-
-        if( m_f != nullptr ) {
-            if( m_f->HE() == this ) {
-                if( m_next->F() == m_f ) {
-                    m_f->setHE( m_next );
-                    m_f = nullptr;
-                }
-            }
-        }
-    }
-
-    if( m_prev != nullptr ) {
-        if( m_prev->Next() == this ) {
-            m_prev->setNext( nullptr );
-        }
-
-        if( m_f != nullptr ) {
-            if( m_f->HE() == this ) {
-                if( m_prev->F() == m_f ) {
-                    m_f->setHE( m_prev );
-                    m_f = nullptr;
-                }
-            }
-        }
-    }
-
-    if( m_twin != nullptr ) {
-        if( m_twin->Twin() == this ) {
-            m_twin->setTwin( nullptr );
-
-            if( m_fe != nullptr ) {
-                if( m_fe->HE() == this ) {
-                    m_fe->setHE( m_twin );
-                }
-            }
-        }
-    } else {
-        if( m_fe != nullptr ) {
-            if( m_fe->HE() == this ) {
-                m_fe->setHE( nullptr );
-            }
-        }
-    }
-
-
-    if( m_f != nullptr ) {
-        if( m_f->HE() == this ) {
-            m_f->setHE( nullptr );
-        }
-    }
-
-    m_v    = nullptr;
-    m_next = nullptr;
-    m_prev = nullptr;
-    m_twin = nullptr;
-    m_fe   = nullptr;
-    m_f    = nullptr;
-    */
-
     if( he->V() != nullptr ) {
         if( he->V()->HE() == he ) {
             if( he->Twin() != nullptr ) {
@@ -309,39 +161,7 @@ void unbind( HalfEdge_ptr& he ) {
     he->setF( nullptr );
 }
 
-void bind( const FullEdge_ptr& fe ) {
-    /*
-    if( m_he != nullptr ) {
-        m_he->setFE( this );
-        if( m_he->Twin() != nullptr ) {
-            m_he->Twin()->setFE( this );
-        }
-    }
-    */
-
-    if( fe->HE() != nullptr ) {
-        fe->HE()->setFE( fe );
-        if( fe->HE()->Twin() != nullptr ) {
-            fe->HE()->Twin()->setFE( fe );
-        }
-    }
-}
-
-void unbind(  FullEdge_ptr& fe ) {
-    /*
-    if( m_he != nullptr ) {
-        if( m_he->FE() == this ) {
-            m_he->setFE( nullptr );
-        }
-        if( m_he->Twin() != nullptr ) {
-            if( m_he->Twin()->FE() == this ) {
-                m_he->Twin()->setFE( nullptr );
-            }
-        }
-    }
-    m_he = nullptr;
-    */
-
+void unbind( FullEdge_ptr& fe ) {
     if( fe->HE() != nullptr ) {
         if( fe->HE()->FE() == fe ) {
             fe->HE()->setFE( nullptr );
@@ -355,77 +175,7 @@ void unbind(  FullEdge_ptr& fe ) {
     fe->setHE( nullptr );
 }
 
-void bind( const Face_ptr& f ) {
-    /*
-    HalfEdge_ptr it = m_he;
-    if( it != nullptr ) {
-        do {
-            if( it->F() == this ) {
-                it->setF( this );
-            }
-            if( it->Next() != nullptr ) {
-                it = it->Next();
-            } else {
-                it = nullptr;
-            }
-        } while( ( it != m_he ) && ( it != nullptr ) );
-        if( it == nullptr ) {
-            it = m_he;
-            do {
-                if( it->F() == this ) {
-                    it->setF( this );
-                }
-                if( it->Prev() != nullptr ) {
-                    it = it->Prev();
-                } else {
-                    it = nullptr;
-                }
-            } while( ( it != m_he ) && ( it != nullptr ) );
-        }
-    }
-    */
-
-    FHEIterator it( f );
-    if( ( *it ) != nullptr ) {
-        const uint size = it.size();
-        for( uint i = 0; i < size; ++i ) {
-            it->setF( f );
-            ++it;
-        }
-    }
-}
-
-void unbind(  Face_ptr& f ) {
-    /*
-    HalfEdge_ptr it = m_he;
-    if( it != nullptr ) {
-        do {
-            if( it->F() == this ) {
-                it->setF( nullptr );
-            }
-            if( it->Next() != nullptr ) {
-                it = it->Next();
-            } else {
-                it = nullptr;
-            }
-        } while( ( it != m_he ) && ( it != nullptr ) );
-        if( it == nullptr ) {
-            it = m_he;
-            do {
-                if( it->F() == this ) {
-                    it->setF( nullptr );
-                }
-                if( it->Prev() != nullptr ) {
-                    it = it->Prev();
-                } else {
-                    it = nullptr;
-                }
-            } while( ( it != m_he ) && ( it != nullptr ) );
-        }
-    }
-    m_he = nullptr;
-    */
-
+void unbind( Face_ptr& f ) {
     FHEIterator it( f );
     if( ( *it ) != nullptr ) {
         const uint size = it.size();
