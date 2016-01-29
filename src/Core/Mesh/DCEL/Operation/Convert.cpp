@@ -36,114 +36,104 @@ bool Twin::operator< ( const Twin& twin ) const {
 void convert( const TriangleMesh& mesh, Dcel& dcel ) {
     dcel.clear();
     // Create vertices
-    for( unsigned int i = 0; i < mesh.m_vertices.size(); ++i ) {
-        Vector3 p = mesh.m_vertices.at( i );
-        Vector3 n = mesh.m_normals.at( i );
-        Vertex_ptr v = ( new Vertex( p, n ) );
+    for( uint i = 0; i < mesh.m_vertices.size(); ++i ) {
+        const Vector3 p = mesh.m_vertices.at( i );
+        const Vector3 n = mesh.m_normals.at( i );
+        Vertex_ptr v = new Vertex( p, n );
         CORE_ASSERT( ( v != nullptr ), "Vertex_ptr == nullptr" );
-#ifdef CORE_DEBUG
-        CORE_ASSERT( dcel.m_vertex.insert( v, v->idx ) , "Vertex not inserted" );
-#else
-        dcel.m_vertex.insert( v, v->idx );
-#endif
+        dcel.insert( v );
     }
-    /// TWIN DATA
-    std::map< Twin, Index > he_table;
-    // Create faces and halfedges
-    for( const auto& t : mesh.m_triangles ) {
-        // Create the halfedges
-        HalfEdgeList he;
+
+    // Create HalfEdge table
+    std::map< std::pair< Index, Index >, HalfEdge_ptr > table;
+
+    // Create the topology
+    for( const auto& T : mesh.m_triangles ) {
+        // Retrieve vertices
+        Index id[3];
+        Vertex_ptr v[3];
         for( uint i = 0; i < 3; ++i ) {
-            he.push_back( ( new HalfEdge() ) );
-            CORE_ASSERT( ( he[i] != nullptr ), "HalfEdge_ptr == nullptr" );
+            id[i].setValue( T[i] );
+            dcel.m_vertex.access( id[i], v[i] );
         }
-        // Create the face
-        Face_ptr f = new Face( he[0] );
-        CORE_ASSERT( ( f != nullptr ), "Face_ptr == nullptr" );
-#ifdef CORE_DEBUG
-        CORE_ASSERT( dcel.m_face.insert( f, f->idx ), "Face not inserted" );
-#else
-        dcel.m_face.insert( f, f->idx );
-#endif
-        // Create the connections
+
+        // Create face
+        Face_ptr f = new Face();
+        dcel.insert( f );
+
+        // ------
+        HalfEdge_ptr he[3];
         for( uint i = 0; i < 3; ++i ) {
-            Vertex_ptr& v = dcel.m_vertex[ t[i] ];
-            v->setHE( he[i] );
-            he[i]->setV( v );
-            he[i]->setNext( he[( i + 1 ) % 3] );
-            he[i]->setPrev( he[( i + 2 ) % 3] );
-            he[i]->setF( f );
-#ifdef CORE_DEBUG
-            CORE_ASSERT( dcel.m_halfedge.insert( he[i], he[i]->idx ), "HalfEdge not inserted" );
-#else
-            dcel.m_halfedge.insert( he[i], he[i]->idx );
-#endif
-            /// TWIN SEARCH
-            Twin twin( t[i], t[( i + 1 ) % 3]);
-            // Search the right twin
-            auto it = he_table.find( twin );
-            if( it == he_table.end() ) {
-                // If not present, add it
-                he_table[twin] = he[i]->idx;
+            std::pair< Index, Index > key[2];
+            key[0].first  = id[i];
+            key[0].second = id[( i + 1 ) % 3];
+            key[1].first  = key[0].second;
+            key[1].second = key[0].first;
+            auto it = table.find( key[0] );
+
+            if( it != table.end() ) {
+                // Retrieve the halfedges
+                he[i] = it->second;
+                he[i]->setF( f );
+                table.erase( it );
+
             } else {
-                // If found, set it and erase it
-                he[i]->setTwin( dcel.m_halfedge[it->second] );
-                dcel.m_halfedge[it->second]->setTwin( he[i] );
-                // Create the fulledge
-                FullEdge_ptr fe = ( new FullEdge( he[i] ) );
-                CORE_ASSERT( ( fe != nullptr ), "FullEdge_ptr == nullptr" );
-#ifdef CORE_DEBUG
-                CORE_ASSERT( dcel.m_fulledge.insert( fe, fe->idx ), "FUllEdge not inserted" );
-#else
-                dcel.m_fulledge.insert( fe, fe->idx );
-#endif
+                // Create halfedges
+                he[i] = new HalfEdge();
+                HalfEdge_ptr twin = new HalfEdge();
+                FullEdge_ptr fe   = new FullEdge( he[i] );
+
+                he[i]->setV( v[i] );
+                he[i]->setTwin( twin );
                 he[i]->setFE( fe );
-                he[i]->Twin()->setFE( fe );
-                he_table.erase( it );
+                he[i]->setF( f );
+
+                twin->setV( v[( i + 1 ) % 3] );
+                twin->setTwin( he[i] );
+                twin->setFE( fe );
+
+                dcel.insert( he[i] );
+                dcel.insert( twin );
+                dcel.insert( fe );
+
+                //table[key[0]] = he[i];
+                table[key[1]] = twin;
+            }
+        }
+
+        for( uint i = 0; i < 3; ++i ) {
+            v[i]->setHE( he[i] );
+            he[i]->setNext( he[( i + 1 ) % 3 ] );
+            he[i]->setPrev( he[( i + 2 ) % 3 ] );
+        }
+
+        f->setHE( he[0] );
+    }
+
+    // Create hole chains if any
+    if( !table.empty() ) {
+        std::map< Index, HalfEdge_ptr > next;
+        std::map< Index, HalfEdge_ptr > prev;
+        for( const auto& it : table ) {
+            next[ it.first.first  ] = it.second;
+            prev[ it.first.second ] = it.second;
+        }
+
+        for( const auto& pair : table ) {
+            HalfEdge_ptr he = pair.second;
+            const Index id_prev = he->V()->idx;
+            const Index id_next = he->Twin()->V()->idx;
+            auto it = prev.find( id_prev );
+            if( it != prev.end() ) {
+                he->setPrev( it->second );
+            }
+            it = next.find( id_next );
+            if( it != next.end() ) {
+                he->setNext( it->second );
             }
         }
     }
-    CORE_ASSERT( he_table.empty(), "Something wrong. Probably holes in the mesh" );
 }
-
-
-#if 0
-void convert( const TriangleMesh& mesh, Dcel& dcel ) {
-    dcel.clear();
-    // Create vertices
-    for( unsigned int i = 0; i < mesh.m_vertices.size(); ++i ) {
-        Vector3 p = mesh.m_vertices.at( i );
-        Vector3 n = mesh.m_normals.at( i );
-        Vertex_ptr v = ( new Vertex( p, n ) );
-        CORE_ASSERT( ( v != nullptr ), "Vertex_ptr == nullptr" );
-#ifdef CORE_DEBUG
-        CORE_ASSERT( dcel.m_vertex.insert( v, v->idx ) , "Vertex not inserted" );
-#else
-        dcel.m_vertex.insert( v, v->idx );
-#endif
-    }
-
-
-    std::map< std::pair< uint, uint >, Index > table;
-    // Create faces and halfedges
-    for( const auto& t : mesh.m_triangles ) {
-        const uint i = t[0];
-        const uint j = t[1];
-        const uint k = t[2];
-
-        std::pair< uint, uint > key[3][2];
-        key[0][0] = std::pair< uint, uint >( i, j );
-        key[0][1] = std::pair< uint, uint >( j, i );
-        key[1][0] = std::pair< uint, uint >( j, k );
-        key[1][1] = std::pair< uint, uint >( k, j );
-        key[2][0] = std::pair< uint, uint >( k, i );
-        key[2][1] = std::pair< uint, uint >( i, k );
-
-
-    }
-
-}
-#endif
 
 
 
