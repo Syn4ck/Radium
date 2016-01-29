@@ -197,22 +197,26 @@ bool SubdivisionHandler::collapseFullEdge( const FullEdge_ptr& ptr ) {
 
     // Initialize data
     fe = ptr;
+    he[x] = fe->HE();
+    he[y] = he[x]->Twin();
     he[0] = he[x]->Prev();
     he[1] = he[x]->Next();
     he[2] = he[y]->Prev();
     he[3] = he[y]->Next();
-    he[x] = fe->HE();
-    he[y] = he[x]->Twin();
     v[0] = he[x]->V();
     v[1] = he[y]->V();
     f[0] = he[x]->F();
     f[1] = he[y]->F();
 
+    // Set data
+    v[0]->setP( 0.5 * ( v[0]->P() + v[1]->P() ) );
+    v[0]->setN( ( v[0]->N() + v[1]->N() ).normalized() );
+
     // Unbinding
     unbind( fe );
-    unbind( v[1] );
     unbind( he[x] );
     unbind( he[y] );
+    unbind( v[1] );
 
     // Set data
     he[1]->setPrev( he[0] );
@@ -224,18 +228,20 @@ bool SubdivisionHandler::collapseFullEdge( const FullEdge_ptr& ptr ) {
     bind( v[0] );
 
     // Removal
-    m_dcel.removeHalfEdge( he[x] );
-    m_dcel.removeHalfEdge( he[y] );
-    m_dcel.removeFullEdge( fe );
+    m_dcel->removeVertex( v[1]->idx );
+    m_dcel->removeHalfEdge( he[x]->idx );
+    m_dcel->removeHalfEdge( he[y]->idx );
+    m_dcel->removeFullEdge( fe->idx );
 
     // Deletion
+    delete v[1];
     delete he[x];
     delete he[y];
     delete fe;
 
     // Handle face collapsing
-    collapseFace( m_dcel, f[0] );
-    collapseFace( m_dcel, f[1] );
+    collapseFace( f[0] );
+    collapseFace( f[1] );
 
     return true;
 }
@@ -274,7 +280,6 @@ bool SubdivisionHandler::collapseFace( const Face_ptr& ptr ) {
 
     // Set data
     he[1]->setTwin( he[3] );
-
     he[3]->setTwin( he[1] );
     he[3]->setFE( fe[0] );
 
@@ -283,10 +288,10 @@ bool SubdivisionHandler::collapseFace( const Face_ptr& ptr ) {
     bind( he[3] );
 
     // Removal
-    m_dcel.removeHalfEdge( he[x] );
-    m_dcel.removeHalfEdge( he[y] );
-    m_dcel.removeFullEdge( fe[1] );
-    m_dcel.removeFace( f );
+    m_dcel->removeHalfEdge( he[x]->idx );
+    m_dcel->removeHalfEdge( he[y]->idx );
+    m_dcel->removeFullEdge( fe[1]->idx );
+    m_dcel->removeFace( f->idx );
 
     // Deletion
     delete he[x];
@@ -311,7 +316,7 @@ bool SubdivisionHandler::flipFullEdge( const FullEdge_ptr& fulledge ) {
 #endif
 
     // In case of a border fulledge, do not flip
-    if( isBorder( fulledge ) ) return false;
+    if( ( fulledge ) ) return false;
 
     // Useful names
     const uint x = 4; // HalfEdge to flip
@@ -372,6 +377,7 @@ bool SubdivisionHandler::flipFullEdge( const FullEdge_ptr& fulledge ) {
     return true;
 }
 #endif
+
 
 
 } // namespace Core

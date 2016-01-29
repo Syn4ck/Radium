@@ -4,9 +4,9 @@
 #include <Core/Index/Index.hpp>
 #include <Core/Mesh/DCEL/Definition.hpp>
 
-#define DEBUG_SPLIT
-//#define DEBUG_COLLAPSE
-#define DEBUG_FLIP
+//#define DEBUG_SPLIT
+#define DEBUG_COLLAPSE
+//#define DEBUG_FLIP
 
 
 namespace Ra {
