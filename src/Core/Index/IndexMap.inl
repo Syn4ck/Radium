@@ -114,6 +114,7 @@ inline bool IndexMap< T >::remove( const uint i ) {
 
 
 
+template < typename T >
 inline bool IndexMap< T >::remove( const Index& idx, T& obj ) {
     IndexMapEntry imp( idx );
     typename std::deque<IndexMapEntry>::iterator data_it = std::find( m_data.begin(), m_data.end(), imp );
