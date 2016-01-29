@@ -22,6 +22,7 @@ inline HalfEdge_ptr FullEdge::HE( const uint i ) const {
     if( i == 0 ) {
         return m_he;
     }
+    if( m_he == nullptr ) return nullptr;
     return m_he->Twin();
 }
 
@@ -32,6 +33,7 @@ inline HalfEdge_ptr& FullEdge::HE( const uint i ) {
     if( i == 0 ) {
         return m_he;
     }
+    if( m_he == nullptr ) return m_he;
     return m_he->Twin();
 }
 
