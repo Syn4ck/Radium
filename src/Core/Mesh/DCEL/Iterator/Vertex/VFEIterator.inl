@@ -22,11 +22,18 @@ VFEIterator::~VFEIterator() { }
 /// LIST
 inline FullEdgeList VFEIterator::list() const {
     FullEdgeList L;
-    HalfEdge_ptr it = m_object->HE();
-    do {
-        L.push_back( it->FE() );
-        it = it->Prev()->Twin();
-    } while( it != m_object->HE() );
+    const HalfEdge_ptr& start = m_object->HE();
+    HalfEdge_ptr        it    = start;
+    if( it != nullptr ) {
+        do {
+            if( it->FE() == nullptr ) break;
+            L.push_back( it->FE() );
+            if( it->Prev() == nullptr ) break;
+            it = it->Prev();
+            if( it->Twin() == nullptr ) break;
+            it = it->Twin();
+        } while( ( it != nullptr ) && ( it != start ) );
+    }
     return L;
 }
 
@@ -34,10 +41,12 @@ inline FullEdgeList VFEIterator::list() const {
 
 /// OPERATOR
 inline FullEdge_ptr VFEIterator::operator->() const {
+    if( m_he == nullptr ) return nullptr;
     return m_he->FE();
 }
 
 inline FullEdge_ptr VFEIterator::operator* () const {
+    if( m_he == nullptr ) return nullptr;
     return m_he->FE();
 }
 

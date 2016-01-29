@@ -81,7 +81,7 @@ inline void DCEL_Iterator< FROM_OBJECT, TO_OBJECT >::reset() {
 
 /// OPERATOR
 template < typename FROM_OBJECT, typename TO_OBJECT >
-inline DCEL_Iterator< FROM_OBJECT, TO_OBJECT >& DCEL_Iterator< FROM_OBJECT, TO_OBJECT >::operator+=( const uint n ) const {
+inline DCEL_Iterator< FROM_OBJECT, TO_OBJECT >& DCEL_Iterator< FROM_OBJECT, TO_OBJECT >::operator+=( const uint n ) {
     for( uint i = 0; i < n; ++i ) {
         ++( *this );
     }
@@ -91,7 +91,7 @@ inline DCEL_Iterator< FROM_OBJECT, TO_OBJECT >& DCEL_Iterator< FROM_OBJECT, TO_O
 
 
 template < typename FROM_OBJECT, typename TO_OBJECT >
-inline DCEL_Iterator< FROM_OBJECT, TO_OBJECT >& DCEL_Iterator< FROM_OBJECT, TO_OBJECT >::operator-=( const uint n ) const {
+inline DCEL_Iterator< FROM_OBJECT, TO_OBJECT >& DCEL_Iterator< FROM_OBJECT, TO_OBJECT >::operator-=( const uint n ) {
     for( uint i = 0; i < n; ++i ) {
         --( *this );
     }

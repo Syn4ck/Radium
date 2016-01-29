@@ -19,11 +19,17 @@ VHEIterator::~VHEIterator() { }
 /// LIST
 inline HalfEdgeList VHEIterator::list() const {
     HalfEdgeList L;
-    HalfEdge_ptr it = m_object->HE();
-    do {
-        L.push_back( it );
-        it = it->Prev()->Twin();
-    } while( it != m_object->HE() );
+    const HalfEdge_ptr& start = m_object->HE();
+    HalfEdge_ptr        it    = start;
+    if( it != nullptr ) {
+        do {
+            L.push_back( it );
+            if( it->Prev() == nullptr ) break;
+            it = it->Prev();
+            if( it->Twin() == nullptr ) break;
+            it = it->Twin();
+        } while( ( it != nullptr ) && ( it != start ) );
+    }
     return L;
 }
 

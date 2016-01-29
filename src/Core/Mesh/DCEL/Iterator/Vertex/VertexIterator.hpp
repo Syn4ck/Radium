@@ -46,12 +46,12 @@ public:
     inline ~VIterator();
 
     /// SIZE
-    inline uint size() const override;
+    virtual uint size() const override;
 
     /// OPERATOR
     inline VIterator& operator= ( const VIterator& it );
-    inline VIterator& operator++() override;
-    inline VIterator& operator--() override;
+    virtual VIterator& operator++() override;
+    virtual VIterator& operator--() override;
     inline bool       operator==( const VIterator& it ) const;
 };
 

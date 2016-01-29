@@ -114,16 +114,14 @@ FIterator< TO_OBJECT >::~FIterator() { }
 template < typename TO_OBJECT >
 inline uint FIterator< TO_OBJECT >::size() const {
     uint i = 0;
-    HalfEdge_ptr it = this->m_object->HE();
+    const HalfEdge_ptr& start = this->m_object->HE();
+    HalfEdge_ptr        it    = start;
     if( it != nullptr ) {
         do {
-            if( it->Next() != nullptr ) {
-                it = it->Next();
-                ++i;
-            } else {
-                it = nullptr;
-            }
-        } while( ( it != this->m_object->HE() ) && ( it != nullptr ) );
+            if( it->Next() == nullptr ) break;
+            it = it->Next();
+            ++i;
+        } while( ( it != nullptr ) && ( it != start ) );
     }
     return i;
 }
@@ -145,7 +143,10 @@ inline FIterator< TO_OBJECT >& FIterator< TO_OBJECT >::operator=( const FIterato
 
 template < typename TO_OBJECT >
 inline FIterator< TO_OBJECT >& FIterator< TO_OBJECT >::operator++() {
-    this->m_he = this->m_he->Next();
+    HalfEdge_ptr ptr = this->m_he;
+    if( ptr == nullptr ) return *this;
+    if( ptr->Next() == nullptr ) return *this;
+    this->m_he = ptr->Next();
     return *this;
 }
 
@@ -153,7 +154,10 @@ inline FIterator< TO_OBJECT >& FIterator< TO_OBJECT >::operator++() {
 
 template < typename TO_OBJECT >
 inline FIterator< TO_OBJECT >& FIterator< TO_OBJECT >::operator--() {
-    this->m_he = this->m_he->Prev();
+    HalfEdge_ptr ptr = this->m_he;
+    if( ptr == nullptr ) return *this;
+    if( ptr->Prev() == nullptr ) return *this;
+    this->m_he = ptr->Prev();
     return *this;
 }
 

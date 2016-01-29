@@ -65,8 +65,8 @@ public:
     virtual TO_OBJECT      operator* () const = 0;
     virtual DCEL_Iterator& operator++() = 0;
     virtual DCEL_Iterator& operator--() = 0;
-    inline  DCEL_Iterator& operator+=( const uint n ) const;
-    inline  DCEL_Iterator& operator-=( const uint n ) const;
+    inline  DCEL_Iterator& operator+=( const uint n );
+    inline  DCEL_Iterator& operator-=( const uint n );
 
 protected:
     /// VARIABLE

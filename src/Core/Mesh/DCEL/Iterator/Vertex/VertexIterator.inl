@@ -110,23 +110,18 @@ VIterator< TO_OBJECT >::~VIterator() { }
 
 /// SIZE
 template < typename TO_OBJECT >
-inline uint VIterator< TO_OBJECT >::size() const {
+uint VIterator< TO_OBJECT >::size() const {
     uint i = 0;
-    HalfEdge_ptr it = this->m_object->HE();
+    const HalfEdge_ptr& start = this->m_object->HE();
+    HalfEdge_ptr        it    = start;
     if( it != nullptr ) {
         do {
-            if( it->Prev() != nullptr ) {
-                it = it->Prev();
-                if( it->Twin() != nullptr ) {
-                    it = it->Twin();
-                    ++i;
-                } else {
-                    it = nullptr;
-                }
-            } else {
-                it = nullptr;
-            }
-        } while( ( it != this->m_object->HE() ) && ( it != nullptr ) );
+            if( it->Prev() == nullptr ) break;
+            it = it->Prev();
+            if( it->Twin() == nullptr ) break;
+            it = it->Twin();
+            ++i;
+        } while( ( it != nullptr ) && ( it != start ) );
     }
     return i;
 }
@@ -147,16 +142,28 @@ inline VIterator< TO_OBJECT >& VIterator< TO_OBJECT >::operator=( const VIterato
 
 
 template < typename TO_OBJECT >
-inline VIterator< TO_OBJECT >& VIterator< TO_OBJECT >::operator++() {
-    this->m_he = this->m_he->Prev()->Twin();
+VIterator< TO_OBJECT >& VIterator< TO_OBJECT >::operator++() {
+    HalfEdge_ptr ptr = this->m_he;
+    if( ptr == nullptr ) return *this;
+    if( ptr->Prev() == nullptr ) return *this;
+    ptr = ptr->Prev();
+    if( ptr->Twin() == nullptr ) return *this;
+    ptr = ptr->Twin();
+    this->m_he = ptr;
     return *this;
 }
 
 
 
 template < typename TO_OBJECT >
-inline VIterator< TO_OBJECT >& VIterator< TO_OBJECT >::operator--() {
-    this->m_he = this->m_he->Twin()->Next();
+VIterator< TO_OBJECT >& VIterator< TO_OBJECT >::operator--() {
+    HalfEdge_ptr ptr = this->m_he;
+    if( ptr == nullptr ) return *this;
+    if( ptr->Twin() == nullptr ) return *this;
+    ptr = ptr->Twin();
+    if( ptr->Next() == nullptr ) return *this;
+    ptr = ptr->Next();
+    this->m_he = ptr;
     return *this;
 }
 

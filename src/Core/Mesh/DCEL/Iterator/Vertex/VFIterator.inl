@@ -32,6 +32,28 @@ inline FaceList VFIterator::list() const {
 
 
 
+/// SIZE
+template < typename TO_OBJECT >
+uint VIterator< TO_OBJECT >::size() const {
+    uint i = 0;
+    const HalfEdge_ptr& start = this->m_object->HE();
+    HalfEdge_ptr        it    = start;
+    if( it != nullptr ) {
+        do {
+            if( it->Prev() == nullptr ) break;
+            it = it->Prev();
+            if( it->Twin() == nullptr ) break;
+            it = it->Twin();
+            if( it->F() != nullptr ) {
+                ++i;
+            }
+        } while( ( it != nullptr ) && ( it != start ) );
+    }
+    return i;
+}
+
+
+
 /// OPERATOR
 inline Face_ptr VFIterator::operator->() const {
     return m_he->F();
@@ -40,6 +62,38 @@ inline Face_ptr VFIterator::operator->() const {
 inline Face_ptr VFIterator::operator* () const {
     return m_he->F();
 }
+
+
+
+VFIterator& VFIterator::operator++() {
+    HalfEdge_ptr ptr = this->m_he;
+    if( ptr == nullptr ) return *this;
+    do {
+        if( ptr->Prev() == nullptr ) return *this;
+        ptr = ptr->Prev();
+        if( ptr->Twin() == nullptr ) return *this;
+        ptr = ptr->Twin();
+    } while( ( ptr != this->m_he ) && ( ptr->F() == nullptr ) );
+    this->m_he = ptr;
+    return *this;
+}
+
+
+
+VFIterator& VFIterator::operator--() {
+    HalfEdge_ptr ptr = this->m_he;
+    if( ptr == nullptr ) return *this;
+    do {
+        if( ptr->Twin() == nullptr ) return *this;
+        ptr = ptr->Twin();
+        if( ptr->Next() == nullptr ) return *this;
+        ptr = ptr->Next();
+    } while( ( ptr != this->m_he ) && ( ptr->F() == nullptr ) );
+    this->m_he = ptr;
+    return *this;
+}
+
+
 
 } // namespace Core
 } // namespace Ra

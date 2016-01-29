@@ -19,11 +19,20 @@ VVIterator::~VVIterator() { }
 /// LIST
 inline VertexList VVIterator::list() const {
     VertexList L;
-    HalfEdge_ptr it = m_object->HE();
-    do {
-        L.push_back( it->Next()->V() );
-        it = it->Prev()->Twin();
-    } while( it != m_object->HE() );
+    const HalfEdge_ptr& start = m_object->HE();
+    HalfEdge_ptr        it    = start;
+    if( it != nullptr ) {
+        do {
+            if( it->Next() == nullptr ) break;
+            it = it->Next();
+            if( it->V() == nullptr ) break;
+            L.push_back( it->Next()->V() );
+            if( it->Prev() == nullptr ) break;
+            it = it->Prev();
+            if( it->Twin() == nullptr ) break;
+            it = it->Twin();
+        } while( ( it != nullptr ) && ( it != start ) );
+    }
     return L;
 }
 
@@ -31,10 +40,14 @@ inline VertexList VVIterator::list() const {
 
 /// OPERATOR
 inline Vertex_ptr VVIterator::operator->() const {
+    if( m_he == nullptr ) return nullptr;
+    if( m_he->Next() == nullptr ) return nullptr;
     return m_he->Next()->V();
 }
 
 inline Vertex_ptr VVIterator::operator* () const {
+    if( m_he == nullptr ) return nullptr;
+    if( m_he->Next() == nullptr ) return nullptr;
     return m_he->Next()->V();
 }
 
