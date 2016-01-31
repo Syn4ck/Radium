@@ -22,7 +22,7 @@ inline Scalar BK2004::getTargetLength() const {
 }
 
 /// CONFIGURED
-inline bool BK2004::isConfigured( uint& exitStatus ) const override {
+inline bool BK2004::isConfigured( uint& exitStatus ) override {
     bool status = ( m_dcel != nullptr );
     if( status ) {
         exitStatus = NO_ERROR;

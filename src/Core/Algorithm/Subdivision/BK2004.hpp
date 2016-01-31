@@ -11,10 +11,14 @@ namespace Core {
 struct BK2004Parameter {
     BK2004Parameter( const uint   algorithmIteration = 1,
                      const uint   smoothingIteration = 1,
+                     const Scalar longScale          = ( 4.0 / 3.0 ),
+                     const Scalar shortScale         = ( 4.0 / 5.0 ),
                      const Scalar lambdaFactor       = 1.0 );
 
     uint   m_algorithmIteration;
     uint   m_smoothingIteration;
+    Scalar m_longScale;
+    Scalar m_shortScale;
     Scalar m_lambda;
 };
 
@@ -23,15 +27,15 @@ struct BK2004Parameter {
 class BK2004 : public Algorithm< BK2004Parameter > {
 public:
     enum ErrorType {
-        NO_ERROR = 0,
-        DCEL_NULLPTR,
-        DCEL_NO_FULLEDGE,
-        DCEL_NOT_VALID,
-        DCEL_NOT_CONSISTENT,
-        TARGET_LENGTH_NOT_VALID,
-        FULLEDGE_NOT_SPLITTED,
-        FULLEDGE_NOT_COLLAPSED,
-        FULLEDGE_NOT_FLIPPED
+        NO_ERROR                = 0,
+        DCEL_NULLPTR            = 1 << 0,
+        DCEL_NO_FULLEDGE        = 1 << 1,
+        DCEL_NOT_VALID          = 1 << 2,
+        DCEL_NOT_CONSISTENT     = 1 << 3,
+        TARGET_LENGTH_NOT_VALID = 1 << 4,
+        FULLEDGE_NOT_SPLITTED   = 1 << 5,
+        FULLEDGE_NOT_COLLAPSED  = 1 << 6,
+        FULLEDGE_NOT_FLIPPED    = 1 << 7
     };
 
     /// CONSTRUCTOR
@@ -52,11 +56,20 @@ public:
 
 protected:
     /// CONFIGURED
-    inline bool isConfigured( uint& exitStatus ) const override;
+    inline bool isConfigured( uint& exitStatus ) override;
 
     /// ALGORITHM STAGE
     bool preprocessing( uint& exitStatus ) override;
     bool   processing( uint& exitStatus ) override;
+
+    /// FUNCTION
+    void extractIndexList( std::vector< Index >& list ) const;
+    bool splitNcollapse( const std::vector< Index >& list, uint& exitStatus );
+    uint edgeValence( const FullEdge_ptr& fe, const bool flip ) const;
+    bool flip( uint& exitStatus );
+    Vector3 g( const Vertex_pr& v ) const;
+    Vector3 tangentialRelaxation( const Vertex_ptr& v ) const;
+    void smoothing();
 
     /// VARIABLE
     Dcel_ptr           m_dcel;
