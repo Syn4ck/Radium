@@ -7,16 +7,6 @@
 namespace Ra {
 namespace Core {
 
-struct Twin {
-    Twin();
-    Twin( const uint i, const uint j );
-
-    bool operator==( const Twin& twin ) const;
-    bool operator< ( const Twin& twin ) const;
-
-    uint m_id[2];
-};
-
 void convert( const TriangleMesh& mesh, Dcel& dcel );
 void convert( const Dcel& dcel, TriangleMesh& mesh );
 

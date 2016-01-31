@@ -13,27 +13,11 @@
 namespace Ra {
 namespace Core {
 
-Twin::Twin() {
-    m_id[0] = uint(-1);
-    m_id[1] = uint(-1);
-}
-
-Twin::Twin( const uint i, const uint j ) {
-    m_id[0] = std::min( i, j );
-    m_id[1] = std::max( i, j );
-}
-
-bool Twin::operator==( const Twin& twin ) const {
-    return ( ( m_id[0] == twin.m_id[0] ) && ( m_id[1] == twin.m_id[1] ) );
-}
-
-bool Twin::operator< ( const Twin& twin ) const {
-    return ( ( m_id[0] < twin.m_id[0] ) || ( ( m_id[0] == twin.m_id[0] ) && ( m_id[1] < twin.m_id[1] ) ) );
-}
-
 
 
 void convert( const TriangleMesh& mesh, Dcel& dcel ) {
+    typedef std::pair< Index, Index > Key_t;
+
     dcel.clear();
     // Create vertices
     for( uint i = 0; i < mesh.m_vertices.size(); ++i ) {
@@ -45,7 +29,7 @@ void convert( const TriangleMesh& mesh, Dcel& dcel ) {
     }
 
     // Create HalfEdge table
-    std::map< std::pair< Index, Index >, HalfEdge_ptr > table;
+    std::map< Key_t, HalfEdge_ptr > table;
 
     // Create the topology
     for( const auto& T : mesh.m_triangles ) {
@@ -64,7 +48,7 @@ void convert( const TriangleMesh& mesh, Dcel& dcel ) {
         // ------
         HalfEdge_ptr he[3];
         for( uint i = 0; i < 3; ++i ) {
-            std::pair< Index, Index > key[2];
+            Key_t key[2];
             key[0].first  = id[i];
             key[0].second = id[( i + 1 ) % 3];
             key[1].first  = key[0].second;
@@ -163,9 +147,12 @@ void convert( const Dcel& dcel, TriangleMesh& mesh ) {
 }
 
 
+
 void convert( const Vertex_ptr& v, Vector3& p ) {
     p = v->P();
 }
+
+
 
 void convert( const VertexList& list, VectorArray< Vector3 >& point ) {
     point.clear();
