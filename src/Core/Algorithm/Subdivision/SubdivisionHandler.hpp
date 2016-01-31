@@ -26,17 +26,20 @@ public:
 
 #ifdef DEBUG_SPLIT
     /// SPLIT
-    inline void splitFullEdge( const Index& index );
+    inline bool splitFullEdge( const Index& index );
+    inline bool splitFullEdge( const uint i );
 #endif
 
 #ifdef DEBUG_COLLAPSE
     /// COLLAPSE
-    inline void collapseFullEdge( const Index& index );
+    inline bool collapseFullEdge( const Index& index );
+    inline bool collapseFullEdge( const uint i );
 #endif
 
 #ifdef DEBUG_FLIP
     /// FLIP
-    inline void flipFullEdge( const Index& index );
+    inline bool flipFullEdge( const Index& index );
+    inline bool flipFullEdge( const uint i );
 #endif
 
 protected:

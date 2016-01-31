@@ -316,7 +316,7 @@ bool SubdivisionHandler::flipFullEdge( const FullEdge_ptr& fulledge ) {
 #endif
 
     // In case of a border fulledge, do not flip
-    if( ( fulledge ) ) return false;
+    if( isBorder( fulledge ) ) return true;
 
     // Useful names
     const uint x = 4; // HalfEdge to flip
@@ -369,10 +369,12 @@ bool SubdivisionHandler::flipFullEdge( const FullEdge_ptr& fulledge ) {
     bind( f[0] );
     bind( f[1] );
 
+#ifdef CORE_DEBUG
     check( v[0], DCEL_CHECK_CONSISTENCY );
     check( v[1], DCEL_CHECK_CONSISTENCY );
     check( v[2], DCEL_CHECK_CONSISTENCY );
     check( v[3], DCEL_CHECK_CONSISTENCY );
+#endif
 
     return true;
 }

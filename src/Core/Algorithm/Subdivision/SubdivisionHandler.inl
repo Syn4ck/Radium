@@ -20,43 +20,90 @@ inline void SubdivisionHandler::setDCEL( const Dcel_ptr& ptr ) {
 
 #ifdef DEBUG_SPLIT
 /// SPLIT
-inline void SubdivisionHandler::splitFullEdge( const Index& index ) {
-    if( m_dcel == nullptr ) return;
-    if( index.isInvalid() ) return;
+inline bool SubdivisionHandler::splitFullEdge( const Index& index ) {
+    if( m_dcel == nullptr ) return false;
+    if( index.isInvalid() ) return false;
     FullEdge_ptr fe;
     if( m_dcel->m_fulledge.access( index, fe ) ) {
         bool status = splitFullEdge( fe );
         CORE_ASSERT( status, "Splitting failed." );
+        return status;
     }
+    return false;
+}
+
+
+
+inline bool SubdivisionHandler::splitFullEdge( const uint i ) {
+    if( m_dcel == nullptr ) return false;
+    if( i < dcel.m_fulledge.size() ) return false;
+    FullEdge_ptr fe;
+    if( m_dcel->m_fulledge.access( i, fe ) ) {
+        bool status = splitFullEdge( fe );
+        CORE_ASSERT( status, "Splitting failed." );
+        return status;
+    }
+    return false;
 }
 #endif
 
 
 #ifdef DEBUG_COLLAPSE
 /// COLLAPSE
-inline void SubdivisionHandler::collapseFullEdge( const Index& index ) {
-    if( m_dcel == nullptr ) return;
-    if( index.isInvalid() ) return;
+inline bool SubdivisionHandler::collapseFullEdge( const Index& index ) {
+    if( m_dcel == nullptr ) return false;
+    if( index.isInvalid() ) return; false
     FullEdge_ptr fe;
     if( m_dcel->m_fulledge.access( index, fe ) ) {
         bool status = collapseFullEdge( fe );
         CORE_ASSERT( status, "Collapsing failed." );
+        return status
     }
-    return;
+    return false;
+}
+
+
+
+inline bool SubdivisionHandler::collapseFullEdge( const uint i ) {
+    if( m_dcel == nullptr ) return false;
+    if( i < dcel.m_fulledge.size() ) return false;
+    FullEdge_ptr fe;
+    if( m_dcel->m_fulledge.access( i, fe ) ) {
+        bool status = collapseFullEdge( fe );
+        CORE_ASSERT( status, "Collapsing failed." );
+        return status
+    }
+    return false;
 }
 #endif
 
 
 #ifdef DEBUG_FLIP
 /// FLIP
-inline void SubdivisionHandler::flipFullEdge( const Index& index ) {
-    if( m_dcel == nullptr ) return;
-    if( index.isInvalid() ) return;
+inline bool SubdivisionHandler::flipFullEdge( const Index& index ) {
+    if( m_dcel == nullptr ) return false;
+    if( index.isInvalid() ) return false;
     FullEdge_ptr fe;
     if( m_dcel->m_fulledge.access( index, fe ) ) {
-        flipFullEdge( fe );
+        bool status = flipFullEdge( fe );
+        CORE_ASSERT( status, "Flipping failed." );
+        return status
     }
-    return;
+    return false;
+}
+
+
+
+inline bool SubdivisionHandler::flipFullEdge( const uint i ) {
+    if( m_dcel == nullptr ) return false;
+    if( i < dcel.m_fulledge.size() ) return false;
+    FullEdge_ptr fe;
+    if( m_dcel->m_fulledge.access( i, fe ) ) {
+        bool status = flipFullEdge( fe );
+        CORE_ASSERT( status, "Flipping failed." );
+        return status
+    }
+    return false;
 }
 #endif
 
