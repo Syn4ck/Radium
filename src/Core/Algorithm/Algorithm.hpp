@@ -74,7 +74,7 @@ private:
 
 protected:
     /// CONFIGURED
-    virtual bool isConfigured( uint& exitStatus ) const = 0;
+    virtual bool isConfigured( uint& exitStatus ) = 0;
 
     /// ALGORITHM STAGE
     virtual bool  preprocessing( uint& exitStatus );

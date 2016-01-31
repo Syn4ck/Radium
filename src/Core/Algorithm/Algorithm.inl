@@ -80,6 +80,9 @@ inline uint Algorithm< PARAMETERS >::getExitStatus() const {
 /// TIMING
 template < typename PARAMETERS >
 inline Scalar Algorithm< PARAMETERS >::getTiming( const AlgorithmStageTiming& stage ) const {
+    if( stage >= TOTAL_STAGE ) {
+        return m_time[OVERALL];
+    }
     return m_time[stage];
 }
 
@@ -124,12 +127,18 @@ inline uint Algorithm< PARAMETERS >::run() {
     }
     m_time[OVERALL] = ( std::clock() - startTime ) / Scalar( CLOCKS_PER_SEC );
 
-    if( isVerbose() ) {
-        LOG( logINFO ) << m_name << " completed in " << std::to_string( m_time[OVERALL] );
-        LOG( logINFO ) << "Exit status : " << m_exitStatus;
+    if( m_state == AlgorithmState::RUNNING ) {
+        m_state = AlgorithmState::COMPLETED;
+        if( isVerbose() ) {
+            LOG( logINFO ) << m_name << " completed in " << std::to_string( m_time[OVERALL] ) << "\n";
+        }
+    } else {
+        if( isVerbose() ) {
+            LOG( logINFO ) << m_name << " aborted.";
+            LOG( logINFO ) << "Exit status : " << m_exitStatus << "\n";
+        }
     }
 
-    m_state = AlgorithmState::COMPLETED;
     return m_exitStatus;
 }
 
