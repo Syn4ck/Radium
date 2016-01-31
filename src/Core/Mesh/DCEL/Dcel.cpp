@@ -50,6 +50,14 @@ Dcel::Dcel( const Dcel& dcel ) :
         he_table[dcel_he->idx] = he->idx;
     }
 
+    // Upload the fulledge data
+    for( uint i = 0; i < dcel.m_fulledge.size(); ++i ) {
+        FullEdge_ptr dcel_fe = dcel.m_fulledge.at( i );
+        FullEdge_ptr fe      = new FullEdge( m_halfedge[he_table[dcel_fe->HE( 0 )->idx]] );
+        insert( fe );
+        fe->HE( 0 )->Twin()->setFE( fe );
+    }
+
     // Upload the face data
     for( uint i = 0; i < dcel.m_face.size(); ++i ) {
         Face_ptr dcel_f = dcel.m_face.at( i );
@@ -67,14 +75,6 @@ Dcel::Dcel( const Dcel& dcel ) :
         he->setTwin( m_halfedge[he_table[dcel_he->Twin()->idx]] );
         he->setF( m_face[f_table[dcel_he->F()->idx]] );
         he->V()->setHE( m_halfedge[he_table[dcel_he->V()->HE()->idx]] );
-    }
-
-    // Upload the fulledge data
-    for( uint i = 0; i < dcel.m_fulledge.size(); ++i ) {
-        FullEdge_ptr dcel_fe = dcel.m_fulledge.at( i );
-        FullEdge_ptr fe      = new FullEdge( m_halfedge[he_table[dcel_fe->HE( 0 )->idx]] );
-        insert( fe );
-        fe->HE( 0 )->Twin()->setFE( fe );
     }
 }
 
