@@ -22,14 +22,18 @@ bool isValid( const HalfEdge_ptr& he ) {
              ( he->Next() != nullptr ) &&
              ( he->Prev() != nullptr ) &&
              ( he->Twin() != nullptr ) &&
+             ( he->Next() != he      ) &&
+             ( he->Prev() != he      ) &&
+             ( he->Twin() != he      ) &&
              ( he->FE()   != nullptr ) );
 }
 
 bool isValid( const FullEdge_ptr& fe ) {
     if( fe == nullptr ) return false;
-    return ( ( fe->idx.isValid()      ) &&
-             ( fe->HE( 0 ) != nullptr ) &&
-             ( fe->HE( 1 ) != nullptr ) );
+    return ( ( fe->idx.isValid()          ) &&
+             ( fe->HE( 0 ) != nullptr     ) &&
+             ( fe->HE( 1 ) != nullptr     ) &&
+             ( fe->HE( 0 ) != fe->HE( 1 ) ) );
 }
 
 bool isValid( const Face_ptr& f ) {

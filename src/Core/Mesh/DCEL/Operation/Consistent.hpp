@@ -7,9 +7,9 @@ namespace Ra {
 namespace Core {
 
 bool isConsistent( const Vertex_ptr&   v    );
-bool isConsistent( const HalfEdge_ptr& he,  );
-bool isConsistent( const FullEdge_ptr& fe,  );
-bool isConsistent( const Face_ptr&     f,   );
+bool isConsistent( const HalfEdge_ptr& he   );
+bool isConsistent( const FullEdge_ptr& fe   );
+bool isConsistent( const Face_ptr&     f    );
 bool isConsistent( const Dcel_ptr&     dcel );
 
 } // namespace Core

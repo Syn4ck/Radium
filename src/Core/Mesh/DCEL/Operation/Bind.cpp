@@ -13,6 +13,7 @@ namespace Core {
 
 /// BIND
 void bind( const Vertex_ptr& v ) {
+    if( v == nullptr ) return;
     VHEIterator it( v );
     if( ( *it ) != nullptr ) {
         const uint size = it.size();
@@ -24,6 +25,8 @@ void bind( const Vertex_ptr& v ) {
 }
 
 void bind( const HalfEdge_ptr& he ) {
+    if( he == nullptr ) return;
+
     if( he->V() != nullptr ) {
         he->V()->setHE( he );
     }
@@ -51,6 +54,7 @@ void bind( const HalfEdge_ptr& he ) {
 }
 
 void bind( const FullEdge_ptr& fe ) {
+    if( fe == nullptr ) return;
     if( fe->HE() != nullptr ) {
         fe->HE()->setFE( fe );
         if( fe->HE()->Twin() != nullptr ) {
@@ -60,6 +64,7 @@ void bind( const FullEdge_ptr& fe ) {
 }
 
 void bind( const Face_ptr& f ) {
+    if( f == nullptr ) return;
     FHEIterator it( f );
     if( ( *it ) != nullptr ) {
         const uint size = it.size();
@@ -74,6 +79,7 @@ void bind( const Face_ptr& f ) {
 
 /// UNBIND
 void unbind( Vertex_ptr& v ) {
+    if( v == nullptr ) return;
     VHEIterator it( v );
     if( ( *it ) != nullptr ) {
         const uint size = it.size();
@@ -88,6 +94,7 @@ void unbind( Vertex_ptr& v ) {
 }
 
 void unbind( HalfEdge_ptr& he ) {
+    if( he == nullptr ) return;
     if( he->V() != nullptr ) {
         if( he->V()->HE() == he ) {
             if( he->Twin() != nullptr ) {
@@ -162,6 +169,7 @@ void unbind( HalfEdge_ptr& he ) {
 }
 
 void unbind( FullEdge_ptr& fe ) {
+    if( fe == nullptr ) return;
     if( fe->HE() != nullptr ) {
         if( fe->HE()->FE() == fe ) {
             fe->HE()->setFE( nullptr );
@@ -176,6 +184,7 @@ void unbind( FullEdge_ptr& fe ) {
 }
 
 void unbind( Face_ptr& f ) {
+    if( f == nullptr ) return;
     FHEIterator it( f );
     if( ( *it ) != nullptr ) {
         const uint size = it.size();

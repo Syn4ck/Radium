@@ -1,4 +1,4 @@
-#include <Core/Mesh/DCEL/Operation/Valence.hpp>
+#include <Core/Mesh/DCEL/Operation/Length.hpp>
 
 #include <limits>
 
@@ -17,54 +17,55 @@ Scalar length( const FullEdge_ptr& fe ) {
 }
 
 Scalar maxFullEdgeLength( const Dcel_ptr& dcel ) {
-    const uint size = dcel.m_fulledge.size();
+    const uint size = dcel->m_fulledge.size();
     Scalar max = std::numeric_limits< Scalar >::min();
     for( uint i = 0; i < size; ++i ) {
-        const Scalar l = length( dcel.m_fulledge.at( i ) );
+        const Scalar l = length( dcel->m_fulledge.at( i ) );
         max = ( max < l ) ? l : max;
     }
     return max;
 }
 
 Scalar minFullEdgeLength( const Dcel_ptr& dcel ) {
-    const uint size = dcel.m_fulledge.size();
+    const uint size = dcel->m_fulledge.size();
     Scalar min = std::numeric_limits< Scalar >::max();
     for( uint i = 0; i < size; ++i ) {
-        const Scalar l = length( dcel.m_fulledge.at( i ) );
+        const Scalar l = length( dcel->m_fulledge.at( i ) );
         min = ( min > l ) ? l : min;
     }
     return min;
 }
 
 Scalar meanFullEdgeLength( const Dcel_ptr& dcel ) {
-    const uint size = dcel.m_fulledge.size();
+    const uint size = dcel->m_fulledge.size();
     Scalar sum = 0.0;
     for( uint i = 0; i < size; ++i ) {
-        sum += length( dcel.m_fulledge.at( i ) );
+        sum += length( dcel->m_fulledge.at( i ) );
     }
-    return ( mean / Scalar( suze ) );
+    return ( sum / Scalar( size ) );
 }
 
-Scalar FullEdgeLength( const Dcel_ptr& dcel, Scalar& max, Scalar& min, Scalar& mean ) {
-    const uint size = dcel.m_fulledge.size();
+void FullEdgeLength( const Dcel_ptr& dcel, Scalar& max, Scalar& min, Scalar& mean ) {
+    const uint size = dcel->m_fulledge.size();
     max  = std::numeric_limits< Scalar >::min();
     min  = std::numeric_limits< Scalar >::max();
     mean = 0.0;
     for( uint i = 0; i < size; ++i ) {
-        const Scalar l = length( dcel.m_fulledge.at( i ) );
+        const Scalar l = length( dcel->m_fulledge.at( i ) );
         max   = ( max < l ) ? l : max;
         min   = ( min > l ) ? l : min;
         mean += l;
     }
-    mean = mean / Scalar( suze );
+    mean = mean / Scalar( size );
 }
 
 void FullEdgeLength( const Dcel_ptr& dcel, std::vector< Scalar >& lengthValue ) {
     lengthValue.clear();
-    const uint size = dcel.m_fulledge.size();
+    const uint size = dcel->m_fulledge.size();
     lengthValue.resize( size );
+#pragma omp parallel for
     for( uint i = 0; i < size; ++i ) {
-        lengthValue[i] = length( dcel.m_fulledge.at( i ) );
+        lengthValue[i] = length( dcel->m_fulledge.at( i ) );
     }
 }
 

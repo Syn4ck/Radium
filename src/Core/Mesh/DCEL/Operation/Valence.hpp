@@ -13,6 +13,8 @@ uint optimalValence( const Vertex_ptr& v );
 int dOptimalValence( const Vertex_ptr& v );
 bool isExtraordinary( const Vertex_ptr& v );
 
+uint valence( const FullEdge_ptr& fe, const bool flip );
+
 } // namespace Core
 } // namespace Ra
 

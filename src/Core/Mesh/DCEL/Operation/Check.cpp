@@ -117,6 +117,7 @@ void check( const HalfEdge_ptr& he, const uint flag ) {
     /// NEXT
     if( flag & DCEL_CHECK_HALFEDGE_NEXT ) {
         CORE_ASSERT( ( he->Next() != nullptr ), "Next is nullptr." );
+        CORE_ASSERT( ( he->Next() != he      ), "Next is he." );
         if( isVerbose ) {
             LOG( logDEBUG ) << "\tNext...\t\t[Y]";
         }
@@ -125,6 +126,7 @@ void check( const HalfEdge_ptr& he, const uint flag ) {
     /// PREV
     if( flag & DCEL_CHECK_HALFEDGE_PREV ) {
         CORE_ASSERT( ( he->Prev() != nullptr ), "Prev is nullptr." );
+        CORE_ASSERT( ( he->Prev() != he      ), "Prev is he." );
         if( isVerbose ) {
             LOG( logDEBUG ) << "\tPrev...\t\t[Y]";
         }
@@ -133,6 +135,7 @@ void check( const HalfEdge_ptr& he, const uint flag ) {
     /// TWIN
     if( flag & DCEL_CHECK_HALFEDGE_TWIN ) {
         CORE_ASSERT( ( he->Twin() != nullptr ), "Twin is nullptr." );
+        CORE_ASSERT( ( he->Twin() != he      ), "Twin is he." );
         if( isVerbose ) {
             LOG( logDEBUG ) << "\tTwin...\t\t[Y]";
         }
@@ -229,6 +232,7 @@ void check( const FullEdge_ptr& fe, const uint flag ) {
     /// STATUS
     if( flag & DCEL_CHECK_FULLEDGE_STATUS ) {
         CORE_ASSERT( ( fe->HE( 1 ) != nullptr ), "FullEdge is corrupted." );
+        CORE_ASSERT( ( fe->HE( 0 ) != fe->HE( 1 ) ), "FullEdge is corrupted." );
         if( isVerbose ) {
             LOG( logDEBUG ) << "\tStatus...\t\t[Y]";
         }
@@ -237,6 +241,7 @@ void check( const FullEdge_ptr& fe, const uint flag ) {
     /// CONSISTENCY
     if( flag & DCEL_CHECK_CONSISTENCY ) {
         CORE_ASSERT( ( fe->HE( 0 ) != nullptr ), "HalfEdge is nullptr." );
+        CORE_ASSERT( ( fe->HE( 0 ) != fe->HE( 1 ) ), "FullEdge is corrupted." );
         CORE_ASSERT( ( ( fe == fe->HE( 0 )->FE() ) && ( fe == fe->HE( 0 )->Twin()->FE() ) ), "FullEdge is not consistent." );
         if( isVerbose ) {
             LOG( logDEBUG ) << "\tConsistent...\t\t[Y]";
@@ -341,6 +346,18 @@ void check( const Dcel_ptr& dcel, const uint flag ) {
         for( uint i = 0; i < v_size; ++i ) {
             check( dcel->m_vertex.at( i ), verbosity | consistency | DCEL_CHECK_VERTEX_DEFAULT );
         }
+        if( consistency ) {
+#ifdef PTR_MATCH_CHECK
+#pragma omp parallel for
+            for( uint i = 0; i < v_size; ++i ) {
+                Vertex_ptr v0 = dcel->m_vertex.at( i );
+                for( uint j = ( i + 1 ); j < v_size; ++j ) {
+                    Vertex_ptr v1 = dcel->m_vertex.at( j );
+                    CORE_ASSERT( ( v0 != v1 ), "Bad Vertex" );
+                }
+            }
+#endif
+        }
         if( isVerbose ) {
             LOG( logDEBUG ) << "\tVertex List...\t[Y]";
             LOG( logDEBUG ) << "Checking Vertex List done.";
@@ -356,6 +373,18 @@ void check( const Dcel_ptr& dcel, const uint flag ) {
         for( uint i = 0; i < he_size; ++i ) {
             check( dcel->m_halfedge.at( i ), verbosity | consistency | DCEL_CHECK_HALFEDGE_DEFAULT );
         }
+        if( consistency ) {
+#ifdef PTR_MATCH_CHECK
+#pragma omp parallel for
+            for( uint i = 0; i < he_size; ++i ) {
+                HalfEdge_ptr he0 = dcel->m_halfedge.at( i );
+                for( uint j = ( i + 1 ); j < he_size; ++j ) {
+                    HalfEdge_ptr he1 = dcel->m_halfedge.at( j );
+                    CORE_ASSERT( ( he0 != he1 ), "Bad HalfEdge" );
+                }
+            }
+#endif
+        }
         if( isVerbose ) {
             LOG( logDEBUG ) << "\tHalfEdge List...\t[Y]";
             LOG( logDEBUG ) << "Checking HalfEdge List done.";
@@ -368,11 +397,21 @@ void check( const Dcel_ptr& dcel, const uint flag ) {
         if( isVerbose ) {
             LOG( logDEBUG ) << "Checking FullEdge List...";
         }
-
         CORE_ASSERT( ( fe_size == ( he_size / 2 ) ), "Fulledges or halfedges missing." );
-
         for( uint i = 0; i < fe_size; ++i ) {
             check( dcel->m_fulledge.at( i ), verbosity | consistency | DCEL_CHECK_FULLEDGE_DEFAULT );
+        }
+        if( consistency ) {
+#ifdef PTR_MATCH_CHECK
+#pragma omp parallel for
+            for( uint i = 0; i < fe_size; ++i ) {
+                FullEdge_ptr fe0 = dcel->m_fulledge.at( i );
+                for( uint j = ( i + 1 ); j < fe_size; ++j ) {
+                    FullEdge_ptr fe1 = dcel->m_fulledge.at( j );
+                    CORE_ASSERT( ( fe0 != fe1 ), "Bad FullEdge" );
+                }
+            }
+#endif
         }
         if( isVerbose ) {
             LOG( logDEBUG ) << "\tFullEdge List...\t[Y]";
@@ -388,6 +427,18 @@ void check( const Dcel_ptr& dcel, const uint flag ) {
         }
         for( uint i = 0; i < f_size; ++i ) {
             check( dcel->m_face.at( i ), verbosity | consistency | DCEL_CHECK_FACE_DEFAULT );
+        }
+        if( consistency ) {
+#ifdef PTR_MATCH_CHECK
+#pragma omp parallel for
+            for( uint i = 0; i < f_size; ++i ) {
+                Face_ptr f0 = dcel->m_face.at( i );
+                for( uint j = ( i + 1 ); j < f_size; ++j ) {
+                    Face_ptr f1 = dcel->m_face.at( j );
+                    CORE_ASSERT( ( f0 != f1 ), "Bad Face" );
+                }
+            }
+#endif
         }
         if( isVerbose ) {
             LOG( logDEBUG ) << "\tFace List...\t[Y]";
