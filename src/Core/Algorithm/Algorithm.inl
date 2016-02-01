@@ -43,7 +43,7 @@ inline PARAMETERS Algorithm< PARAMETERS >::getParameters() const {
 
 
 template < typename PARAMETERS >
-virtual void Algorithm< PARAMETERS >::setParameters( const PARAMETERS& param ) {
+void Algorithm< PARAMETERS >::setParameters( const PARAMETERS& param ) {
     m_param = param;
 }
 
@@ -61,7 +61,7 @@ inline std::string Algorithm< PARAMETERS >::getName() const {
 
 /// STATE
 template < typename PARAMETERS >
-inline Algorithm< PARAMETERS >::AlgorithmState Algorithm< PARAMETERS >::getState() const {
+inline typename Algorithm< PARAMETERS >::AlgorithmState Algorithm< PARAMETERS >::getState() const {
     return m_state;
 }
 
@@ -147,14 +147,14 @@ inline uint Algorithm< PARAMETERS >::run() {
 
 /// ALGORITHM STAGE
 template < typename PARAMETERS >
-inline bool Algorithm< PARAMETERS >::run_configCheck( uint& exitStatus ) const {
+inline bool Algorithm< PARAMETERS >::run_configCheck( uint& exitStatus ) {
     bool status;
 
     if( isVerbose() ) {
         LOG( logINFO ) << "Checking configuration...";
     }
 
-    if( !( status = isConfigured( exitStatus ) ) ) {
+    if( !( status = configCheck( exitStatus ) ) ) {
         m_state = AlgorithmState::NOT_CONFIGURED;
     }
 
@@ -239,7 +239,6 @@ inline bool Algorithm< PARAMETERS >::run_postprocessing( uint& exitStatus ) {
     startTime = std::clock();
     if( !( status = postprocessing( exitStatus ) ) ) {
         m_state = AlgorithmState::POSTPROCESSING_FAILED;
-        return;
     }
     m_time[POSTPROCESSING] = ( std::clock() - startTime ) / Scalar( CLOCKS_PER_SEC );
 
@@ -258,6 +257,12 @@ inline bool Algorithm< PARAMETERS >::run_postprocessing( uint& exitStatus ) {
 //=====================================================================
 
 /// ALGORITHM STAGE
+#if 0
+template < typename PARAMETERS >
+virtual bool    Algorithm< PARAMETERS >::configCheck( uint& exitStatus ) {
+    return true;
+}
+
 template < typename PARAMETERS >
 virtual bool  Algorithm< PARAMETERS >::preprocessing( uint& exitStatus ) {
     return true;
@@ -272,6 +277,7 @@ template < typename PARAMETERS >
 virtual bool Algorithm< PARAMETERS >::postprocessing( uint& exitStatus ) {
     return true;
 }
+#endif
 
 
 

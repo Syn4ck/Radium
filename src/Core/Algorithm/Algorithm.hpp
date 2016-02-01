@@ -2,6 +2,7 @@
 #define RADIUMENGINE_ALGORITHM_DEFINITION_HPP
 
 #include <Core/CoreMacros.hpp>
+#include <string>
 
 namespace Ra {
 namespace Core {
@@ -38,7 +39,7 @@ public:
 
     /// PARAMETER
     inline PARAMETERS getParameters() const;
-    virtual void      setParameters( const PARAMETERS& param );
+    inline void       setParameters( const PARAMETERS& param );
 
     /// NAME
     inline std::string getName() const;
@@ -73,13 +74,11 @@ private:
     Scalar         m_time[TOTAL_STAGE];
 
 protected:
-    /// CONFIGURED
-    virtual bool isConfigured( uint& exitStatus ) = 0;
-
     /// ALGORITHM STAGE
-    virtual bool  preprocessing( uint& exitStatus );
-    virtual bool     processing( uint& exitStatus );
-    virtual bool postprocessing( uint& exitStatus );
+    virtual bool    configCheck( uint& exitStatus ) = 0;
+    virtual bool  preprocessing( uint& exitStatus ) = 0;
+    virtual bool     processing( uint& exitStatus ) = 0;
+    virtual bool postprocessing( uint& exitStatus ) = 0;
 
     /// VARIABLE
     PARAMETERS m_param;
