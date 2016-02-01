@@ -6,6 +6,8 @@
 #include <Core/Mesh/DCEL/Face.hpp>
 #include <Core/Mesh/DCEL/Dcel.hpp>
 
+#include <Core/Mesh/DCEL/Iterator/Vertex/VHEIterator.hpp>
+
 #include <Core/Mesh/DCEL/Operation/Valid.hpp>
 #include <Core/Mesh/DCEL/Operation/Check.hpp>
 #include <Core/Mesh/DCEL/Operation/Bind.hpp>
@@ -32,9 +34,9 @@ bool SubdivisionHandler::splitFullEdge( const FullEdge_ptr& ptr ) {
     check( ptr );
 
     // In case of release, the previous one won't work
-#ifndef CORE_DEBUG
-    if( !isValid( ptr ) ) return false;
-#endif
+    if( !isValid( ptr ) ) {
+        return false;
+    }
 
     // Useful names
     const uint n = 2; // new Vertex
@@ -59,6 +61,17 @@ bool SubdivisionHandler::splitFullEdge( const FullEdge_ptr& ptr ) {
     fe[1] = new FullEdge( he[x] );
     f[0]  = he[0]->F();
     f[1]  = he[1]->F();
+
+    // Insertion
+    m_dcel->insert( v[n] );
+    m_dcel->insert( he[x] );
+    m_dcel->insert( he[y] );
+    m_dcel->insert( fe[1] );
+
+    CORE_ASSERT( m_dcel->m_vertex.compatible( v[n]->idx ), "WTF?" );
+    CORE_ASSERT( m_dcel->m_halfedge.compatible( he[x]->idx ), "WTF?" );
+    CORE_ASSERT( m_dcel->m_halfedge.compatible( he[y]->idx ), "WTF?" );
+    CORE_ASSERT( m_dcel->m_fulledge.compatible( fe[1]->idx ), "WTF?" );
 
     // Set data
     v[n]->setP( 0.5 * ( v[0]->P() + v[1]->P() ) );
@@ -87,11 +100,6 @@ bool SubdivisionHandler::splitFullEdge( const FullEdge_ptr& ptr ) {
     // Set the starting halfedge of the twin face
     if( f[1] != nullptr ) f[1]->setHE( he[1] );
 
-    // Insertion
-    m_dcel->insert( v[n] );
-    m_dcel->insert( he[x] );
-    m_dcel->insert( he[y] );
-    m_dcel->insert( fe[1] );
 
     // Handle face splitting
     bool splitStatus = true;
@@ -112,9 +120,9 @@ bool SubdivisionHandler::splitFace( const Face_ptr& ptr ) {
     if( ptr == nullptr ) return true;
 
     // It is a proper face MAYBE
-#ifndef CORE_DEBUG
-    if( !isValid( ptr ) ) return false;
-#endif
+    if( !isValid( ptr ) ) {
+        return false;
+    }
 
     // Useful names
     const uint n = 3; // nth HalfEdge of the face
@@ -142,6 +150,17 @@ bool SubdivisionHandler::splitFace( const Face_ptr& ptr ) {
     f[0]  = ptr;
     f[1]  = new Face( he[y] );
 
+    // Insertion
+    m_dcel->insert( he[x] );
+    m_dcel->insert( he[y] );
+    m_dcel->insert( fe    );
+    m_dcel->insert( f[1]  );
+
+    CORE_ASSERT( m_dcel->m_halfedge.compatible( he[x]->idx ), "WTF?" );
+    CORE_ASSERT( m_dcel->m_halfedge.compatible( he[y]->idx ), "WTF?" );
+    CORE_ASSERT( m_dcel->m_fulledge.compatible( fe->idx ), "WTF?" );
+    CORE_ASSERT( m_dcel->m_face.compatible( f[1]->idx ), "WTF?" );
+
     // Set data
     he[x]->setV( v[2] );
     he[x]->setNext( he[0] );
@@ -163,12 +182,6 @@ bool SubdivisionHandler::splitFace( const Face_ptr& ptr ) {
     bind( f[0] );
     bind( f[1] );
 
-    // Insertion
-    m_dcel->insert( he[x] );
-    m_dcel->insert( he[y] );
-    m_dcel->insert( fe );
-    m_dcel->insert( f[1] );
-
     return true;
 }
 #endif
@@ -181,9 +194,9 @@ bool SubdivisionHandler::collapseFullEdge( const FullEdge_ptr& ptr ) {
     check( ptr );
 
     // In case of release, the previous one won't work
-#ifndef CORE_DEBUG
-    if( !isValid( ptr ) ) return false;
-#endif
+    if( !isValid( ptr ) ) {
+        return false;
+    }
 
     // Useful names
     const uint x = 4; // HalfEdge to delete
@@ -196,54 +209,87 @@ bool SubdivisionHandler::collapseFullEdge( const FullEdge_ptr& ptr ) {
     Face_ptr     f[2];
 
     // Initialize data
-    fe = ptr;
+    fe    = ptr;
     he[x] = fe->HE();
     he[y] = he[x]->Twin();
     he[0] = he[x]->Prev();
     he[1] = he[x]->Next();
     he[2] = he[y]->Prev();
     he[3] = he[y]->Next();
-    v[0] = he[x]->V();
-    v[1] = he[y]->V();
-    f[0] = he[x]->F();
-    f[1] = he[y]->F();
+    v[0]  = he[x]->V();
+    v[1]  = he[y]->V();
+    f[0]  = he[x]->F();
+    f[1]  = he[y]->F();
+
+    // Check data
+    if( !isValid( v[0] ) || !isValid( v[1] ) ) {
+        return false;
+    }
+
+    for( uint i = 0; i < 6; ++i ) {
+        if( !isValid( he[i] ) ) {
+            return false;
+        }
+    }
 
     // Set data
     v[0]->setP( 0.5 * ( v[0]->P() + v[1]->P() ) );
     v[0]->setN( ( v[0]->N() + v[1]->N() ).normalized() );
 
-    // Unbinding
-    unbind( fe );
-    unbind( he[x] );
-    unbind( he[y] );
-    unbind( v[1] );
-
-    // Set data
-    he[1]->setPrev( he[0] );
-    he[3]->setPrev( he[2] );
-
-    // Binding
-    bind( he[1] );
-    bind( he[3] );
+    v[0]->setHE( v[1]->HE() );
     bind( v[0] );
 
-    // Removal
+    unbind( v[1] );
+
     m_dcel->removeVertex( v[1]->idx );
+    delete v[1];
+    v[1] = nullptr;
+
+    //===========
+
+
+    he[0]->setNext( he[1] );
+    he[1]->setPrev( he[0] );
+
+    bind( he[0] );
+    bind( he[1] );
+
+    //===========
+
+    he[2]->setNext( he[3] );
+    he[3]->setPrev( he[2] );
+
+    bind( he[2] );
+    bind( he[3] );
+
+    //===========
+
+    unbind( he[x] );
+    unbind( he[y] );
+    unbind( fe    );
+
     m_dcel->removeHalfEdge( he[x]->idx );
     m_dcel->removeHalfEdge( he[y]->idx );
     m_dcel->removeFullEdge( fe->idx );
 
-    // Deletion
-    delete v[1];
     delete he[x];
     delete he[y];
     delete fe;
 
-    // Handle face collapsing
-    collapseFace( f[0] );
-    collapseFace( f[1] );
+    he[x] = nullptr;
+    he[y] = nullptr;
+    fe    = nullptr;
 
-    return true;
+    // Handle face collapsing
+    bool collapseStatus = true;
+
+    collapseStatus &= collapseFace( f[0] );
+    CORE_ASSERT( collapseStatus, "collapseFace on f[0] has failed." );
+
+    collapseStatus &= collapseFace( f[1] );
+    CORE_ASSERT( collapseStatus, "collapseFace on f[1] has failed." );
+
+    return collapseStatus;
 }
 
 
@@ -253,13 +299,13 @@ bool SubdivisionHandler::collapseFace( const Face_ptr& ptr ) {
     if( ptr == nullptr ) return true;
 
     // It is a proper face MAYBE
-#ifndef CORE_DEBUG
-    if( !isValid( ptr ) ) return false;
-#endif
+    if( !isValid( ptr ) ) {
+        return false;
+    }
 
     // Useful names
-    const uint x = 0; // HalfEdge to delete
-    const uint y = 2; // HalfEdge to delete
+    const uint x = 2; // HalfEdge to delete
+    const uint y = 3; // HalfEdge to delete
 
     // Declare data
     Vertex_ptr   v[2];
@@ -269,35 +315,48 @@ bool SubdivisionHandler::collapseFace( const Face_ptr& ptr ) {
 
     // Initialize data
     he[x] = ptr->HE();
-    he[1] = he[x]->Twin();
     he[y] = he[x]->Next();
-    he[3] = he[y]->Twin();
+    he[0] = he[x]->Twin();
+    he[1] = he[y]->Twin();
     v[0]  = he[x]->V();
     v[1]  = he[y]->V();
     fe[0] = he[x]->FE();
     fe[1] = he[y]->FE();
     f     = ptr;
 
+    // Check data
+    if( !isValid( he[x] ) || !isValid( he[y] ) ) {
+        return false;
+    }
+
+    if( !isValid( fe[1] ) ) {
+        return false;
+    }
+
     // Set data
-    he[1]->setTwin( he[3] );
-    he[3]->setTwin( he[1] );
-    he[3]->setFE( fe[0] );
+    unbind( f );
+    m_dcel->removeFace( f->idx );
+    delete f;
+    f = nullptr;
 
-    // Binding
+    unbind( fe[1] );
+    m_dcel->removeFullEdge( fe[1]->idx );
+    delete fe[1];
+    fe[1] = nullptr;
+
+    he[0]->setTwin( he[1] );
+    bind( he[0] );
+    bind( fe[0] );
     bind( he[1] );
-    bind( he[3] );
 
-    // Removal
+    unbind( he[x] );
+    unbind( he[y] );
     m_dcel->removeHalfEdge( he[x]->idx );
     m_dcel->removeHalfEdge( he[y]->idx );
-    m_dcel->removeFullEdge( fe[1]->idx );
-    m_dcel->removeFace( f->idx );
-
-    // Deletion
     delete he[x];
     delete he[y];
-    delete fe[1];
-    delete f;
+    he[x] = nullptr;
+    he[y] = nullptr;
 
     return true;
 }
@@ -311,12 +370,14 @@ bool SubdivisionHandler::flipFullEdge( const FullEdge_ptr& fulledge ) {
     check( fulledge );
 
     // In case of release, the previous one won't work
-#ifndef CORE_DEBUG
-    if( !isValid( fulledge ) ) return false;
-#endif
+    if( !isValid( fulledge ) ) {
+        return false;
+    }
 
     // In case of a border fulledge, do not flip
-    if( isBorder( fulledge ) ) return true;
+    if( isBorder( fulledge ) ) {
+        return true;
+    }
 
     // Useful names
     const uint x = 4; // HalfEdge to flip
@@ -343,33 +404,84 @@ bool SubdivisionHandler::flipFullEdge( const FullEdge_ptr& fulledge ) {
     f[0]  = he[x]->F();
     f[1]  = he[y]->F();
 
+#ifdef CORE_DEBUG
+    for( uint i = 0; i < 6; ++i ) {
+        for( uint j = ( i + 1 ); j < 6; ++j ) {
+            CORE_ASSERT( ( he[i] != he[j] ), "Bad HalfEdge" );
+        }
+    }
+
+    for( uint i = 0; i < 4; ++i ) {
+        for( uint j = ( i + 1 ); j < 4; ++j ) {
+            CORE_ASSERT( ( v[i] != v[j] ), "Bad Vertex" );
+        }
+    }
+
+    check( v[0], DCEL_CHECK_CONSISTENCY );
+    check( v[1], DCEL_CHECK_CONSISTENCY );
+    check( v[2], DCEL_CHECK_CONSISTENCY );
+    check( v[3], DCEL_CHECK_CONSISTENCY );
+#endif
+
     // Set data
     v[0]->setHE( he[0] );
     v[1]->setHE( he[1] );
     v[2]->setHE( he[2] );
     v[3]->setHE( he[3] );
+
+    he[0]->setV( v[0] );
     he[0]->setNext( he[x] );
     he[0]->setPrev( he[3] );
+    he[0]->setF( f[0] );
+
+    he[1]->setV( v[1] );
     he[1]->setNext( he[2] );
     he[1]->setPrev( he[y] );
+    he[1]->setF( f[1] );
+
+    he[2]->setV( v[2] );
     he[2]->setNext( he[y] );
     he[2]->setPrev( he[1] );
+    he[2]->setF( f[1] );
+
+    he[3]->setV( v[3] );
     he[3]->setNext( he[0] );
     he[3]->setPrev( he[x] );
+    he[3]->setF( f[0] );
+
     he[x]->setV( v[1] );
     he[x]->setNext( he[3] );
     he[x]->setPrev( he[0] );
+    he[x]->setF( f[0] );
+
     he[y]->setV( v[3] );
     he[y]->setNext( he[1] );
     he[y]->setPrev( he[2] );
+    he[y]->setF( f[1] );
+
+    f[0]->setHE( he[x] );
+    f[1]->setHE( he[y] );
 
     // Binding
-    bind( he[x] );
-    bind( he[y] );
-    bind( f[0] );
-    bind( f[1] );
+    //bind( he[x] );
+    //bind( he[y] );
+    //bind( f[0] );
+    //bind( f[1] );
+
 
 #ifdef CORE_DEBUG
+    for( uint i = 0; i < 6; ++i ) {
+        for( uint j = ( i + 1 ); j < 6; ++j ) {
+            CORE_ASSERT( ( he[i] != he[j] ), "Bad HalfEdge" );
+        }
+    }
+
+    for( uint i = 0; i < 4; ++i ) {
+        for( uint j = ( i + 1 ); j < 4; ++j ) {
+            CORE_ASSERT( ( v[i] != v[j] ), "Bad Vertex" );
+        }
+    }
+
     check( v[0], DCEL_CHECK_CONSISTENCY );
     check( v[1], DCEL_CHECK_CONSISTENCY );
     check( v[2], DCEL_CHECK_CONSISTENCY );
