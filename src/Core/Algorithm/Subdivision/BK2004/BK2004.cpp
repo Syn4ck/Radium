@@ -1,14 +1,25 @@
-#include <Core/Algorithm/Subdivision/BK2004>
+#include <Core/Algorithm/Subdivision/BK2004/BK2004.hpp>
 
 #include <Core/Index/Index.hpp>
+#include <Core/Mesh/DCEL/Vertex.hpp>
 #include <Core/Mesh/DCEL/FullEdge.hpp>
 #include <Core/Mesh/DCEL/Dcel.hpp>
-#include <Core/Mesh/DCEL/Operation/Valid.hpp>
+#include <Core/Mesh/DCEL/Operation/Check.hpp>
 #include <Core/Mesh/DCEL/Operation/Consistent.hpp>
+#include <Core/Mesh/DCEL/Operation/Convert.hpp>
 #include <Core/Mesh/DCEL/Operation/Length.hpp>
+#include <Core/Mesh/DCEL/Operation/Valence.hpp>
+#include <Core/Mesh/DCEL/Operation/Valid.hpp>
+
+#include <Core/Geometry/Normal/Normal.hpp>
+#include <Core/Algorithm/Subdivision/BK2004/BK2004Smoothing.hpp>
 
 namespace Ra {
 namespace Core {
+
+
+#define DEBUG_SMOOTH
+
 
 /// CONSTRUCTOR
 BK2004Parameter::BK2004Parameter( const uint   algorithmIteration,
@@ -30,15 +41,38 @@ BK2004::BK2004( const Dcel_ptr&        dcel,
                 const bool             verbosity ) :
     Algorithm< BK2004Parameter >( param, "Botsch Kobbelt 2004", verbosity ),
     m_dcel( dcel ),
-    m_targetLength( -1.0 ) { }
+    m_targetLength( -1.0 ),
+    m_subHandler( dcel ) { }
 
 /// DESTRUCTOR
 BK2004::~BK2004() { }
 
 
 /// ALGORITHM STAGE
-bool BK2004::preprocessing( uint& exitStatus ) override {
-    const uint size = m_dcel.m_fulledge.size();
+bool BK2004::configCheck( uint& exitStatus ) {
+    bool       dcelStatus = ( m_dcel != nullptr );
+    bool subHandlerStatus = ( m_subHandler.getDCEL() != nullptr );
+    bool         matching = ( m_dcel == m_subHandler.getDCEL() );
+    bool           status = ( dcelStatus && subHandlerStatus && matching );
+    if( status ) {
+        exitStatus = NO_ERROR;
+    } else {
+        if( !dcelStatus ) {
+            exitStatus = DCEL_NULLPTR;
+        } else {
+            if( !subHandlerStatus ) {
+                exitStatus = SUBDIVIDER_NOT_INITIALIZED;
+            } else {
+                exitStatus = DCEL_AND_SUBDIVIDER_MISMATCH;
+            }
+        }
+    }
+    return status;
+}
+
+
+bool BK2004::preprocessing( uint& exitStatus ) {
+    const uint size = m_dcel->m_fulledge.size();
     if( size == 0 ) {
         exitStatus = DCEL_NO_FULLEDGE;
         return false;
@@ -49,6 +83,7 @@ bool BK2004::preprocessing( uint& exitStatus ) override {
         return false;
     }
 
+    //check( m_dcel, DCEL_CHECK_CONSISTENCY | DCEL_CHECK_VERBOSE | DCEL_CHECK_VERBOSE_REC | DCEL_CHECK_DCEL_DEFAULT );
     if( !isConsistent( m_dcel ) ) {
         exitStatus = DCEL_NOT_CONSISTENT;
         return false;
@@ -61,15 +96,13 @@ bool BK2004::preprocessing( uint& exitStatus ) override {
         return false;
     }
 
-    --- Compute normals
-
     exitStatus = NO_ERROR;
     return true;
 }
 
 
 
-bool BK2004::processing( uint& exitStatus ) override {
+bool BK2004::processing( uint& exitStatus ) {
     for( uint alg_iter = 0; alg_iter < m_param.m_algorithmIteration; ++alg_iter ) {
         if( !splitNcollapse( exitStatus ) ) {
                 return false;
@@ -84,33 +117,32 @@ bool BK2004::processing( uint& exitStatus ) override {
             return false;
         }
 
-        --- compute normals
-
         smoothing();
-
     }
-
-    --- compute normals
-
     exitStatus = NO_ERROR;
     return true;
 }
 
 
+bool BK2004::postprocessing( uint& exitStatus ) {
+    return true;
+}
 
-void BK2004::extractoIndexList( std::vector< Index >& list ) const {
+
+
+void BK2004::extractIndexList( std::vector< Index >& list ) const {
     list.clear();
-    const Scalar size = m_dcel._fulledge.size();
+    const Scalar size = m_dcel->m_fulledge.size();
     list.resize( size );
     for( uint i = 0; i < size; ++i ) {
-        list[i] = m_dcel.m_fulledge[i]->idx;
+        list[i] = m_dcel->m_fulledge[i]->idx;
     }
 }
 
 
 
 bool BK2004::splitNcollapse( uint& exitStatus ) {
-    const uint   size     = m_dcel.m_fulledge.size();
+    const uint   size     = m_dcel->m_fulledge.size();
 
     std::vector< Index >  edge( size );
     extractIndexList( edge );
@@ -119,20 +151,25 @@ bool BK2004::splitNcollapse( uint& exitStatus ) {
     FullEdgeLength( m_dcel, length );
 
     for( uint i = 0; i < size; ++i ) {
-        if( !m_dcel.m_fulledge.contains( edge[i] ) ) continue;
+        if( !m_dcel->m_fulledge.contain( edge[i] ) ) continue;
+
+#ifdef DEBUG_SPLIT
         if( length[i] > ( m_param.m_longScale * m_targetLength ) ) {
             if( !m_subHandler.splitFullEdge( edge[i] ) ) {
                 exitStatus = FULLEDGE_NOT_SPLITTED;
                 return false;
             }
         }
+#endif
 
+#ifdef DEBUG_COLLAPSE
         if( length[i] < ( m_param.m_shortScale * m_targetLength ) ) {
             if( !m_subHandler.collapseFullEdge( edge[i] ) ) {
                 exitStatus = FULLEDGE_NOT_COLLAPSED;
                 return false;
             }
         }
+#endif
     }
     exitStatus = NO_ERROR;
     return true;
@@ -140,32 +177,21 @@ bool BK2004::splitNcollapse( uint& exitStatus ) {
 
 
 
-uint BK2004::edgeValence( const FullEdge_ptr& fe, const bool flip ) const {
-    uint valence = 0.0;
-    int dv[4];
-    dv[0] = dOptimalValence( fe->HE( 0 )->V() );
-    dv[1] = dOptimalValence( fe->HE( 1 )->V() );
-    dv[2] = dOptimalValence( fe->HE( 0 )->Prev()->V() );
-    dv[3] = dOptimalValence( fe->HE( 1 )->Prev()->V() );
-    for( uint i = 0; i < 4; ++i ) {
-        dv[i] += ( flip ) ? ( ( ( i / 2 ) * 2 ) + -1 ) : 0.0;
-        valence += dv[i] * dv[i];
-    }
-    return valence;
-}
-
-
 
 bool BK2004::flip( uint& exitStatus ) {
-    const uint size = m_dcel.m_fulledge.size();
+    const uint size = m_dcel->m_fulledge.size();
     for( uint i = 0; i < size; ++i ) {
-        FullEdge_ptr fe = m_dcel.m_fulledge[i];
-        if( edgeValence( fe, false ) > edgeValence( fe, true ) ) {
+        FullEdge_ptr fe = m_dcel->m_fulledge[i];
+#ifdef DEBUG_FLIP
+        uint  pre_flip = valence( fe, false );
+        uint post_flip = valence( fe, true  );
+        if( pre_flip > post_flip ) {
             if( !m_subHandler.flipFullEdge( fe->idx ) ) {
                 exitStatus = FULLEDGE_NOT_FLIPPED;
                 return false;
             }
         }
+#endif
     }
     exitStatus = NO_ERROR;
     return true;
@@ -173,43 +199,34 @@ bool BK2004::flip( uint& exitStatus ) {
 
 
 
-Vector3 BK2004::g( const Vertex_pr& v ) const {
-    Scalar areaSum = 0.0;
-    Vector3 tmp;
-    tmp.setZero();
-    auto ring = Dcel::oneRing( v );
-    for( auto p : ring ) {
-        Scalar area = Dcel::mixedArea( *p );
-        areaSum += area;
-        tmp += area * p->P();
-    }
-    return ( tmp / areaSum );
-}
-
-
-
-Vector3 BK2004::tangentialRelaxation( const Vertex_ptr& v ) const {
-    return ( v->P() + ( param.m_lambda * ( Matrix3::Identity() - ( v->N() * v->N().transpose() )  ) * ( g( v ) - v->P() ) ) );
-}
-
-
-
 void BK2004::smoothing() {
-    const uint size = m_dcel.m_vertex.size();
-    std::vector< Scalar > point( size );
+#ifdef DEBUG_SMOOTH
+    TriangleMesh mesh;
+    convert( *m_dcel, mesh );
+
+    const uint size = mesh.m_vertices.size();
+
+    Geometry::AdjacencyMatrix Adj = Geometry::uniformAdjacency( mesh.m_vertices, mesh.m_triangles );
+    GravityCentroid           G;
+    VectorArray< Vector3 > tmp( size );
     for( uint smooth_iter = 0; smooth_iter < m_param.m_smoothingIteration; ++smooth_iter ) {
-        for( uint i = 0; i < size; ++i ) {
-            point[i] = tangentialRelaxation( m_dcel.m_vertex[i] );
-        }
-        for( uint i = 0; i < size; ++i ) {
-            m_dcel.m_vertex[i]->setP( point[i] );
-        }
+        Geometry::areaWeightedNormal( mesh.m_vertices, mesh.m_triangles, mesh.m_normals );
+        Geometry::AreaMatrix      A   = Geometry::barycentricArea( mesh.m_vertices, mesh.m_triangles );
+        g( mesh.m_vertices, Adj, A, G );
+        tangentialRelaxation( mesh.m_vertices, mesh.m_normals, G, m_param.m_lambda, tmp );
+        std::swap( mesh.m_vertices, tmp );
     }
+    Geometry::areaWeightedNormal( mesh.m_vertices, mesh.m_triangles, mesh.m_normals );
+
+    for( uint i = 0; i < size; ++i ) {
+        Vertex_ptr v = m_dcel->m_vertex[i];
+        v->setP( mesh.m_vertices[i] );
+        v->setN( mesh.m_normals[i] );
+    }
+#endif
 }
 
 
 } // namespace Core
 } // namespace Ra
 
-
-#endif // RADIUMENGINE_REMESHING_HANDLER_DEFINITION_HPP

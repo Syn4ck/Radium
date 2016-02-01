@@ -1,5 +1,5 @@
-#ifndef RADIUMENGINE_REMESHING_HANDLER_DEFINITION_HPP
-#define RADIUMENGINE_REMESHING_HANDLER_DEFINITION_HPP
+#ifndef RADIUMENGINE_BK2004_ALGORITHM_DEFINITION_HPP
+#define RADIUMENGINE_BK2004_ALGORITHM_DEFINITION_HPP
 
 #include <Core/Mesh/DCEL/Definition.hpp>
 #include <Core/Algorithm/Algorithm.hpp>
@@ -28,14 +28,16 @@ class BK2004 : public Algorithm< BK2004Parameter > {
 public:
     enum ErrorType {
         NO_ERROR                = 0,
-        DCEL_NULLPTR            = 1 << 0,
-        DCEL_NO_FULLEDGE        = 1 << 1,
-        DCEL_NOT_VALID          = 1 << 2,
-        DCEL_NOT_CONSISTENT     = 1 << 3,
-        TARGET_LENGTH_NOT_VALID = 1 << 4,
-        FULLEDGE_NOT_SPLITTED   = 1 << 5,
-        FULLEDGE_NOT_COLLAPSED  = 1 << 6,
-        FULLEDGE_NOT_FLIPPED    = 1 << 7
+        DCEL_NULLPTR,
+        SUBDIVIDER_NOT_INITIALIZED,
+        DCEL_AND_SUBDIVIDER_MISMATCH,
+        DCEL_NO_FULLEDGE,
+        DCEL_NOT_VALID,
+        DCEL_NOT_CONSISTENT,
+        TARGET_LENGTH_NOT_VALID,
+        FULLEDGE_NOT_SPLITTED,
+        FULLEDGE_NOT_COLLAPSED,
+        FULLEDGE_NOT_FLIPPED
     };
 
     /// CONSTRUCTOR
@@ -44,7 +46,7 @@ public:
             const bool             verbosity = false );
 
     /// DESTRUCTOR
-    ~BK2004() { }
+    ~BK2004();
 
     /// DCEL
     inline Dcel_ptr getDCEL() const;
@@ -55,20 +57,16 @@ public:
     inline Scalar getTargetLength() const;
 
 protected:
-    /// CONFIGURED
-    inline bool isConfigured( uint& exitStatus ) override;
-
     /// ALGORITHM STAGE
+    bool configCheck( uint& exitStatus ) override;
     bool preprocessing( uint& exitStatus ) override;
     bool   processing( uint& exitStatus ) override;
+    bool postprocessing( uint& exitStatus ) override;
 
     /// FUNCTION
     void extractIndexList( std::vector< Index >& list ) const;
-    bool splitNcollapse( const std::vector< Index >& list, uint& exitStatus );
-    uint edgeValence( const FullEdge_ptr& fe, const bool flip ) const;
+    bool splitNcollapse( uint& exitStatus );
     bool flip( uint& exitStatus );
-    Vector3 g( const Vertex_pr& v ) const;
-    Vector3 tangentialRelaxation( const Vertex_ptr& v ) const;
     void smoothing();
 
     /// VARIABLE
@@ -80,6 +78,6 @@ protected:
 } // namespace Core
 } // namespace Ra
 
-#include <Core/Algorithm/Subdivision/BK2004.inl>
+#include <Core/Algorithm/Subdivision/BK2004/BK2004.inl>
 
-#endif // RADIUMENGINE_REMESHING_HANDLER_DEFINITION_HPP
+#endif // RADIUMENGINE_BK2004_ALGORITHM_DEFINITION_HPP

@@ -1,4 +1,4 @@
-#include <Core/Algorithm/Subdivision/BK2004.hpp>
+#include <Core/Algorithm/Subdivision/BK2004/BK2004.hpp>
 
 #include <Core/Mesh/DCEL/Dcel.hpp>
 
@@ -14,6 +14,7 @@ inline Dcel_ptr BK2004::getDCEL() const {
 
 inline void BK2004::setDCEL( const Dcel_ptr& dcel ) {
     m_dcel = dcel;
+    m_subHandler.setDCEL( m_dcel );
 }
 
 /// TARGET LENGTH
@@ -21,21 +22,10 @@ inline Scalar BK2004::getTargetLength() const {
     return m_targetLength;
 }
 
-/// CONFIGURED
-inline bool BK2004::isConfigured( uint& exitStatus ) override {
-    bool status = ( m_dcel != nullptr );
-    if( status ) {
-        exitStatus = NO_ERROR;
-    } else {
-        exitStatus = DCEL_NULLPTR;
-    }
-    return status;
-}
+/// ALGORITHM STAGE
 
 
 
 } // namespace Core
 } // namespace Ra
 
-
-#endif // RADIUMENGINE_REMESHING_HANDLER_DEFINITION_HPP
