@@ -12,7 +12,8 @@ namespace Core {
 bool isValid( const Vertex_ptr& v ) {
     if( v == nullptr ) return false;
     return ( ( v->idx.isValid()   ) &&
-             ( v->HE() != nullptr ) );
+             ( v->P().allFinite() ) &&
+             ( v->N().allFinite() ) );
 }
 
 bool isValid( const HalfEdge_ptr& he ) {
@@ -30,14 +31,15 @@ bool isValid( const HalfEdge_ptr& he ) {
 
 bool isValid( const FullEdge_ptr& fe ) {
     if( fe == nullptr ) return false;
-    return ( ( fe->idx.isValid()          ) &&
-             ( fe->HE( 0 ) != nullptr     ) &&
-             ( fe->HE( 1 ) != nullptr     ) &&
-             ( fe->HE( 0 ) != fe->HE( 1 ) ) );
+    return ( ( fe->idx.isValid()                    ) &&
+             ( fe->HE( 0 )      != nullptr          ) &&
+             ( fe->HE( 1 )      != nullptr          ) &&
+             ( fe->HE( 0 )      != fe->HE( 1 )      ) &&
+             ( fe->HE( 0 )->V() != fe->HE( 1 )->V() ) );
 }
 
 bool isValid( const Face_ptr& f ) {
-    if( f == nullptr ) return false;
+    if( f == nullptr ) return true;
     return ( ( f->idx.isValid()   ) &&
              ( f->HE() != nullptr ) );
 }

@@ -16,19 +16,18 @@ namespace Core {
 //=====================================================================
 
 bool isConsistent( const Vertex_ptr& v ) {
-    if( v->HE() == nullptr ) {
-        return false;
-    }
-    if( v != v->HE()->V() ) {
-        return false;
-    }
-    VHEIterator it( v );
-    const uint size = it.size();
-    for( uint i = 0; i < size; ++i ) {
-        if( v != it->V() ) {
+    if( v->HE() != nullptr ) {
+        if( v != v->HE()->V() ) {
             return false;
         }
-        ++it;
+        VHEIterator it( v );
+        const uint size = it.size();
+        for( uint i = 0; i < size; ++i ) {
+            if( v != it->V() ) {
+                return false;
+            }
+            ++it;
+        }
     }
     return true;
 }

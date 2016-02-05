@@ -64,13 +64,14 @@ void check( const Vertex_ptr& v, const uint flag ) {
 
     /// CONSISTENCY
     if( flag & DCEL_CHECK_CONSISTENCY ) {
-        CORE_ASSERT( ( v->HE() != nullptr ), "HalfEdge is nullptr." );
-        CORE_ASSERT( ( v == v->HE()->V() ), "Vertex is not consistent." );
-        VHEIterator it( v );
-        const uint size = it.size();
-        for( uint i = 0; i < size; ++i ) {
-            CORE_ASSERT( ( v == it->V() ), "Vertex is not consistent." );
-            ++it;
+        if( v->HE() != nullptr ) {
+            CORE_ASSERT( ( v == v->HE()->V() ), "Vertex is not consistent." );
+            VHEIterator it( v );
+            const uint size = it.size();
+            for( uint i = 0; i < size; ++i ) {
+                CORE_ASSERT( ( v == it->V() ), "Vertex is not consistent." );
+                ++it;
+            }
         }
         if( isVerbose ) {
             LOG( logDEBUG ) << "\tConsistent...[Y]";
@@ -160,6 +161,8 @@ void check( const HalfEdge_ptr& he, const uint flag ) {
     /// CONSISTENCY
     if( flag & DCEL_CHECK_CONSISTENCY ) {
         CORE_ASSERT( ( he->V() != nullptr ), "Vertex is nullptr." );
+        CORE_ASSERT( ( he->Twin() != nullptr ), "HalfEdge is not consistent." );
+        CORE_ASSERT( ( he->Twin()->V() != he->V() ), "HalfEdge is not consistent." );
 
         VHEIterator vit( he->V() );
         const uint vsize = vit.size();

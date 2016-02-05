@@ -35,7 +35,6 @@ void bind( const HalfEdge_ptr& he ) {
         he->Next()->setPrev( he );
     }
 
-
     if( he->Prev() != nullptr ) {
         he->Prev()->setNext( he );
     }
@@ -55,10 +54,10 @@ void bind( const HalfEdge_ptr& he ) {
 
 void bind( const FullEdge_ptr& fe ) {
     if( fe == nullptr ) return;
-    if( fe->HE() != nullptr ) {
-        fe->HE()->setFE( fe );
-        if( fe->HE()->Twin() != nullptr ) {
-            fe->HE()->Twin()->setFE( fe );
+    if( fe->HE( 0 ) != nullptr ) {
+        fe->HE( 0 )->setFE( fe );
+        if( fe->HE( 1 ) != nullptr ) {
+            fe->HE( 1 )->setFE( fe );
         }
     }
 }
