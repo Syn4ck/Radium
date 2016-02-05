@@ -6,7 +6,7 @@
 
 #define DEBUG_SPLIT
 //#define DEBUG_COLLAPSE
-//#define DEBUG_FLIP
+#define DEBUG_FLIP
 
 
 namespace Ra {
@@ -53,10 +53,13 @@ protected:
     /// COLLAPSE
     bool collapseFullEdge( const FullEdge_ptr& ptr );
     bool collapseFace( const Face_ptr& ptr );
+    bool handleSpecialCase( const HalfEdge_ptr& ptr );
+    void faceMerge( const HalfEdge_ptr& h0, const HalfEdge_ptr& h1, const HalfEdge_ptr& h2 );
 #endif
 
 #ifdef DEBUG_FLIP
     /// FLIP
+    bool isFlippable( const FullEdge_ptr& fe );
     bool flipFullEdge( const FullEdge_ptr& ptr );
 #endif
 
