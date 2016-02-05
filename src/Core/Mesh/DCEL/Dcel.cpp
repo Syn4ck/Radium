@@ -50,14 +50,6 @@ Dcel::Dcel( const Dcel& dcel ) :
         he_table[dcel_he->idx] = he->idx;
     }
 
-    // Upload the fulledge data
-    for( uint i = 0; i < dcel.m_fulledge.size(); ++i ) {
-        FullEdge_ptr dcel_fe = dcel.m_fulledge.at( i );
-        FullEdge_ptr fe      = new FullEdge( m_halfedge[he_table[dcel_fe->HE( 0 )->idx]] );
-        insert( fe );
-        fe->HE( 0 )->Twin()->setFE( fe );
-    }
-
     // Upload the face data
     for( uint i = 0; i < dcel.m_face.size(); ++i ) {
         Face_ptr dcel_f = dcel.m_face.at( i );
@@ -70,11 +62,36 @@ Dcel::Dcel( const Dcel& dcel ) :
     for( uint i = 0; i < m_halfedge.size(); ++i ) {
         HalfEdge_ptr dcel_he = dcel.m_halfedge.at( i );
         HalfEdge_ptr he      = m_halfedge[i];
-        he->setNext( m_halfedge[he_table[dcel_he->Next()->idx]] );
-        he->setPrev( m_halfedge[he_table[dcel_he->Prev()->idx]] );
-        he->setTwin( m_halfedge[he_table[dcel_he->Twin()->idx]] );
-        he->setF( m_face[f_table[dcel_he->F()->idx]] );
-        he->V()->setHE( m_halfedge[he_table[dcel_he->V()->HE()->idx]] );
+        if( dcel_he->Next() != nullptr ) {
+            he->setNext( m_halfedge[he_table[dcel_he->Next()->idx]] );
+        }
+        if( dcel_he->Prev() != nullptr ) {
+            he->setPrev( m_halfedge[he_table[dcel_he->Prev()->idx]] );
+        }
+        if( dcel_he->Twin() != nullptr ) {
+            he->setTwin( m_halfedge[he_table[dcel_he->Twin()->idx]] );
+        }
+        if( dcel_he->F() != nullptr ) {
+            he->setF( m_face[f_table[dcel_he->F()->idx]] );
+        }
+        if( dcel_he->V() != nullptr ) {
+            if( dcel_he->V()->HE() != nullptr ) {
+                he->V()->setHE( m_halfedge[he_table[dcel_he->V()->HE()->idx]] );
+            }
+        }
+    }
+
+    // Upload the fulledge data
+    for( uint i = 0; i < dcel.m_fulledge.size(); ++i ) {
+        FullEdge_ptr dcel_fe = dcel.m_fulledge.at( i );
+        FullEdge_ptr fe      = new FullEdge();
+        if( dcel_fe->HE( 0 ) != nullptr ) {
+            fe->setHE( m_halfedge[he_table[dcel_fe->HE( 0 )->idx]] );
+            if( dcel_fe->HE( 1 ) != nullptr ) {
+                fe->HE( 1 )->setFE( fe );
+            }
+        }
+        insert( fe );
     }
 }
 
