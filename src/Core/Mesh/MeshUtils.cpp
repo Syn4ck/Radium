@@ -1,5 +1,8 @@
 #include <Core/Mesh/MeshUtils.hpp>
 
+#include <map>
+#include <utility>
+
 #include <Core/Math/Math.hpp>
 #include <Core/Math/RayCast.hpp>
 #include <Core/String/StringUtils.hpp>
@@ -473,6 +476,47 @@ namespace Ra
 
                 return result;
             }
+
+
+            bool checkManifold( const TriangleMesh& mesh ) {
+                std::map< std::pair< uint, uint >, uint > table;
+
+                for( const auto& T : mesh.m_triangles ) {
+                    uint id[3];
+                    id[0] = T[0];
+                    id[1] = T[1];
+                    id[2] = T[2];
+
+                    if( id[0] == id[1] ) return false;
+                    if( id[0] == id[2] ) return false;
+                    if( id[1] == id[2] ) return false;
+
+                    for( uint i = 0; i < 3; ++i ) {
+                        const uint a = i;
+                        const uint b = (i+1)%3;
+                        std::pair< uint, uint > e;
+                        if( id[a] < id[b] ) {
+                            e.first  = id[a];
+                            e.second = id[b];
+                        } else {
+                            e.first  = id[b];
+                            e.second = id[a];
+                        }
+                        auto it = table.find( e );
+                        if( it == table.end() ) {
+                            table[e] = 1;
+                        } else {
+                            if( it->second == 2 ) {
+                                return false;
+                            }
+                            it->second++;
+                        }
+                    }
+                }
+
+                return true;
+            }
+
 
         }
     }

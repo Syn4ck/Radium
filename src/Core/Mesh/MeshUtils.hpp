@@ -99,6 +99,8 @@ namespace Ra
             /// Check that the mesh is well built, asserting when it is not.
             /// only compiles to something when in debug mode.
             RA_CORE_API void checkConsistency( const TriangleMesh& mesh );
+
+            RA_CORE_API bool checkManifold( const TriangleMesh& mesh );
         }
     }
 }
