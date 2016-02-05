@@ -19,7 +19,7 @@ public:
     inline FaceList list() const override;
 
     /// SIZE
-    virtual uint size() const override;
+    inline uint size() const override;
 
     /// OPERATOR
     inline Face_ptr operator->() const override;

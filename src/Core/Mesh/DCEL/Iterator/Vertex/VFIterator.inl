@@ -22,31 +22,36 @@ VFIterator::~VFIterator() { }
 /// LIST
 inline FaceList VFIterator::list() const {
     FaceList L;
-    HalfEdge_ptr it = m_object->HE();
+    const HalfEdge_ptr& start = this->m_object->HE();
+    HalfEdge_ptr        it    = start;
     do {
-        L.push_back( it->F() );
-        it = it->Prev()->Twin();
-    } while( it != m_object->HE() );
+        if( it->F() != nullptr ) {
+            L.push_back( it->F() );
+        }
+        if( it->Prev() == nullptr ) break;
+        it = it->Prev();
+        if( it->Twin() == nullptr ) break;
+        it = it->Twin();
+    } while( ( it != nullptr ) && ( it != start ) );
     return L;
 }
 
 
 
 /// SIZE
-template < typename TO_OBJECT >
-uint VIterator< TO_OBJECT >::size() const {
+uint VFIterator::size() const {
     uint i = 0;
     const HalfEdge_ptr& start = this->m_object->HE();
     HalfEdge_ptr        it    = start;
     if( it != nullptr ) {
         do {
+            if( it->F() != nullptr ) {
+                ++i;
+            }
             if( it->Prev() == nullptr ) break;
             it = it->Prev();
             if( it->Twin() == nullptr ) break;
             it = it->Twin();
-            if( it->F() != nullptr ) {
-                ++i;
-            }
         } while( ( it != nullptr ) && ( it != start ) );
     }
     return i;

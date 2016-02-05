@@ -24,8 +24,7 @@ inline VertexList VVIterator::list() const {
     if( it != nullptr ) {
         do {
             if( it->Next() == nullptr ) break;
-            it = it->Next();
-            if( it->V() == nullptr ) break;
+            if( it->Next()->V() == nullptr ) break;
             L.push_back( it->Next()->V() );
             if( it->Prev() == nullptr ) break;
             it = it->Prev();
