@@ -1,6 +1,10 @@
 #ifndef RADIUMENGINE_BK2004_ALGORITHM_DEFINITION_HPP
 #define RADIUMENGINE_BK2004_ALGORITHM_DEFINITION_HPP
 
+#include <set>
+#include <utility>
+
+#include <Core/Mesh/TriangleMesh.hpp>
 #include <Core/Mesh/DCEL/Definition.hpp>
 #include <Core/Algorithm/Algorithm.hpp>
 #include <Core/Algorithm/Subdivision/SubdivisionHandler.hpp>
@@ -9,8 +13,8 @@ namespace Ra {
 namespace Core {
 
 struct BK2004Parameter {
-    BK2004Parameter( const uint   algorithmIteration = 1,
-                     const uint   smoothingIteration = 1,
+    BK2004Parameter( const uint   algorithmIteration = 5,
+                     const uint   smoothingIteration = 5,
                      const Scalar longScale          = ( 4.0 / 3.0 ),
                      const Scalar shortScale         = ( 4.0 / 5.0 ),
                      const Scalar lambdaFactor       = 1.0 );
@@ -26,8 +30,9 @@ struct BK2004Parameter {
 
 class BK2004 : public Algorithm< BK2004Parameter > {
 public:
+    /// ERROR
     enum ErrorType {
-        NO_ERROR                = 0,
+        NO_ERROR                     = 0,
         DCEL_NULLPTR,
         SUBDIVIDER_NOT_INITIALIZED,
         DCEL_AND_SUBDIVIDER_MISMATCH,
@@ -50,29 +55,40 @@ public:
 
     /// DCEL
     inline Dcel_ptr getDCEL() const;
-
     inline void setDCEL( const Dcel_ptr& dcel );
+
+    /// TRIANGLE MESH
+    inline TriangleMesh& getLastMesh();
+    inline Dcel_ptr      getLastDCEL();
 
     /// TARGET LENGTH
     inline Scalar getTargetLength() const;
 
 protected:
     /// ALGORITHM STAGE
-    bool configCheck( uint& exitStatus ) override;
-    bool preprocessing( uint& exitStatus ) override;
-    bool   processing( uint& exitStatus ) override;
+    bool    configCheck( uint& exitStatus ) override;
+    bool  preprocessing( uint& exitStatus ) override;
+    bool     processing( uint& exitStatus ) override;
     bool postprocessing( uint& exitStatus ) override;
 
     /// FUNCTION
     void extractIndexList( std::vector< Index >& list ) const;
-    bool splitNcollapse( uint& exitStatus );
+    bool split( uint& exitStatus );
+    bool collapse( uint& exitStatus );
     bool flip( uint& exitStatus );
     void smoothing();
 
+
+
     /// VARIABLE
     Dcel_ptr           m_dcel;
+    TriangleMesh       m_prevMesh;
+    Dcel_ptr           m_prevDCEL;
     Scalar             m_targetLength;
     SubdivisionHandler m_subHandler;
+
+    std::set< std::pair< Scalar, Index > > m_splitList;
+    std::set< std::pair< Scalar, Index > > m_collapseList;
 };
 
 } // namespace Core

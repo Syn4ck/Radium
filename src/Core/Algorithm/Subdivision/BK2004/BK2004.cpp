@@ -4,9 +4,11 @@
 #include <Core/Mesh/DCEL/Vertex.hpp>
 #include <Core/Mesh/DCEL/FullEdge.hpp>
 #include <Core/Mesh/DCEL/Dcel.hpp>
+#include <Core/Mesh/DCEL/Operation/Border.hpp>
 #include <Core/Mesh/DCEL/Operation/Check.hpp>
 #include <Core/Mesh/DCEL/Operation/Consistent.hpp>
 #include <Core/Mesh/DCEL/Operation/Convert.hpp>
+#include <Core/Mesh/DCEL/Operation/Extract.hpp>
 #include <Core/Mesh/DCEL/Operation/Length.hpp>
 #include <Core/Mesh/DCEL/Operation/Valence.hpp>
 #include <Core/Mesh/DCEL/Operation/Valid.hpp>
@@ -42,7 +44,10 @@ BK2004::BK2004( const Dcel_ptr&        dcel,
     Algorithm< BK2004Parameter >( param, "Botsch Kobbelt 2004", verbosity ),
     m_dcel( dcel ),
     m_targetLength( -1.0 ),
-    m_subHandler( dcel ) { }
+    m_subHandler( dcel ) {
+
+    m_prevDCEL = nullptr;
+}
 
 /// DESTRUCTOR
 BK2004::~BK2004() { }
@@ -96,6 +101,9 @@ bool BK2004::preprocessing( uint& exitStatus ) {
         return false;
     }
 
+    m_splitList.clear();
+    m_collapseList.clear();
+
     exitStatus = NO_ERROR;
     return true;
 }
@@ -104,10 +112,42 @@ bool BK2004::preprocessing( uint& exitStatus ) {
 
 bool BK2004::processing( uint& exitStatus ) {
     for( uint alg_iter = 0; alg_iter < m_param.m_algorithmIteration; ++alg_iter ) {
-        if( !splitNcollapse( exitStatus ) ) {
+        const uint size = m_dcel->m_fulledge.size();
+        for( uint i = 0; i < size; ++i ) {
+            FullEdge_ptr fe = m_dcel->m_fulledge[i];
+            Scalar l = length( fe );
+            if( l > ( m_param.m_longScale * m_targetLength ) ) {
+                m_splitList.insert( std::pair< Scalar, Index >( l, fe->idx ) );
+            }
+            if( l < ( m_param.m_shortScale * m_targetLength ) ) {
+                m_collapseList.insert( std::pair< Scalar, Index >( l, fe->idx ) );
+            }
+        }
+
+
+#ifdef DEBUG_SPLIT
+        if( !split( exitStatus ) ) {
                 return false;
         }
 
+        if( !isConsistent( m_dcel ) ) {
+            exitStatus = DCEL_NOT_CONSISTENT;
+            return false;
+        }
+#endif
+
+#ifdef DEBUG_COLLAPSE
+        if( !collapse( exitStatus ) ) {
+                return false;
+        }
+
+        if( !isConsistent( m_dcel ) ) {
+            exitStatus = DCEL_NOT_CONSISTENT;
+            return false;
+        }
+#endif
+
+#ifdef DEBUG_FLIP
         if( !flip( exitStatus ) ) {
             return false;
         }
@@ -116,6 +156,12 @@ bool BK2004::processing( uint& exitStatus ) {
             exitStatus = DCEL_NOT_CONSISTENT;
             return false;
         }
+#endif
+
+        /*if( !isConsistent( m_dcel ) ) {
+            exitStatus = DCEL_NOT_CONSISTENT;
+            return false;
+        }*/
 
         smoothing();
     }
@@ -141,58 +187,77 @@ void BK2004::extractIndexList( std::vector< Index >& list ) const {
 
 
 
-bool BK2004::splitNcollapse( uint& exitStatus ) {
-    const uint   size     = m_dcel->m_fulledge.size();
-
-    std::vector< Index >  edge( size );
-    extractIndexList( edge );
-
-    std::vector< Scalar > length;
-    FullEdgeLength( m_dcel, length );
-
-    for( uint i = 0; i < size; ++i ) {
-        if( !m_dcel->m_fulledge.contain( edge[i] ) ) continue;
-
+bool BK2004::split( uint& exitStatus ) {
 #ifdef DEBUG_SPLIT
-        if( length[i] > ( m_param.m_longScale * m_targetLength ) ) {
-            if( !m_subHandler.splitFullEdge( edge[i] ) ) {
-                exitStatus = FULLEDGE_NOT_SPLITTED;
-                return false;
-            }
+    for( auto it = m_splitList.begin(); it != m_splitList.end(); ++it ) {
+        m_prevMesh.clear();
+        convert( *m_dcel, m_prevMesh );
+        if( m_prevDCEL != nullptr ) {
+            delete m_prevDCEL;
         }
-#endif
 
-#ifdef DEBUG_COLLAPSE
-        if( length[i] < ( m_param.m_shortScale * m_targetLength ) ) {
-            if( !m_subHandler.collapseFullEdge( edge[i] ) ) {
-                exitStatus = FULLEDGE_NOT_COLLAPSED;
-                return false;
-            }
+        if( !m_subHandler.splitFullEdge( it->second ) ) {
+            exitStatus = FULLEDGE_NOT_SPLITTED;
+            return false;
         }
-#endif
+        m_splitList.erase( it );
     }
+#endif
     exitStatus = NO_ERROR;
     return true;
 }
 
 
 
+bool BK2004::collapse( uint& exitStatus ) {
+#ifdef DEBUG_COLLAPSE
+    for( auto it = m_collapseList.begin(); it != m_collapseList.end(); ++it ) {
+        if( m_dcel->m_fulledge.contain( it->second ) ) {
+            m_prevMesh.clear();
+            convert( *m_dcel, m_prevMesh );
+            if( m_prevDCEL != nullptr ) {
+                delete m_prevDCEL;
+            }
 
-bool BK2004::flip( uint& exitStatus ) {
-    const uint size = m_dcel->m_fulledge.size();
-    for( uint i = 0; i < size; ++i ) {
-        FullEdge_ptr fe = m_dcel->m_fulledge[i];
-#ifdef DEBUG_FLIP
-        uint  pre_flip = valence( fe, false );
-        uint post_flip = valence( fe, true  );
-        if( pre_flip > post_flip ) {
-            if( !m_subHandler.flipFullEdge( fe->idx ) ) {
-                exitStatus = FULLEDGE_NOT_FLIPPED;
+            if( !m_subHandler.collapseFullEdge( it->second ) ) {
+                exitStatus = FULLEDGE_NOT_COLLAPSED;
                 return false;
             }
         }
-#endif
+        m_collapseList.erase( it );
     }
+#endif
+    exitStatus = NO_ERROR;
+    return true;
+}
+
+
+
+bool BK2004::flip( uint& exitStatus ) {
+#ifdef DEBUG_FLIP
+    const uint size = m_dcel->m_fulledge.size();
+    std::set< std::pair< int, Index > > list;
+    for( uint i = 0; i < size; ++i ) {
+        FullEdge_ptr fe = m_dcel->m_fulledge[i];
+        if( isBorder( fe ) ) {
+            continue;
+        }
+        int  pre_flip = int( valence( fe, false ) );
+        int post_flip = int( valence( fe, true  ) );
+        int value     = pre_flip - post_flip;
+        if( value > 0 ) {
+            list.insert( std::pair< int, Index >( value, fe->idx ) );
+        }
+    }
+
+    for( auto it = list.rbegin(); it != list.rend(); ++it ) {
+        if( !m_subHandler.flipFullEdge( it->second ) ) {
+            exitStatus = FULLEDGE_NOT_FLIPPED;
+            return false;
+        }
+        //list.erase( it );
+    }
+#endif
     exitStatus = NO_ERROR;
     return true;
 }
