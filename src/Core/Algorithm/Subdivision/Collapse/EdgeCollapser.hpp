@@ -20,10 +20,16 @@ public:
         INVALID_HALFEDGE,
         INVALID_FULLEDGE,
         INVALID_FACE,
-        VERTEX_NOT_INSERTED,
-        HALFEDGE_NOT_INSERTED,
-        FULLEDGE_NOT_INSERTED,
-        FACE_NOT_INSERTED,
+        VERTEX_NOT_REMOVED,
+        HALFEDGE_NOT_REMOVED,
+        FULLEDGE_NOT_REMOVED,
+        FACE_NOT_REMOVED,
+        DEGENERATE_FULLEDGE,
+        BORDER_FULLEDGE,
+        ONE_RING_INTERSECTION_PROBLEM,
+        DEGENERATE_FACE,
+        FACE_INVERSION,
+        FACE_NOT_COLLAPSED
     };
 
     /// CONSTRUCTOR
@@ -47,6 +53,10 @@ protected:
 
     /// FUNCTION
     bool checkFullEdge( uint& exitStatus );
+    bool isCollapsable( uint& exitStatus );
+    bool isOneRingIntersectionFine( const HalfEdge_ptr& ptr );
+    bool collapseFullEdge( uint& exitStatus );
+    bool collapseFace( const Face_ptr& ptr, uint& exitStatus );
 
 
     /// VARIABLE

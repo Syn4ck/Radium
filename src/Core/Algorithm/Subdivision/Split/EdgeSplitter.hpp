@@ -24,6 +24,7 @@ public:
         HALFEDGE_NOT_INSERTED,
         FULLEDGE_NOT_INSERTED,
         FACE_NOT_INSERTED,
+        DEGENERATE_FULLEDGE
     };
 
     /// CONSTRUCTOR
@@ -47,8 +48,9 @@ protected:
 
     /// FUNCTION
     bool checkFullEdge( uint& exitStatus );
+    bool isSplittable( uint& exitStatus );
     bool splitFullEdge( uint& exitStatus );
-    bool     splitFace( const Face_ptr& ptr, uint& exitStatus );
+    bool splitFace( const Face_ptr& ptr, uint& exitStatus );
 
     /// VARIABLE
     Dcel_ptr     m_dcel;

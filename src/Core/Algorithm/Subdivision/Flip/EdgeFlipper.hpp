@@ -24,6 +24,11 @@ public:
         HALFEDGE_NOT_INSERTED,
         FULLEDGE_NOT_INSERTED,
         FACE_NOT_INSERTED,
+        BORDER_FULLEDGE,
+        DIHEDRAL_ANGLE_TOO_LARGE,
+        INVERSION_OCCURS,
+        DEGENERATE_FULLEDGE,
+        DEGENERATE_FACE
     };
 
     /// CONSTRUCTOR
@@ -47,6 +52,7 @@ protected:
 
     /// FUNCTION
     bool checkFullEdge( uint& exitStatus );
+    bool isFlippable( uint& exitStatus );
     bool flipFullEdge( uint& exitStatus );
 
     /// VARIABLE

@@ -60,6 +60,10 @@ bool EdgeSplitter::processing( uint& exitStatus ) {
         return false;
     }
 
+    if( !isSplittable( exitStatus ) ) {
+        return false;
+    }
+
     if( !splitFullEdge( exitStatus ) ) {
         return false;
     }
@@ -107,8 +111,21 @@ bool EdgeSplitter::checkFullEdge( uint& exitStatus ) {
         }
     }
 
+    if( v[0] == v[1] ) {
+        exitStatus = DEGENERATE_FULLEDGE;
+        return false;
+    }
+
     return true;
 }
+
+
+
+bool EdgeSplitter::isSplittable( uint& exitStatus ) {
+    return true;
+}
+
+
 
 bool EdgeSplitter::splitFullEdge( uint& exitStatus ) {
     // Useful names
@@ -121,11 +138,6 @@ bool EdgeSplitter::splitFullEdge( uint& exitStatus ) {
     HalfEdge_ptr he[4];
     FullEdge_ptr fe[2];
     Face_ptr     f[2];
-
-    Vertex_ptr   old_v[2];
-    HalfEdge_ptr old_he[2];
-    FullEdge_ptr old_fe;
-    Face_ptr     old_f[2];
 
     // Initialize data
     fe[0] = m_fe;
@@ -151,11 +163,12 @@ bool EdgeSplitter::splitFullEdge( uint& exitStatus ) {
     if( ( insertStatus &= v[n]->idx.isInvalid() ) ) {
         exitStatus = VERTEX_NOT_INSERTED;
     }
+
     if( ( insertStatus &= he[x]->idx.isInvalid() ) ) {
         exitStatus = HALFEDGE_NOT_INSERTED;
     }
 
-    if( ( insertStatus &= he[x]->idx.isInvalid() ) ) {
+    if( ( insertStatus &= he[y]->idx.isInvalid() ) ) {
         exitStatus = HALFEDGE_NOT_INSERTED;
     }
 
@@ -259,6 +272,7 @@ bool EdgeSplitter::splitFace( const Face_ptr& ptr, uint& exitStatus ) {
     if( ( insertStatus &= fe->idx.isInvalid() ) ) {
         exitStatus = FULLEDGE_NOT_INSERTED;
     }
+
     if( ( insertStatus &= f[1]->idx.isInvalid() ) ) {
         exitStatus = FACE_NOT_INSERTED;
     }

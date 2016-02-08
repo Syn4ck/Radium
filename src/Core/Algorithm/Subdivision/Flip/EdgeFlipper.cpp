@@ -1,5 +1,7 @@
 #include <Core/Algorithm/Subdivision/Flip/EdgeFlipper.hpp>
 
+#include <Core/Geometry/Triangle/TriangleOperation.hpp>
+
 #include <Core/Mesh/DCEL/Vertex.hpp>
 #include <Core/Mesh/DCEL/HalfEdge.hpp>
 #include <Core/Mesh/DCEL/FullEdge.hpp>
@@ -61,6 +63,10 @@ bool EdgeFlipper::processing( uint& exitStatus ) {
         return false;
     }
 
+    if( !isFlippable( exitStatus ) ) {
+        return false;
+    }
+
     if( !flipFullEdge( exitStatus ) ) {
         return false;
     }
@@ -102,7 +108,7 @@ bool EdgeFlipper::checkFullEdge( uint& exitStatus ) {
 
     // Check data
     for( uint i = 0; i < 4; ++i ) {
-        if( !isValid( v[1] ) ) {
+        if( !isValid( v[i] ) ) {
             exitStatus = INVALID_VERTEX;
             return false;
         }
@@ -116,22 +122,98 @@ bool EdgeFlipper::checkFullEdge( uint& exitStatus ) {
     }
 
     for( uint i = 0; i < 2; ++i ) {
-        if( !isValid( f[0] ) ) {
+        if( !isValid( f[i] ) ) {
             exitStatus = INVALID_FACE;
             return false;
         }
+    }
+
+    if( v[0] == v[1] ) {
+        exitStatus = DEGENERATE_FULLEDGE;
+        return false;
     }
 
     return true;
 }
 
 
-bool EdgeFlipper::flipFullEdge( uint& exitStatus ) {
-    // In case of a border fulledge, do not flip
+
+bool EdgeFlipper::isFlippable( uint& exitStatus ) {
     if( isBorder( m_fe ) ) {
-        return true;
+        exitStatus = BORDER_FULLEDGE;
+        return false;
     }
 
+    // Useful names
+    const uint x = 4; // HalfEdge to flip
+    const uint y = 5; // HalfEdge to flip
+
+    // Declare data
+    Vertex_ptr   v[4];
+    HalfEdge_ptr he[6];
+
+    // Initialize data
+    he[x] = m_fe->HE( 0 );
+    he[y] = m_fe->HE( 1 );
+    he[0] = he[x]->Next();
+    he[1] = he[x]->Prev();
+    he[2] = he[y]->Next();
+    he[3] = he[y]->Prev();
+    v[0]  = he[0]->V();
+    v[1]  = he[1]->V();
+    v[2]  = he[2]->V();
+    v[3]  = he[3]->V();
+
+    const Vector3 p = v[2]->P();
+    const Vector3 q = v[0]->P();
+    const Vector3 r = v[1]->P();
+    const Vector3 s = v[3]->P();
+
+    const Vector3 pq = ( q - p ).normalized();
+    const Vector3 pr = ( r - p ).normalized();
+    const Vector3 ps = ( s - p ).normalized();
+    const Vector3 qr = ( r - q ).normalized();
+    const Vector3 qs = ( s - q ).normalized();
+    const Vector3 rs = ( s - r ).normalized();
+
+    const Vector3 n0 = Geometry::triangleNormal( p, q, r );
+    const Vector3 n1 = Geometry::triangleNormal( p, s, q );
+
+    // DEGENERATE
+    if( ( n0.isApprox( Vector3::Zero() ) ) || ( n1.isApprox( Vector3::Zero() ) ) ) {
+        exitStatus = DEGENERATE_FACE;
+        return false;
+    }
+
+    // Dihedral
+    const Scalar angle = Vector::angle< Vector3 >( n0, n1 );
+    if( angle > Math::PiDiv4 ) {
+        exitStatus = DIHEDRAL_ANGLE_TOO_LARGE;
+        return false;
+    }
+
+    // Convexity
+    const Scalar a0 = Vector::angle< Vector3 >( pq, pr );
+    const Scalar a1 = Vector::angle< Vector3 >( pq, ps );
+
+    const Scalar b0 = Vector::angle< Vector3 >( -pq, qr );
+    const Scalar b1 = Vector::angle< Vector3 >( -pq, qs );
+
+    const Scalar alpha = a0 + a1;
+    const Scalar beta  = b0 + b1;
+
+    if( ( alpha >= Math::Pi ) || ( beta >= Math::Pi ) ) {
+        exitStatus = INVERSION_OCCURS;
+        return false;
+    }
+
+    return true;
+
+}
+
+
+
+bool EdgeFlipper::flipFullEdge( uint& exitStatus ) {
     // Useful names
     const uint x = 4; // HalfEdge to flip
     const uint y = 5; // HalfEdge to flip
