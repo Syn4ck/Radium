@@ -16,16 +16,24 @@ void uniformNormal( const VectorArray< Vector3 >& p, const VectorArray< Triangle
     normal.clear();
     normal.resize( N, Vector3::Zero() );
     for( const auto& t : T ) {
-        uint i = t( 0 );
-        uint j = t( 1 );
-        uint k = t( 2 );
+        if( !t.allFinite() ) {
+            return;
+        }
+        const uint i = t( 0 );
+        const uint j = t( 1 );
+        const uint k = t( 2 );
         const Vector3 triN = triangleNormal( p[i], p[j], p[k] );
+        if( !triN.allFinite() ) {
+            return;
+        }
         normal[i] += triN;
         normal[j] += triN;
         normal[k] += triN;
     }
     for( auto& n : normal ) {
-        n.normalize();
+        if( !n.isApprox( Vector3::Zero() ) ) {
+            n.normalize();
+        }
     }
 }
 
@@ -36,9 +44,9 @@ void angleWeightedNormal( const VectorArray< Vector3 >& p, const VectorArray< Tr
     normal.clear();
     normal.resize( N, Vector3::Zero() );
     for( const auto& t : T ) {
-        uint i = t( 0 );
-        uint j = t( 1 );
-        uint k = t( 2 );
+        const uint i = t( 0 );
+        const uint j = t( 1 );
+        const uint k = t( 2 );
         const Vector3 triN = triangleNormal( p[i], p[j], p[k] );
         const Scalar theta_i = Vector::angle( ( p[j] - p[i] ), ( p[k] - p[i] ) );
         const Scalar theta_j = Vector::angle( ( p[i] - p[j] ), ( p[k] - p[j] ) );
@@ -48,7 +56,9 @@ void angleWeightedNormal( const VectorArray< Vector3 >& p, const VectorArray< Tr
         normal[k] += theta_k * triN;
     }
     for( auto& n : normal ) {
-        n.normalize();
+        if( !n.isApprox( Vector3::Zero() ) ) {
+            n.normalize();
+        }
     }
 }
 
@@ -59,9 +69,9 @@ void areaWeightedNormal( const VectorArray< Vector3 >& p, const VectorArray< Tri
     normal.clear();
     normal.resize( N, Vector3::Zero() );
     for( const auto& t : T ) {
-        uint i = t( 0 );
-        uint j = t( 1 );
-        uint k = t( 2 );
+        const uint i = t( 0 );
+        const uint j = t( 1 );
+        const uint k = t( 2 );
         const Scalar  area = triangleArea( p[i], p[j], p[k] );
         const Vector3 triN = area * triangleNormal( p[i], p[j], p[k] );
         normal[i] += triN;
@@ -69,7 +79,9 @@ void areaWeightedNormal( const VectorArray< Vector3 >& p, const VectorArray< Tri
         normal[k] += triN;
     }
     for( auto& n : normal ) {
-        n.normalize();
+        if( !n.isApprox( Vector3::Zero() ) ) {
+            n.normalize();
+        }
     }
 }
 
