@@ -1,4 +1,4 @@
-#include <Core/Algorithm/Subdivision/Flip/EdgeFlipper.hpp>
+#include <Core/Algorithm/Subdivision/FullEdge/EdgeFlipper.hpp>
 
 #include <Core/Mesh/DCEL/Dcel.hpp>
 

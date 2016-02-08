@@ -1,4 +1,4 @@
-#include <Core/Algorithm/Subdivision/Collapse/EdgeCollapser.hpp>
+#include <Core/Algorithm/Subdivision/FullEdge/EdgeCollapser.hpp>
 
 #include <Core/Mesh/DCEL/Dcel.hpp>
 

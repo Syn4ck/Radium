@@ -60,6 +60,6 @@ protected:
 } // namespace Core
 } // namespace Ra
 
-#include <Core/Algorithm/Subdivision/Split/EdgeSplitter.inl>
+#include <Core/Algorithm/Subdivision/FullEdge/EdgeSplitter.inl>
 
 #endif // RADIUMENGINE_EDGE_SPLITTER_DEFINITION_HPP

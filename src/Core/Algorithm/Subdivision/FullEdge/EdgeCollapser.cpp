@@ -1,4 +1,4 @@
-#include <Core/Algorithm/Subdivision/Collapse/EdgeCollapser.hpp>
+#include <Core/Algorithm/Subdivision/FullEdge/EdgeCollapser.hpp>
 
 #include <Core/Geometry/Triangle/TriangleOperation.hpp>
 
@@ -66,7 +66,10 @@ bool EdgeCollapser::processing( uint& exitStatus ) {
     }
 
     if( !isCollapsable( exitStatus ) ) {
-        return false;
+        if( exitStatus == DEGENERATE_FACE ) {
+            return false;
+        }
+        return true;
     }
 
     if( !collapseFullEdge( exitStatus ) ) {
@@ -262,7 +265,7 @@ bool EdgeCollapser::collapseFullEdge( uint& exitStatus ) {
         return false;
     }
 
-    m_dcel->removeHalfEdge( fe->idx );
+    m_dcel->removeFullEdge( fe->idx );
     if( fe->idx.isValid() ) {
         exitStatus = FULLEDGE_NOT_REMOVED;
         return false;
@@ -369,7 +372,7 @@ bool EdgeCollapser::collapseFace( const Face_ptr& ptr, uint& exitStatus ) {
         return false;
     }
 
-    m_dcel->removeHalfEdge( fe[1]->idx );
+    m_dcel->removeFullEdge( fe[1]->idx );
     if( fe[1]->idx.isValid() ) {
         exitStatus = FULLEDGE_NOT_REMOVED;
         return false;

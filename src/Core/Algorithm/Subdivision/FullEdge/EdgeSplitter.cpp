@@ -1,4 +1,4 @@
-#include <Core/Algorithm/Subdivision/Split/EdgeSplitter.hpp>
+#include <Core/Algorithm/Subdivision/FullEdge/EdgeSplitter.hpp>
 
 #include <Core/Mesh/DCEL/Vertex.hpp>
 #include <Core/Mesh/DCEL/HalfEdge.hpp>
@@ -61,7 +61,7 @@ bool EdgeSplitter::processing( uint& exitStatus ) {
     }
 
     if( !isSplittable( exitStatus ) ) {
-        return false;
+        return true;
     }
 
     if( !splitFullEdge( exitStatus ) ) {
@@ -160,19 +160,19 @@ bool EdgeSplitter::splitFullEdge( uint& exitStatus ) {
 
     bool insertStatus = true;
 
-    if( ( insertStatus &= v[n]->idx.isInvalid() ) ) {
+    if( !( insertStatus &= v[n]->idx.isValid() ) ) {
         exitStatus = VERTEX_NOT_INSERTED;
     }
 
-    if( ( insertStatus &= he[x]->idx.isInvalid() ) ) {
+    if( !( insertStatus &= he[x]->idx.isValid() ) ) {
         exitStatus = HALFEDGE_NOT_INSERTED;
     }
 
-    if( ( insertStatus &= he[y]->idx.isInvalid() ) ) {
+    if( !( insertStatus &= he[y]->idx.isValid() ) ) {
         exitStatus = HALFEDGE_NOT_INSERTED;
     }
 
-    if( ( insertStatus &= fe[1]->idx.isInvalid() ) ) {
+    if( !( insertStatus &= fe[1]->idx.isValid() ) ) {
         exitStatus = FULLEDGE_NOT_INSERTED;
     }
 
@@ -261,19 +261,19 @@ bool EdgeSplitter::splitFace( const Face_ptr& ptr, uint& exitStatus ) {
 
     bool insertStatus = true;
 
-    if( ( insertStatus &= he[x]->idx.isInvalid() ) ) {
+    if( !( insertStatus &= he[x]->idx.isValid() ) ) {
         exitStatus = HALFEDGE_NOT_INSERTED;
     }
 
-    if( ( insertStatus &= he[x]->idx.isInvalid() ) ) {
+    if( !( insertStatus &= he[x]->idx.isValid() ) ) {
         exitStatus = HALFEDGE_NOT_INSERTED;
     }
 
-    if( ( insertStatus &= fe->idx.isInvalid() ) ) {
+    if( !( insertStatus &= fe->idx.isValid() ) ) {
         exitStatus = FULLEDGE_NOT_INSERTED;
     }
 
-    if( ( insertStatus &= f[1]->idx.isInvalid() ) ) {
+    if( !( insertStatus &= f[1]->idx.isValid() ) ) {
         exitStatus = FACE_NOT_INSERTED;
     }
 

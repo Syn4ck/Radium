@@ -67,6 +67,6 @@ protected:
 } // namespace Core
 } // namespace Ra
 
-#include <Core/Algorithm/Subdivision/Collapse/EdgeCollapser.inl>
+#include <Core/Algorithm/Subdivision/FullEdge/EdgeCollapser.inl>
 
 #endif // RADIUMENGINE_EDGE_COLLAPSER_DEFINITION_HPP

@@ -28,7 +28,8 @@ public:
         DIHEDRAL_ANGLE_TOO_LARGE,
         INVERSION_OCCURS,
         DEGENERATE_FULLEDGE,
-        DEGENERATE_FACE
+        DEGENERATE_FACE,
+        WORSE_QUALITY
     };
 
     /// CONSTRUCTOR
@@ -63,6 +64,6 @@ protected:
 } // namespace Core
 } // namespace Ra
 
-#include <Core/Algorithm/Subdivision/Flip/EdgeFlipper.inl>
+#include <Core/Algorithm/Subdivision/FullEdge/EdgeFlipper.inl>
 
 #endif // RADIUMENGINE_EDGE_FLIPPER_DEFINITION_HPP

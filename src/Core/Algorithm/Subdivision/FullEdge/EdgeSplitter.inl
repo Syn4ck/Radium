@@ -1,4 +1,4 @@
-#include <Core/Algorithm/Subdivision/Split/EdgeSplitter.hpp>
+#include <Core/Algorithm/Subdivision/FullEdge/EdgeSplitter.hpp>
 
 #include <Core/Mesh/DCEL/Dcel.hpp>
 
