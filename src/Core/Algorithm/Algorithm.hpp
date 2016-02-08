@@ -46,6 +46,8 @@ public:
 
     /// STATE
     inline AlgorithmState getState() const;
+    inline bool isCompleted() const;
+    inline bool isFailed() const;
 
     /// EXIT STATUS
     inline uint getExitStatus() const;

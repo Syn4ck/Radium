@@ -65,6 +65,18 @@ inline typename Algorithm< PARAMETERS >::AlgorithmState Algorithm< PARAMETERS >:
     return m_state;
 }
 
+template < typename PARAMETERS >
+inline bool Algorithm< PARAMETERS >::isCompleted() const {
+    return ( m_state == AlgorithmState::COMPLETED );
+}
+
+template < typename PARAMETERS >
+inline bool Algorithm< PARAMETERS >::isFailed() const {
+    return ( ( m_state != AlgorithmState::READY     ) &&
+             ( m_state != AlgorithmState::RUNNING   ) &&
+             ( m_state != AlgorithmState::COMPLETED ) );
+}
+
 //=====================================================================
 //=====================================================================
 
