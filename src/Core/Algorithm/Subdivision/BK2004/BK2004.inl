@@ -14,7 +14,6 @@ inline Dcel_ptr BK2004::getDCEL() const {
 
 inline void BK2004::setDCEL( const Dcel_ptr& dcel ) {
     m_dcel = dcel;
-    m_subHandler.setDCEL( m_dcel );
 }
 
 /// TRIANGLE MESH

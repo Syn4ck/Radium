@@ -4,20 +4,20 @@
 #include <set>
 #include <utility>
 
+#include <Core/Index/Index.hpp>
 #include <Core/Mesh/TriangleMesh.hpp>
 #include <Core/Mesh/DCEL/Definition.hpp>
 #include <Core/Algorithm/Algorithm.hpp>
-#include <Core/Algorithm/Subdivision/SubdivisionHandler.hpp>
 
 namespace Ra {
 namespace Core {
 
 struct BK2004Parameter {
     BK2004Parameter( const uint   algorithmIteration = 5,
-                     const uint   smoothingIteration = 5,
+                     const uint   smoothingIteration = 15,
                      const Scalar longScale          = ( 4.0 / 3.0 ),
                      const Scalar shortScale         = ( 4.0 / 5.0 ),
-                     const Scalar lambdaFactor       = 1.0 );
+                     const Scalar lambdaFactor       = 0.5 );
 
     uint   m_algorithmIteration;
     uint   m_smoothingIteration;
@@ -42,7 +42,8 @@ public:
         TARGET_LENGTH_NOT_VALID,
         FULLEDGE_NOT_SPLITTED,
         FULLEDGE_NOT_COLLAPSED,
-        FULLEDGE_NOT_FLIPPED
+        FULLEDGE_NOT_FLIPPED,
+        SMOOTHING_FAILED
     };
 
     /// CONSTRUCTOR
@@ -76,7 +77,7 @@ protected:
     bool split( uint& exitStatus );
     bool collapse( uint& exitStatus );
     bool flip( uint& exitStatus );
-    void smoothing();
+    bool smoothing( uint& exitStatus );
 
 
 
@@ -85,7 +86,6 @@ protected:
     TriangleMesh       m_prevMesh;
     Dcel_ptr           m_prevDCEL;
     Scalar             m_targetLength;
-    SubdivisionHandler m_subHandler;
 
     std::set< std::pair< Scalar, Index > > m_splitList;
     std::set< std::pair< Scalar, Index > > m_collapseList;
