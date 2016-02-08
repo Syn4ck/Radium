@@ -86,7 +86,7 @@ void FileData::loadFile( const bool FORCE_RELOAD ) {
     m_loadingTime = ( std::clock() - startTime ) / Scalar( CLOCKS_PER_SEC );
 
     if( m_verbose ) {
-        LOG( logDEBUG ) << "File Loading end.";
+        LOG( logDEBUG ) << "File Loading end.\n";
         displayInfo();
     }
 

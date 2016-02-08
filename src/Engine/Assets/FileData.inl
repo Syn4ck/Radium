@@ -100,7 +100,7 @@ inline void FileData::displayInfo() const {
     LOG( logDEBUG ) << "Total vertex count : " << vtxCount;
     LOG( logDEBUG ) << "Handle loaded      : " << m_handleData.size();
     LOG( logDEBUG ) << "Animation loaded   : " << m_animationData.size();
-    LOG( logDEBUG ) << "Loading Time (sec) : " << m_loadingTime;
+    LOG( logDEBUG ) << "Loading Time (sec) : " << m_loadingTime << "\n";
 }
 
 
