@@ -17,64 +17,14 @@ namespace Core {
 EdgeSplitter::EdgeSplitter( const Dcel_ptr& dcel,
                             const Index&    param,
                             const bool      verbosity ) :
-    Algorithm< Index >( param, "Edge Splitter", verbosity ),
-    m_dcel( dcel ) { }
+    EdgeOperation( "Edge Splitter", dcel, param, verbosity ) { }
+
+
 
 /// DESTRUCTOR
 EdgeSplitter::~EdgeSplitter() { }
 
-/// ALGORITHM STAGE
-bool EdgeSplitter::configCheck( uint& exitStatus ) {
-    bool  dcelStatus = ( m_dcel != nullptr );
-    bool indexStatus = ( m_param.isValid() );
-    bool      status = ( dcelStatus && indexStatus );
-    if( status ) {
-        exitStatus = NO_ERROR;
-    } else {
-        if( !dcelStatus ) {
-            exitStatus = DCEL_NULLPTR;
-        } else {
-            exitStatus = INVALID_INDEX;
-        }
-    }
-    return status;
-}
 
-bool EdgeSplitter::preprocessing( uint& exitStatus ) {
-    if( !m_dcel->m_fulledge.access( m_param, m_fe ) ) {
-        exitStatus = EDGE_NOT_PRESENT;
-        return false;
-    }
-
-    if( !isValid( m_fe ) ) {
-        exitStatus = INVALID_FULLEDGE;
-        return false;
-    }
-
-    return true;
-}
-
-bool EdgeSplitter::processing( uint& exitStatus ) {
-
-    if( !checkFullEdge( exitStatus ) ) {
-        return false;
-    }
-
-    if( !isSplittable( exitStatus ) ) {
-        return true;
-    }
-
-    if( !splitFullEdge( exitStatus ) ) {
-        return false;
-    }
-
-    return true;
-
-}
-
-bool EdgeSplitter::postprocessing( uint& exitStatus ) {
-    return true;
-}
 
 /// FUNCTION
 bool EdgeSplitter::checkFullEdge( uint& exitStatus ) {
@@ -121,13 +71,13 @@ bool EdgeSplitter::checkFullEdge( uint& exitStatus ) {
 
 
 
-bool EdgeSplitter::isSplittable( uint& exitStatus ) {
+bool EdgeSplitter::isProcessable( uint& exitStatus ) {
     return true;
 }
 
 
 
-bool EdgeSplitter::splitFullEdge( uint& exitStatus ) {
+bool EdgeSplitter::processFullEdge( uint& exitStatus ) {
     // Useful names
     const uint n = 2; // new Vertex
     const uint x = 2; // new HalfEdge

@@ -9,6 +9,7 @@
 #include <Core/Mesh/DCEL/Dcel.hpp>
 
 #include <Core/Mesh/DCEL/Iterator/Vertex/VHEIterator.hpp>
+#include <Core/Mesh/DCEL/Iterator/Face/FFIterator.hpp>
 
 #include <Core/Mesh/DCEL/Operation/Bind.hpp>
 #include <Core/Mesh/DCEL/Operation/Border.hpp>
@@ -22,67 +23,14 @@ namespace Core {
 EdgeCollapser::EdgeCollapser( const Dcel_ptr& dcel,
                               const Index&    param,
                               const bool      verbosity ) :
-    Algorithm< Index >( param, "Edge Collapser", verbosity ),
-    m_dcel( dcel ) { }
+    EdgeOperation( "Edge Collapser", dcel, param, verbosity ) { }
+
+
 
 /// DESTRUCTOR
 EdgeCollapser::~EdgeCollapser() { }
 
-/// ALGORITHM STAGE
-bool EdgeCollapser::configCheck( uint& exitStatus ) {
-    bool  dcelStatus = ( m_dcel != nullptr );
-    bool indexStatus = ( m_param.isValid() );
-    bool      status = ( dcelStatus && indexStatus );
-    if( status ) {
-        exitStatus = NO_ERROR;
-    } else {
-        if( !dcelStatus ) {
-            exitStatus = DCEL_NULLPTR;
-        } else {
-            exitStatus = INVALID_INDEX;
-        }
-    }
-    return status;
-}
 
-bool EdgeCollapser::preprocessing( uint& exitStatus ) {
-    if( !m_dcel->m_fulledge.access( m_param, m_fe ) ) {
-        exitStatus = EDGE_NOT_PRESENT;
-        return false;
-    }
-
-    if( !isValid( m_fe ) ) {
-        exitStatus = INVALID_FULLEDGE;
-        return false;
-    }
-
-    return true;
-}
-
-bool EdgeCollapser::processing( uint& exitStatus ) {
-
-    if( !checkFullEdge( exitStatus ) ) {
-        return false;
-    }
-
-    if( !isCollapsable( exitStatus ) ) {
-        if( exitStatus == DEGENERATE_FACE ) {
-            return false;
-        }
-        return true;
-    }
-
-    if( !collapseFullEdge( exitStatus ) ) {
-        return false;
-    }
-
-    return true;
-
-}
-
-bool EdgeCollapser::postprocessing( uint& exitStatus ) {
-    return true;
-}
 
 /// FUNCTION
 bool EdgeCollapser::checkFullEdge( uint& exitStatus ) {
@@ -141,7 +89,7 @@ bool EdgeCollapser::checkFullEdge( uint& exitStatus ) {
 
 
 
-bool EdgeCollapser::isCollapsable( uint& exitStatus ) {
+bool EdgeCollapser::isProcessable( uint& exitStatus ) {
     // Border
     if( isBorder( m_fe ) ) {
         exitStatus = BORDER_FULLEDGE;
@@ -162,6 +110,10 @@ bool EdgeCollapser::isCollapsable( uint& exitStatus ) {
     }
     Vector3 c = 0.5 * ( v[0]->P() + v[1]->P() );
 
+    int id[3];
+    id[0] = -1;
+    std::map< std::pair< int, int >, int > table;
+
     for( uint i = 0; i < 2; ++i ) {
         Vector3 p[3];
         p[0] = v[i]->P();
@@ -173,6 +125,25 @@ bool EdgeCollapser::isCollapsable( uint& exitStatus ) {
                 ( he->F() == m_fe->F( 1 ) ) ) {
                 continue;
             }
+
+            id[1] = he->Next()->V()->idx.getValue();
+            id[2] = he->Prev()->V()->idx.getValue();
+            for( uint k = 1; k < 3; ++k ) {
+                std::pair< int, int > e;
+                e.first  = id[0];
+                e.second = id[k];
+                auto it = table.find( e );
+                if( it == table.end() ) {
+                    table[e] = 1;
+                } else {
+                    if( it->second == 2 ) {
+                        exitStatus = NOT_MANIFOLD;
+                        return false;
+                    }
+                    it->second++;
+                }
+            }
+
 
             p[1] = he->Next()->V()->P();
             p[2] = he->Prev()->V()->P();
@@ -199,30 +170,7 @@ bool EdgeCollapser::isCollapsable( uint& exitStatus ) {
 
 
 
-bool EdgeCollapser::isOneRingIntersectionFine( const HalfEdge_ptr& ptr ) {
-    // Declare data
-    Vertex_ptr   v[3];
-    HalfEdge_ptr he[3];
-
-    // Initialize data
-    he[0] = ptr;
-    he[1] = he[0]->Next()->Twin()->Next();
-    he[2] = he[0]->Prev()->Twin()->Prev();
-    v[0] = he[0]->V();
-    v[1] = he[1]->V();
-    v[2] = he[2]->V();
-
-    // Check
-    if( he[1]->Twin()->V() == v[2] ) {
-        return false;
-    }
-
-    return true;
-}
-
-
-
-bool EdgeCollapser::collapseFullEdge( uint& exitStatus ) {
+bool EdgeCollapser::processFullEdge( uint& exitStatus ) {
     // Useful names
     const uint x = 4; // HalfEdge to delete
     const uint y = 5; // HalfEdge to delete
@@ -303,6 +251,29 @@ bool EdgeCollapser::collapseFullEdge( uint& exitStatus ) {
     }
 
     if( !collapseFace( f[1], exitStatus ) ) {
+        return false;
+    }
+
+    return true;
+}
+
+
+
+bool EdgeCollapser::isOneRingIntersectionFine( const HalfEdge_ptr& ptr ) {
+    // Declare data
+    Vertex_ptr   v[3];
+    HalfEdge_ptr he[3];
+
+    // Initialize data
+    he[0] = ptr;
+    he[1] = he[0]->Next()->Twin()->Next();
+    he[2] = he[0]->Prev()->Twin()->Prev();
+    v[0] = he[0]->V();
+    v[1] = he[1]->V();
+    v[2] = he[2]->V();
+
+    // Check
+    if( he[1]->Twin()->V() == v[2] ) {
         return false;
     }
 
@@ -408,9 +379,6 @@ bool EdgeCollapser::collapseFace( const Face_ptr& ptr, uint& exitStatus ) {
 
     return true;
 }
-
-
-
 
 
 

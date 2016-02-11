@@ -20,67 +20,14 @@ namespace Core {
 EdgeFlipper::EdgeFlipper( const Dcel_ptr& dcel,
                               const Index&    param,
                               const bool      verbosity ) :
-    Algorithm< Index >( param, "Edge Flipper", verbosity ),
-    m_dcel( dcel ) { }
+    EdgeOperation( "Edge Flipper", dcel, param, verbosity ) { }
+
+
 
 /// DESTRUCTOR
 EdgeFlipper::~EdgeFlipper() { }
 
-/// ALGORITHM STAGE
-bool EdgeFlipper::configCheck( uint& exitStatus ) {
-    bool  dcelStatus = ( m_dcel != nullptr );
-    bool indexStatus = ( m_param.isValid() );
-    bool      status = ( dcelStatus && indexStatus );
-    if( status ) {
-        exitStatus = NO_ERROR;
-    } else {
-        if( !dcelStatus ) {
-            exitStatus = DCEL_NULLPTR;
-        } else {
-            exitStatus = INVALID_INDEX;
-        }
-    }
-    return status;
-}
 
-bool EdgeFlipper::preprocessing( uint& exitStatus ) {
-    if( !m_dcel->m_fulledge.access( m_param, m_fe ) ) {
-        exitStatus = EDGE_NOT_PRESENT;
-        return false;
-    }
-
-    if( !isValid( m_fe ) ) {
-        exitStatus = INVALID_FULLEDGE;
-        return false;
-    }
-
-    return true;
-}
-
-bool EdgeFlipper::processing( uint& exitStatus ) {
-
-    if( !checkFullEdge( exitStatus ) ) {
-        return false;
-    }
-
-    if( !isFlippable( exitStatus ) ) {
-        if( exitStatus == DEGENERATE_FACE ) {
-            return false;
-        }
-        return true;
-    }
-
-    if( !flipFullEdge( exitStatus ) ) {
-        return false;
-    }
-
-    return true;
-
-}
-
-bool EdgeFlipper::postprocessing( uint& exitStatus ) {
-    return true;
-}
 
 /// FUNCTION
 bool EdgeFlipper::checkFullEdge( uint& exitStatus ) {
@@ -141,7 +88,7 @@ bool EdgeFlipper::checkFullEdge( uint& exitStatus ) {
 
 
 
-bool EdgeFlipper::isFlippable( uint& exitStatus ) {
+bool EdgeFlipper::isProcessable( uint& exitStatus ) {
     // Border
     if( isBorder( m_fe ) ) {
         exitStatus = BORDER_FULLEDGE;
@@ -261,7 +208,7 @@ bool EdgeFlipper::isFlippable( uint& exitStatus ) {
 
 
 
-bool EdgeFlipper::flipFullEdge( uint& exitStatus ) {
+bool EdgeFlipper::processFullEdge( uint& exitStatus ) {
     // Useful names
     const uint x = 4; // HalfEdge to flip
     const uint y = 5; // HalfEdge to flip
