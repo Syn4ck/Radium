@@ -318,14 +318,17 @@ void BK2004::smoothing() {
 #include <Core/Geometry/Normal/Normal.hpp>
 #include <Core/Algorithm/Subdivision/BK2004/BK2004Relaxation.hpp>
 
+#include <Core/Math/ColorPresets.hpp>
+#include <Engine/SystemDisplay/SystemDisplay.hpp>
+
 namespace Ra {
 namespace Core {
 
 
-#define DEBUG_SPLIT
+//#define DEBUG_SPLIT
 //#define DEBUG_COLLAPSE
-#define DEBUG_FLIP
-#define DEBUG_SMOOTH
+//#define DEBUG_FLIP
+//#define DEBUG_SMOOTH
 
 
 /// CONSTRUCTOR
@@ -426,7 +429,10 @@ bool BK2004::processing( uint& exitStatus ) {
 
 #ifdef DEBUG_SPLIT
         if( !split( exitStatus ) ) {
-                return false;
+            m_prevMesh.clear();
+            convert( *m_dcel, m_prevMesh );
+
+            return false;
         }
 
         if( !isConsistent( m_dcel ) ) {
@@ -437,7 +443,10 @@ bool BK2004::processing( uint& exitStatus ) {
 
 #ifdef DEBUG_COLLAPSE
         if( !collapse( exitStatus ) ) {
-                return false;
+            m_prevMesh.clear();
+            convert( *m_dcel, m_prevMesh );
+
+            return false;
         }
 
         if( !isConsistent( m_dcel ) ) {
@@ -448,6 +457,9 @@ bool BK2004::processing( uint& exitStatus ) {
 
 #ifdef DEBUG_FLIP
         if( !flip( exitStatus ) ) {
+            m_prevMesh.clear();
+            convert( *m_dcel, m_prevMesh );
+
             return false;
         }
 
@@ -491,7 +503,7 @@ void BK2004::extractIndexList( std::vector< Index >& list ) const {
 
 bool BK2004::split( uint& exitStatus ) {
     EdgeSplitter splitter( m_dcel, Index::INVALID_IDX(), isVerbose() );
-    for( auto it = m_splitList.begin(); it != m_splitList.end(); ++it ) {
+    for( auto it = m_splitList.rbegin(); it != m_splitList.rend(); ++it ) {
         /*m_prevMesh.clear();
         convert( *m_dcel, m_prevMesh );
         if( m_prevDCEL != nullptr ) {
@@ -503,8 +515,9 @@ bool BK2004::split( uint& exitStatus ) {
             exitStatus = FULLEDGE_NOT_SPLITTED;
             return false;
         }
-        m_splitList.erase( it );
+        //m_splitList.erase( it );
     }
+    m_splitList.clear();
     return true;
 }
 
@@ -523,6 +536,12 @@ bool BK2004::collapse( uint& exitStatus ) {
             collapser.run();
             if( collapser.isFailed() ) {
                 exitStatus = FULLEDGE_NOT_COLLAPSED;
+
+                FullEdge_ptr fe = m_dcel->m_fulledge[it->second];
+
+                RA_DISPLAY_VECTOR( fe->V( 0 )->P(), fe->V( 0 )->N(), Colors::Red() );
+                RA_DISPLAY_VECTOR( fe->V( 1 )->P(), fe->V( 1 )->N(), Colors::Red() );
+
                 return false;
             }
         }

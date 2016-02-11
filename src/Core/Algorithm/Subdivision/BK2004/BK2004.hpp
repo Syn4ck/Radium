@@ -14,7 +14,7 @@ namespace Core {
 
 struct BK2004Parameter {
     BK2004Parameter( const uint   algorithmIteration = 5,
-                     const uint   smoothingIteration = 15,
+                     const uint   smoothingIteration = 10,
                      const Scalar longScale          = ( 4.0 / 3.0 ),
                      const Scalar shortScale         = ( 4.0 / 5.0 ),
                      const Scalar lambdaFactor       = 0.5 );
