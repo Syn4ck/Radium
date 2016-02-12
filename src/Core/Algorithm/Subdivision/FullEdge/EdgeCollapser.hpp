@@ -21,8 +21,9 @@ protected:
     bool checkFullEdge( uint& exitStatus ) override;
     bool isProcessable( uint& exitStatus ) override;
     bool processFullEdge( uint& exitStatus ) override;
-    bool isOneRingIntersectionFine( const HalfEdge_ptr& ptr );
     bool collapseFace( const Face_ptr& ptr, uint& exitStatus );
+
+    bool isOneRingIntersectionFine( const HalfEdge_ptr& ptr );
 };
 
 } // namespace Core

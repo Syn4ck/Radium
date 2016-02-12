@@ -35,7 +35,7 @@ public:
         ONE_RING_INTERSECTION_PROBLEM,
         DIHEDRAL_ANGLE_TOO_LARGE,
         WORSE_QUALITY,
-        NOT_MANIFOLD,
+        NOT_MANIFOLD
     };
 
     /// CONSTRUCTOR

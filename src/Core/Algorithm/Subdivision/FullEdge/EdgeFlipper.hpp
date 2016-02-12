@@ -21,6 +21,11 @@ protected:
     bool checkFullEdge( uint& exitStatus ) override;
     bool isProcessable( uint& exitStatus ) override;
     bool processFullEdge( uint& exitStatus ) override;
+
+    bool isDegenerateFace() const;
+    bool isDihedralAngleTooBig() const;
+    bool isFaceInversion() const;
+    bool isQualityDecreasing() const;
 };
 
 } // namespace Core

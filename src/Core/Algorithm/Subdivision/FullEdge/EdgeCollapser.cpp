@@ -259,29 +259,6 @@ bool EdgeCollapser::processFullEdge( uint& exitStatus ) {
 
 
 
-bool EdgeCollapser::isOneRingIntersectionFine( const HalfEdge_ptr& ptr ) {
-    // Declare data
-    Vertex_ptr   v[3];
-    HalfEdge_ptr he[3];
-
-    // Initialize data
-    he[0] = ptr;
-    he[1] = he[0]->Next()->Twin()->Next();
-    he[2] = he[0]->Prev()->Twin()->Prev();
-    v[0] = he[0]->V();
-    v[1] = he[1]->V();
-    v[2] = he[2]->V();
-
-    // Check
-    if( he[1]->Twin()->V() == v[2] ) {
-        return false;
-    }
-
-    return true;
-}
-
-
-
 bool EdgeCollapser::collapseFace( const Face_ptr& ptr, uint& exitStatus ) {
     // The face is a hole in the mesh
     if( ptr == nullptr ) {
@@ -376,6 +353,29 @@ bool EdgeCollapser::collapseFace( const Face_ptr& ptr, uint& exitStatus ) {
     delete he[y];
     delete fe[1];
     delete f;
+
+    return true;
+}
+
+
+
+bool EdgeCollapser::isOneRingIntersectionFine( const HalfEdge_ptr& ptr ) {
+    // Declare data
+    Vertex_ptr   v[3];
+    HalfEdge_ptr he[3];
+
+    // Initialize data
+    he[0] = ptr;
+    he[1] = he[0]->Next()->Twin()->Next();
+    he[2] = he[0]->Prev()->Twin()->Prev();
+    v[0] = he[0]->V();
+    v[1] = he[1]->V();
+    v[2] = he[2]->V();
+
+    // Check
+    if( he[1]->Twin()->V() == v[2] ) {
+        return false;
+    }
 
     return true;
 }
