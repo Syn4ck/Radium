@@ -78,7 +78,7 @@ public:
     /// DEBUG
     inline void displayInfo() const;
 
-protected:
+//protected:
     /// NAME
     inline void setName( const std::string& name );
 
@@ -100,7 +100,7 @@ protected:
     /// FACE
     inline void setFaces( const Core::AlignedStdVector< Core::VectorNi >& faceList );
 
-protected:
+//protected:
     /// VARIABLE
     Core::Transform                    m_frame;
     HandleType                         m_type;

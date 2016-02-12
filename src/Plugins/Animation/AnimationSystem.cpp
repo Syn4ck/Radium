@@ -17,7 +17,7 @@
 #include <Engine/Assets/HandleData.hpp>
 
 
-#include <Plugins/Implicit/ImplicitComponent.hpp>
+#include <Plugins/Implicit/ImplicitSkinningComponent.hpp>
 
 namespace AnimationPlugin
 {
@@ -130,9 +130,12 @@ namespace AnimationPlugin
         auto skelData = fileData->getHandleData();
         auto animData = fileData->getAnimationData();
 
-        // FIXME(Charly): One component of a given type by entity ?
+
         for ( const auto& skel : skelData )
         {
+
+            std::cout<<skel->m_component[1].m_frame.matrix()<<std::endl;
+
             uint geomID = uint(-1);
             for( uint i = 0; i < geomData.size(); ++i ) {
                 if( skel->getName() == geomData[i]->getName() ) {
@@ -146,7 +149,7 @@ namespace AnimationPlugin
             component->handleSkeletonLoading( skel, ( geomID == uint( -1 ) ) ? std::map< uint, uint >() : geomData[geomID]->getDuplicateTable() );
             component->handleAnimationLoading( animData );
 
-            //ImplicitPlugin::ImplicitComponent* implicitComponent = static_cast<ImplicitPlugin::ImplicitComponent*>(addComponentToEntity(entity));
+            //ImplicitPlugin::ImplicitSkinningComponent* implicitComponent = static_cast<ImplicitPlugin::ImplicitSkinningComponent*>(addComponentToEntity(entity));
             //implicitComponent->setAnimationComponent(component);
 
 

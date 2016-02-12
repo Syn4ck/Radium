@@ -161,6 +161,7 @@ add_definitions(${Qt5OpenGL_DEFINITIONS})
 include_directories(
     .
     ${CMAKE_CURRENT_BINARY_DIR} # Moc
+    ${IBL_INCLUDE_DIR}
     ${EIGEN_INC}
 )
 

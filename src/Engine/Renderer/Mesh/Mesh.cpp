@@ -101,82 +101,78 @@ namespace Ra
 
     void Engine::Mesh::updateGL()
     {
-        if ( !m_isDirty )
+        if ( m_isDirty )
         {
-            return;
-        }
 
-        if ( m_data[VERTEX_POSITION].empty() || m_indices.empty() )
-        {
-            LOG( logWARNING ) << "Either vertices or indices are empty arrays.";
-            return;
-        }
+            CORE_ASSERT( !( m_data[VERTEX_POSITION].empty() || m_indices.empty() ),
+                         "Either vertices or indices are empty arrays.");
 
-        if ( m_vao == 0 )
-        {
-            // Create VAO if it does not exist
-            GL_ASSERT( glGenVertexArrays( 1, &m_vao ) );
-        }
-
-        // Bind it
-        GL_ASSERT( glBindVertexArray( m_vao ) );
-
-        // Common values for GL data functions.
-#if defined CORE_USE_DOUBLE
-        GLenum type = GL_DOUBLE;
-#else
-        GLenum type = GL_FLOAT;
-#endif
-        GLboolean normalized = GL_FALSE;
-        GLuint size = 4;
-        GLvoid* ptr = nullptr;
-
-        for ( uint i = 0; i < m_data.size(); ++i )
-        {
-            // This vbo has not been created yet
-            if ( m_vbos[i] == 0 && m_data[i].size() > 0 )
+            if ( m_vao == 0 )
             {
-                GL_ASSERT( glGenBuffers( 1, &m_vbos[i] ) );
-                GL_ASSERT( glBindBuffer( GL_ARRAY_BUFFER, m_vbos[i] ) );
-                GL_ASSERT( glBufferData( GL_ARRAY_BUFFER, m_data[i].size() * sizeof( Core::Vector4 ),
-                                         m_data[i].data(), GL_DYNAMIC_DRAW ) );
-
-                GL_ASSERT( glVertexAttribPointer( i, size, type, normalized,
-                                                  sizeof( Core::Vector4 ), ptr ) );
-
-                GL_ASSERT( glEnableVertexAttribArray( i ) );
-
-                m_dirtyArray[i] = false;
+                // Create VAO if it does not exist
+                GL_ASSERT( glGenVertexArrays( 1, &m_vao ) );
             }
 
-            if ( m_dirtyArray[i] == true && m_vbos[i] != 0 && m_data[i].size() > 0 )
+            // Bind it
+            GL_ASSERT( glBindVertexArray( m_vao ) );
+
+            // Common values for GL data functions.
+    #if defined CORE_USE_DOUBLE
+            GLenum type = GL_DOUBLE;
+    #else
+            GLenum type = GL_FLOAT;
+    #endif
+            GLboolean normalized = GL_FALSE;
+            GLuint size = 4;
+            GLvoid* ptr = nullptr;
+
+            for ( uint i = 0; i < m_data.size(); ++i )
             {
-                GL_ASSERT( glBindBuffer( GL_ARRAY_BUFFER, m_vbos[i] ) );
-                GL_ASSERT( glBufferData( GL_ARRAY_BUFFER, m_data[i].size() * sizeof( Core::Vector4 ),
-                                         m_data[i].data(), GL_DYNAMIC_DRAW ) );
+                // This vbo has not been created yet
+                if ( m_vbos[i] == 0 && m_data[i].size() > 0 )
+                {
+                    GL_ASSERT( glGenBuffers( 1, &m_vbos[i] ) );
+                    GL_ASSERT( glBindBuffer( GL_ARRAY_BUFFER, m_vbos[i] ) );
+                    GL_ASSERT( glBufferData( GL_ARRAY_BUFFER, m_data[i].size() * sizeof( Core::Vector4 ),
+                                             m_data[i].data(), GL_DYNAMIC_DRAW ) );
 
-                m_dirtyArray[i] = false;
+                    GL_ASSERT( glVertexAttribPointer( i, size, type, normalized,
+                                                      sizeof( Core::Vector4 ), ptr ) );
+
+                    GL_ASSERT( glEnableVertexAttribArray( i ) );
+
+                    m_dirtyArray[i] = false;
+                }
+
+                if ( m_dirtyArray[i] == true && m_vbos[i] != 0 && m_data[i].size() > 0 )
+                {
+                    GL_ASSERT( glBindBuffer( GL_ARRAY_BUFFER, m_vbos[i] ) );
+                    GL_ASSERT( glBufferData( GL_ARRAY_BUFFER, m_data[i].size() * sizeof( Core::Vector4 ),
+                                             m_data[i].data(), GL_DYNAMIC_DRAW ) );
+
+                    m_dirtyArray[i] = false;
+                }
             }
+
+            // Indices has not been initialized yet
+            if ( m_ibo == 0 )
+            {
+                GL_ASSERT( glGenBuffers( 1, &m_ibo ) );
+                GL_ASSERT( glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, m_ibo ) );
+            }
+
+            if ( m_iboDirty )
+            {
+                GL_ASSERT( glBufferData( GL_ELEMENT_ARRAY_BUFFER, m_indices.size() * sizeof( uint ),
+                                         m_indices.data(), GL_DYNAMIC_DRAW ) );
+                m_iboDirty = false;
+            }
+
+            GL_ASSERT( glBindVertexArray( 0 ) );
+
+            GL_CHECK_ERROR;
+            m_isDirty = false;
         }
-
-        // Indices has not been initialized yet
-        if ( m_ibo == 0 )
-        {
-            GL_ASSERT( glGenBuffers( 1, &m_ibo ) );
-            GL_ASSERT( glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, m_ibo ) );
-        }
-
-        if ( m_iboDirty )
-        {
-            GL_ASSERT( glBufferData( GL_ELEMENT_ARRAY_BUFFER, m_indices.size() * sizeof( uint ),
-                                     m_indices.data(), GL_DYNAMIC_DRAW ) );
-            m_iboDirty = false;
-        }
-
-        GL_ASSERT( glBindVertexArray( 0 ) );
-
-        GL_CHECK_ERROR;
-        m_isDirty = false;
     }
 
     std::shared_ptr<Engine::Mesh> Engine::Mesh::clone()

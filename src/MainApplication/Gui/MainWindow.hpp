@@ -95,6 +95,9 @@ namespace Ra
             void removeRO();
             void editRO();
 
+            /////
+            void showOp()  ;
+
             void cleanup();
 
         signals:

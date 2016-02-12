@@ -20,7 +20,15 @@
 
 #include <Plugins/Animation/AnimationSystem.hpp>
 #include <Plugins/Animation/AnimationComponent.hpp>
-#include <Plugins/Implicit/ImplicitComponent.hpp>
+#include <Plugins/Implicit/ImplicitSkinningComponent.hpp>
+
+#include <ibl/composite/MaxOperator.hpp>
+#include <ibl/composite/RicciOperator.hpp>
+#include <ibl/composite/SumOperator.hpp>
+#include <ibl/composite/gradient_based/custom/contact_operator.hpp>
+#include <ibl/visualization/OperatorDisplay.hpp>
+#include <ibl/functions/Functions1D.hpp>
+#include <ibl/functions/ControlShapePresets.hpp>
 
 namespace Ra
 {
@@ -48,6 +56,9 @@ namespace Ra
         mainApp->framesCountForStatsChanged(
             m_avgFramesCount->value() );
         m_viewer->getCameraInterface()->resetCamera();
+
+
+        showOp();
     }
 
     Gui::MainWindow::~MainWindow()
@@ -665,10 +676,40 @@ namespace Ra
                 const std::string& name = comp.first;
                 if (name.find(std::string("Implicit")) != std::string::npos )
                 {
-                    static_cast<ImplicitPlugin::ImplicitComponent*>(comp.second)->toggleIS(on);
+                    static_cast<ImplicitPlugin::ImplicitSkinningComponent*>(comp.second)->toggleIS(on);
                 }
             }
         }
+    }
+
+    ////
+    void Gui::MainWindow::showOp()
+    {
+        QDialog* display = new QDialog(this);
+        QLabel * label  = new QLabel(display);
+        Ibl::OperatorDisplay displ(256,256);
+        //std::shared_ptr<Ibl::MaxOperator> maxop (new Ibl::MaxOperator());
+        //std::shared_ptr<Ibl::ImplicitComposite> maxop (new Ibl::SumOperator());
+        //std::shared_ptr<Ibl::ImplicitComposite> maxop (new Ibl::RicciOperator<4>());
+
+        typedef Ibl::Functions1D::SampledFunction<Ibl::Functions1D::ControlShape> CtrlDiscrete;
+        typedef  Ibl::Contact_operator<CtrlDiscrete> ContactOp;
+
+        std::shared_ptr<ContactOp> maxop (new ContactOp);
+        CtrlDiscrete ctr( Ibl::Functions1D::ControlShapePresets::flat_down(), 0, Ra::Core::Math::Pi, 128);
+
+        maxop->set_controller(ctr);
+
+        displ.print( maxop );
+
+        QImage img ( displ.data(), 256, 256, QImage::Format_ARGB32);
+        label->setPixmap(QPixmap::fromImage(img));
+
+        display->setMaximumSize(256,256);
+        display->resize(256,256);
+
+        display->show();
+
     }
 
 } // namespace Ra
