@@ -51,6 +51,8 @@ void extract( const Vertex_ptr& v, TriangleMesh& mesh ) {
 
 void extract( const FullEdge_ptr& fe, TriangleMesh& mesh ) {
     std::map< Index, uint > v_table;
+
+#if 0
     // Insert the triangles
     for( uint i = 0; i < 2; ++i ) {
         if( fe->F( i ) == nullptr ) continue;
@@ -69,6 +71,37 @@ void extract( const FullEdge_ptr& fe, TriangleMesh& mesh ) {
             ++it;
         }
         mesh.m_triangles.push_back( T );
+    }
+#endif
+
+    // Insert vertices
+    for( uint i = 0; i < 2; ++i ) {
+        mesh.m_vertices.push_back( fe->V( i )->P() );
+        mesh.m_normals.push_back( fe->V( i )->N() );
+        v_table[fe->V( i )->idx] = mesh.m_vertices.size() - 1;
+    }
+
+    // Insert triangles
+    for( uint i = 0; i < 2; ++i ) {
+        VFIterator fit( fe->V( i ) );
+        auto face = fit.list();
+        for( const auto& f : face ) {
+            if( f != fe->F( i ) ) {
+                Triangle T;
+                FVIterator vit( f );
+                for( uint t = 0; t < 3; ++t ) {
+                    auto p = v_table.find( vit->idx );
+                    if( p == v_table.end() ) {
+                        mesh.m_vertices.push_back( vit->P() );
+                        mesh.m_normals.push_back( vit->N() );
+                        v_table[vit->idx] = mesh.m_vertices.size() - 1;
+                    }
+                    T[t] = v_table[vit->idx];
+                    ++vit;
+                }
+                mesh.m_triangles.push_back( T );
+            }
+        }
     }
 }
 

@@ -8,6 +8,7 @@ namespace Ra {
 namespace Core {
 
 Scalar length( const FullEdge_ptr& fe );
+Scalar lengthSquared( const FullEdge_ptr& fe );
 Scalar maxFullEdgeLength( const Dcel_ptr& dcel );
 Scalar minFullEdgeLength( const Dcel_ptr& dcel );
 Scalar meanFullEdgeLength( const Dcel_ptr& dcel );

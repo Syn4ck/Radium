@@ -13,6 +13,12 @@ namespace Core {
 Scalar length( const FullEdge_ptr& fe ) {
     const Vector3 p0 = fe->HE( 0 )->V()->P();
     const Vector3 p1 = fe->HE( 1 )->V()->P();
+    return ( p0 - p1 ).norm();
+}
+
+Scalar lengthSquared( const FullEdge_ptr& fe ) {
+    const Vector3 p0 = fe->HE( 0 )->V()->P();
+    const Vector3 p1 = fe->HE( 1 )->V()->P();
     return ( p0 - p1 ).squaredNorm();
 }
 
