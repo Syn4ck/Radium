@@ -30,6 +30,8 @@
 #include <ibl/functions/Functions1D.hpp>
 #include <ibl/functions/ControlShapePresets.hpp>
 
+bool doIt;
+
 namespace Ra
 {
 
@@ -138,6 +140,7 @@ namespace Ra
         connect(pauseButton, &QPushButton::clicked, this, &MainWindow::pauseAnimation );
         connect(stepButton,  &QPushButton::clicked, this, &MainWindow::stepAnimation );
         connect(resetButton, &QPushButton::clicked, this, &MainWindow::resetAnimation );
+        connect(doItButton,  &QPushButton::clicked, this, &MainWindow::doItCallback);
 
         // Enable changing shaders
         connect( m_renderObjectsListView, &QListWidget::currentRowChanged, this, &MainWindow::renderObjectListItemClicked );
@@ -228,6 +231,11 @@ namespace Ra
         }
 
         onEntitiesUpdated();
+    }
+
+    void Gui::MainWindow::doItCallback()
+    {
+       doIt = true;
     }
 
     void Gui::MainWindow::onUpdateFramestats( const std::vector<FrameTimerData>& stats )

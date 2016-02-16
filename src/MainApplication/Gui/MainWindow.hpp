@@ -50,8 +50,10 @@ namespace Ra
 
             inline void flushEvents();
 
+
         private slots:
             void loadFile();
+            void doItCallback();
 
             void setCameraPosition();
             void setCameraTarget();

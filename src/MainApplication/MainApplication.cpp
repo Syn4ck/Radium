@@ -23,11 +23,16 @@
 #include <MainApplication/Gui/MainWindow.hpp>
 
 #include <Plugins/FancyMesh/FancyMeshSystem.hpp>
+#include <Plugins/Implicit/ImplicitSystem.hpp>
+#include <Plugins/Implicit/ImplicitDisplayComponent.hpp>
 #include <MainApplication/Version.hpp>
 
 #include <Core/Animation/Handle/Skeleton.hpp>
 #include <Plugins/Animation/AnimationComponent.hpp>
 
+ImplicitPlugin::ImplicitDisplayComponent* g_comp;
+
+extern bool doIt;
 
 // Const parameters : TODO : make config / command line options
 
@@ -133,6 +138,14 @@ namespace Ra
     void MainApplication::setupScene()
     {
         Engine::SystemEntity::uiCmp()->addRenderObject(Engine::DrawPrimitives::Grid(Engine::SystemEntity::uiCmp(),Core::Vector3::Zero(), Core::Vector3::UnitX(), Core::Vector3::UnitZ(),Core::Colors::Grey(0.6f)));
+        Engine :: Entity *  entity =  m_engine->getEntityManager()->getOrCreateEntity( "bunny rest ");
+        ImplicitPlugin::ImplicitDisplayComponent* comp = new ImplicitPlugin::ImplicitDisplayComponent("bunny cmp", 0);
+        entity->addComponent(comp);
+
+        Engine :: Entity *  entity2 =  m_engine->getEntityManager()->getOrCreateEntity( "bunny 2");
+        ImplicitPlugin::ImplicitDisplayComponent* comp2 = new ImplicitPlugin::ImplicitDisplayComponent("bunny cmp", 1);
+        entity2->addComponent(comp2);
+        g_comp = comp2;
     }
 
     void MainApplication::loadFile( QString path )
@@ -184,6 +197,11 @@ namespace Ra
         timerData.taskData = m_taskQueue->getTimerData();
         m_taskQueue->flushTaskQueue();
 
+        if( doIt )
+        {
+            g_comp->advance();
+            //doIt = false;
+        }
         timerData.tasksEnd = Core::Timer::Clock::now();
 
         // ----------
