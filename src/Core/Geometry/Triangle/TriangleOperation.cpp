@@ -32,7 +32,11 @@ Scalar triangleArea( const Vector3& p, const Vector3& q, const Vector3& r ) {
 *       ( Q - P ) X ( R - P ) / ||( Q - P ) X ( R - P )||
 */
 Vector3 triangleNormal( const Vector3& p, const Vector3& q, const Vector3& r ) {
-    return ( ( ( q - p ).cross( r - p ) ).normalized() );
+    Vector3 n = ( q - p ).cross( r - p );
+    if( n.isApprox( Vector3::Zero() ) ) {
+        return Vector3::Zero();
+    }
+    return ( n.normalized() );
 }
 
 
