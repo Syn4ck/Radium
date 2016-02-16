@@ -3,6 +3,9 @@
 #include <Core/Geometry/Normal/Normal.hpp>
 #include <Core/Algorithm/Subdivision/BK2004/BK2004Smoothing.hpp>
 
+#include <Core/Math/ColorPresets.hpp>
+#include <Engine/SystemDisplay/SystemDisplay.hpp>
+
 namespace Ra {
 namespace Core {
 
@@ -81,7 +84,7 @@ bool BK2004Relaxation::processing( uint& exitStatus ) {
         Geometry::AreaMatrix A = Geometry::barycentricArea( m_mesh->m_vertices, m_mesh->m_triangles );
 
         // Check the areas
-        if( !A.diagonal().allFinite() ) {
+        if( !A.diagonal().allFinite() && ( A.diagonal().minCoeff() > 0.0 ) ) {
             exitStatus = INVALID_AREA;
         }
 
@@ -89,8 +92,11 @@ bool BK2004Relaxation::processing( uint& exitStatus ) {
         g( m_mesh->m_vertices, Adj, A, G );
 
         // Check the centroids
-        for( const auto& centroid : G ) {
-            if( !centroid.allFinite() ) {
+        for( uint i = 0; i < size; ++i ) {
+        //for( const auto& centroid : G ) {
+            //if( !centroid.allFinite() ) {
+            if( !G[i].allFinite() ) {
+                RA_DISPLAY_POINT( m_mesh->m_vertices[i], Colors::Red(), 1.0 );
                 exitStatus = INVALID_CENTROID;
                 return false;
             }

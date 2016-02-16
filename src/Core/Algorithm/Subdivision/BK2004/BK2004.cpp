@@ -298,7 +298,8 @@ void BK2004::smoothing() {
 #else
 
 
-
+#include <set>
+#include <utility>
 
 #include <Core/Index/Index.hpp>
 #include <Core/Mesh/DCEL/Vertex.hpp>
@@ -325,10 +326,10 @@ namespace Ra {
 namespace Core {
 
 
-//#define DEBUG_SPLIT
-//#define DEBUG_COLLAPSE
-//#define DEBUG_FLIP
-//#define DEBUG_SMOOTH
+#define DEBUG_SPLIT
+#define DEBUG_COLLAPSE
+#define DEBUG_FLIP
+#define DEBUG_SMOOTH
 
 
 /// CONSTRUCTOR
@@ -394,9 +395,6 @@ bool BK2004::preprocessing( uint& exitStatus ) {
         return false;
     }
 
-    m_splitList.clear();
-    m_collapseList.clear();
-
     exitStatus = NO_ERROR;
     return true;
 }
@@ -407,25 +405,6 @@ bool BK2004::processing( uint& exitStatus ) {
     for( uint alg_iter = 0; alg_iter < m_param.m_algorithmIteration; ++alg_iter ) {
         m_prevMesh.clear();
         convert( *m_dcel, m_prevMesh );
-
-
-        const uint size = m_dcel->m_fulledge.size();
-        for( uint i = 0; i < size; ++i ) {
-            FullEdge_ptr fe = m_dcel->m_fulledge[i];
-            Scalar l = length( fe );
-#ifdef DEBUG_SPLIT
-            if( l > ( m_param.m_longScale * m_targetLength ) ) {
-                m_splitList.insert( std::pair< Scalar, Index >( l, fe->idx ) );
-            }
-#endif
-
-#ifdef DEBUG_COLLAPSE
-            if( l < ( m_param.m_shortScale * m_targetLength ) ) {
-                m_collapseList.insert( std::pair< Scalar, Index >( l, fe->idx ) );
-            }
-#endif
-        }
-
 
 #ifdef DEBUG_SPLIT
         if( !split( exitStatus ) ) {
@@ -476,6 +455,9 @@ bool BK2004::processing( uint& exitStatus ) {
 
 #ifdef DEBUG_SMOOTH
         if( !smoothing( exitStatus ) ) {
+            m_prevMesh.clear();
+            convert( *m_dcel, m_prevMesh );
+
             return false;
         }
 #endif
@@ -503,7 +485,21 @@ void BK2004::extractIndexList( std::vector< Index >& list ) const {
 
 bool BK2004::split( uint& exitStatus ) {
     EdgeSplitter splitter( m_dcel, Index::INVALID_IDX(), isVerbose() );
-    for( auto it = m_splitList.rbegin(); it != m_splitList.rend(); ++it ) {
+
+    std::set< std::pair< Scalar, Index > > splitList;
+
+    const Scalar tooLong = std::pow( ( m_param.m_longScale * m_targetLength ), Scalar( 2.0 ) );
+
+    const uint size = m_dcel->m_fulledge.size();
+    for( uint i = 0; i < size; ++i ) {
+        FullEdge_ptr fe = m_dcel->m_fulledge[i];
+        Scalar l = lengthSquared( fe );
+        if( l > tooLong ) {
+            splitList.insert( std::pair< Scalar, Index >( l, fe->idx ) );
+        }
+    }
+
+    for( auto it = splitList.rbegin(); it != splitList.rend(); ++it ) {
         /*m_prevMesh.clear();
         convert( *m_dcel, m_prevMesh );
         if( m_prevDCEL != nullptr ) {
@@ -515,9 +511,7 @@ bool BK2004::split( uint& exitStatus ) {
             exitStatus = FULLEDGE_NOT_SPLITTED;
             return false;
         }
-        //m_splitList.erase( it );
     }
-    m_splitList.clear();
     return true;
 }
 
@@ -525,27 +519,45 @@ bool BK2004::split( uint& exitStatus ) {
 
 bool BK2004::collapse( uint& exitStatus ) {
     EdgeCollapser collapser( m_dcel, Index::INVALID_IDX(), isVerbose() );
-    for( auto it = m_collapseList.begin(); it != m_collapseList.end(); ++it ) {
-        if( m_dcel->m_fulledge.contain( it->second ) ) {
+
+    std::set< std::pair< Scalar, Index > > collapseList;
+
+    const Scalar tooShort = std::pow( ( m_param.m_shortScale * m_targetLength ), Scalar( 2.0 ) );
+
+    const uint size = m_dcel->m_fulledge.size();
+    for( uint i = 0; i < size; ++i ) {
+        FullEdge_ptr fe = m_dcel->m_fulledge[i];
+        Scalar l = lengthSquared( fe );
+        if( l < tooShort ) {
+            collapseList.insert( std::pair< Scalar, Index >( l, fe->idx ) );
+        }
+    }
+
+    for( auto it = collapseList.begin(); it != collapseList.end(); ++it ) {
+        FullEdge_ptr fe;
+        if( m_dcel->m_fulledge.access( it->second, fe ) ) {
             /*m_prevMesh.clear();
             convert( *m_dcel, m_prevMesh );
             if( m_prevDCEL != nullptr ) {
                 delete m_prevDCEL;
             }*/
-            collapser.setParameters( it->second );
-            collapser.run();
-            if( collapser.isFailed() ) {
-                exitStatus = FULLEDGE_NOT_COLLAPSED;
 
-                FullEdge_ptr fe = m_dcel->m_fulledge[it->second];
+            Scalar l = lengthSquared( fe );
+            if( it->first == l ) {
+                collapser.setParameters( it->second );
+                collapser.run();
+                if( collapser.isFailed() ) {
+                    exitStatus = FULLEDGE_NOT_COLLAPSED;
 
-                RA_DISPLAY_VECTOR( fe->V( 0 )->P(), fe->V( 0 )->N(), Colors::Red() );
-                RA_DISPLAY_VECTOR( fe->V( 1 )->P(), fe->V( 1 )->N(), Colors::Red() );
+                    FullEdge_ptr fe = m_dcel->m_fulledge[it->second];
 
-                return false;
+                    RA_DISPLAY_VECTOR( fe->V( 0 )->P(), fe->V( 0 )->N(), Colors::Red() );
+                    RA_DISPLAY_VECTOR( fe->V( 1 )->P(), fe->V( 1 )->N(), Colors::Red() );
+
+                    return false;
+                }
             }
         }
-        m_collapseList.erase( it );
     }
     return true;
 }

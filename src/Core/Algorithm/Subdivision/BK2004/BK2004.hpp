@@ -1,8 +1,6 @@
 #ifndef RADIUMENGINE_BK2004_ALGORITHM_DEFINITION_HPP
 #define RADIUMENGINE_BK2004_ALGORITHM_DEFINITION_HPP
 
-#include <set>
-#include <utility>
 
 #include <Core/Index/Index.hpp>
 #include <Core/Mesh/TriangleMesh.hpp>
@@ -13,8 +11,8 @@ namespace Ra {
 namespace Core {
 
 struct BK2004Parameter {
-    BK2004Parameter( const uint   algorithmIteration = 5,
-                     const uint   smoothingIteration = 10,
+    BK2004Parameter( const uint   algorithmIteration = 6,
+                     const uint   smoothingIteration = 15,
                      const Scalar longScale          = ( 4.0 / 3.0 ),
                      const Scalar shortScale         = ( 4.0 / 5.0 ),
                      const Scalar lambdaFactor       = 0.5 );
@@ -87,8 +85,6 @@ protected:
     Dcel_ptr           m_prevDCEL;
     Scalar             m_targetLength;
 
-    std::set< std::pair< Scalar, Index > > m_splitList;
-    std::set< std::pair< Scalar, Index > > m_collapseList;
 };
 
 } // namespace Core
