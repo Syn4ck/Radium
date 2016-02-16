@@ -23,7 +23,8 @@ protected:
     bool processFullEdge( uint& exitStatus ) override;
     bool collapseFace( const Face_ptr& ptr, uint& exitStatus );
 
-    bool isOneRingIntersectionFine( const HalfEdge_ptr& ptr );
+    bool oneRingIntersection( const FullEdge_ptr& ptr );
+    bool faceInversion( const FullEdge_ptr& ptr );
 };
 
 } // namespace Core

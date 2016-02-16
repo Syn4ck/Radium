@@ -1,5 +1,7 @@
 #include <Core/Algorithm/Subdivision/FullEdge/EdgeCollapser.hpp>
 
+#include <algorithm>
+
 #include <Core/Geometry/Triangle/TriangleOperation.hpp>
 
 #include <Core/Mesh/DCEL/Vertex.hpp>
@@ -8,11 +10,13 @@
 #include <Core/Mesh/DCEL/Face.hpp>
 #include <Core/Mesh/DCEL/Dcel.hpp>
 
+#include <Core/Mesh/DCEL/Iterator/Vertex/VVIterator.hpp>
 #include <Core/Mesh/DCEL/Iterator/Vertex/VHEIterator.hpp>
 #include <Core/Mesh/DCEL/Iterator/Face/FFIterator.hpp>
 
 #include <Core/Mesh/DCEL/Operation/Bind.hpp>
 #include <Core/Mesh/DCEL/Operation/Border.hpp>
+#include <Core/Mesh/DCEL/Operation/Extract.hpp>
 #include <Core/Mesh/DCEL/Operation/Valid.hpp>
 
 namespace Ra {
@@ -96,14 +100,17 @@ bool EdgeCollapser::isProcessable( uint& exitStatus ) {
         return false;
     }
     // One ring intersection
-    for( uint i = 0; i < 2; ++i ) {
-        if( !isOneRingIntersectionFine( m_fe->HE( i ) ) ) {
-            exitStatus = ONE_RING_INTERSECTION_PROBLEM;
-            return false;
-        }
+    if( oneRingIntersection( m_fe ) ) {
+        exitStatus = ONE_RING_INTERSECTION_PROBLEM;
+        return false;
     }
 
     // Inversion
+    if( faceInversion( m_fe ) ) {
+        exitStatus = FACE_INVERSION;
+        return false;
+    }
+#if 0
     Vertex_ptr v[2];
     for( uint i = 0; i < 2; ++i ) {
         v[i] = m_fe->V( i );
@@ -164,6 +171,7 @@ bool EdgeCollapser::isProcessable( uint& exitStatus ) {
             }
         }
     }
+#endif
 
     return true;
 }
@@ -359,25 +367,105 @@ bool EdgeCollapser::collapseFace( const Face_ptr& ptr, uint& exitStatus ) {
 
 
 
-bool EdgeCollapser::isOneRingIntersectionFine( const HalfEdge_ptr& ptr ) {
-    // Declare data
-    Vertex_ptr   v[3];
-    HalfEdge_ptr he[3];
+bool EdgeCollapser::oneRingIntersection( const FullEdge_ptr& ptr ) {
+    std::vector< Index > index;
+    uint intersection = 0;
+    for( uint i = 0; i < 2; ++i ) {
+        VVIterator it( ptr->V( i ) );
+        auto list = it.list();
+        for( const auto& item : list ) {
+            index.push_back( item->idx );
+        }
+    }
+    std::sort( index.begin(), index.end() );
+    for( uint i = 0; i < index.size(); ++i ) {
+        uint j;
+        for( j = ( i + 1 ); j < index.size(); ++j ) {
+            if( index[i] != index[j] ) {
+                break;
+            }
+        }
+        if( ( j - i ) > 1 ) {
+            ++intersection;
+        }
+        i = j;
+    }
+    return ( intersection >= 3 );
+}
 
-    // Initialize data
-    he[0] = ptr;
-    he[1] = he[0]->Next()->Twin()->Next();
-    he[2] = he[0]->Prev()->Twin()->Prev();
-    v[0] = he[0]->V();
-    v[1] = he[1]->V();
-    v[2] = he[2]->V();
 
-    // Check
-    if( he[1]->Twin()->V() == v[2] ) {
-        return false;
+
+bool EdgeCollapser::faceInversion( const FullEdge_ptr& ptr ) {
+    TriangleMesh mesh;
+    extract( ptr, mesh );
+
+    const Vector3 c = 0.5 * ( mesh.m_vertices[0] + mesh.m_vertices[1] );
+    Vector3       n = Vector3::Zero();
+
+    std::vector< Edge > edge;
+
+    for( const auto& t : mesh.m_triangles ) {
+        const uint i = t[0];
+        const uint j = t[1];
+        const uint k = t[2];
+
+        if( ( ( i == 0 ) && ( j == 1 ) ) ||
+            ( ( j == 0 ) && ( k == 1 ) ) ||
+            ( ( k == 0 ) && ( i == 1 ) ) ) {
+            const Vector3& p = mesh.m_vertices[i];
+            const Vector3& q = mesh.m_vertices[j];
+            const Vector3& r = mesh.m_vertices[k];
+            n += Geometry::triangleNormal( p, q, r );
+        } else {
+            if( ( i == 0 ) || ( i == 1 ) ) {
+                edge.push_back( Edge( j, k ) );
+                continue;
+            }
+
+            if( ( j == 0 ) || ( j == 1 ) ) {
+                edge.push_back( Edge( k, i ) );
+                continue;
+            }
+
+            if( ( k == 0 ) || ( k == 1 ) ) {
+                edge.push_back( Edge( i, j ) );
+                continue;
+            }
+        }
+    }
+    n.normalize();
+
+    Plane3 plane( n, c );
+
+    const Scalar  angle = Vector::angle< Vector3 >( Vector3( 0.0, 0.0, 1.0 ), n );
+    const Vector3 axis  = ( Vector3( 0.0, 0.0, 1.0 ).cross( n ) ).normalized();
+
+    const AngleAxis   R( angle, axis );
+    const Translation T( -c );
+
+    for( uint i = 0; i < 2; ++i ) {
+        mesh.m_vertices[i] = R * T * mesh.m_vertices[i];
+    }
+    for( uint i = 2; i < mesh.m_vertices.size(); ++i ) {
+        mesh.m_vertices[i] = R * T * plane.projection( mesh.m_vertices[i] );
     }
 
-    return true;
+    for( const auto& e : edge ) {
+        const uint i = e[0];
+        const uint j = e[1];
+        const Vector3 p0 = mesh.m_vertices[i];
+        const Vector3 p1 = mesh.m_vertices[j];
+        const Scalar x1 = p0[0];
+        const Scalar x2 = p1[0];
+        const Scalar y1 = p0[1];
+        const Scalar y2 = p1[1];
+
+        if( ( ( x1 * y2 ) - ( x2 * y1 ) ) < 0.0 ) {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 
