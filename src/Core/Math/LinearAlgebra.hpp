@@ -102,6 +102,15 @@ namespace Ra
 
         inline void print( const MatrixN& matrix );
 
+
+        //
+        // Geometry types
+        //
+
+        typedef Eigen::ParametrizedLine< Scalar, 2 > Line2;
+        typedef Eigen::ParametrizedLine< Scalar, 3 > Line3;
+        typedef Eigen::Hyperplane< Scalar, 3 >       Plane3;
+
         // Todo : storage transform using quaternions ?
 
         /// An oriented bounding box.
