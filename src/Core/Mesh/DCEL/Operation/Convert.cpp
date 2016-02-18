@@ -128,14 +128,20 @@ void convert( const Dcel& dcel, TriangleMesh& mesh ) {
     mesh.m_normals.resize( v_size );
     mesh.m_triangles.resize( f_size );
     std::map< Index, uint > v_table;
+#pragma omp parallel for
     for( uint i = 0; i < v_size; ++i ) {
         const Vertex_ptr& v = dcel.m_vertex.at( i );
         const Vector3 p = v->P();
         const Vector3 n = v->N();
         mesh.m_vertices[i] = p;
         mesh.m_normals[i]  = n;
-        v_table[ v->idx ] = i;
+#pragma omp critical
+        {
+            v_table[ v->idx ] = i;
+        }
     }
+
+#pragma omp parallel for
     for( uint i = 0; i < f_size; ++i ) {
         const Face_ptr& f = dcel.m_face.at( i );
         Triangle T;

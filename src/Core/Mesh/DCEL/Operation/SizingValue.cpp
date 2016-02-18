@@ -11,7 +11,7 @@
 #include <Core/Mesh/DCEL/Face.hpp>
 
 #include <Core/Mesh/DCEL/Iterator/Vertex/VVIterator.hpp>
-#include <Core/Mesh/DCEL/Iterator/Face/FHEIterator.hpp>
+#include <Core/Mesh/DCEL/Iterator/Face/FVIterator.hpp>
 
 #include <Core/Mesh/DCEL/Operation/Valid.hpp>
 #include <Core/Mesh/DCEL/Operation/Convert.hpp>
@@ -32,8 +32,10 @@ Scalar sizingValue( const Vertex_ptr& v, const Scalar eps ) {
     CORE_ASSERT( !one_ring.empty(), "One ring is empty." );
 
     Scalar area = Geometry::voronoiArea( p, one_ring );
-    CORE_ASSERT( ( area >= 0.0 ), "Area is negative." );
+    //Scalar area = Geometry::mixedArea( p, one_ring );
     CORE_ASSERT( std::isfinite( area ), "Area is not finite." );
+    CORE_ASSERT( ( area != 0.0 ), "Area is null." );
+    CORE_ASSERT( ( area > 0.0 ), "Area is negative." );
 
     Vector3 L = Geometry::cotangentWeightLaplacian( p, one_ring );
     CORE_ASSERT( L.allFinite(), "Laplacian is not finite." );
@@ -48,8 +50,8 @@ Scalar sizingValue( const Vertex_ptr& v, const Scalar eps ) {
     CORE_ASSERT( std::isfinite( K ), "Gaussian Curvature is not finite." );
 
     Scalar kappa = Geometry::maxCurvature( H, K );
-    CORE_ASSERT( ( kappa > 0.0 ), "Max Curvature MUST be positive" );
     CORE_ASSERT( std::isfinite( kappa ), "Max Curvature is not finite." );
+    CORE_ASSERT( ( kappa > 0.0 ), "Max Curvature MUST be positive" );
 
     Scalar a = ( 6.0 * eps / kappa );
     CORE_ASSERT( std::isfinite( a ), "Scalar a is not finite." );
@@ -80,14 +82,13 @@ Scalar sizingValue( const FullEdge_ptr& fe, const Scalar eps ) {
 Scalar sizingValue( const Face_ptr& f, const Scalar eps ) {
     CORE_ASSERT( isValid( f ), "Face not valid." );
     Scalar sumL = 0.0;
-    FHEIterator it( f );
-    const uint size = it.size();
-    CORE_ASSERT( ( size > 0 ), "Face is corrupted." );
-    for( uint i = 0; i < size; ++i ) {
-        sumL += sizingValue( it->V(), eps );
-        ++it;
+    FVIterator it( f );
+    const auto list = it.list();
+    CORE_ASSERT( ( !list.empty() ), "Face is corrupted." );
+    for( const auto& v : list ) {
+        sumL += sizingValue( v, eps );
     }
-    Scalar sv = sumL / Scalar( size );
+    Scalar sv = sumL / Scalar( list.size() );
     CORE_ASSERT( std::isfinite( sv ), "Sizing Value is not finite." );
     return ( sv );
 }
