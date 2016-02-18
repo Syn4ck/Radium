@@ -15,6 +15,9 @@ void g( const VectorArray< Vector3 >&    p,
         const Geometry::AreaMatrix&      A,
         GravityCentroid&                 G );
 
+void g( const VectorArray< Vector3 >&    p,
+        const VectorArray< Triangle >&   T,
+        GravityCentroid&                 G );
 
 
 void tangentialRelaxation( const VectorArray< Vector3 >& p,

@@ -12,10 +12,10 @@ namespace Core {
 
 struct BK2004Parameter {
     BK2004Parameter( const uint   algorithmIteration = 6,
-                     const uint   smoothingIteration = 15,
+                     const uint   smoothingIteration = 12,
                      const Scalar longScale          = ( 4.0 / 3.0 ),
                      const Scalar shortScale         = ( 4.0 / 5.0 ),
-                     const Scalar lambdaFactor       = 0.5 );
+                     const Scalar lambdaFactor       = 0.7 );
 
     uint   m_algorithmIteration;
     uint   m_smoothingIteration;
@@ -71,20 +71,16 @@ protected:
     bool postprocessing( uint& exitStatus ) override;
 
     /// FUNCTION
-    void extractIndexList( std::vector< Index >& list ) const;
     bool split( uint& exitStatus );
     bool collapse( uint& exitStatus );
     bool flip( uint& exitStatus );
     bool smoothing( uint& exitStatus );
-
-
 
     /// VARIABLE
     Dcel_ptr           m_dcel;
     TriangleMesh       m_prevMesh;
     Dcel_ptr           m_prevDCEL;
     Scalar             m_targetLength;
-
 };
 
 } // namespace Core
