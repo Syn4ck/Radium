@@ -265,8 +265,13 @@ bool EdgeFlipper::isDihedralAngleTooBig() const {
     const Vector3 n1 = Geometry::triangleNormal( P, S, Q );
 
     // Dihedral
-    const Scalar angle = Vector::angle< Vector3 >( n0, n1 );
-    if( angle > Math::PiDiv4 ) {
+//    const Scalar angle = Vector::angle< Vector3 >( n0, n1 );
+//    if( angle > Math::PiDiv2 ) {
+//        return true;
+//    }
+
+    const Scalar cos = n0.dot( n1 );
+    if( cos < 0.0 ) {
         return true;
     }
 
