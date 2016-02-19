@@ -3,12 +3,8 @@
 
 #include <iostream>
 #include <fstream>
-#include <set>
-#include <map>
-#include <vector>
 #include <string>
 #include <Core/Mesh/TriangleMesh.hpp>
-#include <Core/Animation/Handle/Skeleton.hpp>
 
 namespace Ra {
 namespace Core {
