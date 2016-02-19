@@ -99,6 +99,13 @@ Dcel::Dcel( const Dcel& dcel ) :
 
 /// DESTRUCTOR
 Dcel::~Dcel() {
+    clear();
+}
+
+
+
+/// CLEAR
+inline void Dcel::clear() {
     for( uint i = 0; i < m_vertex.size(); ++i ) {
         delete m_vertex[i];
     }
@@ -111,7 +118,13 @@ Dcel::~Dcel() {
     for( uint i = 0; i < m_face.size(); ++i ) {
         delete m_face[i];
     }
+
+    m_vertex.clear();
+    m_halfedge.clear();
+    m_fulledge.clear();
+    m_face.clear();
 }
+
 
 
 

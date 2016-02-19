@@ -29,7 +29,7 @@ public:
     ~Dcel();
 
     /// CLEAR
-    inline void clear(); // Clear the data from the DCEL, making it empty
+    void clear(); // Clear the data from the DCEL, making it empty
 
     /// QUERY
     inline bool empty() const;
