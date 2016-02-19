@@ -1,5 +1,7 @@
 #include <Core/Algorithm/Subdivision/BK2004/BK2004.hpp>
 
+#ifndef NEW_INTERFACE
+
 #include <Core/Mesh/DCEL/Dcel.hpp>
 
 namespace Ra {
@@ -35,3 +37,18 @@ inline Scalar BK2004::getTargetLength() const {
 } // namespace Core
 } // namespace Ra
 
+#else
+
+
+namespace Ra {
+namespace Core {
+
+/// TARGET LENGTH
+inline Scalar BK2004::getTargetLength() const {
+    return m_targetLength;
+}
+
+} // namespace Core
+} // namespace Ra
+
+#endif
