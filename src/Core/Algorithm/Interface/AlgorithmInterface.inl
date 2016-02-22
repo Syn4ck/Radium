@@ -135,6 +135,9 @@ inline OUTPUT* AlgorithmInterface< INPUT, OUTPUT, PARAMETER >::addStep( const st
 
 template < typename INPUT, typename OUTPUT, typename PARAMETER >
 inline void AlgorithmInterface< INPUT, OUTPUT, PARAMETER >::deleteStep() {
+    for( auto& entry : m_step ) {
+        delete entry.getData();
+    }
     m_step.clear();
 }
 
@@ -189,25 +192,30 @@ inline uint AlgorithmInterface< INPUT, OUTPUT, PARAMETER >::run() {
     m_state = AlgorithmState::RUNNING;
     m_exitStatus = 0;
 
-    if( m_settings.isVerbose() ) {
-        LOG( logINFO ) << "======= ALGORITHM INFO =======";
-        LOG( logINFO ) << "Starting " << m_name << "...";
-    }
+    if( !isInitialized() ) {
+        m_state = AlgorithmState::NOT_INITIALIZED;
+        m_exitStatus = std::numeric_limits< uint >::max();
+    } else {
+        if( m_settings.isVerbose() ) {
+            LOG( logINFO ) << "======= ALGORITHM INFO =======";
+            LOG( logINFO ) << "Starting " << m_name << "...";
+        }
 
-    std::clock_t startTime;
-    startTime = std::clock();
-    while( true ) {
-        if( !run_setup         ( m_exitStatus ) ) break;
-        if( !run_configCheck   ( m_exitStatus ) ) break;
-        if( !run_preprocessing ( m_exitStatus ) ) break;
-        if( !run_processing    ( m_exitStatus ) ) break;
-        if( !run_postprocessing( m_exitStatus ) ) break;
-        break;
-    }
-    m_statistics.setOverallTiming( ( std::clock() - startTime ) / Scalar( CLOCKS_PER_SEC ) );
+        std::clock_t startTime;
+        startTime = std::clock();
+        while( true ) {
+            if( !run_setup         ( m_exitStatus ) ) break;
+            if( !run_configCheck   ( m_exitStatus ) ) break;
+            if( !run_preprocessing ( m_exitStatus ) ) break;
+            if( !run_processing    ( m_exitStatus ) ) break;
+            if( !run_postprocessing( m_exitStatus ) ) break;
+            break;
+        }
+        m_statistics.setOverallTiming( ( std::clock() - startTime ) / Scalar( CLOCKS_PER_SEC ) );
 
-    m_statistics.computeOverallPercentage();
-    m_statistics.computeStatistics();
+        m_statistics.computeOverallPercentage();
+        m_statistics.computeStatistics();
+    }
 
     if( m_state == AlgorithmState::RUNNING ) {
         m_state = AlgorithmState::COMPLETED;
@@ -227,6 +235,11 @@ inline uint AlgorithmInterface< INPUT, OUTPUT, PARAMETER >::run() {
 //=====================================================================
 
 /// ALGORITHM STAGE
+template < typename INPUT, typename OUTPUT, typename PARAMETER >
+inline bool AlgorithmInterface< INPUT, OUTPUT, PARAMETER >::isInitialized() const {
+    return ( ( m_input != nullptr ) && ( m_output != nullptr ) );
+}
+
 template < typename INPUT, typename OUTPUT, typename PARAMETER >
 inline bool AlgorithmInterface< INPUT, OUTPUT, PARAMETER >::run_setup( uint& exitStatus ) {
     if( !m_settings.runSetup() && !m_settings.forceSetup() ) {

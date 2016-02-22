@@ -33,9 +33,8 @@ void loadAlgorithmSettings( const std::string& filename,
     for( uint i = 0; i < size; ++i ) {
         std::getline( myfile, line );
         std::string ID;
-        char        separator;
         std::stringstream stream( line );
-        stream >> ID >> separator >> data[i];
+        stream >> ID >> data[i];
     }
 
 

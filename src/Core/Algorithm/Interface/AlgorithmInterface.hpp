@@ -19,6 +19,7 @@ public:
     enum class AlgorithmState {
         READY,
         RUNNING,
+        NOT_INITIALIZED,
         SETUP_FAILED,
         NOT_CONFIGURED,
         PREPROCESSING_FAILED,
@@ -90,6 +91,7 @@ private:
     inline void deleteStep();
 
     /// ALGORITHM STAGE
+    inline bool isInitialized() const;
     inline bool run_setup         ( uint& exitStatus );
     inline bool run_configCheck   ( uint& exitStatus );
     inline bool run_preprocessing ( uint& exitStatus );

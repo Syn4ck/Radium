@@ -6,16 +6,16 @@ namespace Core {
 /// CONSTRUCTOR
 template < typename TYPE >
 AlgorithmStep< TYPE >::AlgorithmStep( const std::string& name,
-                                      TYPE* const  data ) :
+                                      TYPE* const        data ) :
     m_name( name ),
     m_data( data ) { }
 
 /// DESTRUCTOR
 template < typename TYPE >
 AlgorithmStep< TYPE >::~AlgorithmStep() {
-    if( m_data != nullptr ) {
+    /*if( m_data != nullptr ) {
         delete m_data;
-    }
+    }*/
 }
 
 /// NAME
