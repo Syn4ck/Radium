@@ -94,6 +94,8 @@ bool EdgeCollapser::checkFullEdge( uint& exitStatus ) {
 
 
 bool EdgeCollapser::isProcessable( uint& exitStatus ) {
+    return true;
+
     // Border
     if( isBorder( m_fe ) ) {
         exitStatus = BORDER_FULLEDGE;

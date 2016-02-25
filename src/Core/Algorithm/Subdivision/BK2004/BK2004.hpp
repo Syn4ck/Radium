@@ -91,7 +91,11 @@ protected:
 
 #else
 
+#define NEW_CRITERIA
 
+#ifdef NEW_CRITERIA
+#include <set>
+#endif
 
 #include <Core/Index/Index.hpp>
 #include <Core/Mesh/TriangleMesh.hpp>
@@ -156,6 +160,7 @@ protected:
     bool postprocessing( uint& exitStatus ) override;
 
     /// FUNCTION
+
     bool split( uint& exitStatus );
     bool collapse( uint& exitStatus );
     bool flip( uint& exitStatus );
@@ -164,6 +169,29 @@ protected:
     /// VARIABLE
     Dcel_ptr m_dcel;
     Scalar   m_targetLength;
+
+
+
+#ifdef NEW_CRITERIA
+    void decide();
+    bool needSplit( const FullEdge_ptr fe ) const;
+    bool needCollapse( const FullEdge_ptr fe ) const;
+    bool needFlip( const FullEdge_ptr fe ) const;
+    bool neighborsCheckSplit( const FullEdge_ptr fe ) const;
+    bool neighborsCheckCollapse( const FullEdge_ptr fe ) const;
+    bool neighborsCheckFlip( const FullEdge_ptr fe ) const;
+    void setDiamondBlock( const FullEdge_ptr fe, std::set< Index >& lock ) const;
+    void setPolygonBlock( const FullEdge_ptr fe, std::set< Index >& lock ) const;
+
+    bool faceInversionCollapse( const FullEdge_ptr fe ) const;
+    bool faceInversionFlip( const FullEdge_ptr fe ) const;
+    bool triangleQualityDecreasing( const FullEdge_ptr& fe ) const;
+
+    std::set< Index > m_split;
+    std::set< Index > m_collapse;
+    std::set< Index > m_flip;
+#endif
+
 };
 
 } // namespace Core
