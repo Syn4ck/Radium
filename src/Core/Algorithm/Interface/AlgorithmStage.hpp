@@ -1,0 +1,19 @@
+#ifndef RADIUMENGINE_ALGORITHM_STAGE_DEFINITION_HPP
+#define RADIUMENGINE_ALGORITHM_STAGE_DEFINITION_HPP
+
+namespace Ra {
+namespace Core {
+
+enum AlgorithmStage {
+    SETUP,
+    CONFIG_CHECK,
+    PREPROCESSING,
+    PROCESSING,
+    POSTPROCESSING,
+    OVERALL
+};
+
+} // namespace Core
+} // namespace Ra
+
+#endif // RADIUMENGINE_ALGORITHM_STAGE_DEFINITION_HPP
