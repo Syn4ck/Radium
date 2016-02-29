@@ -34,7 +34,6 @@
 
 // Const parameters : TODO : make config / command line options
 
-
 namespace Ra
 {
     MainApplication::MainApplication( int argc, char** argv )

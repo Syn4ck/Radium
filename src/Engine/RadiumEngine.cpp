@@ -113,7 +113,7 @@ namespace Ra
                 system.second->handleAssetLoading( entity, &fileData );
             }
 
-            for (auto& comp :entity->getComponents())
+            for (auto& comp : entity->getComponents())
             {
                 comp->initialize();
             }

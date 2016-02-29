@@ -80,7 +80,8 @@ namespace Ra
             const Core::Transform& getLocalTransform() const;
             const Core::Matrix4& getLocalTransformAsMatrix() const;
 
-
+            void setGlobal(bool value);
+            
         private:
             Core::Transform m_localTransform;
 
@@ -97,6 +98,7 @@ namespace Ra
             bool m_visible;
             bool m_xray;
             bool m_dirty;
+            bool m_isGlobal; // If true, the RO will be drawn without taking into account its entitys transform
 
             mutable std::mutex m_updateMutex;
         };

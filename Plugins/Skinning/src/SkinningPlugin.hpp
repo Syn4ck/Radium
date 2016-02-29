@@ -8,7 +8,7 @@
 #elif defined Skinning_IMPORTS
     #define SKIN_PLUGIN_API DLL_IMPORT
 #else
-    #define SKING_PLUGIN_API
+    #define SKIN_PLUGIN_API
 #endif
 
 #include <QObject>

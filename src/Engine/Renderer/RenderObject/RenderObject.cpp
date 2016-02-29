@@ -138,6 +138,8 @@ namespace Ra
 
         Core::Transform RenderObject::getTransform() const
         {
+            if (m_isGlobal)
+                return m_localTransform;
             return m_component->getEntity()->getTransform() * m_localTransform;
         }
 
@@ -164,6 +166,11 @@ namespace Ra
         const Core::Matrix4& RenderObject::getLocalTransformAsMatrix() const
         {
             return m_localTransform.matrix();
+        }
+        
+        void RenderObject::setGlobal(bool value)
+        {
+            m_isGlobal = value;
         }
     } // namespace Engine
 } // namespace Ra
