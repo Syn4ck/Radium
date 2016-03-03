@@ -305,6 +305,8 @@ namespace Ra
             if ( ext == sysDllExt )
             {
                 QPluginLoader pluginLoader( pluginsDir.absoluteFilePath( filename ) );
+                // Force symbol resolution at load time.
+                pluginLoader.setLoadHints( QLibrary::ResolveAllSymbolsHint );
 
                 LOG( logINFO ) << "Found plugin " << filename.toStdString();
 
