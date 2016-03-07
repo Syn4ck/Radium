@@ -28,6 +28,7 @@ namespace Ra
             , m_xray( false )
             , m_dirty( true )
             , m_hasLifetime( lifetime > 0 )
+            , m_isGlobal(false)
         {
         }
 

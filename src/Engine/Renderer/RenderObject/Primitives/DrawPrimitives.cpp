@@ -610,7 +610,6 @@ namespace Ra
                                 const Core::Color &color, Scalar scale )
             {
                 Core::Vector3Array vertices( 8 );
-
                 for ( uint i = 0; i < 8; ++i )
                 {
                     vertices[i] = aabb.corner( static_cast<Core::Aabb::CornerType>( i ) );
@@ -623,7 +622,7 @@ namespace Ra
                 };
 
                 std::shared_ptr<Mesh> mesh( new Ra::Engine::Mesh("AABB Primitive", GL_LINES) );
-                RenderObject* ro = new Ra::Engine::RenderObject("AABB Primitive", comp, RenderObjectType::Debug);
+                RenderObject* ro = new Ra::Engine::RenderObject(comp->getName() + "_AABB", comp, RenderObjectType::Debug);
                 initRo(ro, mesh, vertices, indices, color);
                 return ro;
             }
@@ -667,8 +666,8 @@ namespace Ra
                     0,4, 1,5, 2,6, 3,7, // Links
                 };
 
-                std::shared_ptr<Mesh> mesh( new Ra::Engine::Mesh("AABB Primitive", GL_LINES) );
-                RenderObject* ro = new Ra::Engine::RenderObject("AABB Primitive", comp, RenderObjectType::Debug);
+                std::shared_ptr<Mesh> mesh( new Ra::Engine::Mesh("OBB Primitive", GL_LINES) );
+                RenderObject* ro = new Ra::Engine::RenderObject("OBB Primitive", comp, RenderObjectType::Debug);
                 initRo(ro, mesh, vertices, indices, color);
                 return ro;
             }

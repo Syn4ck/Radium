@@ -229,8 +229,6 @@ namespace Ra
                     m_gizmoManager->handleMousePressEvent(event);
                 }
             }
-            break;
-
             case Qt::MiddleButton:
             {
                 m_camera->handleMousePressEvent(event);

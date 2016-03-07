@@ -11,9 +11,9 @@ namespace Ra
     {
 
         Material::Material( const std::string& name )
-            : m_kd( 1.0, 1.0, 1.0, 1.0 )
-            , m_ks( 0.0, 0.0, 0.0, 1.0 )
-            , m_ns( 1.0 )
+            : m_kd( 0.5, 0.5, 0.5, 1.0 )
+            , m_ks( 0.0, 0.0, 0.1, 1.0 )
+            , m_ns( 2.0 )
             , m_name( name )
             , m_isDirty( true )
             , m_type( MaterialType::MAT_OPAQUE )

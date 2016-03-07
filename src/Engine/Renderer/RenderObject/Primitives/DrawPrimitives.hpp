@@ -6,13 +6,13 @@
 #include <Core/Index/Index.hpp>
 #include <Core/Math/LinearAlgebra.hpp>
 #include <Core/Math/Ray.hpp>
+#include <Engine/Component/Component.hpp>
 
 namespace Ra
 {
     namespace  Engine
     {
         class RenderObject;
-        class Component;
 
         /// A set of convenient functions to instantiate simple displays such as points, lines, etc.
         /// note that objects will be drawn in their entity's local frame.

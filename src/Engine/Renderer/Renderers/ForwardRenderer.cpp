@@ -138,7 +138,7 @@ void ForwardRenderer::renderInternal( const RenderData& renderData )
             shader->setUniform( "transform.model", M );
             shader->setUniform( "transform.worldNormal", N );
 
-            ro->getRenderTechnique()->material->bind( shader );
+            ro->getRenderTechnique()->material->bind(shader);
 
             // render
             ro->getMesh()->render();
