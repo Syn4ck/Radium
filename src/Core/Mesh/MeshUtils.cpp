@@ -47,7 +47,17 @@ namespace Ra
                     // We look if we have previously seen the same vertex before in the array.
                     const Vector3& vertex = mesh.m_vertices[i];
                     vertPos = mesh.m_vertices.cbegin() + i;
-                    duplicatePos = std::find( mesh.m_vertices.cbegin(), vertPos, vertex );
+                    // duplicatePos = std::find( mesh.m_vertices.cbegin(), vertPos, vertex );
+                    
+                    duplicatePos = mesh.m_vertices.cbegin() + i;
+                    for (uint j = 0; j < i; j++)
+                    {
+                        if (vertex.isApprox(mesh.m_vertices[j]))
+                        {
+                            duplicatePos = mesh.m_vertices.cbegin() + j;
+                            break;
+                        }
+                    }
 
                     // The number in duplicates_map will be 'i' if no duplicates are found
                     // up to v_i, or the index of the first vertex equal to v_i.
@@ -58,6 +68,36 @@ namespace Ra
                 return hasDuplicates;
             }
 
+            void removeDuplicates(TriangleMesh& mesh)
+            {
+                std::vector<VertexIdx> duplicatesMap;
+                findDuplicates(mesh, duplicatesMap);
+
+                std::vector<VertexIdx> newIndices(mesh.m_vertices.size(), VertexIdx(-1));
+                Vector3Array uniqueVertices;
+                for (uint i = 0; i < mesh.m_vertices.size(); i++)
+                {
+                    if (duplicatesMap[i] == i)
+                    {
+                        newIndices[i] = uniqueVertices.size();
+                        uniqueVertices.push_back(mesh.m_vertices[i]);
+
+                    }
+                }
+
+                for (uint i = 0; i < mesh.m_triangles.size(); i++)
+                {
+                    for (uint j = 0; j < 3; j++)
+                    {
+                        int oldIdx = mesh.m_triangles[i](j);
+                        int newIdx = newIndices[duplicatesMap[oldIdx]];
+                        mesh.m_triangles[i](j) = newIdx;
+                    }
+                }
+                
+                mesh.m_vertices = uniqueVertices;
+            }
+            
             void removeDuplicates(TriangleMesh& mesh, std::vector<VertexIdx>& vertexMap)
             {
                 std::vector<VertexIdx> duplicatesMap;
