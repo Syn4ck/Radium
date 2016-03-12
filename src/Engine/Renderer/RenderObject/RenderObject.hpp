@@ -111,8 +111,8 @@ namespace Ra
             bool m_visible;
             bool m_xray;
             bool m_dirty;
-            bool m_isGlobal; // If true, the RO will be drawn without taking into account its entitys transform
             bool m_hasLifetime;
+            bool m_isGlobal; // If true, the RO will be drawn without taking into account its entity's transform
         };
 
     } // namespace Engine
