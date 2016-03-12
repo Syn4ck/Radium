@@ -364,7 +364,7 @@ namespace Ra {
 
                 return mesh;
             }
-
+            
             MeshPtr AABB(const Core::Aabb& aabb, const Core::Color& color, Scalar scale)
             {
                 Core::Vector3Array vertices(8);
