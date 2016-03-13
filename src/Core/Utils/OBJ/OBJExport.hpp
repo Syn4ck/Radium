@@ -1,5 +1,5 @@
-#ifndef RADIUMENGINE_USAI_SKELETON_DEFINITION_HPP
-#define RADIUMENGINE_USAI_SKELETON_DEFINITION_HPP
+#ifndef RADIUMENGINE_OBJ_EXPORT_HPP
+#define RADIUMENGINE_OBJ_EXPORT_HPP
 
 #include <iostream>
 #include <fstream>
@@ -44,4 +44,4 @@ static void ExportOBJ( const TriangleMesh& mesh, const std::string& filename ) {
 } // namespace Core
 } // namespace Ra
 
-#endif // RADIUMENGINE_USAI_SKELETON_DEFINITION_HPP
+#endif // RADIUMENGINE_OBJ_EXPORT_HPP
