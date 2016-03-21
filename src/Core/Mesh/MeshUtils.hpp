@@ -49,8 +49,6 @@ namespace Ra
             /// Return the index of the triangle hit by the ray or -1 if there's no hit.
             RA_CORE_API RayCastResult castRay( const TriangleMesh& mesh, const Ray& ray);
 
-
-
             //
             // Checks
             //
