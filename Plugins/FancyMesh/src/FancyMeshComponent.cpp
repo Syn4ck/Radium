@@ -93,8 +93,14 @@ namespace FancyMeshPlugin
             mesh.m_triangles.push_back( {uint(face[0]), uint(face[1]), uint(face[2]) } );
         }
 
-
+#if defined(LOAD_TEXTURES)
+        for (const auto& v : data->getNormals())
+        {
+            mesh.m_normals.push_back(v);
+        }
+#else
         Ra::Core::Geometry::uniformNormal( mesh.m_vertices, mesh.m_triangles, mesh.m_normals );
+#endif
 
         setupIO( data->getName());
 
@@ -110,8 +116,6 @@ namespace FancyMeshPlugin
         for ( const auto& v : data->getBiTangents() )   bitangents.push_back( v );
         for ( const auto& v : data->getTexCoords() )    texcoords.push_back( v );
         for ( const auto& v : data->getColors() )       colors.push_back( v );
-
-
 
         displayMesh->addData( Ra::Engine::Mesh::VERTEX_TANGENT, tangents );
         displayMesh->addData( Ra::Engine::Mesh::VERTEX_BITANGENT, bitangents );
@@ -130,7 +134,9 @@ namespace FancyMeshPlugin
         if ( m.hasDiffuse() )   mat->setKd( m.m_diffuse );
         if ( m.hasSpecular() )  mat->setKs( m.m_specular );
         if ( m.hasShininess() ) mat->setNs( m.m_shininess );
-        //if ( m.hasDiffuseTexture() ) mat->addTexture( Ra::Engine::Material::TextureType::TEX_DIFFUSE, m.m_texDiffuse );
+#ifdef LOAD_TEXTURES
+        if ( m.hasDiffuseTexture() ) mat->addTexture( Ra::Engine::Material::TextureType::TEX_DIFFUSE, m.m_texDiffuse );
+#endif
         //if ( m.hasSpecularTexture() ) mat->addTexture( Ra::Engine::Material::TextureType::TEX_SPECULAR, m.m_texSpecular );
         //if ( m.hasShininessTexture() ) mat->addTexture( Ra::Engine::Material::TextureType::TEX_SHININESS, m.m_texShininess );
         //if ( m.hasOpacityTexture() ) mat->addTexture( Ra::Engine::Material::TextureType::TEX_ALPHA, m.m_texOpacity );
@@ -140,7 +146,6 @@ namespace FancyMeshPlugin
         rt->shaderConfig = Ra::Engine::ShaderConfiguration( "BlinnPhong", "../Shaders" );
 
         renderObject->setRenderTechnique( rt );
-
     }
 
     Ra::Core::Index FancyMeshComponent::getRenderObjectIndex() const
