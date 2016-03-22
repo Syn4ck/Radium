@@ -257,9 +257,6 @@ namespace Ra
             dbg->addPoints(ctrlPoints, Core::Colors::Grey());
         }
 
-        // ----------
-        // 2. Kickoff rendering
-        m_viewer->startRendering( dt );
 
         timerData.tasksStart = Core::Timer::Clock::now();
 
@@ -275,6 +272,9 @@ namespace Ra
 
         timerData.tasksEnd = Core::Timer::Clock::now();
 
+        // ----------
+        // 2. Kickoff rendering
+        m_viewer->startRendering( dt );
         // ----------
         // 4. Wait until frame is fully rendered and display.
         m_viewer->waitForRendering();
