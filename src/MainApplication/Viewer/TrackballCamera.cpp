@@ -144,7 +144,7 @@ namespace Ra
 
     bool Gui::TrackballCamera::handleWheelEvent(QWheelEvent* event)
     {
-        handleCameraZoom( (event->angleDelta().y() + event->angleDelta().x() * 0.1 ) * m_wheelSpeedModifier );
+        handleCameraZoom( (event->angleDelta().y()) * m_wheelSpeedModifier );
 
         if ( m_hasLightAttached )
         {
