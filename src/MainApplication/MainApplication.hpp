@@ -70,7 +70,7 @@ namespace Ra
 
         void updateFrameStats( const std::vector<FrameTimerData>& );
 
-        void endFrame();
+        void loadComplete();
 
     public slots:
 
@@ -88,6 +88,7 @@ namespace Ra
         bool loadPlugins( const std::string& pluginsPath );
 
         void setupScene();
+        void addBasicShaders();
 
 
         // Public variables, accessible through the mainApp singleton.
@@ -100,6 +101,8 @@ namespace Ra
 
         /// Task queue for processing tasks.
         std::unique_ptr<Core::TaskQueue> m_taskQueue;
+
+        uint m_targetFPS;
 
     private:
         /// Pointer to OpenGL Viewer for render call (belongs to MainWindow).

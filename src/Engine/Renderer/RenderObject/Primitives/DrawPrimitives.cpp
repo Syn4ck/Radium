@@ -7,18 +7,26 @@
 #include <Engine/Renderer/RenderObject/RenderObject.hpp>
 #include <Engine/Renderer/RenderObject/RenderObjectTypes.hpp>
 #include <Engine/Renderer/RenderTechnique/RenderTechnique.hpp>
+#include <Engine/Renderer/RenderTechnique/ShaderConfigFactory.hpp>
 #include <Engine/Renderer/Mesh/Mesh.hpp>
 
 namespace Ra {
     namespace Engine {
         namespace DrawPrimitives {
-            RenderObject* Primitive(const Component* component, const MeshPtr& mesh)
+            RenderObject* Primitive(Component* component, const MeshPtr& mesh)
             {
-                std::string shader(mesh->getRenderMode() == GL_LINES ?
-                                   "Lines" : "Plain");
+                ShaderConfiguration config;
+                if (mesh->getRenderMode() == GL_LINES)
+                {
+                    config = ShaderConfigurationFactory::getConfiguration("Lines");
+                }
+                else
+                {
+                    config = ShaderConfigurationFactory::getConfiguration("Plain");
+                }
 
                 RenderTechnique* rt = new RenderTechnique;
-                rt->shaderConfig = ShaderConfiguration(shader, "../Shaders");
+                rt->shaderConfig = config;
                 rt->material = new Material("Default material");
 
                 RenderObject* ro = new RenderObject(mesh->getName(), component,
@@ -193,18 +201,16 @@ namespace Ra {
                 Core::TriangleMesh sphere =
                     Core::MeshUtils::makeGeodesicSphere(radius, 2);
 
+                for (auto& t : sphere.m_vertices)
+                {
+                    t += center;
+                }
+
                 Core::Vector4Array colors(sphere.m_vertices.size(), color);
 
                 MeshPtr mesh(new Mesh("Sphere Primitive", GL_LINES));
                 mesh->loadGeometry(sphere);
                 mesh->addData(Mesh::VERTEX_COLOR, colors);
-
-                /*
-                Core::Transform t;
-                t.setIdentity();
-                t.translate( center );
-                ro->setLocalTransform( t.matrix() );
-                */
 
                 return mesh;
             }

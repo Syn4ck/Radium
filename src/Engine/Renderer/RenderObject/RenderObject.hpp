@@ -41,7 +41,7 @@ namespace Ra
             /// 0 is an "invalid value" (would mean the render object has to die immediatly),
             /// hence it's considered as infinite,
             /// any other positive value will be taken into account.
-            RenderObject( const std::string& name, const Component* comp,
+            RenderObject( const std::string& name, Component* comp,
                           const RenderObjectType& type, int lifetime = -1 );
             ~RenderObject();
 
@@ -53,6 +53,7 @@ namespace Ra
             //
             const std::string& getName() const;
             const Component* getComponent() const;
+                  Component* getComponent();
 
             const RenderObjectType& getType() const;
             void setType( const RenderObjectType& t);
@@ -72,8 +73,8 @@ namespace Ra
             RenderTechnique* getRenderTechnique();
 
             void setMesh( const std::shared_ptr<Mesh>& mesh );
-            const Mesh* getMesh() const;
-            Mesh* getMesh();
+            std::shared_ptr<const Mesh> getMesh() const;
+            const std::shared_ptr<Mesh>& getMesh();
 
             Core::Transform getTransform() const;
             Core::Matrix4 getTransformAsMatrix() const;
@@ -94,7 +95,7 @@ namespace Ra
         private:
             Core::Transform m_localTransform;
 
-            const Component* m_component;
+            Component* m_component;
             std::string m_name;
 
             RenderObjectType m_type;

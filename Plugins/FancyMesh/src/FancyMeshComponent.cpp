@@ -14,9 +14,10 @@
 #include <Engine/Renderer/RenderObject/RenderObject.hpp>
 #include <Engine/Renderer/RenderObject/RenderObjectTypes.hpp>
 #include <Engine/Renderer/RenderTechnique/RenderTechnique.hpp>
-#include <Engine/Renderer/RenderTechnique/ShaderConfiguration.hpp>
+#include <Engine/Renderer/RenderTechnique/ShaderProgram.hpp>
 #include <Engine/Renderer/RenderTechnique/ShaderProgramManager.hpp>
 #include <Engine/Renderer/RenderObject/Primitives/DrawPrimitives.hpp>
+#include <Engine/Renderer/RenderTechnique/ShaderConfigFactory.hpp>
 
 #include <Engine/Assets/FileData.hpp>
 #include <Engine/Assets/GeometryData.hpp>
@@ -42,7 +43,7 @@ namespace FancyMeshPlugin
     {
         Ra::Engine::RenderTechnique* technique = new Ra::Engine::RenderTechnique;
         technique->material = new Ra::Engine::Material( "Default" );
-        technique->shaderConfig = Ra::Engine::ShaderConfiguration( "Default", "../Shaders" );
+        technique->shaderConfig = Ra::Engine::ShaderProgramManager::getInstance()->getDefaultShaderProgram()->getBasicConfiguration();
 
         addMeshRenderObject(mesh, name, technique);
     }
@@ -85,22 +86,20 @@ namespace FancyMeshPlugin
         std::shared_ptr<Ra::Engine::Mesh> displayMesh( new Ra::Engine::Mesh( meshName ) );
 
         Ra::Core::TriangleMesh mesh;
-        for( const auto& v : data->getVertices() )
+        Ra::Core::Transform T = data->getFrame();
+        Ra::Core::Transform N;
+        N.matrix() = (T.matrix()).inverse().transpose();
+
+        for (size_t i = 0; i < data->getVerticesSize(); ++i)
         {
-            mesh.m_vertices.push_back( data->getFrame() * v );
-        }
-        for( const auto& face : data->getFaces() ) {
-            mesh.m_triangles.push_back( {uint(face[0]), uint(face[1]), uint(face[2]) } );
+            mesh.m_vertices.push_back(T * data->getVertices()[i]);
+            mesh.m_normals.push_back((N * data->getNormals()[i]).normalized());
         }
 
-#if defined(LOAD_TEXTURES)
-        for (const auto& v : data->getNormals())
+        for (const auto& face : data->getFaces())
         {
-            mesh.m_normals.push_back(v);
+            mesh.m_triangles.push_back(face.head<3>());
         }
-#else
-        Ra::Core::Geometry::uniformNormal( mesh.m_vertices, mesh.m_triangles, mesh.m_normals );
-#endif
 
         setupIO( data->getName());
 
@@ -143,7 +142,7 @@ namespace FancyMeshPlugin
         //if ( m.hasNormalTexture() ) mat->addTexture( Ra::Engine::Material::TextureType::TEX_NORMAL, m.m_texNormal );
 
         rt->material = mat;
-        rt->shaderConfig = Ra::Engine::ShaderConfiguration( "BlinnPhong", "../Shaders" );
+        rt->shaderConfig = Ra::Engine::ShaderConfigurationFactory::getConfiguration("BlinnPhong");
 
         renderObject->setRenderTechnique( rt );
     }

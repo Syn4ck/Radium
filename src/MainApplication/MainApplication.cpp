@@ -5,6 +5,7 @@
 #include <QTimer>
 #include <QDir>
 #include <QPluginLoader>
+#include <QCommandLineParser>
 
 #include <Core/Log/Log.hpp>
 #include <Core/String/StringUtils.hpp>
@@ -22,11 +23,12 @@
 #include <Engine/Renderer/Renderer.hpp>
 #include <Engine/Renderer/RenderTechnique/RenderTechnique.hpp>
 #include <Engine/Renderer/RenderTechnique/Material.hpp>
-#include <Engine/Renderer/RenderTechnique/ShaderConfiguration.hpp>
+#include <Engine/Renderer/RenderTechnique/ShaderProgram.hpp>
 #include <Engine/Renderer/RenderObject/RenderObjectManager.hpp>
 #include <Engine/Renderer/RenderObject/RenderObject.hpp>
 #include <Engine/Renderer/Mesh/Mesh.hpp>
 #include <Engine/Renderer/Renderers/DebugRender.hpp>
+#include <Engine/Renderer/RenderTechnique/ShaderConfigFactory.hpp>
 
 #include <MainApplication/Gui/MainWindow.hpp>
 #include <MainApplication/Version.hpp>
@@ -48,25 +50,25 @@ namespace Ra
         , m_isAboutToQuit( false )
         //, m_timerData(TIMER_AVERAGE)
     {
+        m_targetFPS = 60; // Default
+        std::string pluginsPath = "../Plugins/bin";
 
-        std::string pluginsPath;
-        if ( argc > 1 )
-        {
-            for ( int i = 1; i < argc; ++i )
-            {
-                std::string arg( argv[i] );
+        QCommandLineParser parser;
+        parser.setApplicationDescription("Radium Engine RPZ, TMTC");
+        parser.addHelpOption();
+        parser.addVersionOption();
 
-                if ( arg == "--pluginsPath" )
-                {
-                    pluginsPath = std::string( argv[i+1] );
-                    continue;
-                }
-            }
-        }
-        if ( pluginsPath.empty() )
-        {
-            pluginsPath = "../Plugins/bin";
-        }
+        // For any reason, the third parameter must be set if you want to be able to read anything from it (and it cannot be "")
+        QCommandLineOption fpsOpt(QStringList{"r", "framerate", "fps"}, "Control the application framerate, 0 to disable it (and run as fast as possible)", "60");
+        QCommandLineOption pluginOpt(QStringList{"p", "plugins", "pluginsPath"}, "Set the path to the plugin dlls", "../Plugins/bin");
+        QCommandLineOption fileOpt(QStringList{"f", "file", "scene"}, "Open a scene file at startup", "foo.bar");
+        // NOTE(Charly): Add other options here
+
+        parser.addOptions({fpsOpt, pluginOpt, fileOpt});
+        parser.process(*this);
+
+        if (parser.isSet(fpsOpt))      m_targetFPS = parser.value(fpsOpt).toUInt();
+        if (parser.isSet(pluginOpt))   pluginsPath = parser.value(pluginOpt).toStdString();
 
         // Boilerplate print.
         LOG( logINFO ) << "*** Radium Engine Main App  ***";
@@ -124,6 +126,8 @@ namespace Ra
         m_mainWindow.reset( new Gui::MainWindow );
         m_mainWindow->show();
 
+        addBasicShaders();
+
         // Allow all events to be processed (thus the viewer should have
         // initialized the OpenGL context..)
         processEvents();
@@ -149,6 +153,12 @@ namespace Ra
         setupScene();
         emit starting();
 
+        // A file has been required, load it.
+        if (parser.isSet(fileOpt))
+        {
+            loadFile(parser.value(fileOpt));
+        }
+
         m_lastFrameStart = Core::Timer::Clock::now();
     }
 
@@ -160,16 +170,17 @@ namespace Ra
     void MainApplication::setupScene()
     {
         using namespace Engine::DrawPrimitives;
-        
+
         Engine::SystemEntity::uiCmp()->addRenderObject(
             Primitive(Engine::SystemEntity::uiCmp(), Grid(
-                    Core::Vector3::Zero(), Core::Vector3::UnitX(), 
+                    Core::Vector3::Zero(), Core::Vector3::UnitX(),
                     Core::Vector3::UnitZ(), Core::Colors::Grey(0.6f))));
     }
 
     void MainApplication::loadFile( QString path )
     {
         std::string pathStr = path.toLocal8Bit().data();
+        LOG(logINFO) << "Loading file " << pathStr << "...";
         bool res = m_engine->loadFile( pathStr );
         CORE_UNUSED( res );
         m_viewer->handleFileLoading( pathStr );
@@ -198,11 +209,45 @@ namespace Ra
         }
 
         m_viewer->fitCameraToScene( aabb );
+
+        emit loadComplete();
     }
 
     void MainApplication::framesCountForStatsChanged( int count )
     {
         m_frameCountBeforeUpdate = count;
+    }
+
+    void MainApplication::addBasicShaders()
+    {
+        using namespace Ra::Engine;
+
+        ShaderConfiguration bpConfig("BlinnPhong");
+        bpConfig.addShader(ShaderType_VERTEX, "../Shaders/BlinnPhong.vert.glsl");
+        bpConfig.addShader(ShaderType_FRAGMENT, "../Shaders/BlinnPhong.frag.glsl");
+        ShaderConfigurationFactory::addConfiguration(bpConfig);
+
+        ShaderConfiguration bpwConfig("BlinnPhongWireframe");
+        bpwConfig.addShader(ShaderType_VERTEX, "../Shaders/BlinnPhongWireframe.vert.glsl");
+        bpwConfig.addShader(ShaderType_FRAGMENT, "../Shaders/BlinnPhongWireframe.frag.glsl");
+        bpwConfig.addShader(ShaderType_GEOMETRY, "../Shaders/BlinnPhongWireframe.geom.glsl");
+        ShaderConfigurationFactory::addConfiguration(bpwConfig);
+
+        ShaderConfiguration pConfig("Plain");
+        pConfig.addShader(ShaderType_VERTEX, "../Shaders/Plain.vert.glsl");
+        pConfig.addShader(ShaderType_FRAGMENT, "../Shaders/Plain.frag.glsl");
+        ShaderConfigurationFactory::addConfiguration(pConfig);
+
+        ShaderConfiguration lgConfig("LinesGeom");
+        lgConfig.addShader(ShaderType_VERTEX, "../Shaders/Lines.vert.glsl");
+        lgConfig.addShader(ShaderType_FRAGMENT, "../Shaders/Lines.frag.glsl");
+        lgConfig.addShader(ShaderType_GEOMETRY, "../Shaders/Lines.geom.glsl");
+        ShaderConfigurationFactory::addConfiguration(lgConfig);
+
+        ShaderConfiguration lConfig("Lines");
+        lConfig.addShader(ShaderType_VERTEX, "../Shaders/Lines.vert.glsl");
+        lConfig.addShader(ShaderType_FRAGMENT, "../Shaders/Lines.frag.glsl");
+        ShaderConfigurationFactory::addConfiguration(lConfig);
     }
 
     void MainApplication::radiumFrame()
@@ -215,6 +260,10 @@ namespace Ra
         const Scalar dt = Core::Timer::getIntervalSeconds( m_lastFrameStart, timerData.frameStart );
         m_lastFrameStart = timerData.frameStart;
 
+        timerData.eventsStart = Core::Timer::Clock::now();
+        processEvents();
+        timerData.eventsEnd = Core::Timer::Clock::now();
+
         // ----------
         // 1. Gather user input and dispatch it.
         auto keyEvents = m_mainWindow->getKeyEvents();
@@ -224,39 +273,6 @@ namespace Ra
         m_viewer->processPicking();
 
         m_mainWindow->flushEvents();
-
-        // DebugRender examples
-        if (false)
-        {
-            auto dbg = Engine::DebugRender::getInstance();
-            using v3 = Core::Vector3;
-            using v4 = Core::Vector4;
-            using Engine::DrawPrimitives::Triangle;
-            using Engine::DrawPrimitives::Spline;
-
-            dbg->addLine(v3(-0.5, -0.5, 0), v3(0.5, 0.5, 0), v4(0, 1, 0, 1));
-            dbg->addPoint(v3(-0.5, -0.5, 0), v4(1, 0, 0, 1));
-            dbg->addPoint(v3(0.5, 0.5, 0), v4(0, 0, 1, 1));
-
-            dbg->addMesh(Triangle(v3(-1, 0, 0), v3(0, 0, 0), v3(-1, 1, 0), v4(0, 1, 0, 1), false));
-            dbg->addMesh(Triangle(v3(0, 0, 0), v3(0, 1, 0), v3(-1, 1, 0), v4(1, 0, 0, 1), true));
-            dbg->addMesh(Triangle(v3(0, 0, 0), v3(1, 0, 0), v3(0, 1, 0), v4(0, 0, 1, 1), false));
-            dbg->addMesh(Triangle(v3(1, 0, 0), v3(1, 1, 0), v3(0, 1, 0), v4(0, 1, 1, 1), true));
-
-            Core::Vector3Array ctrlPoints =
-            {
-                v3(-3.5,  2, -2), v3(-3.5, -2, -2),
-                v3(-1.5, -2, -2), v3(-1.5,  2, -2),
-                v3( 1.5,  2, -2), v3( 1.5, -2, -2),
-                v3( 3.5, -2, -2), v3( 3.5,  2, -2),
-            };
-
-            Core::Spline<3, 3> sp(Core::Spline<3, 3>::OPEN_UNIFORM);
-            sp.setCtrlPoints(ctrlPoints);
-            dbg->addMesh(Spline(sp, 32, Core::Colors::Magenta()));
-            dbg->addPoints(ctrlPoints, Core::Colors::Grey());
-        }
-
 
         timerData.tasksStart = Core::Timer::Clock::now();
 
@@ -299,7 +315,8 @@ namespace Ra
             emit( updateFrameStats( m_timerData ) );
             m_timerData.clear();
         }
-        emit endFrame();
+
+        m_mainWindow->onFrameComplete();
     }
 
     void MainApplication::appNeedsToQuit()
@@ -323,8 +340,10 @@ namespace Ra
         pluginsDir.cd( pluginsPath.c_str() );
 
         bool res = true;
+        uint pluginCpt = 0;
 
-        foreach (QString filename, pluginsDir.entryList( QDir::Files ) )
+        for (const auto& filename : pluginsDir.entryList(QDir::Files))
+//        foreach (QString filename, pluginsDir.entryList( QDir::Files ) )
         {
             std::string ext = Core::StringUtils::getFileExt( filename.toStdString() );
 #if defined( OS_WINDOWS )
@@ -352,6 +371,7 @@ namespace Ra
                     loadedPlugin = qobject_cast<Plugins::RadiumPluginInterface*>( plugin );
                     if ( loadedPlugin )
                     {
+                        ++pluginCpt;
                         loadedPlugin->registerPlugin( m_engine.get() );
                         m_mainWindow->updateUi( loadedPlugin );
                     }
@@ -370,6 +390,15 @@ namespace Ra
                     res = false;
                 }
             }
+        }
+
+        if (pluginCpt == 0)
+        {
+            LOG(logINFO) << "No plugin found or loaded.";
+        }
+        else
+        {
+            LOG(logINFO) << "Loaded " << pluginCpt << " plugins.";
         }
 
         return res;

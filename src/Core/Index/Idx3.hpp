@@ -126,7 +126,7 @@ namespace Ra
 
 
             inline
-            int size_linear() const
+            uint size_linear() const
             {
                 return _size( 0 ) * _size( 1 ) * _size( 2 );
             }
@@ -143,7 +143,7 @@ namespace Ra
             inline
             bool is_valid() const
             {
-                return _id != InvalidId && size_linear() >= 0;
+                return _id != InvalidId ;
             }
 
             /// Does the index is out of its bounds (defined at construction)

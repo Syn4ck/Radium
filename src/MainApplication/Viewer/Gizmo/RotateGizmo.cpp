@@ -8,6 +8,7 @@
 #include <Engine/RadiumEngine.hpp>
 #include <Engine/Renderer/Camera/Camera.hpp>
 #include <Engine/Renderer/RenderTechnique/RenderTechnique.hpp>
+#include <Engine/Renderer/RenderTechnique/ShaderConfigFactory.hpp>
 #include <Engine/Renderer/Mesh/Mesh.hpp>
 
 namespace Ra
@@ -44,7 +45,7 @@ namespace Ra
                                                                                Engine::RenderObjectType::UI);
 
                 Engine::RenderTechnique* rt = new Engine::RenderTechnique;
-                rt->shaderConfig = Ra::Engine::ShaderConfiguration("Plain", "../Shaders");
+                rt->shaderConfig = Ra::Engine::ShaderConfigurationFactory::getConfiguration("Plain");
                 rt->material = new Ra::Engine::Material("Default material");
                 arrowDrawable->setRenderTechnique(rt);
                 arrowDrawable->setMesh( mesh );

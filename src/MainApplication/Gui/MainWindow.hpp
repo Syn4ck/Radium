@@ -60,6 +60,8 @@ namespace Ra
 
             void updateUi( Plugins::RadiumPluginInterface* plugin );
 
+            void onFrameComplete();
+
         private slots:
             void loadFile();
             void openMaterialEditor();
@@ -136,6 +138,8 @@ namespace Ra
             EntityTreeModel* m_entityTreeModel;
 
             MaterialEditor* m_materialEditor;
+
+            int m_lastSelectedRO;
         };
 
     } // namespace Gui

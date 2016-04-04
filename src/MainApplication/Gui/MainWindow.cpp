@@ -9,6 +9,7 @@
 #include <Engine/Renderer/Renderer.hpp>
 #include <Engine/Renderer/RenderTechnique/RenderTechnique.hpp>
 #include <Engine/Renderer/RenderTechnique/ShaderProgram.hpp>
+#include <Engine/Renderer/RenderTechnique/ShaderConfigFactory.hpp>
 
 #include <MainApplication/MainApplication.hpp>
 #include <MainApplication/Gui/EntityTreeModel.hpp>
@@ -40,6 +41,7 @@ namespace Ra
 
         m_materialEditor = new MaterialEditor();
 
+        m_lastSelectedRO = -1;
         createConnections();
 
         mainApp->framesCountForStatsChanged( m_avgFramesCount->value() );
@@ -70,6 +72,7 @@ namespace Ra
 
         // Loading setup.
         connect( this, &MainWindow::fileLoading, mainApp, &MainApplication::loadFile );
+        connect( mainApp, &MainApplication::loadComplete, this, &MainWindow::onEntitiesUpdated);
 
         // Side menu setup.
         connect( m_entityTreeModel, &EntityTreeModel::dataChanged, m_entityTreeModel, &EntityTreeModel::handleRename );
@@ -96,10 +99,6 @@ namespace Ra
         connect( this, &MainWindow::selectedEntity, this, &MainWindow::displayEntityRenderObjects );
         connect( this, &MainWindow::selectedComponent, this, &MainWindow::displayComponentRenderObjects );
 
-        // Editors should be updated after each frame
-        connect(mainApp, &MainApplication::endFrame, tab_edition, &TransformEditorWidget::updateValues);
-        connect(mainApp, &MainApplication::endFrame, m_viewer->getGizmoManager(), &GizmoManager::updateValues);
-
         // Enable changing shaders
         connect( m_renderObjectsListView, &QListWidget::currentRowChanged, this, &MainWindow::renderObjectListItemClicked );
         connect( m_currentShaderBox, static_cast<void (QComboBox::*)(const QString&)>( &QComboBox::currentIndexChanged ),
@@ -117,6 +116,8 @@ namespace Ra
                  m_viewer, &Viewer::displayTexture );
         connect( m_currentRendererCombo, static_cast<void (QComboBox::*)( int )>( &QComboBox::currentIndexChanged ),
                  m_viewer, &Viewer::changeRenderer );
+
+        connect(m_enablePostProcess, &QCheckBox::stateChanged, m_viewer, &Viewer::enablePostProcess);
 
         // Connect engine signals to the appropriate callbacks
         std::function<void(void)> f =  std::bind(&MainWindow::onEntitiesUpdated, this);
@@ -147,8 +148,6 @@ namespace Ra
         {
             emit fileLoading( path );
         }
-
-        onEntitiesUpdated();
     }
 
     void Gui::MainWindow::onUpdateFramestats( const std::vector<FrameTimerData>& stats )
@@ -157,6 +156,7 @@ namespace Ra
                             .arg( stats.front().numFrame ).arg( stats.back().numFrame );
         m_frameA2BLabel->setText( framesA2B );
 
+        long sumEvents = 0;
         long sumRender = 0;
         long sumTasks = 0;
         long sumFrame = 0;
@@ -164,23 +164,22 @@ namespace Ra
 
         for ( uint i = 0; i < stats.size(); ++i )
         {
-            sumRender += Core::Timer::getIntervalMicro(
-                             stats[i].renderData.renderStart, stats[i].renderData.renderEnd );
-            sumTasks  += Core::Timer::getIntervalMicro(
-                             stats[i].tasksStart, stats[i].tasksEnd );
-            sumFrame  += Core::Timer::getIntervalMicro(
-                             stats[i].frameStart, stats[i].frameEnd );
+            sumEvents += Core::Timer::getIntervalMicro(stats[i].eventsStart, stats[i].eventsEnd);
+            sumRender += Core::Timer::getIntervalMicro(stats[i].renderData.renderStart, stats[i].renderData.renderEnd );
+            sumTasks  += Core::Timer::getIntervalMicro(stats[i].tasksStart, stats[i].tasksEnd );
+            sumFrame  += Core::Timer::getIntervalMicro(stats[i].frameStart, stats[i].frameEnd );
 
             if ( i > 0 )
             {
-                sumInterFrame += Core::Timer::getIntervalMicro(
-                                     stats[i - 1].frameEnd, stats[i].frameEnd );
+                sumInterFrame += Core::Timer::getIntervalMicro(stats[i - 1].frameEnd, stats[i].frameEnd );
             }
         }
 
         const uint N = stats.size();
         const Scalar T( N * 1000000.0 );
 
+        m_eventsTime->setValue(sumEvents / N);
+        m_eventsUpdates->setValue(T / Scalar(sumEvents));
         m_renderTime->setValue( sumRender / N );
         m_renderUpdates->setValue( T / Scalar( sumRender ) );
         m_tasksTime->setValue( sumTasks / N );
@@ -307,6 +306,21 @@ namespace Ra
 
     void Gui::MainWindow::handlePicking( int drawableIndex )
     {
+        if (m_lastSelectedRO >= 0)
+        {
+
+            if ( mainApp->m_engine->getRenderObjectManager()->exists( m_lastSelectedRO ))
+            {
+                const std::shared_ptr<Engine::RenderObject>& ro =
+                    mainApp->m_engine->getRenderObjectManager()->getRenderObject( m_lastSelectedRO );
+
+                Engine::Component* comp = ro->getComponent();
+                Engine::Entity* ent = comp->getEntity();
+                comp->picked( -1 );
+                ent->picked(-1);
+            }
+        }
+
         if ( drawableIndex >= 0 )
         {
             const std::shared_ptr<Engine::RenderObject>& ro =
@@ -323,7 +337,7 @@ namespace Ra
             LOG( logDEBUG ) << "RO Name  : " << ro->getName();
             /////////////////////////////////////////////
 
-            const Engine::Component* comp = ro->getComponent();
+            Engine::Component* comp = ro->getComponent();
             const Engine::Entity* ent = comp->getEntity();
             int compIdx = -1;
             int i = 0;
@@ -361,6 +375,7 @@ namespace Ra
         {
             m_entitiesTreeView->selectionModel()->clear();
         }
+        m_lastSelectedRO = drawableIndex;
     }
 
     void Gui::MainWindow::onSelectionChanged( const QItemSelection& selected, const QItemSelection& deselected )
@@ -482,7 +497,7 @@ namespace Ra
         auto roMgr = Engine::RadiumEngine::getInstance()->getRenderObjectManager();
         auto ro = roMgr->getRenderObject( itemIdx );
 
-        auto shaderName = ro->getRenderTechnique()->shader->getBasicConfiguration().getName();
+        auto shaderName = ro->getRenderTechnique()->shader->getBasicConfiguration().m_name;
 
         m_materialEditor->changeRenderObject( ro->idx );
 
@@ -490,7 +505,6 @@ namespace Ra
         {
             m_currentShaderBox->addItem( QString( shaderName.c_str() ) );
             m_currentShaderBox->setCurrentText( shaderName.c_str() );
-            //m_currentShaderBox->setCurrentText( "" );
         }
         else
         {
@@ -500,7 +514,8 @@ namespace Ra
 
     void Gui::MainWindow::changeRenderObjectShader( const QString& shaderName )
     {
-        if ( shaderName == "" )
+        std::string name = shaderName.toStdString();
+        if ( name == "" )
         {
             return;
         }
@@ -511,26 +526,13 @@ namespace Ra
             return;
         }
 
-        if ( ro->getRenderTechnique()->shader->getBasicConfiguration().getName() == shaderName.toStdString() )
+        if (ro->getRenderTechnique()->shader->getBasicConfiguration().m_name == name)
         {
             return;
         }
 
-        Engine::ShaderConfiguration config;
-
-        config.setName( shaderName.toStdString() );
-        config.setPath( "../Shaders" );
-
-        if ( shaderName == "BlinnPhong" || shaderName == "Plain" )
-        {
-            config.setType( Engine::ShaderConfiguration::DEFAULT_SHADER_PROGRAM );
-        }
-        if ( shaderName == "BlinnPhongWireframe" || shaderName == "Lines" )
-        {
-            config.setType( Engine::ShaderConfiguration::DEFAULT_SHADER_PROGRAM_W_GEOM );
-        }
-
-        ro->getRenderTechnique()->changeShader( config );
+        Engine::ShaderConfiguration config = Ra::Engine::ShaderConfigurationFactory::getConfiguration(name);
+        ro->getRenderTechnique()->changeShader(config);
     }
 
     void Gui::MainWindow::toggleVisisbleRO()
@@ -619,5 +621,11 @@ namespace Ra
         {
             m_currentRendererCombo->addItem( renderer.c_str() );
         }
+    }
+
+    void Gui::MainWindow::onFrameComplete()
+    {
+        tab_edition->updateValues();
+        m_viewer->getGizmoManager()->updateValues();
     }
 } // namespace Ra

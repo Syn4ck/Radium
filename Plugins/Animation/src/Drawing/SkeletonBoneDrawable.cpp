@@ -1,6 +1,7 @@
 #include <Drawing/SkeletonBoneDrawable.hpp>
 
 #include <Engine/Renderer/RenderObject/Primitives/DrawPrimitives.hpp>
+#include <Engine/Renderer/RenderTechnique/ShaderConfigFactory.hpp>
 
 #include <Core/Animation/Handle/SkeletonUtils.hpp>
 
@@ -15,7 +16,8 @@ namespace AnimationPlugin
         // FIXME(Charly): Debug or fancy ?
         Ra::Engine::RenderObject* renderObject = new Ra::Engine::RenderObject( name, comp, Ra::Engine::RenderObjectType::Debug );
         renderObject->setXRay( true );
-        Ra::Engine::ShaderConfiguration shader("BlinnPhong", "../Shaders");
+
+        Ra::Engine::ShaderConfiguration shader = Ra::Engine::ShaderConfigurationFactory::getConfiguration("BlinnPhong");
 
         m_material.reset(new Ra::Engine::Material("Bone Material"));
         m_material->setKd(Ra::Core::Color(0.4, 0.4, 0.4, 0.5));

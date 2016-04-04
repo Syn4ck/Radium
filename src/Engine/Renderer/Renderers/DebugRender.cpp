@@ -20,12 +20,12 @@ namespace Ra
 
         void DebugRender::initialize()
         {
-            m_lineShader = ShaderProgramManager::getInstance()->addShaderProgram("DebugLine");
-            m_pointShader = ShaderProgramManager::getInstance()->addShaderProgram("DebugPoint");
-            m_plainShader = ShaderProgramManager::getInstance()->getShaderProgram(ShaderConfiguration("Plain", "../Shaders"));
+            m_lineShader    = ShaderProgramManager::getInstance()->addShaderProgram("DebugLine", "../Shaders/DebugLine.vert.glsl", "../Shaders/DebugLine.frag.glsl");
+            m_pointShader   = ShaderProgramManager::getInstance()->addShaderProgram("DebugPoint", "../Shaders/DebugPoint.vert.glsl", "../Shaders/DebugPoint.frag.glsl");
+            m_plainShader   = ShaderProgramManager::getInstance()->addShaderProgram("Plain", "../Shaders/Plain.vert.glsl", "../Shaders/Plain.frag.glsl");
         }
 
-        void DebugRender::render(const Core::Matrix4& viewMatrix, 
+        void DebugRender::render(const Core::Matrix4& viewMatrix,
                                  const Core::Matrix4& projMatrix)
         {
             renderLines(viewMatrix, projMatrix);
@@ -88,17 +88,12 @@ namespace Ra
                 return;
             }
 
-            if (0 == m_pointVao)
-            {
-                glGenVertexArrays(1, &m_pointVao);
-                glBindVertexArray(m_pointVao);
-                glGenBuffers(1, &m_pointVbo);
-                glBindVertexArray(0);
-            }
+            GLuint vao, vbo;
+            glGenVertexArrays(1, &vao);
 
-            glBindVertexArray(m_pointVao);
-
-            glBindBuffer(GL_ARRAY_BUFFER, m_pointVbo);
+            glBindVertexArray(vao);
+            glGenBuffers(1, &vbo);
+            glBindBuffer(GL_ARRAY_BUFFER, vbo);
             glBufferData(GL_ARRAY_BUFFER, size * 2 * sizeof(Core::Vector3), m_points.data(), GL_DYNAMIC_DRAW);
 
 #ifdef CORE_USE_DOUBLE
@@ -122,13 +117,15 @@ namespace Ra
             glDisable(GL_PROGRAM_POINT_SIZE);
 
             glBindVertexArray(0);
+            glDeleteVertexArrays(1, &vao);
+            glDeleteBuffers(1, &vbo);
 
             m_points.clear();
         }
 
         void DebugRender::renderMeshes(const Core::Matrix4 &view, const Core::Matrix4 &proj)
         {
-            if (m_meshes.size() == 0)
+            if (m_meshes.empty())
             {
                 return;
             }
@@ -157,7 +154,6 @@ namespace Ra
                 m_meshes[i]->updateGL();
                 m_meshes[i]->render();
             }
-
 
             m_meshes.clear();
         }

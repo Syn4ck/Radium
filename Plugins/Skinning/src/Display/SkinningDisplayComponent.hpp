@@ -15,7 +15,8 @@
 #include <Engine/Renderer/RenderTechnique/RenderTechnique.hpp>
 #include <Engine/Renderer/Mesh/Mesh.hpp>
 #include <Engine/Renderer/RenderTechnique/Material.hpp>
-#include <Engine/Renderer/RenderTechnique/ShaderConfiguration.hpp>
+#include <Engine/Renderer/RenderTechnique/ShaderProgram.hpp>
+#include <Engine/Renderer/RenderTechnique/ShaderConfigFactory.hpp>
 #include <Engine/Renderer/RenderObject/RenderObject.hpp>
 
 #include <Engine/Managers/ComponentMessenger/ComponentMessenger.hpp>
@@ -46,7 +47,7 @@ public:
             const uint size = mesh.m_vertices.size();
 
             const uint   fiveColor = 5;
-            const Scalar magenta   = 5.0 / 6.0;
+            const Scalar magenta   = 5.0f/ 6.0f;
             Ra::Core::Vector4Array palette( fiveColor );
             for( uint i = 0; i < fiveColor; ++i ) {
                 Scalar hue = ( Scalar( i ) / Scalar( fiveColor - 1 ) ) * magenta;
@@ -65,7 +66,7 @@ public:
             Ra::Core::Geometry::AdjacencyMatrix Adj = Ra::Core::Geometry::uniformAdjacency( mesh.m_vertices, mesh.m_triangles );
             Ra::Core::Geometry::AdjacencyMatrix Seg( weights.cols(), weights.cols() );
 
-            for( uint k = 0; k < Adj.outerSize(); ++k ) {
+            for( int k = 0; k < Adj.outerSize(); ++k ) {
                 for( Ra::Core::Geometry::AdjacencyMatrix::InnerIterator it( Adj, k ); it; ++it ) {
                     const uint i = it.row();
                     const uint j = it.col();
@@ -76,7 +77,7 @@ public:
             }
 
             std::vector< uint > assignedColor( weights.cols(), uint( -1 ) );
-            for( uint k = 0; k < Seg.outerSize(); ++k ) {
+            for( int k = 0; k < Seg.outerSize(); ++k ) {
                 std::set< uint > option;
                 for( uint i = 0; i < fiveColor; ++i ) {
                     option.insert( i );
@@ -108,7 +109,8 @@ public:
             technique->material->setKd( Ra::Core::Vector4::Zero() );
             technique->material->setKs( Ra::Core::Vector4::Zero() );
             technique->material->setNs( 100 );
-            technique->shaderConfig = Ra::Engine::ShaderConfiguration( "Plain", "../Shaders" );
+            technique->shaderConfig = Ra::Engine::ShaderConfigurationFactory::getConfiguration("Plain");
+
 
             std::string name = m_name + "_Partition";
 
