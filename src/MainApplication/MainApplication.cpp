@@ -175,6 +175,8 @@ namespace Ra
             Primitive(Engine::SystemEntity::uiCmp(), Grid(
                     Core::Vector3::Zero(), Core::Vector3::UnitX(),
                     Core::Vector3::UnitZ(), Core::Colors::Grey(0.6f))));
+        loadFile("/home/boris/Downloads/chair2.obj");
+        //loadFile("/home/boris/Downloads/triangle.obj");
     }
 
     void MainApplication::loadFile( QString path )
@@ -186,29 +188,29 @@ namespace Ra
         m_viewer->handleFileLoading( pathStr );
 
         // Compute new scene aabb
-        Core::Aabb aabb;
+//        Core::Aabb aabb;
 
-        std::vector<std::shared_ptr<Engine::RenderObject>> ros;
-        m_engine->getRenderObjectManager()->getRenderObjects( ros );
+//        std::vector<std::shared_ptr<Engine::RenderObject>> ros;
+//        m_engine->getRenderObjectManager()->getRenderObjects( ros );
 
-        for ( auto ro : ros )
-        {
-            auto mesh = ro->getMesh();
-            auto pos = mesh->getGeometry().m_vertices;
+//        for ( auto ro : ros )
+//        {
+//            auto mesh = ro->getMesh();
+//            auto pos = mesh->getGeometry().m_vertices;
 
-            for ( auto& p : pos )
-            {
-                p = ro->getLocalTransform() * p;
-            }
+//            for ( auto& p : pos )
+//            {
+//                p = ro->getLocalTransform() * p;
+//            }
 
-            Ra::Core::Vector3 bmin = pos.getMap().rowwise().minCoeff().head<3>();
-            Ra::Core::Vector3 bmax = pos.getMap().rowwise().maxCoeff().head<3>();
+//            Ra::Core::Vector3 bmin = pos.getMap().rowwise().minCoeff().head<3>();
+//            Ra::Core::Vector3 bmax = pos.getMap().rowwise().maxCoeff().head<3>();
 
-            aabb.extend( bmin );
-            aabb.extend( bmax );
-        }
+//            aabb.extend( bmin );
+//            aabb.extend( bmax );
+//        }
 
-        m_viewer->fitCameraToScene( aabb );
+//        m_viewer->fitCameraToScene( aabb );
 
         emit loadComplete();
     }
