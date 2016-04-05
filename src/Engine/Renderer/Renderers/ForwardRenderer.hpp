@@ -41,6 +41,7 @@ namespace Ra
                 TEX_TONEMAP_PONG,
                 TEX_BLOOM_PING,
                 TEX_BLOOM_PONG,
+                TEX_DUMMY,          // /!\ stupid test on shaders and postFX
                 TEX_COUNT
             };
 
