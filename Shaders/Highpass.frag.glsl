@@ -18,12 +18,11 @@ void main()
 
     float middleGrey = getMiddleGrey(lumMean);
     float lumScaled = getLumScaled(Yxy.r, middleGrey, lumMean);
-
     float white = 1.0;
 
     // TODO(charly): Uniforms ?
-    float T = 0.5;
-    float O = 2.0;
+    float T = 0.1;
+    float O = 10.0;
 
     float lumThreshold = max(lumScaled * (1 + lumScaled) - T, 0.0);
     float lumBright = lumThreshold / (O + lumThreshold);
