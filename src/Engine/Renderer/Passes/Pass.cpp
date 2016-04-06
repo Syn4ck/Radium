@@ -1,77 +1,56 @@
-//#include <Engine/Renderer/Passes/Pass.hpp>
-//#include <Engine/Renderer/OpenGL/FBO.hpp>
+#include <Engine/Renderer/Passes/Pass.hpp>
+#include <Engine/Renderer/OpenGL/FBO.hpp>
 
-//namespace Ra
-//{
-//    namespace Engine {
+namespace Ra
+{
+    namespace Engine {
 
-//        // COMPONENT
-//        PassComponent::PassComponent(const std::string& name)
-//            : m_name(name)
-//            , m_texIn(nullptr)
-//            , m_texOut(nullptr)
-//        {
-//        }
+        Pass::Pass(const std::string& name, int w, int h, int nTexIn=1, int nTexOut=1)
+            : m_name( name )
+            , m_width( w )
+            , m_height( h )
+            , m_fbo( nullptr )
+        {
+            // m_fbo.reset( new FBO( FBO::Components( FBO::COLOR ), m_width, m_height ) );
+        }
 
-//        // LEAF
-//        Pass::Pass(const std::string& name, int w, int h, int ntex=0)
-//            : PassComponent(name)
-//            , m_requiredTextures(ntex)
-//            , m_width(w)
-//            , m_height(h)
-//        {
-//            m_fbo.reset( new FBO( FBO::Components( FBO::COLOR ), m_width, m_height ) );
-//        }
+        Pass::initFbo()
+        {
+            // how many fbos are needed
+            int fboCount = m_texIn + m_texOut / GL_MAX_COLOR_ATTACHMENTS;
 
+            // reallocate a new array if more space is required
+            if (fboCount > 1)
+                m_fbo.reset( new std::array<FBO, fboCount> );
 
-//        virtual void Pass::initFbo()
-//        {
-//            m_fbo->bind();
-//            m_fbo->setSize( m_width, m_height );
-//            m_fbo->attachTexture(GL_COLOR_ATTACHMENT0, m_texIn);
-//            m_fbo->attachTexture(GL_COLOR_ATTACHMENT1, m_texOut);
-//            m_fbo->check();
-//            m_fbo->unbind( true );
-//        }
+            // initiate every fbo
+            std::array<FBO,int>::iterator it_texIn  = m_texIn.begin();
+            std::array<FBO,int>::iterator it_texOut = m_texOut.begin();
 
+            for (int j = 0; j < fboCount; ++ j)
+            {
+                int i = 0;
+                FBO f = m_fbo.get() + j;
 
+                f.bind();
+                f.setSize( m_width, m_height );
 
-////        // COMPOSITE/NODE
-////        PassComposite::PassComposite(const std::string& name)
-////            : PassComponent(name)
-////        {
-////        }
+                // while there is space to attach textures IN
+                while (( i < GL_MAX_COLOR_ATTACHMENTS ) && ( it_texIn != m_texIn.end() ))
+                {
+                    f.attachTexture( GL_COLOR_ATTACHMENT0 + (i ++), m_texIn );
+                }
 
-////        PassComposite::add(PassComponent& p)
-////        {
-////            m_childrens->push_back(p);
-////        }
+                // while there is space to attach textures OUT
+                while (( i < GL_MAX_COLOR_ATTACHMENTS ) && ( it_texOut != m_texOut.end() ))
+                {
+                    f.attachTexture( GL_COLOR_ATTACHMENT0 + (i ++) );
+                }
 
-////        PassComposite::remove()
-////        {
-////            m_childrens->pop_back();
-////        }
+                f.unbind( true );
+            }
 
-////        PassComposite::remove(const int i)
-////        {
-////            m_childrens->erase(m_childrens->begin() + i)
-////        }
+        }
 
-////        PassComposite::remove(const std::string& name)
-////        {
-////            std::vector<PassComponent>::iterator elem;
-////            elem = std::find(m_childrens->begin(), m_childrens->end(), name);
-
-////            if (elem != m_childrens->end())
-////            {
-////                m_childrens->erase(elem);
-////            }
-////        }
-
-////        PassComposite::operator[](const int i)
-////        {
-////            return m_childrens.get()[i];
-////        }
-
-//    }
-//}
+    }
+}
