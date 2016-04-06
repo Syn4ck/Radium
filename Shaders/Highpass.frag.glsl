@@ -29,5 +29,10 @@ void main()
     Yxy.r = lumBright;
     color = Yxy2rgb(Yxy);
 
+    if (isnan(color.r) || isnan(color.g) || isnan(color.b))
+    {
+        color = vec3(0);
+    }
+
     fragColor = vec4(color, 1.0);
 }

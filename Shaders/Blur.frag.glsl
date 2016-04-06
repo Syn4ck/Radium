@@ -17,4 +17,9 @@ void main()
     }
 
     fragColor = vec4(c, 1.0);
+
+    if (isnan(c.r) || isnan(c.g) || isnan(c.b))
+    {
+        fragColor = vec4(1, 1, 0, 1);
+    }
 }
