@@ -25,7 +25,7 @@ namespace Ra
         , m_quickCameraModifier( 1.0 )
         , m_wheelSpeedModifier(0.02 )
         , m_distFromCenter( 1.0 )
-        , m_cameraRadius( 1.0 )
+        , m_cameraRadius( 5.0 )
         , m_rotateAround( true )
         , m_cameraRotateMode( false )
         , m_cameraPanMode( false )
@@ -36,6 +36,13 @@ namespace Ra
         , m_walking( 0.0 )
         , m_strafing( 0.0 )
         , m_climbing( 0.0 )
+        , m_isPressedA(false)
+        , m_isPressedD(false)
+        , m_isPressedW(false)
+        , m_isPressedS(false)
+        , m_isPressedQ(false)
+        , m_isPressedE(false)
+        
     {
         resetCamera();
     }
@@ -164,12 +171,57 @@ namespace Ra
             m_rotateAround = !m_rotateAround;
             return true;
         }
+        
+        switch(e->key())
+        {
+        case Qt::Key_A:
+            m_isPressedA = true; 
+            break;
+        case Qt::Key_D:
+            m_isPressedD = true;
+            break;
+        case Qt::Key_E:
+            m_isPressedE = true; 
+            break;
+        case Qt::Key_Q:
+            m_isPressedQ = true;
+            break;
+        case Qt::Key_W:
+            m_isPressedW = true; 
+            break;
+        case Qt::Key_S:
+            m_isPressedS = true;
+            break;
+        }
 
         return false;
     }
 
     bool Gui::TrackballCamera::handleKeyReleaseEvent( QKeyEvent* e )
     {
+        
+        switch(e->key())
+        {
+        case Qt::Key_A:
+            m_isPressedA = false; 
+            break;
+        case Qt::Key_D:
+            m_isPressedD = false;
+            break;
+        case Qt::Key_E:
+            m_isPressedE = false; 
+            break;
+        case Qt::Key_Q:
+            m_isPressedQ = false;
+            break;
+        case Qt::Key_W:
+            m_isPressedW = false; 
+            break;
+        case Qt::Key_S:
+            m_isPressedS = false;
+            break;
+        }
+        
         return false;
     }
 
@@ -182,17 +234,15 @@ namespace Ra
 
         Core::Transform T( Core::Transform::Identity() );
         Core::Vector3 t;
+        
+        Scalar f = m_isPressedW ? 1.0 : m_isPressedS ? -1.0 : 0.0;
+        Scalar r = m_isPressedD ? 1.0 : m_isPressedA ? -1.0 : 0.0;
+        Scalar u = m_isPressedE ? 1.0 : m_isPressedQ ? -1.0 : 0.0;
 
-        // FIXME(Charly): WASDQE should be handled by a keymap, not hard coded
-        Scalar f = Gui::isKeyPressed( Gui::Key_W ) ? 1.0 : Gui::isKeyPressed( Gui::Key_S ) ? -1.0 : 0.0;
-        Scalar r = Gui::isKeyPressed( Gui::Key_D ) ? 1.0 : Gui::isKeyPressed( Gui::Key_A ) ? -1.0 : 0.0;
-        Scalar u = Gui::isKeyPressed( Gui::Key_Q ) ? 1.0 : Gui::isKeyPressed( Gui::Key_E ) ? -1.0 : 0.0;
-
-        Scalar m = Gui::isKeyPressed( Gui::Key_LAlt ) ? 1.5 : 0.25;
-
-        Core::Vector3 F = m_camera->getDirection() * dt * f * m_cameraRadius * m;
-        Core::Vector3 R = m_camera->getRightVector() * dt * r * m_cameraRadius * m;
-        Core::Vector3 U = m_camera->getUpVector() * dt * u * m_cameraRadius * m;
+        
+        Core::Vector3 F = m_camera->getDirection() * dt * f * m_cameraRadius;
+        Core::Vector3 R = m_camera->getRightVector() * dt * r * m_cameraRadius;
+        Core::Vector3 U = m_camera->getUpVector() * dt * u * m_cameraRadius;
 
         t = F + R + U;
         T.translate( t );
@@ -275,7 +325,7 @@ namespace Ra
         emit cameraPositionChanged( m_camera->getPosition() );
         emit cameraTargetChanged( m_trackballCenter );
     }
-
+    
     void Gui::TrackballCamera::handleCameraRotate( Scalar dx, Scalar dy )
     {
         Scalar x = dx * m_cameraSensitivity * m_quickCameraModifier;

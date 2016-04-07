@@ -75,6 +75,13 @@ namespace Ra
             Scalar m_walking;
             Scalar m_strafing;
             Scalar m_climbing;
+            
+            bool m_isPressedA;
+            bool m_isPressedD;
+            bool m_isPressedW;
+            bool m_isPressedS;
+            bool m_isPressedQ;
+            bool m_isPressedE;
         };
 
     } // namespace Engine
