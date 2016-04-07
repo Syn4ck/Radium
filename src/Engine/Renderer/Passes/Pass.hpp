@@ -3,6 +3,7 @@
 
 #include <Engine/RadiumEngine.hpp>
 #include <Engine/Renderer/Renderer.hpp>
+#include <Engine/Renderer/OpenGL/OpenGL.hpp>
 
 namespace Ra
 {
@@ -18,13 +19,11 @@ namespace Ra
 
             virtual std::string getPassName() const { return m_name; }
 
-            virtual void renderPass() = 0;
-            virtual void initFbo()    = 0;
+            virtual void renderPass(ShaderProgramManager* shaderMgr, Mesh* screen) = 0;
+            virtual void initFbos() = 0;
 
             virtual void setIn(int slot, Texture* tex);
             virtual void setOut(int slot, Texture* tex);
-
-            virtual std::shared_ptr<Texture> getIn(int slot);   // FIXME(Hugo) shared useful ? unique ?
 
         protected:
             std::string m_name;
@@ -32,14 +31,15 @@ namespace Ra
             int m_width;
             int m_height;
 
-            int m_texIn;
-            int m_texOut;
+            int m_nTexIn;
+            int m_nTexOut;
 
-            std::array<std::shared_ptr<Texture>, m_texIn>  m_texIn;
-            std::array<std::shared_ptr<Texture>, m_texOut> m_texOut;
+            std::vector<std::shared_ptr<Texture>> m_texIn;
+            std::vector<std::shared_ptr<Texture>> m_texOut;
 
-            std::unique_ptr<std::array<FBO,1>> m_fbo;
+            static const GLenum buffers[];
         };
+
 
     } // namespace Engine
 } // namespace Ra

@@ -1,56 +1,65 @@
-#include <Engine/Renderer/Passes/Pass.hpp>
 #include <Engine/Renderer/OpenGL/FBO.hpp>
+#include <Engine/Renderer/Passes/Pass.hpp>
+#include <Engine/Renderer/Texture/Texture.hpp>
+
 
 namespace Ra
 {
     namespace Engine {
 
-        Pass::Pass(const std::string& name, int w, int h, int nTexIn=1, int nTexOut=1)
-            : m_name( name )
-            , m_width( w )
-            , m_height( h )
-            , m_fbo( nullptr )
+        // a static buffer for every passes to use in glDrawBuffers
+        const GLenum Pass::buffers[] = {
+                    GL_COLOR_ATTACHMENT0,
+                    GL_COLOR_ATTACHMENT1,
+                    GL_COLOR_ATTACHMENT2,
+                    GL_COLOR_ATTACHMENT3,
+                    GL_COLOR_ATTACHMENT4,
+                    GL_COLOR_ATTACHMENT5,
+                    GL_COLOR_ATTACHMENT6,
+                    GL_COLOR_ATTACHMENT7
+                };
+
+        Pass::Pass(const std::string& name, int w, int h, int nTexIn=0, int nTexOut=0)
+            : m_name    ( name )
+            , m_width   ( w )
+            , m_height  ( h )
+            , m_nTexIn  ( nTexIn )
+            , m_nTexOut ( nTexOut )
         {
-            // m_fbo.reset( new FBO( FBO::Components( FBO::COLOR ), m_width, m_height ) );
+            // resize vectors of textures if necessary
+            if (m_nTexIn > 1)
+                m_texIn.resize(m_nTexIn, nullptr);
+
+            if (m_nTexOut > 1)
+                m_texOut.resize(m_nTexOut, nullptr);
         }
 
-        Pass::initFbo()
+        Pass::~Pass() {}
+
+        void Pass::setIn(int slot, Texture* tex)
         {
-            // how many fbos are needed
-            int fboCount = m_texIn + m_texOut / GL_MAX_COLOR_ATTACHMENTS;
-
-            // reallocate a new array if more space is required
-            if (fboCount > 1)
-                m_fbo.reset( new std::array<FBO, fboCount> );
-
-            // initiate every fbo
-            std::array<FBO,int>::iterator it_texIn  = m_texIn.begin();
-            std::array<FBO,int>::iterator it_texOut = m_texOut.begin();
-
-            for (int j = 0; j < fboCount; ++ j)
+            if ( slot < m_nTexIn )
             {
-                int i = 0;
-                FBO f = m_fbo.get() + j;
-
-                f.bind();
-                f.setSize( m_width, m_height );
-
-                // while there is space to attach textures IN
-                while (( i < GL_MAX_COLOR_ATTACHMENTS ) && ( it_texIn != m_texIn.end() ))
-                {
-                    f.attachTexture( GL_COLOR_ATTACHMENT0 + (i ++), m_texIn );
-                }
-
-                // while there is space to attach textures OUT
-                while (( i < GL_MAX_COLOR_ATTACHMENTS ) && ( it_texOut != m_texOut.end() ))
-                {
-                    f.attachTexture( GL_COLOR_ATTACHMENT0 + (i ++) );
-                }
-
-                f.unbind( true );
+                m_texIn[slot].reset( tex );
             }
-
+            else
+            {
+                // (1) ask for error management policy, e.g exit() or return ERROR
+            }
         }
+
+        void Pass::setOut(int slot, Texture* tex)
+        {
+            if ( slot < m_nTexOut )
+            {
+                m_texOut[slot].reset( tex );
+            }
+            else
+            {
+                // TODO(Hugo) manage error (see (1))
+            }
+        }
+
 
     }
 }
