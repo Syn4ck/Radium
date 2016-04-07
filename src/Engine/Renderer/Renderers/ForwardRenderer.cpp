@@ -27,6 +27,7 @@
 #include <Engine/Renderer/Texture/Texture.hpp>
 #include <Engine/Renderer/Renderers/DebugRender.hpp>
 
+
 #define NO_TRANSPARENCY
 namespace Ra
 {
@@ -52,7 +53,8 @@ namespace Ra
             : Renderer( width, height )
             , m_fbo( nullptr )
             , m_postprocessFbo( nullptr )
-            , m_pingPongFbo(nullptr)
+            , m_pingPongFbo( nullptr )
+            , m_pass0( "lumpass0", width, height, 1, 1 )
         {
         }
 
@@ -111,6 +113,10 @@ namespace Ra
             m_secondaryTextures["Tonemaping Texture 1"] = m_textures[TEX_TONEMAP_PING].get();
             m_secondaryTextures["Tonemaping Texture 2"] = m_textures[TEX_TONEMAP_PONG].get();
             m_secondaryTextures["Dummy test"]           = m_textures[TEX_DUMMY].get();
+
+            m_pass0.setIn(0, m_textures[TEX_LIT].get());
+            m_pass0.setOut(0, m_textures[TEX_LUMINANCE].get());
+            m_pass0.initFbos();
         }
 
         void ForwardRenderer::updateStepInternal( const RenderData& renderData )
@@ -362,6 +368,8 @@ namespace Ra
         {
             CORE_UNUSED( renderData );
 
+            std::cout << "postFXing" << std::endl;
+
             m_postprocessFbo->useAsTarget( m_width, m_height );
 
             GL_ASSERT( glDepthMask( GL_TRUE ) );
@@ -379,40 +387,45 @@ namespace Ra
             if (m_postProcessEnabled)
             {
                 // Get per pixel luminance
-                GL_ASSERT(glDrawBuffers(1, buffers + 1));
-                shader = m_shaderMgr->getShaderProgram("Luminance");
-                shader->bind();
-                shader->setUniform("hdr", m_textures[TEX_LIT].get(), 0);
-                m_quadMesh->render();
+//                GL_ASSERT(glDrawBuffers(1, buffers + 1));
+//                shader = m_shaderMgr->getShaderProgram("Luminance");
+//                shader->bind();
+//                shader->setUniform("hdr", m_textures[TEX_LIT].get(), 0);
+//                m_quadMesh->render();
 
-                m_pingPongFbo->useAsTarget();
+//                m_pingPongFbo->useAsTarget();
 
-                uint size = m_pingPongSize;
-                glDrawBuffers(1, buffers);
-                glViewport(0, 0, size, size);
-                shader = m_shaderMgr->getShaderProgram("DrawScreen");
-                shader->bind();
-                shader->setUniform("screenTexture", m_textures[TEX_LUMINANCE].get(), 0);
-                m_quadMesh->render();
+//                uint size = m_pingPongSize;
+//                glDrawBuffers(1, buffers);
+//                glViewport(0, 0, size, size);
+//                shader = m_shaderMgr->getShaderProgram("DrawScreen");
+//                shader->bind();
+//                shader->setUniform("screenTexture", m_textures[TEX_LUMINANCE].get(), 0);
+//                m_quadMesh->render();
 
-                // Get min / max / avg lum values
-                shader = m_shaderMgr->getShaderProgram("MinMax");
-                shader->bind();
-                uint ping = 0;
-                while (size != 1)
-                {
-                    size /= 2;
-                    // Ping pong between textures
-                    GL_ASSERT(glDrawBuffers(1, buffers + (ping + 1)%2));
-                    GL_ASSERT(glViewport(0, 0, size, size));
+//                // Get min / max / avg lum values
+//                shader = m_shaderMgr->getShaderProgram("MinMax");
+//                shader->bind();
+//                uint ping = 0;
+//                while (size != 1)
+//                {
+//                    size /= 2;
+//                    // Ping pong between textures
+//                    GL_ASSERT(glDrawBuffers(1, buffers + (ping + 1)%2));
+//                    GL_ASSERT(glViewport(0, 0, size, size));
 
-                    shader->setUniform("color", m_textures[TEX_TONEMAP_PING + ping].get(), 0);
-                    m_quadMesh->render();
+//                    shader->setUniform("color", m_textures[TEX_TONEMAP_PING + ping].get(), 0);
+//                    m_quadMesh->render();
 
-                    ++ping %= 2;
-                }
+//                    ++ping %= 2;
+//                }
 
-                Core::Color lum = m_textures[TEX_TONEMAP_PING + (ping + 1) % 2]->getTexel(0, 0);
+                // pass test
+                std::cout << "ARMAGEDDONing" << std::endl;
+                m_pass0.renderPass(m_shaderMgr, m_quadMesh.get());
+                std::cout << "ARMAGEDDONed" << std::endl;
+
+                Core::Color lum = m_textures[TEX_LUMINANCE]->getTexel(0, 0);
 
                 Scalar lumMin  = lum.x();
                 Scalar lumMax  = lum.y();
@@ -480,6 +493,7 @@ namespace Ra
 
                 GL_ASSERT( glDepthFunc( GL_LESS ) );
                 m_postprocessFbo->unbind();
+                std::cout << "postFXed" << std::endl;
             }
             else
             {

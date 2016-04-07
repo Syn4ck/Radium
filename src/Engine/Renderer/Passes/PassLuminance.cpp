@@ -1,20 +1,9 @@
 #include "PassLuminance.hpp"
 
+#include <iostream>
 
 namespace Ra {
     namespace Engine {
-
-//        const GLenum buffers[] =
-//        {
-//            GL_COLOR_ATTACHMENT0,
-//            GL_COLOR_ATTACHMENT1,
-//            GL_COLOR_ATTACHMENT2,
-//            GL_COLOR_ATTACHMENT3,
-//            GL_COLOR_ATTACHMENT4,
-//            GL_COLOR_ATTACHMENT5,
-//            GL_COLOR_ATTACHMENT6,
-//            GL_COLOR_ATTACHMENT7
-//        };
 
         PassLuminance::PassLuminance(const std::string& name, int w, int h, int nTexIn=1, int nTexOut=1)
             : Pass(name, w, h, nTexIn, nTexOut)
@@ -25,7 +14,7 @@ namespace Ra {
 
             // actually create necessary intermediate textures (ping-pong here)
             m_internalTextures[TEX_PING].reset( new Texture( "Pong", GL_TEXTURE_2D ) );
-            m_internalTextures[TEX_PING].reset( new Texture( "Ping", GL_TEXTURE_2D ) );
+            m_internalTextures[TEX_PONG].reset( new Texture( "Ping", GL_TEXTURE_2D ) );
 
             m_pingPongSize = std::pow(2.0, Scalar(uint(std::log2(std::min(m_width, m_height)))));
         }
@@ -45,7 +34,6 @@ namespace Ra {
 
             m_fbo[FBO_MAIN]->unbind( true );
 
-
             // initiate, bind and configure the ping-pong fbo
             m_fbo[FBO_PING_PONG]->bind();
             m_fbo[FBO_PING_PONG]->setSize( m_width, m_height );
@@ -54,7 +42,6 @@ namespace Ra {
             m_fbo[FBO_PING_PONG]->attachTexture( GL_COLOR_ATTACHMENT1, m_internalTextures[1].get() );
 
             m_fbo[FBO_PING_PONG]->unbind( true );
-
 
             GL_CHECK_ERROR;
 

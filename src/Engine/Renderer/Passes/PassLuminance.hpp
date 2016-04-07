@@ -31,7 +31,7 @@ namespace Ra
             {
                 FBO_MAIN = 0,
                 FBO_PING_PONG,
-                FBO_COUNT
+                FBO_COUNT,
             };
 
             enum TextureInternalTags
@@ -43,16 +43,16 @@ namespace Ra
 
             enum TextureInTags
             {
-                TEX_LIT = 0
+                TEX_LIT = 0,
             };
 
             enum TextureOutTags
             {
-                TEX_LUM = 0
+                TEX_LUM = 0,
             };
 
             uint m_pingPongSize;
-            std::array<std::unique_ptr<FBO>,2> m_fbo;
+            std::array<std::unique_ptr<FBO>,FBO_COUNT> m_fbo;
             std::array<std::shared_ptr<Texture>,TEX_INTERNAL_COUNT> m_internalTextures;
         };
 

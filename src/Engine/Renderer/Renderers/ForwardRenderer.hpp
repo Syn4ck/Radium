@@ -4,6 +4,9 @@
 #include <Engine/RadiumEngine.hpp>
 #include <Engine/Renderer/Renderer.hpp>
 
+#include <Engine/Renderer/Passes/Pass.hpp>
+#include <Engine/Renderer/Passes/PassLuminance.hpp>
+
 namespace Ra
 {
     namespace Engine
@@ -54,6 +57,8 @@ namespace Ra
             uint m_pingPongSize;
 
             std::array<std::unique_ptr<Texture>, TEX_COUNT> m_textures;
+
+            PassLuminance m_pass0;
         };
 
     } // namespace Engine

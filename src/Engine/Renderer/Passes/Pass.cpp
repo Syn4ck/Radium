@@ -26,12 +26,8 @@ namespace Ra
             , m_nTexIn  ( nTexIn )
             , m_nTexOut ( nTexOut )
         {
-            // resize vectors of textures if necessary
-            if (m_nTexIn > 1)
-                m_texIn.resize(m_nTexIn, nullptr);
-
-            if (m_nTexOut > 1)
-                m_texOut.resize(m_nTexOut, nullptr);
+            m_texIn.resize  (nTexIn, nullptr);
+            m_texOut.resize (nTexOut, nullptr);
         }
 
         Pass::~Pass() {}
