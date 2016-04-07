@@ -33,6 +33,12 @@ namespace Ra
             , m_texOut   ( nTexOut )
             , m_canvas   ( canvas )
         {
+            // resize vectors of textures if necessary
+            if (m_nTexIn > 1)
+                m_texIn.resize(m_nTexIn, nullptr);
+
+            if (m_nTexOut > 1)
+                m_texOut.resize(m_nTexOut, nullptr);
         }
 
         Pass::~Pass() {}
@@ -77,6 +83,7 @@ namespace Ra
 
             std::sort(passVector.begin(), passVector.end(), f);
         }
+
 
     }
 }

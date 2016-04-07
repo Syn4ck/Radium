@@ -51,6 +51,8 @@ namespace Ra
             // Default renderer logic here, no need to be accessed by overriding renderers.
             std::unique_ptr<FBO> m_fbo;
             std::unique_ptr<FBO> m_postprocessFbo;
+            std::unique_ptr<FBO> m_pingPongFbo;
+            std::unique_ptr<FBO> m_bloomFbo;
 
             uint m_pingPongSize;
 

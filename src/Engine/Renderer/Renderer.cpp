@@ -308,7 +308,6 @@ namespace Ra
                 }
             }
 
-
             // Always draw ui stuff on top of everything
             GL_ASSERT( glClear( GL_DEPTH_BUFFER_BIT ) );
             for ( const auto& ro : m_uiRenderObjects )
