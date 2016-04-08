@@ -19,7 +19,7 @@ namespace Ra
                     GL_COLOR_ATTACHMENT7
                 };
 
-        Pass::Pass(const std::string& name, int w, int h, int nTexIn=0, int nTexOut=0)
+        Pass::Pass(const std::string& name, uint w, uint h, uint nTexIn=0, uint nTexOut=0)
             : m_name    ( name )
             , m_width   ( w )
             , m_height  ( h )
@@ -32,7 +32,7 @@ namespace Ra
 
         Pass::~Pass() {}
 
-        void Pass::setIn(int slot, Texture* tex)
+        void Pass::setIn(uint slot, Texture* tex)
         {
             if ( slot < m_nTexIn )
             {
@@ -44,7 +44,7 @@ namespace Ra
             }
         }
 
-        void Pass::setOut(int slot, Texture* tex)
+        void Pass::setOut(uint slot, Texture* tex)
         {
             if ( slot < m_nTexOut )
             {

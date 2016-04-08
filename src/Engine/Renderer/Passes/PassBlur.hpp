@@ -1,5 +1,5 @@
-#ifndef RADIUMENGINE_RENDERER_PASS_LUM_HPP
-#define RADIUMENGINE_RENDERER_PASS_LUM_HPP
+#ifndef RADIUMENGINE_RENDERER_PASS_BLUR_HPP
+#define RADIUMENGINE_RENDERER_PASS_BLUR_HPP
 
 #include <Engine/RadiumEngine.hpp>
 #include <Engine/Renderer/Renderer.hpp>
@@ -17,11 +17,11 @@ namespace Ra
     namespace Engine
     {
 
-        class RA_ENGINE_API PassLuminance : public Pass
+        class RA_ENGINE_API PassBlur : public Pass
         {
         public:
-            PassLuminance(const std::string& name, uint w, uint h, uint nTexIn, uint nTexOut);
-            virtual ~PassLuminance();
+            PassBlur(const std::string& name, uint w, uint h, uint nTexIn, uint nTexOut);
+            virtual ~PassBlur();
 
             void renderPass(ShaderProgramManager* shaderMgr, Mesh* screen);
             void resizePass(uint w, uint h);
@@ -34,25 +34,27 @@ namespace Ra
             enum FboTags
             {
                 FBO_MAIN = 0,
-                FBO_PING_PONG,
+                FBO_BLUR,
                 FBO_COUNT,
             };
 
             enum TextureInternalTags
             {
-                TEX_PING = 0,
-                TEX_PONG,
+                TEX_BLUR_PING = 0,
+                TEX_BLUR_PONG,
                 TEX_INTERNAL_COUNT,
             };
 
             enum TextureInTags
             {
-                TEX_LIT = 0,
+                TEX_COLOR = 0,
+                TEX_IN_COUNT,
             };
 
             enum TextureOutTags
             {
-                TEX_LUM = 0,
+                TEX_BLURRED = 0,
+                TEX_OUT_COUNT,
             };
 
             uint m_pingPongSize;
@@ -64,4 +66,4 @@ namespace Ra
 }
 
 
-#endif // RADIUMENGINE_RENDERER_PASS_LUM_HPP
+#endif // RADIUMENGINE_RENDERER_PASS_BLUR_HPP

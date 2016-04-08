@@ -1,5 +1,5 @@
-#ifndef RADIUMENGINE_RENDERER_PASSCOMPONENT_HPP
-#define RADIUMENGINE_RENDERER_PASSCOMPONENT_HPP
+#ifndef RADIUMENGINE_RENDERER_PASS_HPP
+#define RADIUMENGINE_RENDERER_PASS_HPP
 
 #include <Engine/RadiumEngine.hpp>
 #include <Engine/Renderer/Renderer.hpp>
@@ -14,27 +14,28 @@ namespace Ra
         class RA_ENGINE_API Pass
         {
         public:
-            Pass(const std::string& name, int w, int h, int nTexIn, int nTexOut);
+            Pass(const std::string& name, uint w, uint h, uint nTexIn, uint nTexOut);
             virtual ~Pass() = 0;
 
             virtual std::string getPassName() const { return m_name; }
 
             virtual void renderPass(ShaderProgramManager* shaderMgr, Mesh* screen) = 0;
+            virtual void resizePass( uint w, uint h ) = 0;
             virtual void initFbos() = 0;
 
-            virtual void setIn(int slot, Texture* tex);
-            virtual void setOut(int slot, Texture* tex);
+            virtual void setIn(uint slot, Texture* tex);
+            virtual void setOut(uint slot, Texture* tex);
 
-            virtual std::shared_ptr<Texture> getInternTextures(int i) = 0;
+            virtual std::shared_ptr<Texture> getInternTextures(uint i) = 0;
 
         protected:
             std::string m_name;
 
-            int m_width;
-            int m_height;
+            uint m_width;
+            uint m_height;
 
-            int m_nTexIn;
-            int m_nTexOut;
+            uint m_nTexIn;
+            uint m_nTexOut;
 
             std::vector<std::shared_ptr<Texture>> m_texIn;
             std::vector<std::shared_ptr<Texture>> m_texOut;
@@ -46,4 +47,4 @@ namespace Ra
     } // namespace Engine
 } // namespace Ra
 
-#endif // RADIUMENGINE_FORWARDRENDERER_PASS_HPP
+#endif // RADIUMENGINE_RENDERER_PASS_HPP

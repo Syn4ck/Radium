@@ -1,5 +1,5 @@
-#ifndef RADIUMENGINE_RENDERER_PASS_LUM_HPP
-#define RADIUMENGINE_RENDERER_PASS_LUM_HPP
+#ifndef RADIUMENGINE_RENDERER_PASS_HIGHPASS_HPP
+#define RADIUMENGINE_RENDERER_PASS_HIGHPASS_HPP
 
 #include <Engine/RadiumEngine.hpp>
 #include <Engine/Renderer/Renderer.hpp>
@@ -17,11 +17,11 @@ namespace Ra
     namespace Engine
     {
 
-        class RA_ENGINE_API PassLuminance : public Pass
+        class RA_ENGINE_API PassHighpass : public Pass
         {
         public:
-            PassLuminance(const std::string& name, uint w, uint h, uint nTexIn, uint nTexOut);
-            virtual ~PassLuminance();
+            PassHighpass(const std::string& name, uint w, uint h, uint nTexIn, uint nTexOut);
+            virtual ~PassHighpass();
 
             void renderPass(ShaderProgramManager* shaderMgr, Mesh* screen);
             void resizePass(uint w, uint h);
@@ -33,35 +33,28 @@ namespace Ra
         private:
             enum FboTags
             {
-                FBO_MAIN = 0,
-                FBO_PING_PONG,
+                FBO_BLOOM = 0,
                 FBO_COUNT,
-            };
-
-            enum TextureInternalTags
-            {
-                TEX_PING = 0,
-                TEX_PONG,
-                TEX_INTERNAL_COUNT,
             };
 
             enum TextureInTags
             {
                 TEX_LIT = 0,
+                TEX_LUM,
+                TEX_IN_COUNT,
             };
 
             enum TextureOutTags
             {
-                TEX_LUM = 0,
+                TEX_HPASS = 0,
+                TEX_OUT_COUNT,
             };
 
-            uint m_pingPongSize;
             std::array<std::unique_ptr<FBO>,FBO_COUNT> m_fbo;
-            std::array<std::shared_ptr<Texture>,TEX_INTERNAL_COUNT> m_internalTextures;
         };
 
     }
 }
 
 
-#endif // RADIUMENGINE_RENDERER_PASS_LUM_HPP
+#endif // RADIUMENGINE_RENDERER_PASS_HIGHPASS_HPP

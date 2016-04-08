@@ -368,62 +368,16 @@ namespace Ra
         {
             CORE_UNUSED( renderData );
 
-            std::cout << "postFXing" << std::endl;
-
-            m_postprocessFbo->useAsTarget( m_width, m_height );
-
-            GL_ASSERT( glDepthMask( GL_TRUE ) );
+            GL_ASSERT( glDepthMask( GL_TRUE )    );
             GL_ASSERT( glColorMask( 1, 1, 1, 1 ) );
-
-            // FIXME(Charly): Do we really need to clear buffers ?
-            GL_ASSERT(glClearColor( 1.0, 1.0, 0.0, 0.0 ) );
-            GL_ASSERT(glDrawBuffers(5, buffers));
-            m_postprocessFbo->clear( FBO::Components( FBO::COLOR) );
-
-            GL_ASSERT(glDepthFunc( GL_ALWAYS ) );
+            GL_ASSERT( glDepthFunc( GL_ALWAYS )  );
 
             const ShaderProgram* shader = nullptr;
 
             if (m_postProcessEnabled)
             {
-                // Get per pixel luminance
-//                GL_ASSERT(glDrawBuffers(1, buffers + 1));
-//                shader = m_shaderMgr->getShaderProgram("Luminance");
-//                shader->bind();
-//                shader->setUniform("hdr", m_textures[TEX_LIT].get(), 0);
-//                m_quadMesh->render();
-
-//                m_pingPongFbo->useAsTarget();
-
-//                uint size = m_pingPongSize;
-//                glDrawBuffers(1, buffers);
-//                glViewport(0, 0, size, size);
-//                shader = m_shaderMgr->getShaderProgram("DrawScreen");
-//                shader->bind();
-//                shader->setUniform("screenTexture", m_textures[TEX_LUMINANCE].get(), 0);
-//                m_quadMesh->render();
-
-//                // Get min / max / avg lum values
-//                shader = m_shaderMgr->getShaderProgram("MinMax");
-//                shader->bind();
-//                uint ping = 0;
-//                while (size != 1)
-//                {
-//                    size /= 2;
-//                    // Ping pong between textures
-//                    GL_ASSERT(glDrawBuffers(1, buffers + (ping + 1)%2));
-//                    GL_ASSERT(glViewport(0, 0, size, size));
-
-//                    shader->setUniform("color", m_textures[TEX_TONEMAP_PING + ping].get(), 0);
-//                    m_quadMesh->render();
-
-//                    ++ping %= 2;
-//                }
-
                 // pass test
-                std::cout << "ARMAGEDDONing" << std::endl;
                 m_pass0.renderPass(m_shaderMgr, m_quadMesh.get());
-                std::cout << "ARMAGEDDONed" << std::endl;
 
                 Core::Color lum = m_textures[TEX_LUMINANCE]->getTexel(0, 0);
 
@@ -477,7 +431,7 @@ namespace Ra
                 GL_ASSERT(glViewport(0, 0, m_width, m_height));
 
                 // Dummy test
-                GL_ASSERT(glDrawBuffers(1, buffers + 3));    // Attach. 3
+                GL_ASSERT(glDrawBuffers(1, buffers + 3));
                 shader = m_shaderMgr->getShaderProgram("Dummy");
                 shader->bind();
                 shader->setUniform("color", m_textures[TEX_LIT].get(), 0);
@@ -493,7 +447,6 @@ namespace Ra
 
                 GL_ASSERT( glDepthFunc( GL_LESS ) );
                 m_postprocessFbo->unbind();
-                std::cout << "postFXed" << std::endl;
             }
             else
             {
@@ -523,9 +476,9 @@ namespace Ra
 
             m_fbo->bind();
             m_fbo->setSize( m_width, m_height );
-            m_fbo->attachTexture( GL_DEPTH_ATTACHMENT , m_textures[TEX_DEPTH]   .get() );
-            m_fbo->attachTexture( GL_COLOR_ATTACHMENT0, m_textures[TEX_NORMAL]  .get() );
-            m_fbo->attachTexture( GL_COLOR_ATTACHMENT1, m_textures[TEX_LIT] .get() );
+            m_fbo->attachTexture( GL_DEPTH_ATTACHMENT , m_textures[TEX_DEPTH].get() );
+            m_fbo->attachTexture( GL_COLOR_ATTACHMENT0, m_textures[TEX_NORMAL].get() );
+            m_fbo->attachTexture( GL_COLOR_ATTACHMENT1, m_textures[TEX_LIT].get() );
             m_fbo->check();
             m_fbo->unbind( true );
 
@@ -551,6 +504,8 @@ namespace Ra
             m_bloomFbo->attachTexture(GL_COLOR_ATTACHMENT1, m_textures[TEX_BLOOM_PONG].get());
             m_bloomFbo->check();
             m_bloomFbo->unbind(true);
+
+            m_pass0.resizePass(m_width, m_height);
 
             GL_CHECK_ERROR;
 

@@ -61,6 +61,7 @@ namespace Ra
             PassLuminance m_pass0;
         };
 
+
     } // namespace Engine
 } // namespace Ra
 

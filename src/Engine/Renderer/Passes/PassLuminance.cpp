@@ -1,20 +1,13 @@
 #include "PassLuminance.hpp"
 
+#include <iostream>
 
 namespace Ra {
     namespace Engine {
 
-        PassLuminance::PassLuminance(const std::string& name, int w, int h, int nTexIn=1, int nTexOut=1)
+        PassLuminance::PassLuminance(const std::string& name, uint w, uint h, uint nTexIn=1, uint nTexOut=1)
             : Pass(name, w, h, nTexIn, nTexOut)
         {
-            // create FBOs
-            m_fbo[FBO_MAIN].reset( new FBO( FBO::Components(FBO::COLOR), m_width, m_height ));
-            m_fbo[FBO_PING_PONG].reset( new FBO( FBO::Components(FBO::COLOR), 1, 1 ));
-
-            // actually create necessary intermediate textures (ping-pong here)
-            m_internalTextures[TEX_PING].reset( new Texture( "Pong", GL_TEXTURE_2D ) );
-            m_internalTextures[TEX_PONG].reset( new Texture( "Ping", GL_TEXTURE_2D ) );
-
             m_pingPongSize = std::pow(2.0, Scalar(uint(std::log2(std::min(m_width, m_height)))));
         }
 
@@ -24,22 +17,42 @@ namespace Ra {
 
         void PassLuminance::initFbos()
         {
+            // create internal FBOs
+            m_fbo[FBO_MAIN].reset( new FBO( FBO::Components(FBO::COLOR), m_width, m_height ));
+            m_fbo[FBO_PING_PONG].reset( new FBO( FBO::Components(FBO::COLOR), 1, 1 ));
+
+            // actually create necessary intermediate textures (ping-pong here)
+            m_internalTextures[TEX_PING].reset( new Texture( "Pong", GL_TEXTURE_2D ) );
+            m_internalTextures[TEX_PONG].reset( new Texture( "Ping", GL_TEXTURE_2D ) );
+        }
+
+        void PassLuminance::resizePass(uint w, uint h)
+        {
+            m_width  = w;
+            m_height = h;
+            resizePass();
+        }
+
+        void PassLuminance::resizePass()
+        {
+            m_pingPongSize = std::pow(2.0, Scalar(uint(std::log2(std::min(m_width, m_height)))));
+
+            // m_texOut[TEX_LUM]->initGL(GL_RGBA32F, m_width, m_height, GL_RGBA, GL_FLOAT, nullptr);
+            m_internalTextures[TEX_PING]->initGL(GL_RGBA32F, m_pingPongSize, m_pingPongSize, GL_RGBA, GL_FLOAT, nullptr);
+            m_internalTextures[TEX_PONG]->initGL(GL_RGBA32F, m_pingPongSize, m_pingPongSize, GL_RGBA, GL_FLOAT, nullptr);
+
             // initiate, bind and configure the main fbo
             m_fbo[FBO_MAIN]->bind();
             m_fbo[FBO_MAIN]->setSize( m_width, m_height );
-
             m_fbo[FBO_MAIN]->attachTexture( GL_COLOR_ATTACHMENT0, m_texIn[0].get() );
             m_fbo[FBO_MAIN]->attachTexture( GL_COLOR_ATTACHMENT1, m_texOut[0].get() );
-
             m_fbo[FBO_MAIN]->unbind( true );
 
             // initiate, bind and configure the ping-pong fbo
             m_fbo[FBO_PING_PONG]->bind();
             m_fbo[FBO_PING_PONG]->setSize( m_width, m_height );
-
             m_fbo[FBO_PING_PONG]->attachTexture( GL_COLOR_ATTACHMENT0, m_internalTextures[0].get() );
             m_fbo[FBO_PING_PONG]->attachTexture( GL_COLOR_ATTACHMENT1, m_internalTextures[1].get() );
-
             m_fbo[FBO_PING_PONG]->unbind( true );
 
             GL_CHECK_ERROR;
@@ -64,6 +77,7 @@ namespace Ra {
             shader->bind();
             shader->setUniform("hdr", m_texIn[TEX_LIT].get(), 0); // set TEX_LIT as uniform source
             screen->render();
+
 
             m_fbo[FBO_PING_PONG]->useAsTarget(); // prepare for ping-pong
 
@@ -96,9 +110,9 @@ namespace Ra {
             m_texOut[TEX_LUM] = m_internalTextures[TEX_PING + ((ping+1)%2)];
         }
 
-        std::shared_ptr<Texture> PassLuminance::getInternTextures(int i)
+        std::shared_ptr<Texture> PassLuminance::getInternTextures(uint i)
         {
-            if (i < m_internalTextures.size())
+            if (i < TEX_INTERNAL_COUNT)
                 return m_internalTextures[i];
             else
                 return m_internalTextures[0];  // FIXME(Hugo) what an error management
