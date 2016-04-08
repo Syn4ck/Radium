@@ -54,7 +54,6 @@ namespace Ra
             , m_fbo( nullptr )
             , m_postprocessFbo( nullptr )
             , m_pingPongFbo( nullptr )
-            , m_pass0( "lumpass0", width, height, 1, 1 )
         {
         }
 
@@ -101,7 +100,6 @@ namespace Ra
             m_textures[TEX_BLOOM_PONG].reset(new Texture("Bloom Pong", GL_TEXTURE_2D));
             m_textures[TEX_TONEMAP_PING].reset(new Texture("Minmax Ping", GL_TEXTURE_2D));
             m_textures[TEX_TONEMAP_PONG].reset(new Texture("Minmax Pong", GL_TEXTURE_2D));
-            m_textures[TEX_DUMMY].reset(new Texture("Dummytex", GL_TEXTURE_2D));
 
             m_secondaryTextures["Depth Texture"]        = m_textures[TEX_DEPTH].get();
             m_secondaryTextures["Normal Texture"]       = m_textures[TEX_NORMAL].get();
@@ -112,11 +110,6 @@ namespace Ra
             m_secondaryTextures["Bloom Texture 2"]      = m_textures[TEX_BLOOM_PONG].get();
             m_secondaryTextures["Tonemaping Texture 1"] = m_textures[TEX_TONEMAP_PING].get();
             m_secondaryTextures["Tonemaping Texture 2"] = m_textures[TEX_TONEMAP_PONG].get();
-            m_secondaryTextures["Dummy test"]           = m_textures[TEX_DUMMY].get();
-
-            m_pass0.setIn(0, m_textures[TEX_LIT].get());
-            m_pass0.setOut(0, m_textures[TEX_LUMINANCE].get());
-            m_pass0.initFbos();
         }
 
         void ForwardRenderer::updateStepInternal( const RenderData& renderData )
@@ -288,7 +281,7 @@ namespace Ra
                     }
                 }
 
-                DebugRender::getInstance()->render(renderData.viewMatrix, 
+                DebugRender::getInstance()->render(renderData.viewMatrix,
                                                    renderData.projMatrix);
 
             }
@@ -368,18 +361,57 @@ namespace Ra
         {
             CORE_UNUSED( renderData );
 
-            GL_ASSERT( glDepthMask( GL_TRUE )    );
+            m_postprocessFbo->useAsTarget( m_width, m_height );
+
+            GL_ASSERT( glDepthMask( GL_TRUE ) );
             GL_ASSERT( glColorMask( 1, 1, 1, 1 ) );
-            GL_ASSERT( glDepthFunc( GL_ALWAYS )  );
+
+            // FIXME(Charly): Do we really need to clear buffers ?
+            GL_ASSERT(glClearColor( 1.0, 1.0, 0.0, 0.0 ) );
+            GL_ASSERT(glDrawBuffers(5, buffers));
+            m_postprocessFbo->clear( FBO::Components( FBO::COLOR) );
+
+            GL_ASSERT(glDepthFunc( GL_ALWAYS ) );
 
             const ShaderProgram* shader = nullptr;
 
             if (m_postProcessEnabled)
             {
-                // pass test
-                m_pass0.renderPass(m_shaderMgr, m_quadMesh.get());
+                // Get per pixel luminance
+                GL_ASSERT(glDrawBuffers(1, buffers + 1));
+                shader = m_shaderMgr->getShaderProgram("Luminance");
+                shader->bind();
+                shader->setUniform("hdr", m_textures[TEX_LIT].get(), 0);
+                m_quadMesh->render();
 
-                Core::Color lum = m_textures[TEX_LUMINANCE]->getTexel(0, 0);
+                m_pingPongFbo->useAsTarget();
+
+                uint size = m_pingPongSize;
+                glDrawBuffers(1, buffers);
+                glViewport(0, 0, size, size);
+                shader = m_shaderMgr->getShaderProgram("DrawScreen");
+                shader->bind();
+                shader->setUniform("screenTexture", m_textures[TEX_LUMINANCE].get(), 0);
+                m_quadMesh->render();
+
+                // Get min / max / avg lum values
+                shader = m_shaderMgr->getShaderProgram("MinMax");
+                shader->bind();
+                uint ping = 0;
+                while (size != 1)
+                {
+                    size /= 2;
+                    // Ping pong between textures
+                    GL_ASSERT(glDrawBuffers(1, buffers + (ping + 1)%2));
+                    GL_ASSERT(glViewport(0, 0, size, size));
+
+                    shader->setUniform("color", m_textures[TEX_TONEMAP_PING + ping].get(), 0);
+                    m_quadMesh->render();
+
+                    ++ping %= 2;
+                }
+
+                Core::Color lum = m_textures[TEX_TONEMAP_PING + (ping + 1) % 2]->getTexel(0, 0);
 
                 Scalar lumMin  = lum.x();
                 Scalar lumMax  = lum.y();
@@ -426,18 +458,10 @@ namespace Ra
                     m_quadMesh->render();
                 }
 
-                // rebind post-process FBO
+                // Compose final image (tonemapped + bloom + ...)
                 m_postprocessFbo->useAsTarget(m_width, m_height);
                 GL_ASSERT(glViewport(0, 0, m_width, m_height));
 
-                // Dummy test
-                GL_ASSERT(glDrawBuffers(1, buffers + 3));
-                shader = m_shaderMgr->getShaderProgram("Dummy");
-                shader->bind();
-                shader->setUniform("color", m_textures[TEX_LIT].get(), 0);
-                m_quadMesh->render();
-
-                // Compose final image (tonemapped + bloom + dummy + ...)
                 GL_ASSERT(glDrawBuffers(1, buffers));
                 shader = m_shaderMgr->getShaderProgram("FinalCompose");
                 shader->bind();
@@ -472,7 +496,6 @@ namespace Ra
             m_textures[TEX_TONEMAP_PONG]->initGL(GL_RGBA32F, m_pingPongSize, m_pingPongSize, GL_RGBA, GL_FLOAT, nullptr);
             m_textures[TEX_BLOOM_PING]->initGL(GL_RGBA32F, m_width / 8, m_height / 8, GL_RGBA, GL_FLOAT, nullptr);
             m_textures[TEX_BLOOM_PONG]->initGL(GL_RGBA32F, m_width / 8, m_height / 8, GL_RGBA, GL_FLOAT, nullptr);
-            m_textures[TEX_DUMMY]->initGL(GL_RGBA32F, m_width, m_height, GL_RGBA, GL_FLOAT, nullptr);
 
             m_fbo->bind();
             m_fbo->setSize( m_width, m_height );
@@ -487,7 +510,6 @@ namespace Ra
             m_postprocessFbo->attachTexture(GL_COLOR_ATTACHMENT0, m_fancyTexture.get());
             m_postprocessFbo->attachTexture(GL_COLOR_ATTACHMENT1, m_textures[TEX_LUMINANCE].get());
             m_postprocessFbo->attachTexture(GL_COLOR_ATTACHMENT2, m_textures[TEX_TONEMAPPED].get());
-            m_postprocessFbo->attachTexture(GL_COLOR_ATTACHMENT3, m_textures[TEX_DUMMY].get());
             m_postprocessFbo->check();
             m_postprocessFbo->unbind( true );
 
@@ -504,8 +526,6 @@ namespace Ra
             m_bloomFbo->attachTexture(GL_COLOR_ATTACHMENT1, m_textures[TEX_BLOOM_PONG].get());
             m_bloomFbo->check();
             m_bloomFbo->unbind(true);
-
-            m_pass0.resizePass(m_width, m_height);
 
             GL_CHECK_ERROR;
 

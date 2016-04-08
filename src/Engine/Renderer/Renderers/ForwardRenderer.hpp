@@ -4,8 +4,7 @@
 #include <Engine/RadiumEngine.hpp>
 #include <Engine/Renderer/Renderer.hpp>
 
-#include <Engine/Renderer/Passes/Pass.hpp>
-#include <Engine/Renderer/Passes/PassLuminance.hpp>
+#include <Engine/Renderer/Passes/Passes.hpp> // include every Pass*.hpp, TODO(Hugo) remove it after debug
 
 namespace Ra
 {
@@ -58,7 +57,7 @@ namespace Ra
 
             std::array<std::unique_ptr<Texture>, TEX_COUNT> m_textures;
 
-            PassLuminance m_pass0;
+//            PassDummy m_pass0;
         };
 
 
