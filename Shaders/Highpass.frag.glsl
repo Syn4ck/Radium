@@ -17,6 +17,7 @@ void main()
 
     float middleGrey = getMiddleGrey(lumMean);
     float lumScaled = getLumScaled(Yxy.r, middleGrey, lumMean);
+
     float white = 1.0;
 
     // TODO(charly): Uniforms ?
@@ -30,9 +31,8 @@ void main()
     color = Yxy2rgb(Yxy);
 
     if (isnan(color.r) || isnan(color.g) || isnan(color.b))
-    {
-        color = vec3(0);
-    }
+        color = vec3(0.0) ;
+
 
     fragColor = vec4(color, 1.0);
 }
