@@ -1,6 +1,5 @@
 #include "PassLuminance.hpp"
 
-#include <iostream>
 
 namespace Ra {
     namespace Engine {
@@ -60,7 +59,7 @@ namespace Ra {
             m_fbo[FBO_MAIN]->useAsTarget( m_width, m_height );
 
             GL_ASSERT( glDrawBuffers(1, buffers + 1) ); // draw on TEX_LUM (out)
-            shader = shaderMgr->getShaderProgram("luminance");
+            shader = shaderMgr->getShaderProgram("Luminance");
 
             shader->bind();
             shader->setUniform("hdr", m_texIn[TEX_LIT].get(), 0); // set TEX_LIT as uniform source
@@ -95,6 +94,14 @@ namespace Ra {
 
             // now the right texture should be outputted (verb from wikipedia)
             m_texOut[TEX_LUM] = m_internalTextures[TEX_PING + ((ping+1)%2)];
+        }
+
+        std::shared_ptr<Texture> PassLuminance::getInternTextures(int i)
+        {
+            if (i < m_internalTextures.size())
+                return m_internalTextures[i];
+            else
+                return m_internalTextures[0];  // FIXME(Hugo) what an error management
         }
 
     }

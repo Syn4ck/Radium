@@ -26,6 +26,8 @@ namespace Ra
             void initFbos();
             void renderPass(ShaderProgramManager* shaderMgr, Mesh* screen);
 
+            virtual std::shared_ptr<Texture> getInternTextures(int i);
+
         private:
             enum FboTags
             {

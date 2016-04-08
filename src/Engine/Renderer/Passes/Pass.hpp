@@ -25,6 +25,8 @@ namespace Ra
             virtual void setIn(int slot, Texture* tex);
             virtual void setOut(int slot, Texture* tex);
 
+            virtual std::shared_ptr<Texture> getInternTextures(int i) = 0;
+
         protected:
             std::string m_name;
 
