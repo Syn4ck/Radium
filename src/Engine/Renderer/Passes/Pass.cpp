@@ -19,15 +19,15 @@ namespace Ra
                     GL_COLOR_ATTACHMENT7
                 };
 
-        Pass::Pass(const std::string& name, uint w, uint h, uint nTexIn=0, uint nTexOut=0)
+        Pass::Pass(const std::string& name, uint w, uint h, uint nTexIn=1, uint nTexOut=1)
             : m_name    ( name )
             , m_width   ( w )
             , m_height  ( h )
             , m_nTexIn  ( nTexIn )
             , m_nTexOut ( nTexOut )
+            , m_texIn   ( nTexIn )
+            , m_texOut  ( nTexOut )
         {
-            m_texIn.resize  (nTexIn, nullptr);
-            m_texOut.resize (nTexOut, nullptr);
         }
 
         Pass::~Pass() {}
@@ -36,11 +36,13 @@ namespace Ra
         {
             if ( slot < m_nTexIn )
             {
-                m_texIn[slot].reset( tex );
+                //m_texIn[slot].reset( tex );
+                m_texIn[slot] = tex;
             }
             else
             {
                 // (1) ask for error management policy, e.g exit() or return ERROR
+                m_texIn[slot] = nullptr;
             }
         }
 
@@ -48,11 +50,13 @@ namespace Ra
         {
             if ( slot < m_nTexOut )
             {
-                m_texOut[slot].reset( tex );
+                //m_texOut[slot].reset( tex );
+                m_texOut[slot] = tex;
             }
             else
             {
                 // TODO(Hugo) manage error (see (1))
+                m_texOut[slot] = nullptr;
             }
         }
 

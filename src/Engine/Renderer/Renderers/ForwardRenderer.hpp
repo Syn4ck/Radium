@@ -57,7 +57,8 @@ namespace Ra
 
             std::array<std::unique_ptr<Texture>, TEX_COUNT> m_textures;
 
-//            PassDummy m_pass0;
+            // PassTonemap m_tonemap;
+            PassDummy   m_dummy;
         };
 
 

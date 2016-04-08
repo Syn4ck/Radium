@@ -22,8 +22,8 @@ namespace Ra {
             m_fbo[FBO_BLUR].reset( new FBO( FBO::Components(FBO::COLOR), m_width / 8, m_height / 8 ));
 
             // actually create necessary intermediate textures (ping-pong here)
-            m_internalTextures[TEX_BLUR_PING].reset( new Texture( "Ping", GL_TEXTURE_2D ) );
-            m_internalTextures[TEX_BLUR_PONG].reset( new Texture( "Pong", GL_TEXTURE_2D ) );
+            //m_internalTextures[TEX_BLUR_PING].reset( new Texture( "Ping", GL_TEXTURE_2D ) );
+            //m_internalTextures[TEX_BLUR_PONG].reset( new Texture( "Pong", GL_TEXTURE_2D ) );
         }
 
         void PassBlur::resizePass(uint w, uint h)
@@ -37,14 +37,14 @@ namespace Ra {
         {
             m_pingPongSize = std::pow(2.0, Scalar(uint(std::log2(std::min(m_width, m_height)))));
 
-            m_internalTextures[TEX_BLUR_PING]->initGL(GL_RGBA32F, m_pingPongSize, m_pingPongSize, GL_RGBA, GL_FLOAT, nullptr);
-            m_internalTextures[TEX_BLUR_PONG]->initGL(GL_RGBA32F, m_pingPongSize, m_pingPongSize, GL_RGBA, GL_FLOAT, nullptr);
+            //m_internalTextures[TEX_BLUR_PING]->initGL(GL_RGBA32F, m_pingPongSize, m_pingPongSize, GL_RGBA, GL_FLOAT, nullptr);
+            //m_internalTextures[TEX_BLUR_PONG]->initGL(GL_RGBA32F, m_pingPongSize, m_pingPongSize, GL_RGBA, GL_FLOAT, nullptr);
 
             // initiate, bind and configure the main fbo
             m_fbo[FBO_MAIN]->bind();
             m_fbo[FBO_MAIN]->setSize( m_width, m_height );
-            m_fbo[FBO_MAIN]->attachTexture( GL_COLOR_ATTACHMENT0, m_texIn[TEX_COLOR].get() );
-            m_fbo[FBO_MAIN]->attachTexture( GL_COLOR_ATTACHMENT1, m_texOut[TEX_BLURRED].get() );
+            m_fbo[FBO_MAIN]->attachTexture( GL_COLOR_ATTACHMENT0, m_texIn[TEX_COLOR] );
+            m_fbo[FBO_MAIN]->attachTexture( GL_COLOR_ATTACHMENT1, m_texOut[TEX_BLURRED] );
             m_fbo[FBO_MAIN]->unbind( true );
 
             // initiate, bind and configure the ping-pong blurring fbo

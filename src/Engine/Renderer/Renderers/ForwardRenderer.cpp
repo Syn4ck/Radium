@@ -1,6 +1,6 @@
 #include <Engine/Renderer/Renderers/ForwardRenderer.hpp>
 
-#include <iostream>
+#include <iostream> // DIRTY DEBUG TODO(Hugo) remove this
 
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
@@ -54,6 +54,8 @@ namespace Ra
             , m_fbo( nullptr )
             , m_postprocessFbo( nullptr )
             , m_pingPongFbo( nullptr )
+            , m_dummy( "YoloPass", width, height, 1, 1 )
+            //, m_tonemap( "TonemapPass", width, height, 1, 1 )
         {
         }
 
@@ -100,6 +102,7 @@ namespace Ra
             m_textures[TEX_BLOOM_PONG].reset(new Texture("Bloom Pong", GL_TEXTURE_2D));
             m_textures[TEX_TONEMAP_PING].reset(new Texture("Minmax Ping", GL_TEXTURE_2D));
             m_textures[TEX_TONEMAP_PONG].reset(new Texture("Minmax Pong", GL_TEXTURE_2D));
+            m_textures[TEX_DUMMY].reset(new Texture("Dummy", GL_TEXTURE_2D));
 
             m_secondaryTextures["Depth Texture"]        = m_textures[TEX_DEPTH].get();
             m_secondaryTextures["Normal Texture"]       = m_textures[TEX_NORMAL].get();
@@ -110,6 +113,11 @@ namespace Ra
             m_secondaryTextures["Bloom Texture 2"]      = m_textures[TEX_BLOOM_PONG].get();
             m_secondaryTextures["Tonemaping Texture 1"] = m_textures[TEX_TONEMAP_PING].get();
             m_secondaryTextures["Tonemaping Texture 2"] = m_textures[TEX_TONEMAP_PONG].get();
+            m_secondaryTextures["Dummy pass secondary"] = m_textures[TEX_DUMMY].get();
+
+            m_dummy.setIn  (0, m_textures[TEX_LIT].get());
+            m_dummy.setOut (0, m_textures[TEX_DUMMY].get());
+            m_dummy.initFbos();
         }
 
         void ForwardRenderer::updateStepInternal( const RenderData& renderData )
@@ -458,6 +466,9 @@ namespace Ra
                     m_quadMesh->render();
                 }
 
+                // test of pass
+                m_dummy.renderPass(m_shaderMgr, m_quadMesh.get());
+
                 // Compose final image (tonemapped + bloom + ...)
                 m_postprocessFbo->useAsTarget(m_width, m_height);
                 GL_ASSERT(glViewport(0, 0, m_width, m_height));
@@ -496,6 +507,7 @@ namespace Ra
             m_textures[TEX_TONEMAP_PONG]->initGL(GL_RGBA32F, m_pingPongSize, m_pingPongSize, GL_RGBA, GL_FLOAT, nullptr);
             m_textures[TEX_BLOOM_PING]->initGL(GL_RGBA32F, m_width / 8, m_height / 8, GL_RGBA, GL_FLOAT, nullptr);
             m_textures[TEX_BLOOM_PONG]->initGL(GL_RGBA32F, m_width / 8, m_height / 8, GL_RGBA, GL_FLOAT, nullptr);
+            m_textures[TEX_DUMMY]->initGL(GL_RGBA32F, m_width, m_height, GL_RGBA, GL_FLOAT, nullptr);
 
             m_fbo->bind();
             m_fbo->setSize( m_width, m_height );
@@ -526,6 +538,8 @@ namespace Ra
             m_bloomFbo->attachTexture(GL_COLOR_ATTACHMENT1, m_textures[TEX_BLOOM_PONG].get());
             m_bloomFbo->check();
             m_bloomFbo->unbind(true);
+
+            m_dummy.resizePass(m_width, m_height);
 
             GL_CHECK_ERROR;
 

@@ -37,9 +37,9 @@ namespace Ra
             // initiate, bind and configure the main fbo
             m_fbo[FBO_MAIN]->bind();
             m_fbo[FBO_MAIN]->setSize( m_width, m_height );
-            m_fbo[FBO_MAIN]->attachTexture( GL_COLOR_ATTACHMENT0, m_texIn[TEX_A].get() );
-            m_fbo[FBO_MAIN]->attachTexture( GL_COLOR_ATTACHMENT1, m_texIn[TEX_B].get() );
-            m_fbo[FBO_MAIN]->attachTexture( GL_COLOR_ATTACHMENT2, m_texOut[TEX_AB].get() );
+            m_fbo[FBO_MAIN]->attachTexture( GL_COLOR_ATTACHMENT0, m_texIn[TEX_A] );
+            m_fbo[FBO_MAIN]->attachTexture( GL_COLOR_ATTACHMENT1, m_texIn[TEX_B] );
+            m_fbo[FBO_MAIN]->attachTexture( GL_COLOR_ATTACHMENT2, m_texOut[TEX_AB] );
             m_fbo[FBO_MAIN]->unbind( true );
         }
 
@@ -54,8 +54,8 @@ namespace Ra
 
             shader = shaderMgr->getShaderProgram("Tonemapping");
             shader->bind();
-            shader->setUniform("texA", m_texIn[TEX_A].get(), 0);
-            shader->setUniform("texB", m_texIn[TEX_B].get(), 0);
+            shader->setUniform("texA", m_texIn[TEX_A], 0);
+            shader->setUniform("texB", m_texIn[TEX_B], 0);
             screen->render();
         }
 

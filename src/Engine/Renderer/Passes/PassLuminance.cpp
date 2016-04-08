@@ -38,21 +38,21 @@ namespace Ra {
             m_pingPongSize = std::pow(2.0, Scalar(uint(std::log2(std::min(m_width, m_height)))));
 
             // m_texOut[TEX_LUM]->initGL(GL_RGBA32F, m_width, m_height, GL_RGBA, GL_FLOAT, nullptr);
-            m_internalTextures[TEX_PING]->initGL(GL_RGBA32F, m_pingPongSize, m_pingPongSize, GL_RGBA, GL_FLOAT, nullptr);
-            m_internalTextures[TEX_PONG]->initGL(GL_RGBA32F, m_pingPongSize, m_pingPongSize, GL_RGBA, GL_FLOAT, nullptr);
+            // m_internalTextures[TEX_PING]->initGL(GL_RGBA32F, m_pingPongSize, m_pingPongSize, GL_RGBA, GL_FLOAT, nullptr);
+            // m_internalTextures[TEX_PONG]->initGL(GL_RGBA32F, m_pingPongSize, m_pingPongSize, GL_RGBA, GL_FLOAT, nullptr);
 
             // initiate, bind and configure the main fbo
             m_fbo[FBO_MAIN]->bind();
             m_fbo[FBO_MAIN]->setSize( m_width, m_height );
-            m_fbo[FBO_MAIN]->attachTexture( GL_COLOR_ATTACHMENT0, m_texIn[0].get() );
-            m_fbo[FBO_MAIN]->attachTexture( GL_COLOR_ATTACHMENT1, m_texOut[0].get() );
+            m_fbo[FBO_MAIN]->attachTexture( GL_COLOR_ATTACHMENT0, m_texIn[TEX_LIT] );
+            m_fbo[FBO_MAIN]->attachTexture( GL_COLOR_ATTACHMENT1, m_texOut[TEX_LUM] );
             m_fbo[FBO_MAIN]->unbind( true );
 
             // initiate, bind and configure the ping-pong fbo
             m_fbo[FBO_PING_PONG]->bind();
             m_fbo[FBO_PING_PONG]->setSize( m_width, m_height );
-            m_fbo[FBO_PING_PONG]->attachTexture( GL_COLOR_ATTACHMENT0, m_internalTextures[0].get() );
-            m_fbo[FBO_PING_PONG]->attachTexture( GL_COLOR_ATTACHMENT1, m_internalTextures[1].get() );
+            m_fbo[FBO_PING_PONG]->attachTexture( GL_COLOR_ATTACHMENT0, m_internalTextures[TEX_PING].get() );
+            m_fbo[FBO_PING_PONG]->attachTexture( GL_COLOR_ATTACHMENT1, m_internalTextures[TEX_PONG].get() );
             m_fbo[FBO_PING_PONG]->unbind( true );
 
             GL_CHECK_ERROR;
@@ -75,7 +75,7 @@ namespace Ra {
             shader = shaderMgr->getShaderProgram("Luminance");
 
             shader->bind();
-            shader->setUniform("hdr", m_texIn[TEX_LIT].get(), 0); // set TEX_LIT as uniform source
+            shader->setUniform("hdr", m_texIn[TEX_LIT], 0); // set TEX_LIT as uniform source
             screen->render();
 
 
@@ -87,7 +87,7 @@ namespace Ra {
             glViewport(0, 0, size, size);
             shader = shaderMgr->getShaderProgram("DrawScreen");
             shader->bind();
-            shader->setUniform( "screenTexture", m_texOut[TEX_LUM].get(), 0);
+            shader->setUniform( "screenTexture", m_texOut[TEX_LUM], 0);
             screen->render();
 
             // ping-pong to min/max and avg
@@ -107,7 +107,7 @@ namespace Ra {
             }
 
             // now the right texture should be outputted (verb from wikipedia)
-            m_texOut[TEX_LUM] = m_internalTextures[TEX_PING + ((ping+1)%2)];
+            m_texOut[TEX_LUM] = m_internalTextures[TEX_PING + ((ping+1)%2)].get();
         }
 
         std::shared_ptr<Texture> PassLuminance::getInternTextures(uint i)

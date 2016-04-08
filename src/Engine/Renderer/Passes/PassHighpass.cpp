@@ -32,9 +32,9 @@ namespace Ra {
             // initiate, bind and configure the main fbo
             m_fbo[FBO_BLOOM]->bind();
             m_fbo[FBO_BLOOM]->setSize( m_width, m_height );
-            m_fbo[FBO_BLOOM]->attachTexture( GL_COLOR_ATTACHMENT0, m_texIn[TEX_LIT].get() );
-            m_fbo[FBO_BLOOM]->attachTexture( GL_COLOR_ATTACHMENT1, m_texIn[TEX_LUM].get() );
-            m_fbo[FBO_BLOOM]->attachTexture( GL_COLOR_ATTACHMENT2, m_texOut[TEX_HPASS].get() );
+            m_fbo[FBO_BLOOM]->attachTexture( GL_COLOR_ATTACHMENT0, m_texIn[TEX_LIT] );
+            m_fbo[FBO_BLOOM]->attachTexture( GL_COLOR_ATTACHMENT1, m_texIn[TEX_LUM] );
+            m_fbo[FBO_BLOOM]->attachTexture( GL_COLOR_ATTACHMENT2, m_texOut[TEX_HPASS] );
             m_fbo[FBO_BLOOM]->unbind( true );
 
             GL_CHECK_ERROR;
@@ -57,8 +57,8 @@ namespace Ra {
 
             shader = shaderMgr->getShaderProgram("Highpass");
             shader->bind();
-            shader->setUniform("hdr",  m_texIn[TEX_LIT].get(), 0);
-            shader->setUniform("lum", m_texOut[TEX_LUM].get(), 0);
+            shader->setUniform("hdr",  m_texIn[TEX_LIT], 0);
+            shader->setUniform("lum", m_texOut[TEX_LUM], 0);
             screen->render();
         }
 

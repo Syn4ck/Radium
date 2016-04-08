@@ -37,8 +37,8 @@ namespace Ra
             uint m_nTexIn;
             uint m_nTexOut;
 
-            std::vector<std::shared_ptr<Texture>> m_texIn;
-            std::vector<std::shared_ptr<Texture>> m_texOut;
+            std::vector<Texture*> m_texIn;
+            std::vector<Texture*> m_texOut;
 
             static const GLenum buffers[];
         };

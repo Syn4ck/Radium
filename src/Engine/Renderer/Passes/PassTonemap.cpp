@@ -37,9 +37,9 @@ namespace Ra
             // initiate, bind and configure the main fbo
             m_fbo[FBO_MAIN]->bind();
             m_fbo[FBO_MAIN]->setSize( m_width, m_height );
-            m_fbo[FBO_MAIN]->attachTexture( GL_COLOR_ATTACHMENT0, m_texIn[TEX_LUM].get() );
-            m_fbo[FBO_MAIN]->attachTexture( GL_COLOR_ATTACHMENT1, m_texIn[TEX_HDR].get() );
-            m_fbo[FBO_MAIN]->attachTexture( GL_COLOR_ATTACHMENT2, m_texOut[TEX_TONEMAP].get() );
+            m_fbo[FBO_MAIN]->attachTexture( GL_COLOR_ATTACHMENT0, m_texIn[TEX_LUM] );
+            m_fbo[FBO_MAIN]->attachTexture( GL_COLOR_ATTACHMENT1, m_texIn[TEX_HDR] );
+            m_fbo[FBO_MAIN]->attachTexture( GL_COLOR_ATTACHMENT2, m_texOut[TEX_TONEMAP] );
             m_fbo[FBO_MAIN]->unbind( true );
         }
 
@@ -54,8 +54,8 @@ namespace Ra
 
             shader = shaderMgr->getShaderProgram("Tonemapping");
             shader->bind();
-            shader->setUniform("hdr", m_texIn[TEX_HDR].get(), 0); // good tex unit ?
-            shader->setUniform("lum", m_texIn[TEX_HDR].get(), 0); // shader to be updated to extract lum values itself
+            shader->setUniform("hdr", m_texIn[TEX_HDR], 0); // good tex unit ?
+            shader->setUniform("lum", m_texIn[TEX_HDR], 0); // shader to be updated to extract lum values itself
             screen->render();
         }
 
