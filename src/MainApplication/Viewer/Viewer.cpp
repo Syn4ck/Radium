@@ -322,7 +322,7 @@ namespace Ra
         makeCurrent();
 
         // Move camera if needed. Disabled for now as it takes too long (see issue #69)
-        //m_camera->update( dt );
+        m_camera->update( dt );
 
         Engine::RenderData data;
         data.dt = dt;
