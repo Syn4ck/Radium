@@ -58,6 +58,8 @@ namespace Ra
 
         void PassDummy::renderPass()
         {
+            const ShaderProgram* shader = nullptr;
+
             m_fbo[FBO_MAIN]->useAsTarget(m_width, m_height);
 
             GL_ASSERT( glViewport(0, 0, m_width, m_height) );
@@ -73,6 +75,7 @@ namespace Ra
             std::shared_ptr<Texture> empty( nullptr );
             return empty;
         }
+
 
     }
 }

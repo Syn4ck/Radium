@@ -1,5 +1,7 @@
 #include "PassHighpass.hpp"
 
+//#include <iostream>
+
 namespace Ra {
     namespace Engine {
 

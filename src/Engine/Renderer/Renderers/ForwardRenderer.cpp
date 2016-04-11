@@ -27,6 +27,7 @@
 #include <Engine/Renderer/Texture/Texture.hpp>
 #include <Engine/Renderer/Renderers/DebugRender.hpp>
 
+
 #define NO_TRANSPARENCY
 namespace Ra
 {

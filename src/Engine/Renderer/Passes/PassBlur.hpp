@@ -7,6 +7,7 @@
 #include <Engine/Renderer/OpenGL/FBO.hpp>
 #include <Engine/Renderer/Mesh/Mesh.hpp>
 #include <Engine/Renderer/Passes/Pass.hpp>
+#include <Engine/Renderer/OpenGL/FBO.hpp>
 #include <Engine/Renderer/Texture/Texture.hpp>
 #include <Engine/Renderer/Passes/PassPingPong.hpp>
 #include <Engine/Renderer/RenderTechnique/ShaderProgram.hpp>
@@ -38,7 +39,15 @@ namespace Ra
             enum FboTags
             {
                 FBO_MAIN = 0,
+                FBO_BLUR,
                 FBO_COUNT,
+            };
+
+            enum TextureInternalTags
+            {
+                TEX_BLUR_PING = 0,
+                TEX_BLUR_PONG,
+                TEX_INTERNAL_COUNT,
             };
 
             enum TextureInTags

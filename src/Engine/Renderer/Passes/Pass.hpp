@@ -10,6 +10,7 @@ namespace Ra
     namespace Engine
     {
 
+
         class RA_ENGINE_API Pass
         {
         public:
@@ -52,6 +53,7 @@ namespace Ra
 
             static const GLenum buffers[];
         };
+
 
     } // namespace Engine
 } // namespace Ra

@@ -1,5 +1,6 @@
 #include "PassLuminance.hpp"
 
+#include <iostream>
 
 namespace Ra {
     namespace Engine {
