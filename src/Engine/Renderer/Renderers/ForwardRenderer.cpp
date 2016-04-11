@@ -55,7 +55,7 @@ namespace Ra
             , m_postprocessFbo( nullptr )
             , m_pingPongFbo( nullptr )
             , m_dummy( "YoloPass", width, height, 1, 1 )
-            //, m_lumin( "LumPass",  width, height, 1, 1 )
+            , m_lumin( "LumPass",  width, height, 1, 1 )
             //, m_highp( "HighPass", width, height, 2, 1 )
             , m_blurp( "BlurPass", width, height, 1, 1 )
         {
@@ -111,12 +111,12 @@ namespace Ra
             m_dummy.initFbos();
 
             //m_lumin.setIn(0, m_dummy.getOut(0));
-            //m_lumin.setIn(0, m_textures[TEX_LIT].get());
-            //m_lumin.initFbos();
+            m_lumin.setIn(0, m_textures[TEX_LIT].get());
+            m_lumin.initFbos();
 
             //m_highp.setIn(0, m_textures[TEX_LIT].get());
             //m_highp.setIn(1, m_textures[TEX_LUMINANCE].get());
-            //m_highp.setIn(1, m_lumin.getOut(0));   // first test of chaining passes
+            //m_highp.setIn(1, m_lumin.getOut(0));
             //m_highp.initFbos();
 
             //m_blurp.setIn(0, m_textures[TEX_LIT].get());
@@ -134,11 +134,12 @@ namespace Ra
             m_secondaryTextures["Tonemaping Texture 2"] = m_textures[TEX_TONEMAP_PONG].get();
 
             m_secondaryTextures["sec. Dummy pass"]     = m_dummy.getOut(0);
-            //m_secondaryTextures["sec. Luminance Pass"] = m_lumin.getOut(0);
+            m_secondaryTextures["sec. Luminance Pass"] = m_lumin.getOut(0);
             //m_secondaryTextures["sec. Highpass Pass"]  = m_highp.getOut(0);
             m_secondaryTextures["sec. Blur Pass"]      = m_blurp.getOut(0);
-            m_secondaryTextures["internal. Blur Ping"] = m_blurp.getInternTextures(0).get();
-            m_secondaryTextures["internal. Blur Pong"] = m_blurp.getInternTextures(1).get();
+
+            m_secondaryTextures["internal. Lum Ping"]  = m_lumin.getInternTextures(0).get();
+            m_secondaryTextures["internal. Lum Pong"]  = m_lumin.getInternTextures(1).get();
         }
 
         void ForwardRenderer::updateStepInternal( const RenderData& renderData )
@@ -396,9 +397,9 @@ namespace Ra
             GL_ASSERT( glColorMask( 1, 1, 1, 1 ) );
 
             // FIXME(Charly): Do we really need to clear buffers ?
-            GL_ASSERT(glClearColor( 1.0, 1.0, 0.0, 0.0 ) );
-            GL_ASSERT(glDrawBuffers(5, buffers));
-            m_postprocessFbo->clear( FBO::Components( FBO::COLOR) );
+            //GL_ASSERT(glClearColor( 1.0, 1.0, 0.0, 0.0 ) );
+            //GL_ASSERT(glDrawBuffers(5, buffers));
+            //m_postprocessFbo->clear( FBO::Components( FBO::COLOR) );
 
             GL_ASSERT(glDepthFunc( GL_ALWAYS ) );
 
@@ -489,7 +490,7 @@ namespace Ra
 
                 // test of pass
                 m_dummy.renderPass(m_shaderMgr, m_quadMesh.get());
-                //m_lumin.renderPass(m_shaderMgr, m_quadMesh.get());
+                m_lumin.renderPass(m_shaderMgr, m_quadMesh.get());
                 //m_highp.renderPass(m_shaderMgr, m_quadMesh.get());
                 m_blurp.renderPass(m_shaderMgr, m_quadMesh.get());
 
@@ -563,7 +564,7 @@ namespace Ra
             m_bloomFbo->unbind( true );
 
             m_dummy.resizePass(m_width, m_height);
-            //m_lumin.resizePass(m_width, m_height);
+            m_lumin.resizePass(m_width, m_height);
             //m_highp.resizePass(m_width, m_height);
             m_blurp.resizePass(m_width, m_height);
 

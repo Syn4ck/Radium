@@ -43,7 +43,6 @@ namespace Ra
                 TEX_TONEMAP_PONG,
                 TEX_BLOOM_PING,
                 TEX_BLOOM_PONG,
-                //TEX_DUMMY,          // /!\ stupid test on shaders and postFX
                 TEX_COUNT
             };
 
@@ -58,7 +57,7 @@ namespace Ra
             std::array<std::unique_ptr<Texture>, TEX_COUNT> m_textures;
 
             PassDummy m_dummy;
-            //PassLuminance m_lumin;
+            PassLuminance m_lumin;
             //PassHighpass m_highp;
             PassBlur m_blurp;
         };

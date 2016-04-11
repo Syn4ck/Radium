@@ -47,7 +47,7 @@ namespace Ra
 
             enum TextureInTags
             {
-                TEX_LIT = 0,
+                TEX_HDR = 0,
             };
 
             enum TextureOutTags
