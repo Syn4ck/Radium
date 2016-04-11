@@ -90,6 +90,41 @@ namespace Ra {
             m_canvas->render();
         }
 
+        void PassHighpass::renderPass(ShaderProgramManager* shaderMgr, Mesh* screen, uint pingpongsize)
+        {
+            const ShaderProgram* shader = nullptr;
+
+            m_fbo[FBO_COLOR]->useAsTarget();
+
+            GL_ASSERT( glViewport(0, 0, m_width, m_height) );
+            GL_ASSERT( glDrawBuffers(1, buffers+2) );
+
+            shader = shaderMgr->getShaderProgram("HighpassTEST");
+            shader->bind();
+            shader->setUniform("hdr", m_texIn[TEX_LIT], 0);
+            shader->setUniform("lum", m_texIn[TEX_LUM], 1);
+            shader->setUniform("pingpongsz", pingpongsize);
+            screen->render();
+        }
+
+        void PassHighpass::renderPass(ShaderProgramManager* shaderMgr, Mesh *screen, Scalar min, Scalar max, Scalar mean)
+        {
+            const ShaderProgram* shader = nullptr;
+
+            m_fbo[FBO_COLOR]->useAsTarget();
+
+            GL_ASSERT( glViewport(0, 0, m_width, m_height) );
+            GL_ASSERT( glDrawBuffers(1, buffers+2) );
+
+            shader = shaderMgr->getShaderProgram("Highpass");
+            shader->bind();
+            shader->setUniform("hdr",     m_texIn[TEX_LIT], 0);
+            shader->setUniform("lumMin",  min);
+            shader->setUniform("lumMax",  max);
+            shader->setUniform("lumMean", mean);
+            screen->render();
+        }
+
         std::shared_ptr<Texture> PassHighpass::getInternTextures(uint i)
         {
             std::shared_ptr<Texture> empty( nullptr );

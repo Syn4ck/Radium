@@ -144,6 +144,8 @@ namespace Ra
             m_shaderMgr->addShaderProgram("Blur", "../Shaders/Basic2D.vert.glsl", "../Shaders/Blur.frag.glsl");
             m_shaderMgr->addShaderProgram("FinalCompose", "../Shaders/Basic2D.vert.glsl", "../Shaders/FinalCompose.frag.glsl");
             m_shaderMgr->addShaderProgram("Dummy", "../Shaders/Basic2D.vert.glsl", "../Shaders/Dummy.frag.glsl");
+            m_shaderMgr->addShaderProgram("DummyGreen", "../Shaders/Basic2D.vert.glsl", "../Shaders/DummyGreen.frag.glsl");
+            m_shaderMgr->addShaderProgram("HighpassTEST", "../Shaders/Basic2D.vert.glsl", "../Shaders/HighpassNoFetch.frag.glsl");
         }
 
         void ForwardRenderer::initBuffers()

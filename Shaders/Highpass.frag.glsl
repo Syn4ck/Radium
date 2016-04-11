@@ -16,12 +16,6 @@ void main()
     vec2 size = vec2(textureSize(hdr, 0));
     vec3 color = texelFetch(hdr, ivec2(varTexcoord * size), 0).rgb;
 
-    // get lum. values
-//    vec3 lum = texture(hdr, vec2(0,0)).rgb;
-//    lumMin  = lum.x;
-//    lumMax  = lum.y;
-//    lumMean = (lumMax + lumMin) / 2;
-
     vec3 Yxy = rgb2Yxy(color);
 
     float middleGrey = getMiddleGrey(lumMean);
