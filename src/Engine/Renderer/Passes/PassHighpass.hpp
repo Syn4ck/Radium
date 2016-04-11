@@ -33,7 +33,7 @@ namespace Ra
         private:
             enum FboTags
             {
-                FBO_BLOOM = 0,
+                FBO_COLOR = 0,
                 FBO_COUNT,
             };
 

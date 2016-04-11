@@ -20,7 +20,8 @@ namespace Ra
         class RA_ENGINE_API PassBlur : public Pass
         {
         public:
-            PassBlur(const std::string& name, uint w, uint h, uint nTexIn, uint nTexOut);
+            PassBlur(const std::string& name, uint w, uint h, uint nTexIn=1, uint nTexOut=1,
+                     uint amount=2, uint box=1);
             virtual ~PassBlur();
 
             void renderPass(ShaderProgramManager* shaderMgr, Mesh* screen);
@@ -34,7 +35,6 @@ namespace Ra
             enum FboTags
             {
                 FBO_MAIN = 0,
-                FBO_BLUR,
                 FBO_COUNT,
             };
 
@@ -57,6 +57,8 @@ namespace Ra
                 TEX_OUT_COUNT,
             };
 
+            uint m_amount;
+            uint m_boxfactor;
             uint m_pingPongSize;
             std::array<std::unique_ptr<FBO>,FBO_COUNT> m_fbo;
             std::array<std::shared_ptr<Texture>,TEX_INTERNAL_COUNT> m_internalTextures;

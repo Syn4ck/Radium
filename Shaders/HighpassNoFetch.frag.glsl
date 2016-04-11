@@ -2,12 +2,11 @@ in vec2 varTexcoord;
 out vec4 fragColor;
 
 uniform sampler2D hdr;
-
-uniform float lumMin;
-uniform float lumMax;
-uniform float lumMean;
-
 uniform sampler2D lum;
+
+//uniform float lumMin;
+//uniform float lumMax;
+//uniform float lumMean;
 
 #include "Tonemap.glsl"
 
@@ -16,10 +15,11 @@ void main()
     vec3 color = texture(hdr, varTexcoord).rgb;
 
     // get lum. values
-//    vec3 lum = texture(hdr, vec2(0,0)).rgb;
-//    lumMin  = lum.x;
-//    lumMax  = lum.y;
-//    lumMean = (lumMax + lumMin) / 2;
+    vec2 varNullcoord = vec2(0,0);
+    vec3 lum = texture(lum, varNullcoord).rgb;   // mean is poorly computed here
+    float lumMin  = lum.x;
+    float lumMax  = lum.y;
+    float lumMean = (lumMax + lumMin) / 2;
 
     vec3 Yxy = rgb2Yxy(color);
 

@@ -26,6 +26,9 @@ namespace Ra
             virtual void setIn(uint slot, Texture* tex);
             virtual void setOut(uint slot, Texture* tex);
 
+            virtual Texture* getIn(uint slot);
+            virtual Texture* getOut(uint slot);
+
             virtual std::shared_ptr<Texture> getInternTextures(uint i) = 0;
 
         protected:
@@ -38,7 +41,7 @@ namespace Ra
             uint m_nTexOut;
 
             std::vector<Texture*> m_texIn;
-            std::vector<Texture*> m_texOut;
+            std::vector<std::shared_ptr<Texture>> m_texOut;
 
             static const GLenum buffers[];
         };

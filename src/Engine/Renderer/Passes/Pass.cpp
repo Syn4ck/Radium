@@ -34,32 +34,27 @@ namespace Ra
 
         void Pass::setIn(uint slot, Texture* tex)
         {
-            if ( slot < m_nTexIn )
-            {
-                //m_texIn[slot].reset( tex );
-                m_texIn[slot] = tex;
-            }
-            else
-            {
-                // (1) ask for error management policy, e.g exit() or return ERROR
-                m_texIn[slot] = nullptr;
-            }
+            //CORE_ASSERT( m_texIn[slot] = tex, "bad m_texIn array index" );
+            m_texIn[slot] = tex;
         }
 
         void Pass::setOut(uint slot, Texture* tex)
         {
-            if ( slot < m_nTexOut )
-            {
-                //m_texOut[slot].reset( tex );
-                m_texOut[slot] = tex;
-            }
-            else
-            {
-                // TODO(Hugo) manage error (see (1))
-                m_texOut[slot] = nullptr;
-            }
+            //CORE_ASSERT( m_texOut[slot].reset(tex), "bad m_texOut array index");
+            m_texOut[slot].reset(tex);
         }
 
+        Texture* Pass::getIn(uint slot)
+        {
+            //CORE_ASSERT( return m_texIn[slot], "bad m_texIn array index" );
+            return m_texIn[slot];
+        }
+
+        Texture* Pass::getOut(uint slot)
+        {
+            //CORE_ASSERT( return m_texOut[slot].get(), "bad m_texOut array index" );
+            return m_texOut[slot].get();
+        }
 
     }
 }

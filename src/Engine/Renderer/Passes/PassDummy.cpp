@@ -16,7 +16,8 @@ namespace Ra
         PassDummy::PassDummy(const std::string& name, uint w, uint h, uint nTexIn, uint nTexOut)
             : Pass(name, w, h, nTexIn, nTexOut)
         {
-            // m_texOut->initGL(GL_RGBA32F, m_width, m_height, GL_RGBA, GL_FLOAT, nullptr);
+            // generate output texture
+            m_texOut[TEX_DUMMY].reset( new Texture("Dummy", GL_TEXTURE_2D) );
         }
 
         PassDummy::~PassDummy()
@@ -25,8 +26,8 @@ namespace Ra
 
         void PassDummy::initFbos()
         {
+            // initialize internal FBO
             m_fbo[FBO_MAIN].reset( new FBO( FBO::Components(FBO::COLOR), m_width, m_height ));
-
         }
 
         void PassDummy::resizePass(uint w, uint h)
@@ -38,11 +39,14 @@ namespace Ra
 
         void PassDummy::resizePass()
         {
+            // resize output textures accordingly
+            m_texOut[TEX_DUMMY]->initGL(GL_RGBA32F, m_width, m_height, GL_RGBA, GL_FLOAT, nullptr);
+
             // initiate, bind and configure the main fbo
             m_fbo[FBO_MAIN]->bind();
             m_fbo[FBO_MAIN]->setSize( m_width, m_height );
             m_fbo[FBO_MAIN]->attachTexture( GL_COLOR_ATTACHMENT0, m_texIn[TEX_COLOR] );
-            m_fbo[FBO_MAIN]->attachTexture( GL_COLOR_ATTACHMENT1, m_texOut[TEX_DUMMY] );
+            m_fbo[FBO_MAIN]->attachTexture( GL_COLOR_ATTACHMENT1, m_texOut[TEX_DUMMY].get() );
             m_fbo[FBO_MAIN]->unbind( true );
         }
 
@@ -66,7 +70,6 @@ namespace Ra
             std::shared_ptr<Texture> empty( nullptr );
             return empty;
         }
-
 
     }
 }
