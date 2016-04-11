@@ -58,8 +58,12 @@ namespace Ra
 
             PassDummy m_dummy;
             PassLuminance m_lumin;
-            //PassHighpass m_highp;
-            PassBlur m_blurp;
+            PassHighpass  m_highp;
+            PassBlur      m_blurp;
+            PassTonemap   m_tonmp;
+            PassCompose   m_compp;
+
+            //PassBlur      m_blurtest;
         };
 
 

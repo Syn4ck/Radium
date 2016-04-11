@@ -24,6 +24,8 @@ namespace Ra
             virtual ~PassHighpass();
 
             void renderPass(ShaderProgramManager* shaderMgr, Mesh* screen);
+            void renderPass(ShaderProgramManager* shaderMgr, Mesh* screen, uint pingpongsize);
+            void renderPass(ShaderProgramManager* shaderMgr, Mesh* screen, Scalar min, Scalar max, Scalar mean);
             void resizePass(uint w, uint h);
             void resizePass();
             void initFbos();
