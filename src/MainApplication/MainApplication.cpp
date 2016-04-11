@@ -171,12 +171,11 @@ namespace Ra
     {
         using namespace Engine::DrawPrimitives;
 
-        Engine::SystemEntity::uiCmp()->addRenderObject(
-            Primitive(Engine::SystemEntity::uiCmp(), Grid(
-                    Core::Vector3::Zero(), Core::Vector3::UnitX(),
-                    Core::Vector3::UnitZ(), Core::Colors::Grey(0.6f))));
-        loadFile("/home/boris/Downloads/chair2.obj");
-        //loadFile("/home/boris/Downloads/triangle.obj");
+//        Engine::SystemEntity::uiCmp()->addRenderObject(
+//            Primitive(Engine::SystemEntity::uiCmp(), Grid(
+//                    Core::Vector3::Zero(), Core::Vector3::UnitX(),
+//                    Core::Vector3::UnitZ(), Core::Colors::Grey(0.6f))));
+//        loadFile("/home/boris/Downloads/models/balls.obj");
     }
 
     void MainApplication::loadFile( QString path )
