@@ -51,7 +51,6 @@ namespace Ra
             : Renderer( width, height )
             , m_fbo( nullptr )
             , m_postprocessFbo( nullptr )
-            , m_pingPongFbo( nullptr )
             , m_dummy( "YoloPass", width, height, 1, 1 )
             , m_lumin( "LumPass",  width, height, 1, 1 )
             , m_highp( "HighPass", width, height, 2, 1 )
@@ -99,6 +98,8 @@ namespace Ra
             m_textures[TEX_NORMAL].reset( new Texture( "Normal", GL_TEXTURE_2D ) );
             m_textures[TEX_LIT].reset( new Texture( "HDR", GL_TEXTURE_2D ) );
 
+            // this is where the branching occurs, maybe it should be done later on
+            // but if we want to initiate passes' FBOs we need to branch them before
             m_dummy.setIn(0, m_textures[TEX_LIT].get());
             m_dummy.initFbos();
 
@@ -117,7 +118,6 @@ namespace Ra
             m_tonmp.initFbos();
 
             m_compp.setIn(0, m_tonmp.getOut(0));
-            //m_compp.setIn(0, m_textures[TEX_LIT].get());
             m_compp.setIn(1, m_blurp.getOut(0));
             m_compp.initFbos();
 
@@ -409,11 +409,6 @@ namespace Ra
                 Scalar lumMin  = lum.x();
                 Scalar lumMax  = lum.y();
                 Scalar lumMean = std::exp(lum.z() / (m_pingPongSize * m_pingPongSize));
-
-//                std::cout << "LUM. VALUES:" << std::endl;
-//                std::cout << "   min: " << lumMin  << std::endl;
-//                std::cout << "   max: " << lumMax  << std::endl;
-//                std::cout << "   avg: " << lumMean << std::endl;
 
                 // tonemapping pass
                 //m_tonmp.renderPass(m_shaderMgr, m_quadMesh.get(), m_pingPongSize);

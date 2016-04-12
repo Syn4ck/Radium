@@ -18,7 +18,7 @@ namespace Ra
             ~PassTonemap();
             void renderPass(ShaderProgramManager* shaderMgr, Mesh* screen);
             void renderPass(ShaderProgramManager* shaderMgr, Mesh* screen, uint pingpongsize);
-            void renderPass(ShaderProgramManager* shaderMgr, Mesh* screen, uint lumMin, uint lumMax, uint lumMean);
+            void renderPass(ShaderProgramManager* shaderMgr, Mesh* screen, float lumMin, float lumMax, float lumMean);
             void resizePass(uint w, uint h);
             void resizePass();
             void initFbos();

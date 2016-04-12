@@ -68,7 +68,7 @@ namespace Ra
             screen->render();
         }
 
-        void PassTonemap::renderPass(ShaderProgramManager* shaderMgr, Mesh* screen, uint lumMin, uint lumMax, uint lumMean)
+        void PassTonemap::renderPass(ShaderProgramManager* shaderMgr, Mesh* screen, float lumMin, float lumMax, float lumMean)
         {
             const ShaderProgram* shader = nullptr;
 
@@ -80,9 +80,9 @@ namespace Ra
             shader = shaderMgr->getShaderProgram("Tonemapping");
             shader->bind();
             shader->setUniform("hdr", m_texIn[TEX_HDR], 0);
-            shader->setUniform("lumMin",  0.0);
-            shader->setUniform("lumMax",  1.0);
-            shader->setUniform("lumMean", 0.5);
+            shader->setUniform("lumMin",  lumMin);
+            shader->setUniform("lumMax",  lumMax);
+            shader->setUniform("lumMean", lumMean);
             screen->render();
         }
 
