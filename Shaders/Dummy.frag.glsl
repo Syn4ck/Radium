@@ -6,8 +6,10 @@ out vec4 fragColor;
 in vec2 varTexcoord;
 
 uniform sampler2D color;
+uniform uint w;
+uniform uint h;
 
 void main()
 {
-    fragColor = vec4(0.6, texture(color, varTexcoord).yzw);
+    fragColor = texture(color, varTexcoord).xyzw + vec4(0, 0.4, 0.3, 0);
 }

@@ -103,17 +103,18 @@ namespace Ra
             m_dummy.setIn(0, m_textures[TEX_LIT].get());
             m_dummy.initFbos();
 
-            m_lumin.setIn(0, m_textures[TEX_LIT].get());
+            m_lumin.setIn(0, m_dummy.getOut(0));
             m_lumin.initFbos();
 
-            m_highp.setIn(0, m_textures[TEX_LIT].get());
+            m_highp.setIn(0, m_dummy.getOut(0));
             m_highp.setIn(1, m_lumin.getOut(0));
             m_highp.initFbos();
 
             m_blurp.setIn(0, m_highp.getOut(0));
             m_blurp.initFbos();
 
-            m_tonmp.setIn(0, m_textures[TEX_LIT].get());
+            //m_tonmp.setIn(0, m_textures[TEX_LIT].get());
+            m_tonmp.setIn(0, m_dummy.getOut(0));
             m_tonmp.setIn(1, m_lumin.getOut(0));
             m_tonmp.initFbos();
 

@@ -59,7 +59,7 @@ namespace Ra
             GL_ASSERT( glViewport(0, 0, m_width, m_height) );
             GL_ASSERT( glDrawBuffers(1, buffers+1) );
 
-            shader = shaderMgr->getShaderProgram("DummyGreen");
+            shader = shaderMgr->getShaderProgram("Dummy");
             shader->bind();
             shader->setUniform("color", m_texIn[TEX_COLOR], 0);
             screen->render();
