@@ -58,7 +58,6 @@ namespace Ra
             , m_blurp( "BlurPass", width, height, 1, 1, 16 )
             , m_tonmp( "TonemapPass", width, height, 1, 1 )
             , m_compp( "CompositePass", width, height, 1, 1 )
-            //, m_blurtest( "Blurtest", width, height, 1, 1, 40 )
         {
         }
 
@@ -100,12 +99,8 @@ namespace Ra
             m_textures[TEX_NORMAL].reset( new Texture( "Normal", GL_TEXTURE_2D ) );
             m_textures[TEX_LIT].reset( new Texture( "HDR", GL_TEXTURE_2D ) );
 
-
             m_dummy.setIn(0, m_textures[TEX_LIT].get());
             m_dummy.initFbos();
-
-            //m_blurtest.setIn(0, m_dummy.getOut(0));
-            //m_blurtest.initFbos();
 
             m_lumin.setIn(0, m_textures[TEX_LIT].get());
             m_lumin.initFbos();
@@ -136,8 +131,6 @@ namespace Ra
             m_secondaryTextures["sec.4 Blur Pass"]      = m_blurp.getOut(0);
             m_secondaryTextures["sec.5 Tonemap Pass"]   = m_tonmp.getOut(0);
             m_secondaryTextures["sec.6 Composite Pass"] = m_compp.getOut(0);
-
-            //m_secondaryTextures["test. blur"] = m_blurtest.getOut(0);
         }
 
         void ForwardRenderer::updateStepInternal( const RenderData& renderData )
@@ -434,8 +427,6 @@ namespace Ra
                 // do final composition
                 m_compp.renderPass(m_shaderMgr, m_quadMesh.get());
 
-                //m_blurtest.renderPass(m_shaderMgr, m_quadMesh.get());
-
                 GL_ASSERT( glDepthFunc( GL_LESS ) );
                 m_postprocessFbo->unbind();
             }
@@ -479,11 +470,9 @@ namespace Ra
             m_tonmp.resizePass(m_width, m_height);
             m_compp.resizePass(m_width, m_height);
 
-            //m_blurtest.resizePass(m_width, m_height);
-
-            GL_CHECK_ERROR;
 
             // Reset framebuffer state
+            GL_CHECK_ERROR;
             GL_ASSERT( glBindFramebuffer( GL_FRAMEBUFFER, 0 ) );
 
             GL_ASSERT( glDrawBuffer( GL_BACK ) );
