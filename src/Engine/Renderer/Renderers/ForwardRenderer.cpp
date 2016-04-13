@@ -94,22 +94,28 @@ namespace Ra
 
             // branching
             m_dummy.setIn(0, m_textures[TEX_LIT].get());
+            m_dummy.init();
 
 //            m_lumin.setIn(0, m_textures[TEX_LIT].get());
             m_lumin.setIn(0, m_dummy.getOut(0));
+            m_lumin.init();
 
 //            m_highp.setIn(0, m_textures[TEX_LIT].get());
             m_highp.setIn(0, m_dummy.getOut(0));
             m_highp.setIn(1, m_lumin.getOut(0));
+            m_highp.init();
 
             m_blurp.setIn(0, m_highp.getOut(0));
+            m_blurp.init();
 
 //            m_tonmp.setIn(0, m_textures[TEX_LIT].get());
             m_tonmp.setIn(0, m_dummy.getOut(0));
             m_tonmp.setIn(1, m_lumin.getOut(0));
+            m_tonmp.init();
 
             m_compp.setIn(0, m_tonmp.getOut(0));
             m_compp.setIn(1, m_blurp.getOut(0));
+            m_compp.init();
 
             // initialize everything
             for (auto const& pass: m_passes)
@@ -462,6 +468,7 @@ namespace Ra
                 // luminance pass
                 m_dummy.renderPass();
 
+                // luminance pass : TODO(Hugo) remove fetch
                 m_lumin.renderPass();
                 Core::Color lum = m_lumin.getOut(0)->getTexel(0, 0);
                 Scalar lumMin  = lum.x();
@@ -469,9 +476,11 @@ namespace Ra
                 Scalar lumMean = std::exp(lum.z() / (m_pingPongSize * m_pingPongSize));
 
                 // tonemapping pass
+                //m_tonmp.renderPass(m_shaderMgr, m_quadMesh.get(), m_pingPongSize);
                 m_tonmp.renderPass(lumMin, lumMax, lumMean);
 
                 // bloom pass : TODO(Hugo) do a bloom pass to group highpass and blur
+                //m_highp.renderPass(m_shaderMgr, m_quadMesh.get(), m_pingPongSize);
                 m_highp.renderPass(lumMin, lumMax, lumMean);
                 m_blurp.renderPass();
 
@@ -533,6 +542,7 @@ namespace Ra
             GL_CHECK_ERROR;
 
             // Reset framebuffer state
+            GL_CHECK_ERROR;
             GL_ASSERT( glBindFramebuffer( GL_FRAMEBUFFER, 0 ) );
 
             GL_ASSERT( glDrawBuffer( GL_BACK ) );

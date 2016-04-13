@@ -35,6 +35,7 @@ namespace Ra {
 
             // load shader
             ShaderProgramManager* shaderMgr = ShaderProgramManager::getInstance();
+            m_shader[SHADER_DRAWSCREEN] = shaderMgr->getShaderProgram("DrawScreen");
             m_shader[SHADER_BLUR] = shaderMgr->addShaderProgram("Blur", "../Shaders/Basic2D.vert.glsl", "../Shaders/Blur.frag.glsl");
 
             // and tell the pingpong passe to use parameters
