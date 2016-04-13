@@ -30,6 +30,7 @@ namespace Ra
         private:
             void initShaders();
             void initBuffers();
+            void initPasses();
 
         private:
             enum RendererTextures

@@ -70,17 +70,48 @@ namespace Ra
         {
             initShaders();
             initBuffers();
+            initPasses();
 
             DebugRender::createInstance();
             DebugRender::getInstance()->initialize();
+        }
 
-            // Pass mapping
+        void ForwardRenderer::initPasses()
+        {
+            // set hashmap
             m_passes["dummy0"]     = &m_dummy;
             m_passes["luminance0"] = &m_lumin;
             m_passes["high0"]      = &m_highp;
             m_passes["blur0"]      = &m_blurp;
             m_passes["tonemap0"]   = &m_tonmp;
             m_passes["composite0"] = &m_compp;
+
+            // branching
+            m_dummy.setIn(0, m_textures[TEX_LIT].get());
+
+            m_lumin.setIn(0, m_dummy.getOut(0));
+
+            m_highp.setIn(0, m_dummy.getOut(0));
+            m_highp.setIn(1, m_lumin.getOut(0));
+
+            m_blurp.setIn(0, m_highp.getOut(0));
+
+            m_tonmp.setIn(0, m_dummy.getOut(0));
+            m_tonmp.setIn(1, m_lumin.getOut(0));
+
+            m_compp.setIn(0, m_tonmp.getOut(0));
+            m_compp.setIn(1, m_blurp.getOut(0));
+
+            // initialize everything
+            for (auto const it_pass: m_passes)
+            {
+                // init
+                it_pass.second->setCanvas(m_quadMesh.get());
+                it_pass.second->init();
+
+                // show up in UI
+                m_secondaryTextures["[pass] " + it_pass.first] = it_pass.second->getOut(0);
+            }
         }
 
         void ForwardRenderer::initShaders()
@@ -100,47 +131,9 @@ namespace Ra
             m_textures[TEX_NORMAL].reset( new Texture( "Normal", GL_TEXTURE_2D ) );
             m_textures[TEX_LIT].reset( new Texture( "HDR", GL_TEXTURE_2D ) );
 
-            // Canvas
-            m_dummy.setCanvas(m_quadMesh.get());  // this surely isn't the best way of doing things
-            m_lumin.setCanvas(m_quadMesh.get());  // but setting them in constructor is too early
-            m_highp.setCanvas(m_quadMesh.get());  // as quadMesh is created in Renderer::initialize
-            m_blurp.setCanvas(m_quadMesh.get());
-            m_tonmp.setCanvas(m_quadMesh.get());
-            m_compp.setCanvas(m_quadMesh.get());
-
-            // this is where the branching occurs, maybe it should be done later on
-            // but if we want to initiate passes' FBOs we need to branch them before
-            m_dummy.setIn(0, m_textures[TEX_LIT].get());
-            m_dummy.init();
-
-            m_lumin.setIn(0, m_dummy.getOut(0));
-            m_lumin.init();
-
-            m_highp.setIn(0, m_dummy.getOut(0));
-            m_highp.setIn(1, m_lumin.getOut(0));
-            m_highp.init();
-
-            m_blurp.setIn(0, m_highp.getOut(0));
-            m_blurp.init();
-
-            m_tonmp.setIn(0, m_dummy.getOut(0));
-            m_tonmp.setIn(1, m_lumin.getOut(0));
-            m_tonmp.init();
-
-            m_compp.setIn(0, m_tonmp.getOut(0));
-            m_compp.setIn(1, m_blurp.getOut(0));
-            m_compp.init();
-
             m_secondaryTextures["Depth Texture"]        = m_textures[TEX_DEPTH].get();
             m_secondaryTextures["Normal Texture"]       = m_textures[TEX_NORMAL].get();
             m_secondaryTextures["HDR Texture"]          = m_textures[TEX_LIT].get();
-
-            m_secondaryTextures["sec.1 Dummy pass"]     = m_dummy.getOut(0);
-            m_secondaryTextures["sec.2 Luminance Pass"] = m_lumin.getOut(0);
-            m_secondaryTextures["sec.3 Highpass Pass"]  = m_highp.getOut(0);
-            m_secondaryTextures["sec.4 Blur Pass"]      = m_blurp.getOut(0);
-            m_secondaryTextures["sec.5 Tonemap Pass"]   = m_tonmp.getOut(0);
-            m_secondaryTextures["sec.6 Composite Pass"] = m_compp.getOut(0);
         }
 
         void ForwardRenderer::updateStepInternal( const RenderData& renderData )
@@ -409,6 +402,10 @@ namespace Ra
                 shader->bind();
                 shader->setUniform("screenTexture", m_textures[TEX_LIT].get(), 0);
                 m_quadMesh->render();
+
+                // TODO(Hugo) one day it should be possible to loop over every pass
+                // and just magically call Pass::renderPass() but for now there are
+                // additionnal parameters that ruin the whole thing
 
                 // dummy pass
                 m_dummy.renderPass();
