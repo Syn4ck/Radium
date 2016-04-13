@@ -13,7 +13,7 @@ uniform sampler2D lum;
 
 void main()
 {
-    vec3 color = texture(hdr, varTexcoord).rgb;
+    vec3 color = texelFetch(hdr, ivec2(gl_FragCoord), 0).rgb;
 
     vec3 Yxy = rgb2Yxy(color);
 

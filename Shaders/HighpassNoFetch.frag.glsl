@@ -9,16 +9,14 @@ uniform float     pingpongsz;
 
 void main()
 {
-    //vec3 color = texture(hdr, varTexcoord).rgb;
-    vec3 color = texelFetch(hdr, ivec2(gl_FragCoord.xy), 0).rgb;
-
     // get lum. values
-    vec2 varNullcoord = vec2(0,0);
-    //vec3 lum = texture(lum, varNullcoord).xyz;  // fetch bad ?
-    vec3 lum = texelFetch(lum, ivec2(0,0), 0).xyz;  // fetch bad ?
+    vec3 lum = texelFetch(lum, ivec2(0,0), 0).xyz;
+    
     float lumMin  = lum.x;
     float lumMax  = lum.y;
     float lumMean = exp(lum.z / pow(pingpongsz, 2));
+
+    vec3 color = texelFetch(hdr, ivec2(gl_FragCoord.xy), 0).rgb;
 
     vec3 Yxy = rgb2Yxy(color);
 

@@ -92,8 +92,8 @@ namespace Ra
             m_textures[TEX_LIT].reset( new Texture( "HDR", GL_TEXTURE_2D ) );
 
             // Canvas
-            m_dummy.setCanvas(m_quadMesh.get());
-            m_lumin.setCanvas(m_quadMesh.get());
+            m_dummy.setCanvas(m_quadMesh.get());  // this surely isn't the best way of doing things
+            m_lumin.setCanvas(m_quadMesh.get());  // but setting them in constructor is too early
             m_highp.setCanvas(m_quadMesh.get());
             m_blurp.setCanvas(m_quadMesh.get());
             m_tonmp.setCanvas(m_quadMesh.get());
@@ -414,11 +414,11 @@ namespace Ra
                 Scalar lumMean = std::exp(lum.z() / (m_pingPongSize * m_pingPongSize));
 
                 // tonemapping pass
-                //m_tonmp.renderPass(m_shaderMgr, m_quadMesh.get(), m_pingPongSize);
+                //m_tonmp.renderPass(m_pingPongSize);
                 m_tonmp.renderPass(lumMin, lumMax, lumMean);
 
                 // bloom pass : TODO(Hugo) do a bloom pass to group highpass and blur
-                //m_highp.renderPass(m_shaderMgr, m_quadMesh.get(), m_pingPongSize);
+                //m_highp.renderPass(m_pingPongSize);
                 m_highp.renderPass(lumMin, lumMax, lumMean);
                 m_blurp.renderPass();
 

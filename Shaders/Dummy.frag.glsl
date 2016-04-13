@@ -11,5 +11,5 @@ uniform uint h;
 
 void main()
 {
-    fragColor = texture(color, varTexcoord).xyzw + vec4(0, 0.4, 0.3, 0);
+    fragColor = texelFetch(color, ivec2(gl_FragCoord), 0).xyzw + vec4(0, 0.4, 0.3, 0);
 }

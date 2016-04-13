@@ -84,12 +84,16 @@ namespace Ra {
                 GL_ASSERT( glDrawBuffers(1, buffers + 3) );
                 m_shader[SHADER_BLUR]->setUniform("color", m_internalTextures[TEX_BLUR_PING].get(), 0);
                 m_shader[SHADER_BLUR]->setUniform("offset", Core::Vector2(1.0 / m_width, 0.0));
+                m_shader[SHADER_BLUR]->setUniform("wView", m_width);
+                m_shader[SHADER_BLUR]->setUniform("hView", m_height);
                 m_canvas->render();
 
                 // Y blur | pong -> ping
                 GL_ASSERT( glDrawBuffers(1, buffers + 2) );
                 m_shader[SHADER_BLUR]->setUniform("color", m_internalTextures[TEX_BLUR_PONG].get(), 0);
                 m_shader[SHADER_BLUR]->setUniform("offset", Core::Vector2(0.0, 1.0 / m_height));
+                m_shader[SHADER_BLUR]->setUniform("wView", (int)m_width);
+                m_shader[SHADER_BLUR]->setUniform("hView", (int)m_height);
                 m_canvas->render();
             }
 
