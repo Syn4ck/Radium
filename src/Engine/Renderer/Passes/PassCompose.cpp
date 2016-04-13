@@ -11,8 +11,8 @@ namespace Ra
     namespace Engine
     {
 
-        PassCompose::PassCompose(const std::string& name, uint w, uint h, uint nTexIn, uint nTexOut)
-            : Pass(name, w, h, nTexIn, nTexOut)
+        PassCompose::PassCompose(const std::string& name, uint w, uint h, uint nTexIn, uint nTexOut, Mesh* canvas)
+            : Pass(name, w, h, nTexIn, nTexOut, canvas)
         {
             // create out texture
             m_texOut[TEX_AB].reset( new Texture("Composite", GL_TEXTURE_2D) );
@@ -52,7 +52,7 @@ namespace Ra
             m_fbo[FBO_MAIN]->unbind( true );
         }
 
-        void PassCompose::renderPass(Mesh* screen)
+        void PassCompose::renderPass()
         {
             m_fbo[FBO_MAIN]->useAsTarget(m_width, m_height);
 
@@ -62,7 +62,7 @@ namespace Ra
             m_shader->bind();
             m_shader->setUniform("texA", m_texIn[TEX_A], 0);
             m_shader->setUniform("texB", m_texIn[TEX_B], 1);
-            screen->render();
+            m_canvas->render();
         }
 
         std::shared_ptr<Texture> PassCompose::getInternTextures(uint i)

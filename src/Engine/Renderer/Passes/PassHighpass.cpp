@@ -3,8 +3,8 @@
 namespace Ra {
     namespace Engine {
 
-        PassHighpass::PassHighpass(const std::string& name, uint w, uint h, uint nTexIn=1, uint nTexOut=1)
-            : Pass(name, w, h, nTexIn, nTexOut)
+        PassHighpass::PassHighpass(const std::string& name, uint w, uint h, uint nTexIn, uint nTexOut, Mesh* canvas)
+            : Pass(name, w, h, nTexIn, nTexOut, canvas)
         {
             // texture out
             m_texOut[TEX_HPASS].reset( new Texture("HighPass", GL_TEXTURE_2D) );
@@ -53,7 +53,7 @@ namespace Ra {
             GL_ASSERT( glReadBuffer( GL_BACK ) );
         }
 
-        void PassHighpass::renderPass(Mesh *screen)
+        void PassHighpass::renderPass()
         {
             m_fbo[FBO_COLOR]->useAsTarget();
 
@@ -63,10 +63,10 @@ namespace Ra {
             m_shader->bind();
             m_shader->setUniform("hdr", m_texIn[TEX_LIT], 0);
             m_shader->setUniform("lum", m_texIn[TEX_LUM], 1);
-            screen->render();
+            m_canvas->render();
         }
 
-        void PassHighpass::renderPass(Mesh* screen, uint pingpongsize)
+        void PassHighpass::renderPass(uint pingpongsize)
         {
             m_fbo[FBO_COLOR]->useAsTarget();
 
@@ -77,11 +77,11 @@ namespace Ra {
             m_shader->setUniform("hdr", m_texIn[TEX_LIT], 0);
             m_shader->setUniform("lum", m_texIn[TEX_LUM], 1);
             m_shader->setUniform("pingpongsz", pingpongsize);
-            screen->render();
+            m_canvas->render();
         }
 
         // FIXME(Hugo) the only one to work for now
-        void PassHighpass::renderPass(Mesh *screen, Scalar min, Scalar max, Scalar mean)
+        void PassHighpass::renderPass(Scalar min, Scalar max, Scalar mean)
         {
             m_fbo[FBO_COLOR]->useAsTarget();
 
@@ -93,7 +93,7 @@ namespace Ra {
             m_shader->setUniform("lumMin",  min);
             m_shader->setUniform("lumMax",  max);
             m_shader->setUniform("lumMean", mean);
-            screen->render();
+            m_canvas->render();
         }
 
         std::shared_ptr<Texture> PassHighpass::getInternTextures(uint i)

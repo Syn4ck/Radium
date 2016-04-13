@@ -11,8 +11,8 @@ namespace Ra
     namespace Engine
     {
 
-        PassTonemap::PassTonemap(const std::string& name, uint w, uint h, uint nTexIn, uint nTexOut)
-            : Pass(name, w, h, nTexIn, nTexOut)
+        PassTonemap::PassTonemap(const std::string& name, uint w, uint h, uint nTexIn, uint nTexOut, Mesh* canvas)
+            : Pass(name, w, h, nTexIn, nTexOut, canvas)
         {
             // out
             m_texOut[TEX_TONEMAP].reset( new Texture("TonemapPass", GL_TEXTURE_2D) );
@@ -52,11 +52,11 @@ namespace Ra
             m_fbo[FBO_MAIN]->unbind( true );
         }
 
-        void PassTonemap::renderPass(Mesh* screen)
+        void PassTonemap::renderPass()
         {
         }
 
-        void PassTonemap::renderPass(Mesh* screen, uint pingpongsize)
+        void PassTonemap::renderPass(uint pingpongsize)
         {
             m_fbo[FBO_MAIN]->useAsTarget(m_width, m_height);
 
@@ -67,10 +67,10 @@ namespace Ra
             m_shader->setUniform("hdr", m_texIn[TEX_HDR], 0);
             m_shader->setUniform("lum", m_texIn[TEX_LUM], 1);
             m_shader->setUniform("pingpongsz", pingpongsize);
-            screen->render();
+            m_canvas->render();
         }
 
-        void PassTonemap::renderPass(Mesh* screen, float lumMin, float lumMax, float lumMean)
+        void PassTonemap::renderPass(float lumMin, float lumMax, float lumMean)
         {
             m_fbo[FBO_MAIN]->useAsTarget(m_width, m_height);
 
@@ -82,7 +82,7 @@ namespace Ra
             m_shader->setUniform("lumMin",  lumMin);
             m_shader->setUniform("lumMax",  lumMax);
             m_shader->setUniform("lumMean", lumMean);
-            screen->render();
+            m_canvas->render();
         }
 
         std::shared_ptr<Texture> PassTonemap::getInternTextures(uint i)

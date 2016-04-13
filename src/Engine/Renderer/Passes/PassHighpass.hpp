@@ -20,12 +20,12 @@ namespace Ra
         class RA_ENGINE_API PassHighpass : public Pass
         {
         public:
-            PassHighpass(const std::string& name, uint w, uint h, uint nTexIn, uint nTexOut);
+            PassHighpass(const std::string& name, uint w, uint h, uint nTexIn, uint nTexOut, Mesh* canvas);
             virtual ~PassHighpass();
 
-            void renderPass(Mesh* screen);
-            void renderPass(Mesh* screen, uint pingpongsize);
-            void renderPass(Mesh* screen, Scalar min, Scalar max, Scalar mean);
+            void renderPass();
+            void renderPass(uint pingpongsize);
+            void renderPass(Scalar min, Scalar max, Scalar mean);
             void resizePass(uint w, uint h);
             void resizePass();
             void init();

@@ -13,8 +13,8 @@ namespace Ra
     namespace Engine
     {
 
-        PassDummy::PassDummy(const std::string& name, uint w, uint h, uint nTexIn, uint nTexOut)
-            : Pass(name, w, h, nTexIn, nTexOut)
+        PassDummy::PassDummy(const std::string& name, uint w, uint h, uint nTexIn, uint nTexOut, Mesh* canvas)
+            : Pass(name, w, h, nTexIn, nTexOut, canvas)
             , m_shader(nullptr)
         {
             // generate output texture
@@ -55,7 +55,7 @@ namespace Ra
             m_fbo[FBO_MAIN]->unbind( true );
         }
 
-        void PassDummy::renderPass(Mesh* screen)
+        void PassDummy::renderPass()
         {
             m_fbo[FBO_MAIN]->useAsTarget(m_width, m_height);
 
@@ -64,7 +64,7 @@ namespace Ra
 
             m_shader->bind();
             m_shader->setUniform("color", m_texIn[TEX_COLOR], 0);
-            screen->render();
+            m_canvas->render();
         }
 
         std::shared_ptr<Texture> PassDummy::getInternTextures(uint i)

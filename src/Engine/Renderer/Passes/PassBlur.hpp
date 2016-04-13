@@ -20,11 +20,11 @@ namespace Ra
         class RA_ENGINE_API PassBlur : public Pass
         {
         public:
-            PassBlur(const std::string& name, uint w, uint h, uint nTexIn=1, uint nTexOut=1,
+            PassBlur(const std::string& name, uint w, uint h, uint nTexIn, uint nTexOut, Mesh* canvas,
                      uint amount=2, uint box=1);
             virtual ~PassBlur();
 
-            void renderPass(Mesh* screen);
+            void renderPass();
             void resizePass(uint w, uint h);
             void resizePass();
             void init();

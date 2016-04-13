@@ -3,8 +3,8 @@
 namespace Ra {
     namespace Engine {
 
-        PassBlur::PassBlur(const std::string& name, uint w, uint h, uint nTexIn, uint nTexOut, uint amount, uint box)
-            : Pass(name, w, h, nTexIn, nTexOut)
+        PassBlur::PassBlur(const std::string& name, uint w, uint h, uint nTexIn, uint nTexOut, Mesh* canvas, uint amount, uint box)
+            : Pass(name, w, h, nTexIn, nTexOut, canvas)
             , m_amount(amount)
             , m_boxfactor(box)
         {
@@ -65,7 +65,7 @@ namespace Ra {
             GL_ASSERT( glReadBuffer( GL_BACK ) );
         }
 
-        void PassBlur::renderPass(Mesh *screen)
+        void PassBlur::renderPass()
         {
             m_fbo[FBO_MAIN]->useAsTarget(m_width, m_height);
             GL_ASSERT( glViewport(0, 0, m_width, m_height) );
@@ -74,7 +74,7 @@ namespace Ra {
             GL_ASSERT( glDrawBuffers(1, buffers + 2) );            
             m_shader[SHADER_DRAWSCREEN]->bind();
             m_shader[SHADER_DRAWSCREEN]->setUniform("screenTexture", m_texIn[TEX_COLOR], 0);
-            screen->render();
+            m_canvas->render();
 
             m_shader[SHADER_BLUR]->bind();
 
@@ -84,20 +84,20 @@ namespace Ra {
                 GL_ASSERT( glDrawBuffers(1, buffers + 3) );
                 m_shader[SHADER_BLUR]->setUniform("color", m_internalTextures[TEX_BLUR_PING].get(), 0);
                 m_shader[SHADER_BLUR]->setUniform("offset", Core::Vector2(1.0 / m_width, 0.0));
-                screen->render();
+                m_canvas->render();
 
                 // Y blur | pong -> ping
                 GL_ASSERT( glDrawBuffers(1, buffers + 2) );
                 m_shader[SHADER_BLUR]->setUniform("color", m_internalTextures[TEX_BLUR_PONG].get(), 0);
                 m_shader[SHADER_BLUR]->setUniform("offset", Core::Vector2(0.0, 1.0 / m_height));
-                screen->render();
+                m_canvas->render();
             }
 
             // bring back to the output texture
             GL_ASSERT( glDrawBuffers(1, buffers + 1) );
             m_shader[SHADER_DRAWSCREEN]->bind();
             m_shader[SHADER_DRAWSCREEN]->setUniform("screenTexture", m_internalTextures[TEX_BLUR_PING].get(), 0);
-            screen->render();
+            m_canvas->render();
         }
 
         std::shared_ptr<Texture> PassBlur::getInternTextures(uint i)

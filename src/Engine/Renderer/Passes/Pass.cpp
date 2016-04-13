@@ -19,7 +19,7 @@ namespace Ra
                     GL_COLOR_ATTACHMENT7
                 };
 
-        Pass::Pass(const std::string& name, uint w, uint h, uint nTexIn=1, uint nTexOut=1)
+        Pass::Pass(const std::string& name, uint w, uint h, uint nTexIn, uint nTexOut, Mesh* canvas)
             : m_name    ( name )
             , m_width   ( w )
             , m_height  ( h )
@@ -27,6 +27,7 @@ namespace Ra
             , m_nTexOut ( nTexOut )
             , m_texIn   ( nTexIn )
             , m_texOut  ( nTexOut )
+            , m_canvas  ( canvas )
         {
         }
 
@@ -54,6 +55,11 @@ namespace Ra
         {
             //CORE_ASSERT( return m_texOut[slot].get(), "bad m_texOut array index" );
             return m_texOut[slot].get();
+        }
+
+        void Pass::setCanvas(Mesh* canvas)
+        {
+            m_canvas = canvas;
         }
 
     }

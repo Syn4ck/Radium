@@ -5,8 +5,8 @@
 namespace Ra {
     namespace Engine {
 
-        PassLuminance::PassLuminance(const std::string& name, uint w, uint h, uint nTexIn=1, uint nTexOut=1)
-            : Pass(name, w, h, nTexIn, nTexOut)
+        PassLuminance::PassLuminance(const std::string& name, uint w, uint h, uint nTexIn, uint nTexOut, Mesh* canvas)
+            : Pass(name, w, h, nTexIn, nTexOut, canvas)
         {
             // internal
             m_internalTextures[TEX_PING].reset( new Texture("intern_Ping", GL_TEXTURE_2D) );
@@ -72,7 +72,7 @@ namespace Ra {
             GL_ASSERT( glReadBuffer( GL_BACK ) );
         }
 
-        void PassLuminance::renderPass(Mesh *screen)
+        void PassLuminance::renderPass()
         {
             // first apply the Luminance shader to the input texture (HDR) and write to output (LUM)
             m_fbo[FBO_MAIN]->useAsTarget( m_width, m_height );
@@ -81,7 +81,7 @@ namespace Ra {
 
             m_shader[SHADER_LUMINANCE]->bind();
             m_shader[SHADER_LUMINANCE]->setUniform("hdr", m_texIn[TEX_HDR], 0);
-            screen->render();
+            m_canvas->render();
 
             // now that the LUM texture contains luminance(HDR), ping-pong with MinMax
             m_fbo[FBO_PING_PONG]->useAsTarget(); // prepare for ping-pong/redux combo
@@ -93,7 +93,7 @@ namespace Ra {
             GL_ASSERT( glViewport(0, 0, size, size) );
             m_shader[SHADER_DRAWSCREEN]->bind();
             m_shader[SHADER_DRAWSCREEN]->setUniform( "screenTexture", m_texOut[TEX_LUM].get(), 0);
-            screen->render();
+            m_canvas->render();
 
             // ping-pong to min/max and avg
             m_shader[SHADER_MIN_MAX]->bind();
@@ -105,7 +105,7 @@ namespace Ra {
                 GL_ASSERT( glViewport(0, 0, size, size) );
 
                 m_shader[SHADER_MIN_MAX]->setUniform("color", m_internalTextures[TEX_PING + ping].get(), 0);
-                screen->render();
+                m_canvas->render();
 
                 ++ ping %= 2;
             }
@@ -118,7 +118,7 @@ namespace Ra {
 
             m_shader[SHADER_DRAWSCREEN]->bind();
             m_shader[SHADER_DRAWSCREEN]->setUniform( "screenTexture", m_internalTextures[TEX_PING + ((ping+1)%2)].get(), 0 );
-            screen->render();
+            m_canvas->render();
         }
 
         std::shared_ptr<Texture> PassLuminance::getInternTextures(uint i)

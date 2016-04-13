@@ -51,12 +51,12 @@ namespace Ra
             : Renderer( width, height )
             , m_fbo( nullptr )
             , m_postprocessFbo( nullptr )
-            , m_dummy( "YoloPass", width, height, 1, 1 )
-            , m_lumin( "LumPass",  width, height, 1, 1 )
-            , m_highp( "HighPass", width, height, 2, 1 )
-            , m_blurp( "BlurPass", width, height, 1, 1, 16 )
-            , m_tonmp( "TonemapPass", width, height, 1, 1 )
-            , m_compp( "CompositePass", width, height, 1, 1 )
+            , m_dummy( "YoloPass",      width, height, 1, 1, nullptr )
+            , m_lumin( "LumPass",       width, height, 1, 1, nullptr )
+            , m_highp( "HighPass",      width, height, 2, 1, nullptr )
+            , m_blurp( "BlurPass",      width, height, 1, 1, nullptr, 16 )  // 16 ping-pongs
+            , m_tonmp( "TonemapPass",   width, height, 1, 1, nullptr )
+            , m_compp( "CompositePass", width, height, 1, 1, nullptr )
         {
         }
 
@@ -90,6 +90,14 @@ namespace Ra
             m_textures[TEX_DEPTH].reset( new Texture( "Depth", GL_TEXTURE_2D ) );
             m_textures[TEX_NORMAL].reset( new Texture( "Normal", GL_TEXTURE_2D ) );
             m_textures[TEX_LIT].reset( new Texture( "HDR", GL_TEXTURE_2D ) );
+
+            // Canvas
+            m_dummy.setCanvas(m_quadMesh.get());
+            m_lumin.setCanvas(m_quadMesh.get());
+            m_highp.setCanvas(m_quadMesh.get());
+            m_blurp.setCanvas(m_quadMesh.get());
+            m_tonmp.setCanvas(m_quadMesh.get());
+            m_compp.setCanvas(m_quadMesh.get());
 
             // this is where the branching occurs, maybe it should be done later on
             // but if we want to initiate passes' FBOs we need to branch them before
@@ -396,10 +404,10 @@ namespace Ra
                 m_quadMesh->render();
 
                 // dummy pass
-                m_dummy.renderPass(m_quadMesh.get());
+                m_dummy.renderPass();
 
                 // luminance pass : TODO(Hugo) remove fetch
-                m_lumin.renderPass(m_quadMesh.get());
+                m_lumin.renderPass();
                 Core::Color lum = m_lumin.getOut(0)->getTexel(0, 0);
                 Scalar lumMin  = lum.x();
                 Scalar lumMax  = lum.y();
@@ -407,15 +415,15 @@ namespace Ra
 
                 // tonemapping pass
                 //m_tonmp.renderPass(m_shaderMgr, m_quadMesh.get(), m_pingPongSize);
-                m_tonmp.renderPass(m_quadMesh.get(), lumMin, lumMax, lumMean);
+                m_tonmp.renderPass(lumMin, lumMax, lumMean);
 
                 // bloom pass : TODO(Hugo) do a bloom pass to group highpass and blur
                 //m_highp.renderPass(m_shaderMgr, m_quadMesh.get(), m_pingPongSize);
-                m_highp.renderPass(m_quadMesh.get(), lumMin, lumMax, lumMean);
-                m_blurp.renderPass(m_quadMesh.get());
+                m_highp.renderPass(lumMin, lumMax, lumMean);
+                m_blurp.renderPass();
 
                 // do final composition
-                m_compp.renderPass(m_quadMesh.get());
+                m_compp.renderPass();
 
                 GL_ASSERT( glDepthFunc( GL_LESS ) );
                 m_postprocessFbo->unbind();
