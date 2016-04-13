@@ -1,4 +1,4 @@
- 
+
 #ifndef RADIUMENGINE_BVH_HPP
 #define RADIUMENGINE_BVH_HPP
 
@@ -27,23 +27,16 @@ namespace Ra
 
                 inline Node( const std::shared_ptr<Node>& l, const std::shared_ptr<Node>& r );
 
+                inline void clear();
+
                 inline std::shared_ptr<Node> getLeftChild() const;
                 inline std::shared_ptr<Node> getRightChild() const;
 
-                inline Aabb getAabb() const
-                {
-                    return m_aabb;
-                }
+                inline Aabb getAabb() const;
 
-                inline std::shared_ptr<T> getData()
-                {
-                    return m_data;
-                }
+                inline std::shared_ptr<T> getData();
 
-                inline bool isFinal() const
-                {
-                    return m_children.empty();
-                }
+                inline bool isFinal() const;
 
             protected:
                 Aabb m_aabb ;
@@ -56,8 +49,6 @@ namespace Ra
             // public types and constants.
             typedef std::shared_ptr<Node> NodePtr;
 
-            typedef Node * Nodep;
-
         public:
             RA_CORE_ALIGNED_NEW
 
@@ -68,7 +59,7 @@ namespace Ra
 
             inline void insertLeaf(const std::shared_ptr<T>& t);
 
-            //TODO removeLeaf()
+            inline void removeLeaf(const std::shared_ptr<T>& t);
 
             inline void clear();
 

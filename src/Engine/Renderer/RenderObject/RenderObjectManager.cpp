@@ -52,6 +52,7 @@ namespace Ra
             // FIXME(Charly): Should we check if the render object is in the double buffer map ?
             std::shared_ptr<RenderObject> renderObject = m_renderObjects.at( index );
             m_renderObjects.remove( index );
+            m_fancyBVH.removeLeaf(renderObject);
 
             auto type = renderObject->getType();
 
@@ -129,9 +130,6 @@ namespace Ra
                 Core::Matrix4 mvp(renderData.projMatrix * renderData.viewMatrix);
                 m_fancyBVH.update();
                 m_fancyBVH.getInFrustumSlow(objectsOut, Core::Frustum(mvp));
-
-                // DEBUG purpose
-                LOG(logDEBUG) << "RO inside frustum / Total : " << objectsOut.size() << "/" << m_renderObjectByType[(int)RenderObjectType::Fancy].size() ;
             }
             else
             {
