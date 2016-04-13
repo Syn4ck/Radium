@@ -78,13 +78,6 @@ namespace Ra
         {
             m_shaderMgr->addShaderProgram("DepthAmbientPass", "../Shaders/DepthAmbientPass.vert.glsl", "../Shaders/DepthAmbientPass.frag.glsl");
             m_shaderMgr->addShaderProgram("FinalCompose", "../Shaders/Basic2D.vert.glsl", "../Shaders/FinalCompose.frag.glsl");
-            m_shaderMgr->addShaderProgram("Tonemapping", "../Shaders/Basic2D.vert.glsl", "../Shaders/Tonemapping.frag.glsl");
-            m_shaderMgr->addShaderProgram("Luminance", "../Shaders/Basic2D.vert.glsl", "../Shaders/Luminance.frag.glsl");
-            m_shaderMgr->addShaderProgram("MinMax", "../Shaders/Basic2D.vert.glsl", "../Shaders/MinMax.frag.glsl");
-            m_shaderMgr->addShaderProgram("Blur", "../Shaders/Basic2D.vert.glsl", "../Shaders/Blur.frag.glsl");
-            m_shaderMgr->addShaderProgram("Dummy", "../Shaders/Basic2D.vert.glsl", "../Shaders/Dummy.frag.glsl");
-            m_shaderMgr->addShaderProgram("Highpass", "../Shaders/Basic2D.vert.glsl", "../Shaders/Highpass.frag.glsl");
-            m_shaderMgr->addShaderProgram("DummyGreen", "../Shaders/Basic2D.vert.glsl", "../Shaders/DummyGreen.frag.glsl");
             m_shaderMgr->addShaderProgram("HighpassTEST", "../Shaders/Basic2D.vert.glsl", "../Shaders/HighpassNoFetch.frag.glsl");
         }
 
@@ -100,27 +93,28 @@ namespace Ra
 
             // this is where the branching occurs, maybe it should be done later on
             // but if we want to initiate passes' FBOs we need to branch them before
+            //m_passes[DUMMY]->setIn(0, m_textures[TEX_LIT].get());
+            //m_passes[DUMMY]->initFbos();
             m_dummy.setIn(0, m_textures[TEX_LIT].get());
-            m_dummy.initFbos();
+            m_dummy.init();
 
             m_lumin.setIn(0, m_dummy.getOut(0));
-            m_lumin.initFbos();
+            m_lumin.init();
 
             m_highp.setIn(0, m_dummy.getOut(0));
             m_highp.setIn(1, m_lumin.getOut(0));
-            m_highp.initFbos();
+            m_highp.init();
 
             m_blurp.setIn(0, m_highp.getOut(0));
-            m_blurp.initFbos();
+            m_blurp.init();
 
-            //m_tonmp.setIn(0, m_textures[TEX_LIT].get());
             m_tonmp.setIn(0, m_dummy.getOut(0));
             m_tonmp.setIn(1, m_lumin.getOut(0));
-            m_tonmp.initFbos();
+            m_tonmp.init();
 
             m_compp.setIn(0, m_tonmp.getOut(0));
             m_compp.setIn(1, m_blurp.getOut(0));
-            m_compp.initFbos();
+            m_compp.init();
 
             m_secondaryTextures["Depth Texture"]        = m_textures[TEX_DEPTH].get();
             m_secondaryTextures["Normal Texture"]       = m_textures[TEX_NORMAL].get();
@@ -402,10 +396,10 @@ namespace Ra
                 m_quadMesh->render();
 
                 // dummy pass
-                m_dummy.renderPass(m_shaderMgr, m_quadMesh.get());
+                m_dummy.renderPass(m_quadMesh.get());
 
                 // luminance pass : TODO(Hugo) remove fetch
-                m_lumin.renderPass(m_shaderMgr, m_quadMesh.get());
+                m_lumin.renderPass(m_quadMesh.get());
                 Core::Color lum = m_lumin.getOut(0)->getTexel(0, 0);
                 Scalar lumMin  = lum.x();
                 Scalar lumMax  = lum.y();
@@ -413,15 +407,15 @@ namespace Ra
 
                 // tonemapping pass
                 //m_tonmp.renderPass(m_shaderMgr, m_quadMesh.get(), m_pingPongSize);
-                m_tonmp.renderPass(m_shaderMgr, m_quadMesh.get(), lumMin, lumMax, lumMean);
+                m_tonmp.renderPass(m_quadMesh.get(), lumMin, lumMax, lumMean);
 
                 // bloom pass : TODO(Hugo) do a bloom pass to group highpass and blur
                 //m_highp.renderPass(m_shaderMgr, m_quadMesh.get(), m_pingPongSize);
-                m_highp.renderPass(m_shaderMgr, m_quadMesh.get(), lumMin, lumMax, lumMean);
-                m_blurp.renderPass(m_shaderMgr, m_quadMesh.get());
+                m_highp.renderPass(m_quadMesh.get(), lumMin, lumMax, lumMean);
+                m_blurp.renderPass(m_quadMesh.get());
 
                 // do final composition
-                m_compp.renderPass(m_shaderMgr, m_quadMesh.get());
+                m_compp.renderPass(m_quadMesh.get());
 
                 GL_ASSERT( glDepthFunc( GL_LESS ) );
                 m_postprocessFbo->unbind();

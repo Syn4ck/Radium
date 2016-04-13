@@ -20,11 +20,17 @@ namespace Ra {
         {
         }
 
-        void PassLuminance::initFbos()
+        void PassLuminance::init()
         {
             // create internal FBOs
             m_fbo[FBO_MAIN].reset( new FBO( FBO::Components(FBO::COLOR), m_width, m_height ));
             m_fbo[FBO_PING_PONG].reset( new FBO( FBO::Components(FBO::COLOR), 1, 1 ));
+
+            // shaders
+            ShaderProgramManager* shaderMgr = ShaderProgramManager::getInstance();
+            m_shader[SHADER_DRAWSCREEN] = shaderMgr->getShaderProgram("DrawScreen");
+            m_shader[SHADER_LUMINANCE]  = shaderMgr->addShaderProgram("Luminance", "../Shaders/Basic2D.vert.glsl", "../Shaders/Luminance.frag.glsl");
+            m_shader[SHADER_MIN_MAX]    = shaderMgr->addShaderProgram("MinMax", "../Shaders/Basic2D.vert.glsl", "../Shaders/MinMax.frag.glsl");
         }
 
         void PassLuminance::resizePass(uint w, uint h)
@@ -66,18 +72,15 @@ namespace Ra {
             GL_ASSERT( glReadBuffer( GL_BACK ) );
         }
 
-        void PassLuminance::renderPass(ShaderProgramManager* shaderMgr, Mesh *screen)
+        void PassLuminance::renderPass(Mesh *screen)
         {
-            const ShaderProgram* shader = nullptr;
-
             // first apply the Luminance shader to the input texture (HDR) and write to output (LUM)
             m_fbo[FBO_MAIN]->useAsTarget( m_width, m_height );
 
             GL_ASSERT( glDrawBuffers(1, buffers + 1) );
-            shader = shaderMgr->getShaderProgram("Luminance");
 
-            shader->bind();
-            shader->setUniform("hdr", m_texIn[TEX_HDR], 0);
+            m_shader[SHADER_LUMINANCE]->bind();
+            m_shader[SHADER_LUMINANCE]->setUniform("hdr", m_texIn[TEX_HDR], 0);
             screen->render();
 
             // now that the LUM texture contains luminance(HDR), ping-pong with MinMax
@@ -88,14 +91,12 @@ namespace Ra {
             // first draw on PING to start
             GL_ASSERT( glDrawBuffers(1, buffers) );
             GL_ASSERT( glViewport(0, 0, size, size) );
-            shader = shaderMgr->getShaderProgram("DrawScreen");
-            shader->bind();
-            shader->setUniform( "screenTexture", m_texOut[TEX_LUM].get(), 0);
+            m_shader[SHADER_DRAWSCREEN]->bind();
+            m_shader[SHADER_DRAWSCREEN]->setUniform( "screenTexture", m_texOut[TEX_LUM].get(), 0);
             screen->render();
 
             // ping-pong to min/max and avg
-            shader = shaderMgr->getShaderProgram("MinMax");
-            shader->bind();
+            m_shader[SHADER_MIN_MAX]->bind();
             uint ping = 0;
             while (size != 1)
             {
@@ -103,7 +104,7 @@ namespace Ra {
                 GL_ASSERT( glDrawBuffers(1, buffers + (ping + 1)%2) );
                 GL_ASSERT( glViewport(0, 0, size, size) );
 
-                shader->setUniform("color", m_internalTextures[TEX_PING + ping].get(), 0);
+                m_shader[SHADER_MIN_MAX]->setUniform("color", m_internalTextures[TEX_PING + ping].get(), 0);
                 screen->render();
 
                 ++ ping %= 2;
@@ -115,9 +116,8 @@ namespace Ra {
             GL_ASSERT( glDrawBuffers(1, buffers + 1) );
             GL_ASSERT( glViewport(0, 0, m_width, m_height) );
 
-            shader = shaderMgr->getShaderProgram("DrawScreen");
-            shader->bind();
-            shader->setUniform( "screenTexture", m_internalTextures[TEX_PING + ((ping+1)%2)].get(), 0 );
+            m_shader[SHADER_DRAWSCREEN]->bind();
+            m_shader[SHADER_DRAWSCREEN]->setUniform( "screenTexture", m_internalTextures[TEX_PING + ((ping+1)%2)].get(), 0 );
             screen->render();
         }
 

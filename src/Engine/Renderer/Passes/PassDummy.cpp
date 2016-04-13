@@ -15,6 +15,7 @@ namespace Ra
 
         PassDummy::PassDummy(const std::string& name, uint w, uint h, uint nTexIn, uint nTexOut)
             : Pass(name, w, h, nTexIn, nTexOut)
+            , m_shader(nullptr)
         {
             // generate output texture
             m_texOut[TEX_DUMMY].reset( new Texture("Dummy", GL_TEXTURE_2D) );
@@ -24,10 +25,14 @@ namespace Ra
         {
         }
 
-        void PassDummy::initFbos()
+        void PassDummy::init()
         {
             // initialize internal FBO
             m_fbo[FBO_MAIN].reset( new FBO( FBO::Components(FBO::COLOR), m_width, m_height ));
+
+            // get shader
+            ShaderProgramManager* shaderMgr = ShaderProgramManager::getInstance();
+            m_shader = shaderMgr->addShaderProgram("Dummy", "../Shaders/Basic2D.vert.glsl", "../Shaders/Dummy.frag.glsl");
         }
 
         void PassDummy::resizePass(uint w, uint h)
@@ -50,18 +55,15 @@ namespace Ra
             m_fbo[FBO_MAIN]->unbind( true );
         }
 
-        void PassDummy::renderPass(ShaderProgramManager* shaderMgr, Mesh* screen)
+        void PassDummy::renderPass(Mesh* screen)
         {
-            const ShaderProgram* shader = nullptr;
-
             m_fbo[FBO_MAIN]->useAsTarget(m_width, m_height);
 
             GL_ASSERT( glViewport(0, 0, m_width, m_height) );
             GL_ASSERT( glDrawBuffers(1, buffers+1) );
 
-            shader = shaderMgr->getShaderProgram("Dummy");
-            shader->bind();
-            shader->setUniform("color", m_texIn[TEX_COLOR], 0);
+            m_shader->bind();
+            m_shader->setUniform("color", m_texIn[TEX_COLOR], 0);
             screen->render();
         }
 

@@ -24,10 +24,10 @@ namespace Ra
                      uint amount=2, uint box=1);
             virtual ~PassBlur();
 
-            void renderPass(ShaderProgramManager* shaderMgr, Mesh* screen);
+            void renderPass(Mesh* screen);
             void resizePass(uint w, uint h);
             void resizePass();
-            void initFbos();
+            void init();
 
             virtual std::shared_ptr<Texture> getInternTextures(uint i);
 
@@ -62,6 +62,15 @@ namespace Ra
             uint m_pingPongSize;
             std::array<std::unique_ptr<FBO>,FBO_COUNT> m_fbo;
             std::array<std::shared_ptr<Texture>,TEX_INTERNAL_COUNT> m_internalTextures;
+
+            enum Shaders
+            {
+                SHADER_DRAWSCREEN = 0,
+                SHADER_BLUR,
+                SHADER_COUNT,
+            };
+
+            const ShaderProgram *m_shader[SHADER_COUNT];
         };
 
     }

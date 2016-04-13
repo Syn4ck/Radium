@@ -20,10 +20,15 @@ namespace Ra {
         {
         }
 
-        void PassBlur::initFbos()
+        void PassBlur::init()
         {
             // create internal FBOs
             m_fbo[FBO_MAIN].reset( new FBO( FBO::Components(FBO::COLOR), m_width, m_height ));
+
+            // load shader
+            ShaderProgramManager* shaderMgr = ShaderProgramManager::getInstance();
+            m_shader[SHADER_DRAWSCREEN] = shaderMgr->getShaderProgram("DrawScreen");
+            m_shader[SHADER_BLUR] = shaderMgr->addShaderProgram("Blur", "../Shaders/Basic2D.vert.glsl", "../Shaders/Blur.frag.glsl");
         }
 
         void PassBlur::resizePass(uint w, uint h)
@@ -60,43 +65,38 @@ namespace Ra {
             GL_ASSERT( glReadBuffer( GL_BACK ) );
         }
 
-        void PassBlur::renderPass(ShaderProgramManager* shaderMgr, Mesh *screen)
+        void PassBlur::renderPass(Mesh *screen)
         {
-            const ShaderProgram* shader = nullptr;
-
             m_fbo[FBO_MAIN]->useAsTarget(m_width, m_height);
             GL_ASSERT( glViewport(0, 0, m_width, m_height) );
 
             // first copy the in-texture in PING
-            GL_ASSERT( glDrawBuffers(1, buffers + 2) );
-            shader = shaderMgr->getShaderProgram("DrawScreen");
-            shader->bind();
-            shader->setUniform("screenTexture", m_texIn[TEX_COLOR], 0);
+            GL_ASSERT( glDrawBuffers(1, buffers + 2) );            
+            m_shader[SHADER_DRAWSCREEN]->bind();
+            m_shader[SHADER_DRAWSCREEN]->setUniform("screenTexture", m_texIn[TEX_COLOR], 0);
             screen->render();
 
-            shader = shaderMgr->getShaderProgram("Blur");
-            shader->bind();
+            m_shader[SHADER_BLUR]->bind();
 
             for (uint i = 0; i < m_amount; ++i)
             {
                 // X blur | ping -> pong
                 GL_ASSERT( glDrawBuffers(1, buffers + 3) );
-                shader->setUniform("color", m_internalTextures[TEX_BLUR_PING].get(), 0);
-                shader->setUniform("offset", Core::Vector2(1.0 / m_width, 0.0));
+                m_shader[SHADER_BLUR]->setUniform("color", m_internalTextures[TEX_BLUR_PING].get(), 0);
+                m_shader[SHADER_BLUR]->setUniform("offset", Core::Vector2(1.0 / m_width, 0.0));
                 screen->render();
 
                 // Y blur | pong -> ping
                 GL_ASSERT( glDrawBuffers(1, buffers + 2) );
-                shader->setUniform("color", m_internalTextures[TEX_BLUR_PONG].get(), 0);
-                shader->setUniform("offset", Core::Vector2(0.0, 1.0 / m_height));
+                m_shader[SHADER_BLUR]->setUniform("color", m_internalTextures[TEX_BLUR_PONG].get(), 0);
+                m_shader[SHADER_BLUR]->setUniform("offset", Core::Vector2(0.0, 1.0 / m_height));
                 screen->render();
             }
 
             // bring back to the output texture
             GL_ASSERT( glDrawBuffers(1, buffers + 1) );
-            shader = shaderMgr->getShaderProgram("DrawScreen");
-            shader->bind();
-            shader->setUniform("screenTexture", m_internalTextures[TEX_BLUR_PING].get(), 0);
+            m_shader[SHADER_DRAWSCREEN]->bind();
+            m_shader[SHADER_DRAWSCREEN]->setUniform("screenTexture", m_internalTextures[TEX_BLUR_PING].get(), 0);
             screen->render();
         }
 
@@ -105,7 +105,7 @@ namespace Ra {
             if (i < TEX_INTERNAL_COUNT)
                 return m_internalTextures[i];
             else
-                return m_internalTextures[0];
+                return m_internalTextures[0];  // default. TODO(Hugo) change this ugliness
         }
 
     }

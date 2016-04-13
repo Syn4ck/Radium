@@ -16,10 +16,10 @@ namespace Ra
         public:
             PassDummy(const std::string& name, uint w, uint h, uint nTexIn, uint nTexOut);
             ~PassDummy();
-            void renderPass(ShaderProgramManager* shaderMgr, Mesh* screen);
+            void renderPass(Mesh* screen);
             void resizePass(uint w, uint h);
             void resizePass();
-            void initFbos();
+            void init();
 
             virtual std::shared_ptr<Texture> getInternTextures(uint i);
 
@@ -42,6 +42,7 @@ namespace Ra
             };
 
             std::array<std::unique_ptr<FBO>,FBO_COUNT> m_fbo;
+            const ShaderProgram* m_shader;
         };
 
     }

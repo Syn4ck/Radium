@@ -14,6 +14,7 @@ namespace Ra
         PassCompose::PassCompose(const std::string& name, uint w, uint h, uint nTexIn, uint nTexOut)
             : Pass(name, w, h, nTexIn, nTexOut)
         {
+            // create out texture
             m_texOut[TEX_AB].reset( new Texture("Composite", GL_TEXTURE_2D) );
         }
 
@@ -21,10 +22,13 @@ namespace Ra
         {
         }
 
-        void PassCompose::initFbos()
+        void PassCompose::init()
         {
             m_fbo[FBO_MAIN].reset( new FBO( FBO::Components(FBO::COLOR), m_width, m_height ));
 
+            // get shaders
+            ShaderProgramManager* shaderMgr = ShaderProgramManager::getInstance();
+            m_shader = shaderMgr->getShaderProgram("FinalCompose");
         }
 
         void PassCompose::resizePass(uint w, uint h)
@@ -48,19 +52,16 @@ namespace Ra
             m_fbo[FBO_MAIN]->unbind( true );
         }
 
-        void PassCompose::renderPass(ShaderProgramManager* shaderMgr, Mesh* screen)
+        void PassCompose::renderPass(Mesh* screen)
         {
-            const ShaderProgram* shader = nullptr;
-
             m_fbo[FBO_MAIN]->useAsTarget(m_width, m_height);
 
             GL_ASSERT( glViewport(0, 0, m_width, m_height) );
             GL_ASSERT( glDrawBuffers(1, buffers+2) );
 
-            shader = shaderMgr->getShaderProgram("FinalCompose");
-            shader->bind();
-            shader->setUniform("texA", m_texIn[TEX_A], 0);
-            shader->setUniform("texB", m_texIn[TEX_B], 1);
+            m_shader->bind();
+            m_shader->setUniform("texA", m_texIn[TEX_A], 0);
+            m_shader->setUniform("texB", m_texIn[TEX_B], 1);
             screen->render();
         }
 

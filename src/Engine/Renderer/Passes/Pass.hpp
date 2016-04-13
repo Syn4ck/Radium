@@ -19,9 +19,9 @@ namespace Ra
 
             virtual std::string getPassName() const { return m_name; }
 
-            virtual void renderPass(ShaderProgramManager* shaderMgr, Mesh* screen) = 0;
+            virtual void renderPass(Mesh* screen) = 0;
             virtual void resizePass( uint w, uint h ) = 0;
-            virtual void initFbos() = 0;
+            virtual void init() = 0;
 
             virtual void setIn(uint slot, Texture* tex);
             virtual void setOut(uint slot, Texture* tex);

@@ -16,12 +16,12 @@ namespace Ra
         public:
             PassTonemap(const std::string& name, uint w, uint h, uint nTexIn, uint nTexOut);
             ~PassTonemap();
-            void renderPass(ShaderProgramManager* shaderMgr, Mesh* screen);
-            void renderPass(ShaderProgramManager* shaderMgr, Mesh* screen, uint pingpongsize);
-            void renderPass(ShaderProgramManager* shaderMgr, Mesh* screen, float lumMin, float lumMax, float lumMean);
+            void renderPass(Mesh* screen);
+            void renderPass(Mesh* screen, uint pingpongsize);
+            void renderPass(Mesh* screen, float lumMin, float lumMax, float lumMean);
             void resizePass(uint w, uint h);
             void resizePass();
-            void initFbos();
+            void init();
 
             virtual std::shared_ptr<Texture> getInternTextures(uint i);
 
@@ -45,6 +45,7 @@ namespace Ra
             };
 
             std::array<std::unique_ptr<FBO>,FBO_COUNT> m_fbo;
+            const ShaderProgram *m_shader;
         };
 
     }

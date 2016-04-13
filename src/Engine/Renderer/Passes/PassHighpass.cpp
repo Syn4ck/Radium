@@ -6,6 +6,7 @@ namespace Ra {
         PassHighpass::PassHighpass(const std::string& name, uint w, uint h, uint nTexIn=1, uint nTexOut=1)
             : Pass(name, w, h, nTexIn, nTexOut)
         {
+            // texture out
             m_texOut[TEX_HPASS].reset( new Texture("HighPass", GL_TEXTURE_2D) );
         }
 
@@ -13,10 +14,14 @@ namespace Ra {
         {
         }
 
-        void PassHighpass::initFbos()
+        void PassHighpass::init()
         {
             // create internal FBOs
             m_fbo[FBO_COLOR].reset( new FBO( FBO::Components(FBO::COLOR), m_width, m_height ));
+
+            // shader program
+            ShaderProgramManager* shaderMgr = ShaderProgramManager::getInstance();
+            m_shader = shaderMgr->addShaderProgram("Highpass", "../Shaders/Basic2D.vert.glsl", "../Shaders/Highpass.frag.glsl"); // TODO(Hugo) replace with HighpassTEST
         }
 
         void PassHighpass::resizePass(uint w, uint h)
@@ -48,54 +53,46 @@ namespace Ra {
             GL_ASSERT( glReadBuffer( GL_BACK ) );
         }
 
-        void PassHighpass::renderPass(ShaderProgramManager* shaderMgr, Mesh *screen)
+        void PassHighpass::renderPass(Mesh *screen)
         {
-            const ShaderProgram* shader = nullptr;
-
             m_fbo[FBO_COLOR]->useAsTarget();
 
             GL_ASSERT( glViewport(0, 0, m_width, m_height) );
             GL_ASSERT( glDrawBuffers(1, buffers+2) );
 
-            shader = shaderMgr->getShaderProgram("HighpassTEST");
-            shader->bind();
-            shader->setUniform("hdr", m_texIn[TEX_LIT], 0);
-            shader->setUniform("lum", m_texIn[TEX_LUM], 1);
+            m_shader->bind();
+            m_shader->setUniform("hdr", m_texIn[TEX_LIT], 0);
+            m_shader->setUniform("lum", m_texIn[TEX_LUM], 1);
             screen->render();
         }
 
-        void PassHighpass::renderPass(ShaderProgramManager* shaderMgr, Mesh* screen, uint pingpongsize)
+        void PassHighpass::renderPass(Mesh* screen, uint pingpongsize)
         {
-            const ShaderProgram* shader = nullptr;
-
             m_fbo[FBO_COLOR]->useAsTarget();
 
             GL_ASSERT( glViewport(0, 0, m_width, m_height) );
             GL_ASSERT( glDrawBuffers(1, buffers+2) );
 
-            shader = shaderMgr->getShaderProgram("HighpassTEST");
-            shader->bind();
-            shader->setUniform("hdr", m_texIn[TEX_LIT], 0);
-            shader->setUniform("lum", m_texIn[TEX_LUM], 1);
-            shader->setUniform("pingpongsz", pingpongsize);
+            m_shader->bind();
+            m_shader->setUniform("hdr", m_texIn[TEX_LIT], 0);
+            m_shader->setUniform("lum", m_texIn[TEX_LUM], 1);
+            m_shader->setUniform("pingpongsz", pingpongsize);
             screen->render();
         }
 
-        void PassHighpass::renderPass(ShaderProgramManager* shaderMgr, Mesh *screen, Scalar min, Scalar max, Scalar mean)
+        // FIXME(Hugo) the only one to work for now
+        void PassHighpass::renderPass(Mesh *screen, Scalar min, Scalar max, Scalar mean)
         {
-            const ShaderProgram* shader = nullptr;
-
             m_fbo[FBO_COLOR]->useAsTarget();
 
             GL_ASSERT( glViewport(0, 0, m_width, m_height) );
             GL_ASSERT( glDrawBuffers(1, buffers+2) );
 
-            shader = shaderMgr->getShaderProgram("Highpass");
-            shader->bind();
-            shader->setUniform("hdr",     m_texIn[TEX_LIT], 0);
-            shader->setUniform("lumMin",  min);
-            shader->setUniform("lumMax",  max);
-            shader->setUniform("lumMean", mean);
+            m_shader->bind();
+            m_shader->setUniform("hdr",     m_texIn[TEX_LIT], 0);
+            m_shader->setUniform("lumMin",  min);
+            m_shader->setUniform("lumMax",  max);
+            m_shader->setUniform("lumMean", mean);
             screen->render();
         }
 

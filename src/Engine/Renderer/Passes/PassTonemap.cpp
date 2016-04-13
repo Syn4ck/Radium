@@ -14,6 +14,7 @@ namespace Ra
         PassTonemap::PassTonemap(const std::string& name, uint w, uint h, uint nTexIn, uint nTexOut)
             : Pass(name, w, h, nTexIn, nTexOut)
         {
+            // out
             m_texOut[TEX_TONEMAP].reset( new Texture("TonemapPass", GL_TEXTURE_2D) );
         }
 
@@ -21,9 +22,13 @@ namespace Ra
         {
         }
 
-        void PassTonemap::initFbos()
+        void PassTonemap::init()
         {
             m_fbo[FBO_MAIN].reset( new FBO( FBO::Components(FBO::COLOR), m_width, m_height ));
+
+            // shaders
+            ShaderProgramManager* shaderMgr = ShaderProgramManager::getInstance();
+            m_shader = shaderMgr->addShaderProgram("Tonemapping", "../Shaders/Basic2D.vert.glsl", "../Shaders/Tonemapping.frag.glsl");
         }
 
         void PassTonemap::resizePass(uint w, uint h)
@@ -47,42 +52,36 @@ namespace Ra
             m_fbo[FBO_MAIN]->unbind( true );
         }
 
-        void PassTonemap::renderPass(ShaderProgramManager* shaderMgr, Mesh* screen)
+        void PassTonemap::renderPass(Mesh* screen)
         {
         }
 
-        void PassTonemap::renderPass(ShaderProgramManager* shaderMgr, Mesh* screen, uint pingpongsize)
+        void PassTonemap::renderPass(Mesh* screen, uint pingpongsize)
         {
-            const ShaderProgram* shader = nullptr;
-
             m_fbo[FBO_MAIN]->useAsTarget(m_width, m_height);
 
             GL_ASSERT( glViewport(0, 0, m_width, m_height) );
             GL_ASSERT( glDrawBuffers(1, buffers+2) );
 
-            shader = shaderMgr->getShaderProgram("TonemappingTEST");
-            shader->bind();
-            shader->setUniform("hdr", m_texIn[TEX_HDR], 0);
-            shader->setUniform("lum", m_texIn[TEX_LUM], 1);
-            shader->setUniform("pingpongsz", pingpongsize);
+            m_shader->bind();
+            m_shader->setUniform("hdr", m_texIn[TEX_HDR], 0);
+            m_shader->setUniform("lum", m_texIn[TEX_LUM], 1);
+            m_shader->setUniform("pingpongsz", pingpongsize);
             screen->render();
         }
 
-        void PassTonemap::renderPass(ShaderProgramManager* shaderMgr, Mesh* screen, float lumMin, float lumMax, float lumMean)
+        void PassTonemap::renderPass(Mesh* screen, float lumMin, float lumMax, float lumMean)
         {
-            const ShaderProgram* shader = nullptr;
-
             m_fbo[FBO_MAIN]->useAsTarget(m_width, m_height);
 
             GL_ASSERT( glViewport(0, 0, m_width, m_height) );
             GL_ASSERT( glDrawBuffers(1, buffers + 2) );
 
-            shader = shaderMgr->getShaderProgram("Tonemapping");
-            shader->bind();
-            shader->setUniform("hdr", m_texIn[TEX_HDR], 0);
-            shader->setUniform("lumMin",  lumMin);
-            shader->setUniform("lumMax",  lumMax);
-            shader->setUniform("lumMean", lumMean);
+            m_shader->bind();
+            m_shader->setUniform("hdr", m_texIn[TEX_HDR], 0);
+            m_shader->setUniform("lumMin",  lumMin);
+            m_shader->setUniform("lumMax",  lumMax);
+            m_shader->setUniform("lumMean", lumMean);
             screen->render();
         }
 
