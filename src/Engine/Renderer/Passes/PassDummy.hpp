@@ -14,7 +14,8 @@ namespace Ra
         class PassDummy : public Pass
         {
         public:
-            PassDummy(const std::string& name, uint w, uint h, uint nTexIn, uint nTexOut, Mesh* canvas);
+            PassDummy(const std::string& name, uint w, uint h, uint nTexIn, uint nTexOut,
+                      Mesh* canvas, uint priority);
             ~PassDummy();
             void renderPass();
             void resizePass(uint w, uint h);

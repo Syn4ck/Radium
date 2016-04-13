@@ -13,7 +13,8 @@ namespace Ra
         class RA_ENGINE_API Pass
         {
         public:
-            Pass(const std::string& name, uint w, uint h, uint nTexIn, uint nTexOut, Mesh* canvas);
+            Pass(const std::string& name, uint w, uint h, uint nTexIn, uint nTexOut,
+                 Mesh* canvas, uint priority);
             virtual ~Pass() = 0;
 
             virtual std::string getPassName() const { return m_name; }
@@ -25,6 +26,8 @@ namespace Ra
             virtual void setIn(uint slot, Texture* tex);
             virtual void setOut(uint slot, Texture* tex);
 
+            virtual bool operator <(const Pass& other);
+
             void setCanvas(Mesh* canvas);
 
             virtual Texture* getIn(uint slot);
@@ -34,6 +37,7 @@ namespace Ra
 
         protected:
             std::string m_name;
+            uint m_priority;
 
             uint m_width;
             uint m_height;

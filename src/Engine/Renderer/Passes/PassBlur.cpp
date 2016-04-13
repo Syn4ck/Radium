@@ -3,8 +3,9 @@
 namespace Ra {
     namespace Engine {
 
-        PassBlur::PassBlur(const std::string& name, uint w, uint h, uint nTexIn, uint nTexOut, Mesh* canvas, uint amount, uint box)
-            : Pass(name, w, h, nTexIn, nTexOut, canvas)
+        PassBlur::PassBlur(const std::string& name, uint w, uint h, uint nTexIn, uint nTexOut,
+                           Mesh* canvas, uint priority, uint amount, uint box)
+            : Pass(name, w, h, nTexIn, nTexOut, canvas, priority)
             , m_amount(amount)
             , m_boxfactor(box)
         {

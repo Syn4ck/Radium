@@ -3,8 +3,9 @@
 namespace Ra {
     namespace Engine {
 
-        PassHighpass::PassHighpass(const std::string& name, uint w, uint h, uint nTexIn, uint nTexOut, Mesh* canvas)
-            : Pass(name, w, h, nTexIn, nTexOut, canvas)
+        PassHighpass::PassHighpass(const std::string& name, uint w, uint h, uint nTexIn, uint nTexOut,
+                                   Mesh* canvas, uint priority)
+            : Pass(name, w, h, nTexIn, nTexOut, canvas, priority)
         {
             // texture out
             m_texOut[TEX_HPASS].reset( new Texture("HighPass", GL_TEXTURE_2D) );

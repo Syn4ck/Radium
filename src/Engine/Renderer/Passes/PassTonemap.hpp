@@ -14,7 +14,8 @@ namespace Ra
         class PassTonemap : public Pass
         {
         public:
-            PassTonemap(const std::string& name, uint w, uint h, uint nTexIn, uint nTexOut, Mesh* canvas);
+            PassTonemap(const std::string& name, uint w, uint h, uint nTexIn, uint nTexOut,
+                        Mesh* canvas, uint priority);
             ~PassTonemap();
             void renderPass();
             void renderPass(uint pingpongsize);

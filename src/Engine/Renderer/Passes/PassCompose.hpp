@@ -14,7 +14,8 @@ namespace Ra
         class PassCompose : public Pass
         {
         public:
-            PassCompose(const std::string& name, uint w, uint h, uint nTexIn, uint nTexOut, Mesh* canvas);
+            PassCompose(const std::string& name, uint w, uint h, uint nTexIn, uint nTexOut,
+                        Mesh* canvas, uint priority);
             ~PassCompose();
             void renderPass();
             void resizePass(uint w, uint h);

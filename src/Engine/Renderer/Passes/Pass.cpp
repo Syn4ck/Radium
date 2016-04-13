@@ -19,15 +19,17 @@ namespace Ra
                     GL_COLOR_ATTACHMENT7
                 };
 
-        Pass::Pass(const std::string& name, uint w, uint h, uint nTexIn, uint nTexOut, Mesh* canvas)
-            : m_name    ( name )
-            , m_width   ( w )
-            , m_height  ( h )
-            , m_nTexIn  ( nTexIn )
-            , m_nTexOut ( nTexOut )
-            , m_texIn   ( nTexIn )
-            , m_texOut  ( nTexOut )
-            , m_canvas  ( canvas )
+        Pass::Pass(const std::string& name, uint w, uint h, uint nTexIn, uint nTexOut,
+                   Mesh* canvas, uint priority)
+            : m_name     ( name )
+            , m_priority ( priority )
+            , m_width    ( w )
+            , m_height   ( h )
+            , m_nTexIn   ( nTexIn )
+            , m_nTexOut  ( nTexOut )
+            , m_texIn    ( nTexIn )
+            , m_texOut   ( nTexOut )
+            , m_canvas   ( canvas )
         {
         }
 
@@ -55,6 +57,15 @@ namespace Ra
         {
             //CORE_ASSERT( return m_texOut[slot].get(), "bad m_texOut array index" );
             return m_texOut[slot].get();
+        }
+
+        bool Pass::operator <(const Pass& other)
+        {
+            // this operator is present in order to set up a
+            // priorisation system through the #map of passes.
+            // 0 stands for undefined and is the default value
+            return ((m_priority < other.m_priority) && (m_priority != 0))
+                || (other.m_priority == 0);
         }
 
         void Pass::setCanvas(Mesh* canvas)

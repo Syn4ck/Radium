@@ -13,8 +13,9 @@ namespace Ra
     namespace Engine
     {
 
-        PassDummy::PassDummy(const std::string& name, uint w, uint h, uint nTexIn, uint nTexOut, Mesh* canvas)
-            : Pass(name, w, h, nTexIn, nTexOut, canvas)
+        PassDummy::PassDummy(const std::string& name, uint w, uint h, uint nTexIn, uint nTexOut,
+                             Mesh* canvas, uint priority)
+            : Pass(name, w, h, nTexIn, nTexOut, canvas, priority)
             , m_shader(nullptr)
         {
             // generate output texture

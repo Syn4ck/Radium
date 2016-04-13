@@ -20,7 +20,8 @@ namespace Ra
         class RA_ENGINE_API PassLuminance : public Pass
         {
         public:
-            PassLuminance(const std::string& name, uint w, uint h, uint nTexIn, uint nTexOut, Mesh* canvas);
+            PassLuminance(const std::string& name, uint w, uint h, uint nTexIn, uint nTexOut,
+                          Mesh* canvas, uint priority);
             virtual ~PassLuminance();
 
             void renderPass();

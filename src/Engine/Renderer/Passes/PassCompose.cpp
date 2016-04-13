@@ -11,8 +11,9 @@ namespace Ra
     namespace Engine
     {
 
-        PassCompose::PassCompose(const std::string& name, uint w, uint h, uint nTexIn, uint nTexOut, Mesh* canvas)
-            : Pass(name, w, h, nTexIn, nTexOut, canvas)
+        PassCompose::PassCompose(const std::string& name, uint w, uint h, uint nTexIn, uint nTexOut,
+                                 Mesh* canvas, uint priority)
+            : Pass(name, w, h, nTexIn, nTexOut, canvas, priority)
         {
             // create out texture
             m_texOut[TEX_AB].reset( new Texture("Composite", GL_TEXTURE_2D) );

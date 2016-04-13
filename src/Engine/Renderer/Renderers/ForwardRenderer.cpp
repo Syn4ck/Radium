@@ -51,12 +51,13 @@ namespace Ra
             : Renderer( width, height )
             , m_fbo( nullptr )
             , m_postprocessFbo( nullptr )
-            , m_dummy( "YoloPass",      width, height, 1, 1, nullptr )
-            , m_lumin( "LumPass",       width, height, 1, 1, nullptr )
-            , m_highp( "HighPass",      width, height, 2, 1, nullptr )
-            , m_blurp( "BlurPass",      width, height, 1, 1, nullptr, 16 )  // 16 ping-pongs
-            , m_tonmp( "TonemapPass",   width, height, 1, 1, nullptr )
-            , m_compp( "CompositePass", width, height, 1, 1, nullptr )
+            , m_dummy( "YoloPass",      width, height, 1, 1, nullptr, 1 )
+            , m_lumin( "LumPass",       width, height, 1, 1, nullptr, 2 )
+            , m_highp( "HighPass",      width, height, 2, 1, nullptr, 3 )
+            , m_blurp( "BlurPass",      width, height, 1, 1, nullptr, 4, 16 )  // 16 ping-pongs
+            , m_tonmp( "TonemapPass",   width, height, 1, 1, nullptr, 5 )
+            , m_compp( "CompositePass", width, height, 1, 1, nullptr, 6 )
+            //         name             width  height in out canvas  order
         {
         }
 
@@ -72,6 +73,14 @@ namespace Ra
 
             DebugRender::createInstance();
             DebugRender::getInstance()->initialize();
+
+            // Pass mapping
+            m_passes["dummy0"]     = &m_dummy;
+            m_passes["luminance0"] = &m_lumin;
+            m_passes["high0"]      = &m_highp;
+            m_passes["blur0"]      = &m_blurp;
+            m_passes["tonemap0"]   = &m_tonmp;
+            m_passes["composite0"] = &m_compp;
         }
 
         void ForwardRenderer::initShaders()
@@ -94,15 +103,13 @@ namespace Ra
             // Canvas
             m_dummy.setCanvas(m_quadMesh.get());  // this surely isn't the best way of doing things
             m_lumin.setCanvas(m_quadMesh.get());  // but setting them in constructor is too early
-            m_highp.setCanvas(m_quadMesh.get());
+            m_highp.setCanvas(m_quadMesh.get());  // as quadMesh is created in Renderer::initialize
             m_blurp.setCanvas(m_quadMesh.get());
             m_tonmp.setCanvas(m_quadMesh.get());
             m_compp.setCanvas(m_quadMesh.get());
 
             // this is where the branching occurs, maybe it should be done later on
             // but if we want to initiate passes' FBOs we need to branch them before
-            //m_passes[DUMMY]->setIn(0, m_textures[TEX_LIT].get());
-            //m_passes[DUMMY]->initFbos();
             m_dummy.setIn(0, m_textures[TEX_LIT].get());
             m_dummy.init();
 
@@ -406,7 +413,7 @@ namespace Ra
                 // dummy pass
                 m_dummy.renderPass();
 
-                // luminance pass : TODO(Hugo) remove fetch
+                // luminance pass
                 m_lumin.renderPass();
                 Core::Color lum = m_lumin.getOut(0)->getTexel(0, 0);
                 Scalar lumMin  = lum.x();
@@ -461,13 +468,10 @@ namespace Ra
             m_postprocessFbo->check();
             m_postprocessFbo->unbind( true );
 
-            m_dummy.resizePass(m_width, m_height);
-            m_lumin.resizePass(m_width, m_height);
-            m_highp.resizePass(m_width, m_height);
-            m_blurp.resizePass(m_width, m_height);
-            m_tonmp.resizePass(m_width, m_height);
-            m_compp.resizePass(m_width, m_height);
-
+            for (auto const it_pass: m_passes)
+            {
+                it_pass.second->resizePass(m_width, m_height);
+            }
 
             // Reset framebuffer state
             GL_CHECK_ERROR;

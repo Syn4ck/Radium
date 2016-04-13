@@ -5,8 +5,9 @@
 namespace Ra {
     namespace Engine {
 
-        PassLuminance::PassLuminance(const std::string& name, uint w, uint h, uint nTexIn, uint nTexOut, Mesh* canvas)
-            : Pass(name, w, h, nTexIn, nTexOut, canvas)
+        PassLuminance::PassLuminance(const std::string& name, uint w, uint h, uint nTexIn, uint nTexOut,
+                                     Mesh* canvas, uint priority)
+            : Pass(name, w, h, nTexIn, nTexOut, canvas, priority)
         {
             // internal
             m_internalTextures[TEX_PING].reset( new Texture("intern_Ping", GL_TEXTURE_2D) );
