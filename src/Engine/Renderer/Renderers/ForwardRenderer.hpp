@@ -63,6 +63,8 @@ namespace Ra
             PassBlur      m_blurp;
             PassTonemap   m_tonmp;
             PassCompose   m_compp;
+
+            PassBlur2     m_blurtest;
         };
 
 

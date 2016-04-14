@@ -6,8 +6,6 @@ out vec4 fragColor;
 in vec2 varTexcoord;
 
 uniform sampler2D color;
-uniform uint w;
-uniform uint h;
 
 void main()
 {

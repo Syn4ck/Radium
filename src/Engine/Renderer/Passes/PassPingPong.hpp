@@ -9,6 +9,7 @@
 #include <Engine/Renderer/Passes/Pass.hpp>
 #include <Engine/Renderer/Texture/Texture.hpp>
 #include <Engine/Renderer/RenderTechnique/ShaderProgram.hpp>
+#include <Engine/Renderer/RenderTechnique/RenderParameters.hpp>
 #include <Engine/Renderer/RenderTechnique/ShaderProgramManager.hpp>
 
 namespace Ra
@@ -19,14 +20,19 @@ namespace Ra
         class PassPingPong : public Pass
         {
         public:
-            PassPingPong(const std::string& name, uint w, uint h, uint nTexIn, uint nTexOut, uint priority,
-                         uint nLoop, const ShaderProgram* pingpong, const ShaderProgram* pongping);
+            PassPingPong(const std::string& name, uint w, uint h, uint nTexIn, uint nTexOut, Mesh* canvas, uint priority, uint loop);
             virtual ~PassPingPong();
 
             void renderPass();
             void resizePass(uint w, uint h);
             void resizePass();
             void init();
+
+            void setPingPongShader(const ShaderProgram* shader, RenderParameters* params);
+            void setPongPingShader(const ShaderProgram* shader, RenderParameters* params);
+
+            void setPingPongShader(const ShaderProgram* shader);
+            void setPongPingShader(const ShaderProgram* shader);
 
             virtual std::shared_ptr<Texture> getInternTextures(uint i);
 
@@ -56,6 +62,7 @@ namespace Ra
             };
 
             const ShaderProgram* m_shader[SHADER_COUNT];
+            RenderParameters*    m_params[SHADER_COUNT];
         };
 
     }
