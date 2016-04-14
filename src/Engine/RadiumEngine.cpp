@@ -26,6 +26,8 @@
 
 #include <Engine/Assets/FileData.hpp>
 
+#include <Core/Mesh/MeshUtils.hpp>
+
 namespace Ra
 {
     namespace Engine
@@ -120,6 +122,29 @@ namespace Ra
                 {
                     comp->initialize();
                 }
+                
+                // Re-center the entities
+                
+                Asset::GeometryData* gData = fileData.getGeometryData()[0];
+                const Ra::Core::Vector3Array& vertices = gData->getVertices();
+                const Ra::Core::Vector3 min = vertices.getMap().rowwise().minCoeff();
+                const Ra::Core::Vector3 max = vertices.getMap().rowwise().maxCoeff();
+                Ra::Core::Vector3 center = min + (max - min) * 0.5;
+                center = gData->getFrame() * center;
+                std::cout << "Center: " << center.transpose() << std::endl;
+                std::cout << gData->getFrame().matrix() << std::endl;
+                
+                Ra::Core::Transform t = Ra::Core::Transform::Identity();
+                t.translate(-center);
+                for (auto& comp : entity->getComponents())
+                {
+                    for (Ra::Core::Index& idx : comp->m_renderObjects)
+                    {
+                        Ra::Engine::RenderObject* ro = Engine::RadiumEngine::getInstance()->getRenderObjectManager()->getRenderObject(idx).get();
+                        ro->setLocalTransform(t);
+                    }
+                }
+                entity->setTransform(t.inverse());
             }
 
 
