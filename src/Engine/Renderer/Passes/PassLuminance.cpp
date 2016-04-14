@@ -10,8 +10,8 @@ namespace Ra {
             : Pass(name, w, h, nTexIn, nTexOut, canvas, priority)
         {
             // internal
-            m_internalTextures[TEX_PING].reset( new Texture("intern_Ping", GL_TEXTURE_2D) );
-            m_internalTextures[TEX_PONG].reset( new Texture("intern_Pong", GL_TEXTURE_2D) );
+            m_texIntern[TEX_PING].reset( new Texture("intern_Ping", GL_TEXTURE_2D) );
+            m_texIntern[TEX_PONG].reset( new Texture("intern_Pong", GL_TEXTURE_2D) );
 
             // output
             m_texOut[TEX_LUM].reset( new Texture("Lum", GL_TEXTURE_2D) );
@@ -46,8 +46,8 @@ namespace Ra {
             m_pingPongSize = std::pow(2.0, Scalar(uint(std::log2(std::min(m_width, m_height)))));
 
             // resize textures
-            m_internalTextures[TEX_PING]->initGL(GL_RGBA32F, m_pingPongSize, m_pingPongSize, GL_RGBA, GL_FLOAT, nullptr);
-            m_internalTextures[TEX_PONG]->initGL(GL_RGBA32F, m_pingPongSize, m_pingPongSize, GL_RGBA, GL_FLOAT, nullptr);
+            m_texIntern[TEX_PING]->initGL(GL_RGBA32F, m_pingPongSize, m_pingPongSize, GL_RGBA, GL_FLOAT, nullptr);
+            m_texIntern[TEX_PONG]->initGL(GL_RGBA32F, m_pingPongSize, m_pingPongSize, GL_RGBA, GL_FLOAT, nullptr);
             m_texOut[TEX_LUM]->initGL(GL_RGBA32F, m_width, m_height, GL_RGBA, GL_FLOAT, nullptr);
 
             // initiate, bind and configure the main fbo
@@ -60,8 +60,8 @@ namespace Ra {
             // initiate, bind and configure the ping-pong fbo
             m_fbo[FBO_PING_PONG]->bind();
             m_fbo[FBO_PING_PONG]->setSize( m_width, m_height );
-            m_fbo[FBO_PING_PONG]->attachTexture( GL_COLOR_ATTACHMENT0, m_internalTextures[TEX_PING].get() );
-            m_fbo[FBO_PING_PONG]->attachTexture( GL_COLOR_ATTACHMENT1, m_internalTextures[TEX_PONG].get() );
+            m_fbo[FBO_PING_PONG]->attachTexture( GL_COLOR_ATTACHMENT0, m_texIntern[TEX_PING].get() );
+            m_fbo[FBO_PING_PONG]->attachTexture( GL_COLOR_ATTACHMENT1, m_texIntern[TEX_PONG].get() );
             m_fbo[FBO_PING_PONG]->unbind( true );
 
             GL_CHECK_ERROR;
@@ -105,7 +105,7 @@ namespace Ra {
                 GL_ASSERT( glDrawBuffers(1, buffers + (ping + 1)%2) );
                 GL_ASSERT( glViewport(0, 0, size, size) );
 
-                m_shader[SHADER_MIN_MAX]->setUniform("color", m_internalTextures[TEX_PING + ping].get(), 0);
+                m_shader[SHADER_MIN_MAX]->setUniform("color", m_texIntern[TEX_PING + ping].get(), 0);
                 m_canvas->render();
 
                 ++ ping %= 2;
@@ -118,16 +118,16 @@ namespace Ra {
             GL_ASSERT( glViewport(0, 0, m_width, m_height) );
 
             m_shader[SHADER_DRAWSCREEN]->bind();
-            m_shader[SHADER_DRAWSCREEN]->setUniform( "screenTexture", m_internalTextures[TEX_PING + ((ping+1)%2)].get(), 0 );
+            m_shader[SHADER_DRAWSCREEN]->setUniform( "screenTexture", m_texIntern[TEX_PING + ((ping+1)%2)].get(), 0 );
             m_canvas->render();
         }
 
         std::shared_ptr<Texture> PassLuminance::getInternTextures(uint i)
         {
             if (i < TEX_INTERNAL_COUNT)
-                return m_internalTextures[i];
+                return m_texIntern[i];
             else
-                return m_internalTextures[0];
+                return m_texIntern[0];
         }
 
     }

@@ -131,9 +131,9 @@ namespace Ra
             m_textures[TEX_NORMAL].reset( new Texture( "Normal", GL_TEXTURE_2D ) );
             m_textures[TEX_LIT].reset( new Texture( "HDR", GL_TEXTURE_2D ) );
 
-            m_secondaryTextures["Depth Texture"]        = m_textures[TEX_DEPTH].get();
-            m_secondaryTextures["Normal Texture"]       = m_textures[TEX_NORMAL].get();
-            m_secondaryTextures["HDR Texture"]          = m_textures[TEX_LIT].get();
+            m_secondaryTextures["Depth Texture"]  = m_textures[TEX_DEPTH].get();
+            m_secondaryTextures["Normal Texture"] = m_textures[TEX_NORMAL].get();
+            m_secondaryTextures["HDR Texture"]    = m_textures[TEX_LIT].get();
         }
 
         void ForwardRenderer::updateStepInternal( const RenderData& renderData )

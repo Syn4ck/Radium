@@ -61,7 +61,7 @@ namespace Ra
             uint m_boxfactor;
             uint m_pingPongSize;
             std::array<std::unique_ptr<FBO>,FBO_COUNT> m_fbo;
-            std::array<std::shared_ptr<Texture>,TEX_INTERNAL_COUNT> m_internalTextures;
+            std::array<std::shared_ptr<Texture>,TEX_INTERNAL_COUNT> m_texIntern;
 
             enum Shaders
             {
