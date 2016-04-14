@@ -55,6 +55,9 @@ public:
     inline void reset();
 
     inline void displayInfo() const;
+    
+    void setCurrentIndex(int i) {m_currentIndex = i;}
+    int getGeometryDataSize() { return m_geometryData.size(); }
 
 protected:
     /// VARIABLE
@@ -65,6 +68,7 @@ protected:
     std::vector< std::unique_ptr< AnimationData > > m_animationData;
     bool                                            m_processed;
     bool                                            m_verbose;
+    int m_currentIndex;
 };
 
 } // namespace Asset

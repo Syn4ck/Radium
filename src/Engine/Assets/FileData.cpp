@@ -25,7 +25,9 @@ FileData::FileData( const std::string& filename,
     m_handleData(),
     m_animationData(),
     m_processed( false ),
-    m_verbose( VERBOSE_MODE ) {
+    m_verbose( VERBOSE_MODE ),
+    m_currentIndex(0)
+{
     loadFile();
 }
 

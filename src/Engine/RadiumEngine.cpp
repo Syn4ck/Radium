@@ -104,19 +104,24 @@ namespace Ra
         bool RadiumEngine::loadFile( const std::string& filename )
         {
             Asset::FileData fileData( filename, true );
-
-            std::string entityName = Core::StringUtils::getBaseName( filename, false );
-
-            Entity* entity = m_entityManager->createEntity( entityName );
-
-            for( auto& system : m_systems ) {
-                system.second->handleAssetLoading( entity, &fileData );
-            }
-
-            for (auto& comp : entity->getComponents())
+            int objectCount = fileData.getGeometryDataSize();
+            for (int i = 0; i < objectCount; i++)
             {
-                comp->initialize();
+                fileData.setCurrentIndex(i);
+                std::string entityName = Core::StringUtils::getBaseName( filename, false ) + "_" + std::to_string(i);
+                Entity* entity = m_entityManager->createEntity( entityName );
+                
+                for( auto& system : m_systems )
+                {
+                    system.second->handleAssetLoading( entity, &fileData );
+                }
+                
+                for (auto& comp : entity->getComponents())
+                {
+                    comp->initialize();
+                }
             }
+
 
             return true;
         }

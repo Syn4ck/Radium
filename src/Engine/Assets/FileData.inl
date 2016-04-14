@@ -26,28 +26,50 @@ inline Scalar FileData::getLoadingTime() const {
 /// DATA
 inline std::vector< GeometryData* > FileData::getGeometryData() const {
     std::vector< GeometryData* > list;
-    list.reserve( m_geometryData.size() );
-    for( const auto& item : m_geometryData ) {
-        list.push_back( item.get() );
-    }
+//    list.reserve( m_geometryData.size() );
+//    for( const auto& item : m_geometryData ) {
+//        list.push_back( item.get() );
+//    }
+    list.push_back(m_geometryData[m_currentIndex].get());
     return list;
 }
 
 inline std::vector< HandleData* > FileData::getHandleData() const {
     std::vector< HandleData* > list;
-    list.reserve( m_handleData.size() );
-    for( const auto& item : m_handleData ) {
-        list.push_back( item.get() );
+//    list.reserve( m_handleData.size() );
+//    for( const auto& item : m_handleData ) {
+//        list.push_back( item.get() );
+//    }
+    std::string currentName = m_geometryData[m_currentIndex]->getName();
+    for( const auto& item : m_handleData )
+    {
+        if (item->getName() == currentName)
+        {
+            list.push_back( item.get() );
+            break;
+        }
     }
+    
     return list;
 }
 
 inline std::vector< AnimationData* > FileData::getAnimationData() const {
     std::vector< AnimationData* > list;
-    list.reserve( m_animationData.size() );
-    for( const auto& item : m_animationData ) {
-        list.push_back( item.get() );
+//    list.reserve( m_animationData.size() );
+//    for( const auto& item : m_animationData ) {
+//        list.push_back( item.get() );
+//    }
+    
+    std::string currentName = m_geometryData[m_currentIndex]->getName();
+    for( const auto& item : m_animationData)
+    {
+        if (item->getName() == currentName)
+        {
+            list.push_back( item.get() );
+            break;
+        }
     }
+    
     return list;
 }
 
