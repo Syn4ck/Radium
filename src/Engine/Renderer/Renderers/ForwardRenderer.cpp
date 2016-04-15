@@ -1,5 +1,7 @@
 #include <Engine/Renderer/Renderers/ForwardRenderer.hpp>
 
+#include <iostream>
+
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
@@ -439,11 +441,9 @@ namespace Ra
                 Scalar lumMean = std::exp(lum.z() / (m_pingPongSize * m_pingPongSize));
 
                 // tonemapping pass
-                //m_tonmp.renderPass(m_pingPongSize);
                 m_tonmp.renderPass(lumMin, lumMax, lumMean);
 
                 // bloom pass : TODO(Hugo) do a bloom pass to group highpass and blur
-                //m_highp.renderPass(m_pingPongSize);
                 m_highp.renderPass(lumMin, lumMax, lumMean);
                 m_blurp.renderPass();
 

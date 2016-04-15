@@ -47,12 +47,6 @@ namespace Ra
                 TEX_IN_COUNT,
             };
 
-            enum TextureOutTags
-            {
-                TEX_BLURRED = 0,
-                TEX_OUT_COUNT,
-            };
-
             uint m_boxfactor;
             std::array<std::unique_ptr<FBO>,FBO_COUNT> m_fbo;
 

@@ -6,3 +6,5 @@
 #include <Engine/Renderer/Passes/PassTonemap.hpp>
 #include <Engine/Renderer/Passes/PassCompose.hpp>
 
+#include <Engine/Renderer/Passes/PassPingPong.hpp>
+#include <Engine/Renderer/Passes/PassRedux.hpp>
