@@ -111,7 +111,7 @@ namespace Ra
             saveExternalFBOInternal();
 
             // 1. Gather render objects if needed
-            feedRenderQueuesInternal();
+            feedRenderQueuesInternal( data );
 
             m_timerData.feedRenderQueuesEnd = Core::Timer::Clock::now();
 
@@ -161,16 +161,16 @@ namespace Ra
             updateStepInternal( renderData );
         }
 
-        void Renderer::feedRenderQueuesInternal()
+        void Renderer::feedRenderQueuesInternal( const RenderData& renderData )
         {
             m_fancyRenderObjects.clear();
             m_debugRenderObjects.clear();
             m_uiRenderObjects.clear();
             m_xrayRenderObjects.clear();
 
-            m_roMgr->getRenderObjectsByType( m_fancyRenderObjects, RenderObjectType::Fancy, true );
-            m_roMgr->getRenderObjectsByType( m_debugRenderObjects, RenderObjectType::Debug, true );
-            m_roMgr->getRenderObjectsByType( m_uiRenderObjects, RenderObjectType::UI, true );
+            m_roMgr->getRenderObjectsByType( renderData, m_fancyRenderObjects, RenderObjectType::Fancy, true );
+            m_roMgr->getRenderObjectsByType( renderData, m_debugRenderObjects, RenderObjectType::Debug, true );
+            m_roMgr->getRenderObjectsByType( renderData, m_uiRenderObjects, RenderObjectType::UI, true );
 
             for ( auto it = m_fancyRenderObjects.begin(); it != m_fancyRenderObjects.end(); )
             {
@@ -253,6 +253,33 @@ namespace Ra
                 }
             }
 
+            // Draw debug objects
+            GL_ASSERT( glClear( GL_DEPTH_BUFFER_BIT ) );
+            if ( m_drawDebug )
+            {
+                for ( const auto& ro : m_debugRenderObjects )
+                {
+                    if ( ro->isVisible() )
+                    {
+                        auto id = ro->idx.getValue();
+                        float r = float( ( id & 0x000000FF ) >> 0 ) / 255.0;
+                        float g = float( ( id & 0x0000FF00 ) >> 8 ) / 255.0;
+                        float b = float( ( id & 0x00FF0000 ) >> 16 ) / 255.0;
+                        shader->setUniform( "objectId", Core::Colorf( r, g, b, 1.0 ) );
+
+                        Core::Matrix4 M = ro->getTransformAsMatrix();
+                        shader->setUniform( "transform.proj", renderData.projMatrix );
+                        shader->setUniform( "transform.view", renderData.viewMatrix );
+                        shader->setUniform( "transform.model", M );
+
+                        ro->getRenderTechnique()->material->bind( shader );
+
+                        // render
+                        ro->getMesh()->render();
+                    }
+                }
+            }
+
             // Draw xrayed objects on top of normal objects
             GL_ASSERT( glClear( GL_DEPTH_BUFFER_BIT ) );
             if ( m_drawDebug )
@@ -279,6 +306,7 @@ namespace Ra
                     }
                 }
             }
+
 
             // Always draw ui stuff on top of everything
             GL_ASSERT( glClear( GL_DEPTH_BUFFER_BIT ) );

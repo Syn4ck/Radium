@@ -40,9 +40,24 @@ namespace AnimationPlugin
             tb->addAction(toggleXray);
         }
         {
+            QAction* play = new QAction( QIcon(":/Assets/Images/play.png"),"Play", widget );
+            connect( play , &QAction::triggered, this, &AnimationPluginC::play);
+            tb->addAction(play);
+        }
+        {
+            QAction* pause = new QAction( QIcon(":/Assets/Images/pause.png"),"pause", widget );
+            connect( pause , &QAction::triggered, this, &AnimationPluginC::pause);
+            tb->addAction(pause);
+        }
+        {
             QAction* step = new QAction( "Step", widget );
             connect( step , &QAction::triggered, this, &AnimationPluginC::step);
             tb->addAction(step);
+        }
+        {
+            QAction* reset = new QAction( "Reset", widget );
+            connect( reset , &QAction::triggered, this, &AnimationPluginC::reset);
+            tb->addAction(reset);
         }
 
         return widget;
@@ -64,8 +79,29 @@ namespace AnimationPlugin
         m_system->setXray(on);
     }
 
+    void AnimationPluginC::play()
+    {
+        CORE_ASSERT(m_system, "System should be there ");
+        m_system->setPlaying( true );
+    }
+
+    void AnimationPluginC::pause()
+    {
+        CORE_ASSERT(m_system, "System should be there ");
+        m_system->setPlaying(false);
+    }
+
     void AnimationPluginC::step()
     {
+        CORE_ASSERT(m_system, "System should be there ");
+        pause();
         m_system->step();
+    }
+
+    void AnimationPluginC::reset()
+    {
+        CORE_ASSERT(m_system, "System should be there ");
+        pause();
+        m_system->reset();
     }
 }
