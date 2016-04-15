@@ -1,7 +1,5 @@
 #include "PassLuminance.hpp"
 
-#include <iostream>
-
 namespace Ra {
     namespace Engine {
 
@@ -22,7 +20,6 @@ namespace Ra {
         {
             // create internal FBOs
             m_fbo[FBO_MAIN].reset( new FBO( FBO::Components(FBO::COLOR), m_width, m_height ));
-            m_fbo[FBO_PING_PONG].reset( new FBO( FBO::Components(FBO::COLOR), 1, 1 ));
 
             // shaders
             ShaderProgramManager* shaderMgr = ShaderProgramManager::getInstance();
