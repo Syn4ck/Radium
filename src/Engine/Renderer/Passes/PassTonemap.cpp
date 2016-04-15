@@ -41,6 +41,9 @@ namespace Ra
 
         void PassTonemap::resizePass()
         {
+            // resize pingpong_size
+            m_pingPongSize = std::pow(2.0, Scalar(uint(std::log2(std::min(m_width, m_height)))));
+
             // update out texture
             m_texOut[TEX_TONEMAP]->initGL(GL_RGBA32F, m_width, m_height, GL_RGBA, GL_FLOAT, nullptr);
 
@@ -55,10 +58,6 @@ namespace Ra
 
         void PassTonemap::renderPass()
         {
-        }
-
-        void PassTonemap::renderPass(uint pingpongsize)
-        {
             m_fbo[FBO_MAIN]->useAsTarget(m_width, m_height);
 
             GL_ASSERT( glViewport(0, 0, m_width, m_height) );
@@ -67,7 +66,7 @@ namespace Ra
             m_shader->bind();
             m_shader->setUniform("hdr", m_texIn[TEX_HDR], 0);
             m_shader->setUniform("lum", m_texIn[TEX_LUM], 1);
-            m_shader->setUniform("pingpongsz", pingpongsize);
+            m_shader->setUniform("pingpongsz", m_pingPongSize);
             m_canvas->render();
         }
 

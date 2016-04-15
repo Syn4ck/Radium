@@ -34,6 +34,10 @@ namespace Ra {
 
         void PassHighpass::resizePass()
         {
+            // recompute pingpong_size
+            m_pingPongSize = std::pow(2.0, Scalar(uint(std::log2(std::min(m_width, m_height)))));
+            /** side note: see the project head for this formula which roughly compute the min of w and h */
+
             // resize output tex.
             m_texOut[TEX_HPASS]->initGL(GL_RGBA32F, m_width, m_height, GL_RGBA, GL_FLOAT, nullptr);
 
@@ -64,20 +68,7 @@ namespace Ra {
             m_shader->bind();
             m_shader->setUniform("hdr", m_texIn[TEX_LIT], 0);
             m_shader->setUniform("lum", m_texIn[TEX_LUM], 1);
-            m_canvas->render();
-        }
-
-        void PassHighpass::renderPass(uint pingpongsize)
-        {
-            m_fbo[FBO_COLOR]->useAsTarget();
-
-            GL_ASSERT( glViewport(0, 0, m_width, m_height) );
-            GL_ASSERT( glDrawBuffers(1, buffers+2) );
-
-            m_shader->bind();
-            m_shader->setUniform("hdr", m_texIn[TEX_LIT], 0);
-            m_shader->setUniform("lum", m_texIn[TEX_LUM], 1);
-            m_shader->setUniform("pingpongsz", pingpongsize);
+            m_shader->setUniform("pingpongsz", m_pingPongSize);
             m_canvas->render();
         }
 

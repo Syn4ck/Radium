@@ -25,7 +25,6 @@ namespace Ra
             virtual ~PassHighpass();
 
             void renderPass();
-            void renderPass(uint pingpongsize);
             void renderPass(Scalar min, Scalar max, Scalar mean);
             void resizePass(uint w, uint h);
             void resizePass();
@@ -55,6 +54,8 @@ namespace Ra
 
             std::array<std::unique_ptr<FBO>,FBO_COUNT> m_fbo;
             const ShaderProgram* m_shader;
+
+            uint m_pingPongSize;
         };
 
     }

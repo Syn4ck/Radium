@@ -18,7 +18,6 @@ namespace Ra
                         Mesh* canvas, uint priority);
             ~PassTonemap();
             void renderPass();
-            void renderPass(uint pingpongsize);
             void renderPass(float lumMin, float lumMax, float lumMean);
             void resizePass(uint w, uint h);
             void resizePass();
@@ -47,6 +46,8 @@ namespace Ra
 
             std::array<std::unique_ptr<FBO>,FBO_COUNT> m_fbo;
             const ShaderProgram *m_shader;
+
+            uint m_pingPongSize;
         };
 
     }
