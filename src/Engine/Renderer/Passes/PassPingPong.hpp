@@ -17,7 +17,7 @@ namespace Ra
     namespace Engine
     {
 
-        class PassPingPong : public Pass
+        class RA_ENGINE_API PassPingPong : public Pass
         {
         public:
             PassPingPong(const std::string& name, uint w, uint h, uint nTexIn, uint nTexOut, Mesh* canvas, uint priority, uint loop);
@@ -30,9 +30,6 @@ namespace Ra
 
             void setPingPongShader(const ShaderProgram* shader, RenderParameters* params);
             void setPongPingShader(const ShaderProgram* shader, RenderParameters* params);
-
-            void setPingPongShader(const ShaderProgram* shader);
-            void setPongPingShader(const ShaderProgram* shader);
 
             virtual std::shared_ptr<Texture> getInternTextures(uint i);
 
@@ -61,8 +58,14 @@ namespace Ra
                 SHADER_COUNT,
             };
 
+            enum Params
+            {
+                PARAMS_PINGPONG,
+                PARAMS_PONGPING,
+            };
+
             const ShaderProgram* m_shader[SHADER_COUNT];
-            RenderParameters*    m_params[SHADER_COUNT];
+            RenderParameters*    m_params[2];
         };
 
     }

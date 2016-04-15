@@ -53,7 +53,7 @@ namespace Ra
             public:
                 TextureParameter() = default;
                 TextureParameter( const char* name, Texture* tex, int texUnit )
-                    : Parameter( name ), m_texture( tex ), m_texUnit( texUnit ) {}
+                    :  Parameter( name ), m_texture( tex ), m_texUnit( texUnit ) {}
                 virtual void bind( const ShaderProgram* shader ) const override;
 
                 Texture* m_texture;

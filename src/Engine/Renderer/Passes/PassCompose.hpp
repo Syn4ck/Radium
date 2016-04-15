@@ -11,7 +11,7 @@ namespace Ra
     namespace Engine
     {
 
-        class PassCompose : public Pass
+        class RA_ENGINE_API PassCompose : public Pass
         {
         public:
             PassCompose(const std::string& name, uint w, uint h, uint nTexIn, uint nTexOut,

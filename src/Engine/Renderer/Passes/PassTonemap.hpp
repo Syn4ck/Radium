@@ -11,7 +11,7 @@ namespace Ra
     namespace Engine
     {
 
-        class PassTonemap : public Pass
+        class RA_ENGINE_API PassTonemap : public Pass
         {
         public:
             PassTonemap(const std::string& name, uint w, uint h, uint nTexIn, uint nTexOut,

@@ -11,7 +11,7 @@
 //    namespace Engine
 //    {
 
-//        class ReduxPass : public Pass
+//        class RA_ENGINE_API ReduxPass : public Pass
 //        {
 //        public:
 //            ReduxPass(const std::string& name, uint w, uint h, uint nTexIn, uint nTexOut, uint priority);

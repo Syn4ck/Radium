@@ -11,7 +11,7 @@ namespace Ra
     namespace Engine
     {
 
-        class PassDummy : public Pass
+        class RA_ENGINE_API PassDummy : public Pass
         {
         public:
             PassDummy(const std::string& name, uint w, uint h, uint nTexIn, uint nTexOut,

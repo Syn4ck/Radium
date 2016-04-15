@@ -57,7 +57,6 @@ namespace Ra
             , m_blurp( "BlurPass",      width, height, 1, 1, nullptr, 4, 16 )  // 16 ping-pongs
             , m_tonmp( "TonemapPass",   width, height, 1, 1, nullptr, 5 )
             , m_compp( "CompositePass", width, height, 1, 1, nullptr, 6 )
-            , m_blurtest("Hello",       width, height, 1, 1, nullptr, 7, 4 )
             //         name             width  height in out canvas  order
         {
         }
@@ -86,7 +85,6 @@ namespace Ra
             m_passes["blur0"]      = &m_blurp;
             m_passes["tonemap0"]   = &m_tonmp;
             m_passes["composite0"] = &m_compp;
-            m_passes["-\\_(o,o)_/-"]= &m_blurtest;
 
             // branching
             m_dummy.setIn(0, m_textures[TEX_LIT].get());
@@ -103,8 +101,6 @@ namespace Ra
 
             m_compp.setIn(0, m_tonmp.getOut(0));
             m_compp.setIn(1, m_blurp.getOut(0));
-
-            m_blurtest.setIn(0, m_textures[TEX_LIT].get());
 
             // initialize everything
             for (auto const it_pass: m_passes)
@@ -432,9 +428,6 @@ namespace Ra
 
                 // do final composition
                 m_compp.renderPass();
-
-                // more test
-                // m_blurtest.renderPass();
 
                 GL_ASSERT( glDepthFunc( GL_LESS ) );
                 m_postprocessFbo->unbind();

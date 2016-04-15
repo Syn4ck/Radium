@@ -4,10 +4,11 @@
 #include <Engine/RadiumEngine.hpp>
 #include <Engine/Renderer/Renderer.hpp>
 
-#include <Engine/Renderer/Passes/Pass.hpp>
 #include <Engine/Renderer/OpenGL/FBO.hpp>
-#include <Engine/Renderer/Texture/Texture.hpp>
 #include <Engine/Renderer/Mesh/Mesh.hpp>
+#include <Engine/Renderer/Passes/Pass.hpp>
+#include <Engine/Renderer/Texture/Texture.hpp>
+#include <Engine/Renderer/Passes/PassPingPong.hpp>
 #include <Engine/Renderer/RenderTechnique/ShaderProgram.hpp>
 #include <Engine/Renderer/RenderTechnique/ShaderProgramManager.hpp>
 
@@ -31,18 +32,13 @@ namespace Ra
 
             virtual std::shared_ptr<Texture> getInternTextures(uint i);
 
+            virtual Texture* getOut(uint slot) override;
+
         private:
             enum FboTags
             {
                 FBO_MAIN = 0,
                 FBO_COUNT,
-            };
-
-            enum TextureInternalTags
-            {
-                TEX_BLUR_PING = 0,
-                TEX_BLUR_PONG,
-                TEX_INTERNAL_COUNT,
             };
 
             enum TextureInTags
@@ -57,19 +53,17 @@ namespace Ra
                 TEX_OUT_COUNT,
             };
 
-            uint m_amount;
             uint m_boxfactor;
-            uint m_pingPongSize;
             std::array<std::unique_ptr<FBO>,FBO_COUNT> m_fbo;
-            std::array<std::shared_ptr<Texture>,TEX_INTERNAL_COUNT> m_texIntern;
+
+            PassPingPong         m_pingpong;
+            RenderParameters     m_params[2];
 
             enum Shaders
             {
-                SHADER_DRAWSCREEN = 0,
-                SHADER_BLUR,
+                SHADER_BLUR = 0,
                 SHADER_COUNT,
             };
-
             const ShaderProgram *m_shader[SHADER_COUNT];
         };
 
@@ -77,4 +71,4 @@ namespace Ra
 }
 
 
-#endif // RADIUMENGINE_RENDERER_PASS_BLUR_HPP
+#endif // RADIUMENGINE_RENDERER_PASS_BLUR2_HPP

@@ -58,50 +58,30 @@ namespace Ra
 
             GL_ASSERT( glViewport(0, 0, m_width, m_height) );
 
-            ShaderProgramManager* sh = ShaderProgramManager::getInstance();
-            const ShaderProgram* yolo = sh->getShaderProgram("Dummy");
-
-            yolo->bind();
-            yolo->setUniform("color", m_texIn[0], 0);
-            m_canvas->render();
-
-/*
             // first write to pong
             GL_ASSERT( glDrawBuffers(1, buffers + 2) );
+            m_params[PARAMS_PINGPONG]->bind(m_shader[SHADER_PINGPONG]);
             m_shader[SHADER_PINGPONG]->bind();
             m_shader[SHADER_PINGPONG]->setUniform("color",  m_texIn[0], 0);
-            m_shader[SHADER_PINGPONG]->setUniform("offset", Core::Vector2(1.0 / m_width, 0.0));
-            m_shader[SHADER_PINGPONG]->setUniform("wView",  m_width);
-            m_shader[SHADER_PINGPONG]->setUniform("hView",  m_height);
-//            m_params[0]->addParameter("color", m_texIn[0], 0);
-//            m_params[0]->bind(m_shader[SHADER_PINGPONG]);
             m_canvas->render();
-
-            // tell which texture use as input in shader
-//            m_params[0]->addParameter("color", m_texIntern[TEX_PING].get(), 0);
-//            m_params[1]->addParameter("color", m_texOut   [TEX_PONG].get(), 0);
 
             // actually do the ping-pong
             for (uint i = 0; i < m_loop; ++i)
             {
                 // pong->ping
                 GL_ASSERT( glDrawBuffers(1, buffers + 1) );
+                m_shader[PARAMS_PONGPING]->bind();
+                m_params[SHADER_PONGPING]->bind(m_shader[SHADER_PONGPING]);
                 m_shader[SHADER_PONGPING]->setUniform("color", m_texOut[TEX_PONG].get(), 0);
-                m_shader[SHADER_PONGPING]->setUniform("offset", Core::Vector2(0.0, 1.0 / m_height));
-                m_shader[SHADER_PONGPING]->setUniform("wView",  (int) m_width);
-                m_shader[SHADER_PONGPING]->setUniform("hView",  (int) m_height);
-//                m_params[1]->bind(m_shader[SHADER_PONGPING]);
                 m_canvas->render();
 
                 // ping->pong
                 GL_ASSERT( glDrawBuffers(1, buffers + 2) );
+                m_params[PARAMS_PINGPONG]->bind(m_shader[SHADER_PINGPONG]);
+                m_shader[SHADER_PINGPONG]->bind();
                 m_shader[SHADER_PINGPONG]->setUniform("color", m_texIntern[TEX_PING].get(), 0);
-                m_shader[SHADER_PINGPONG]->setUniform("offset", Core::Vector2(1.0 / m_width, 0.0));
-                m_shader[SHADER_PINGPONG]->setUniform("wView",  (int) m_width);
-                m_shader[SHADER_PINGPONG]->setUniform("hView",  (int) m_height);
-//                m_params[0]->bind(m_shader[SHADER_PINGPONG]);
                 m_canvas->render();
-            } */
+            }
         }
 
         std::shared_ptr<Texture> PassPingPong::getInternTextures(uint i)
@@ -115,23 +95,14 @@ namespace Ra
         void PassPingPong::setPingPongShader(const ShaderProgram* shader, RenderParameters* params)
         {
             m_shader[SHADER_PINGPONG] = shader;
-            m_params[SHADER_PINGPONG] = params;
+            m_params[PARAMS_PINGPONG] = params;
         }
 
         void PassPingPong::setPongPingShader(const ShaderProgram* shader, RenderParameters* params)
         {
             m_shader[SHADER_PONGPING] = shader;
-            m_params[SHADER_PONGPING] = params;
+            m_params[PARAMS_PONGPING] = params;
         }
 
-        void PassPingPong::setPingPongShader(const ShaderProgram* shader)
-        {
-            m_shader[SHADER_PINGPONG] = shader;
-        }
-
-        void PassPingPong::setPongPingShader(const ShaderProgram* shader)
-        {
-            m_shader[SHADER_PONGPING] = shader;
-        }
     }
 }
