@@ -60,8 +60,8 @@ namespace Ra
 
             // first write to pong
             GL_ASSERT( glDrawBuffers(1, buffers + 2) );
-            m_params[PARAMS_PINGPONG]->bind(m_shader[SHADER_PINGPONG]);
             m_shader[SHADER_PINGPONG]->bind();
+            m_params[PARAMS_PINGPONG]->bind(m_shader[SHADER_PINGPONG]);
             m_shader[SHADER_PINGPONG]->setUniform("color",  m_texIn[0], 0);
             m_canvas->render();
 
@@ -77,8 +77,8 @@ namespace Ra
 
                 // ping->pong
                 GL_ASSERT( glDrawBuffers(1, buffers + 2) );
-                m_params[PARAMS_PINGPONG]->bind(m_shader[SHADER_PINGPONG]);
                 m_shader[SHADER_PINGPONG]->bind();
+                m_params[PARAMS_PINGPONG]->bind(m_shader[SHADER_PINGPONG]);
                 m_shader[SHADER_PINGPONG]->setUniform("color", m_texIntern[TEX_PING].get(), 0);
                 m_canvas->render();
             }
