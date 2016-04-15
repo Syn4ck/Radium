@@ -145,6 +145,7 @@ namespace FancyMeshPlugin
         rt->shaderConfig = Ra::Engine::ShaderConfigurationFactory::getConfiguration("BlinnPhong");
 
         renderObject->setRenderTechnique( rt );
+        renderObject->setVisible(false);
     }
 
     Ra::Core::Index FancyMeshComponent::getRenderObjectIndex() const
