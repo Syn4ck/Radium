@@ -121,12 +121,11 @@ namespace FancyMeshPlugin
         //if ( m.hasNormalTexture() ) mat->addTexture( Ra::Engine::Material::TextureType::TEX_NORMAL, m.m_texNormal );
 
         auto config = Ra::Engine::ShaderConfigurationFactory::getConfiguration("BlinnPhong");
-
-        renderObject->setRenderTechnique( rt );
-        renderObject->setVisible(false);
         
         Ra::Engine::RenderObject* renderObject = Ra::Engine::RenderObject::createRenderObject(roName, this, Ra::Engine::RenderObjectType::Fancy, displayMesh, config, mat);
         m_meshIndex = addRenderObject(renderObject);
+        
+        renderObject->setVisible(false);
     }
 
     Ra::Core::Index FancyMeshComponent::getRenderObjectIndex() const
