@@ -26,14 +26,14 @@ namespace Ra
             virtual void setIn(uint slot, Texture* tex);
             virtual void setOut(uint slot, Texture* tex);
 
-            virtual bool operator <(const Pass& other);
-
             void setCanvas(Mesh* canvas);
 
             virtual Texture* getIn(uint slot);
             virtual Texture* getOut(uint slot);
 
             virtual std::shared_ptr<Texture> getInternTextures(uint i) = 0;
+
+            static void sort(std::vector<Pass*>& passVector); // static ?
 
         protected:
             std::string m_name;

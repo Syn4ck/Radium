@@ -1,3 +1,5 @@
+#include <algorithm>
+
 #include <Engine/Renderer/OpenGL/FBO.hpp>
 #include <Engine/Renderer/Passes/Pass.hpp>
 #include <Engine/Renderer/Texture/Texture.hpp>
@@ -59,18 +61,21 @@ namespace Ra
             return m_texOut[slot].get();
         }
 
-        bool Pass::operator <(const Pass& other)
-        {
-            // this operator is present in order to set up a
-            // priorisation system through the #map of passes.
-            // 0 stands for undefined and is the default value
-            return ((m_priority < other.m_priority) && (m_priority != 0))
-                || (other.m_priority == 0);
-        }
-
         void Pass::setCanvas(Mesh* canvas)
         {
             m_canvas = canvas;
+        }
+
+
+        void Pass::sort(std::vector<Pass*>& passVector)
+        {
+            auto f = [](const Pass* p1, const Pass* p2) -> bool
+            {
+                // return true if p1 is before p2 and is non-0 or if p2 is 0
+                return ((p1->m_priority < p2->m_priority) && (p1->m_priority != 0)) || (p2->m_priority == 0);
+            };
+
+            std::sort(passVector.begin(), passVector.end(), f);
         }
 
     }

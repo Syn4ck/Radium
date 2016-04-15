@@ -78,13 +78,17 @@ namespace Ra
 
         void ForwardRenderer::initPasses()
         {
-            // set hashmap
-            m_passes["dummy0"]     = &m_dummy;
-            m_passes["luminance0"] = &m_lumin;
-            m_passes["high0"]      = &m_highp;
-            m_passes["blur0"]      = &m_blurp;
-            m_passes["tonemap0"]   = &m_tonmp;
-            m_passes["composite0"] = &m_compp;
+            // create the vector of passes
+            m_passes.push_back(&m_dummy);
+            m_passes.push_back(&m_lumin);
+            m_passes.push_back(&m_highp);
+            m_passes.push_back(&m_blurp);
+            m_passes.push_back(&m_tonmp);
+            m_passes.push_back(&m_compp);
+
+            // and sort the vector to have passes
+            // being rendered in the specified order
+            Pass::sort(m_passes);
 
             // branching
             m_dummy.setIn(0, m_textures[TEX_LIT].get());
@@ -103,13 +107,24 @@ namespace Ra
             m_compp.setIn(1, m_blurp.getOut(0));
 
             // initialize everything
-            for (auto const it_pass: m_passes)
+            for (auto const& pass: m_passes)
             {
                 // init
-                it_pass.second->setCanvas(m_quadMesh.get());
-                it_pass.second->init();
+                pass->setCanvas(m_quadMesh.get());
+                pass->init();
+            }
 
-                // show up in UI
+            // set hashmap
+            m_passmap["dummy0"]     = &m_dummy;
+            m_passmap["luminance0"] = &m_lumin;
+            m_passmap["high0"]      = &m_highp;
+            m_passmap["blur0"]      = &m_blurp;
+            m_passmap["tonemap0"]   = &m_tonmp;
+            m_passmap["composite0"] = &m_compp;
+
+            // and add them in Qt
+            for (auto const it_pass: m_passmap)
+            {
                 m_secondaryTextures["[pass] " + it_pass.first] = it_pass.second->getOut(0);
             }
         }
@@ -406,6 +421,12 @@ namespace Ra
                 // TODO(Hugo) one day it should be possible to loop over every pass
                 // and just magically call Pass::renderPass() but for now there are
                 // additionnal parameters that ruin the whole thing
+                // I'm absolutely not thinking of lumM*
+                // we SHOULD be able to do that ↓!
+                //for (auto const& pass: m_passes)
+                //{
+                //    pass->renderPass();
+                //}
 
                 // dummy pass
                 m_dummy.renderPass();
@@ -465,9 +486,9 @@ namespace Ra
             m_postprocessFbo->check();
             m_postprocessFbo->unbind( true );
 
-            for (auto const it_pass: m_passes)
+            for (auto const& pass: m_passes)
             {
-                it_pass.second->resizePass(m_width, m_height);
+                pass->resizePass(m_width, m_height);
             }
 
             // Reset framebuffer state
