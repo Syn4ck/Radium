@@ -13,7 +13,8 @@ uniform sampler2D lum;
 
 void main()
 {
-    vec3 color = texelFetch(hdr, ivec2(gl_FragCoord), 0).rgb;
+    vec2 size = vec2(textureSize(hdr, 0));
+    vec3 color = texelFetch(hdr, ivec2(varTexcoord * size), 0).rgb;
 
     vec3 Yxy = rgb2Yxy(color);
 
@@ -23,8 +24,8 @@ void main()
     float white = 1.0;
 
     // TODO(charly): Uniforms ?
-    float T = 0.1;
-    float O = 10.0;
+    float T = 0.5;
+    float O = 2.0;
 
     float lumThreshold = max(lumScaled * (1 + lumScaled) - T, 0.0);
     float lumBright = lumThreshold / (O + lumThreshold);
