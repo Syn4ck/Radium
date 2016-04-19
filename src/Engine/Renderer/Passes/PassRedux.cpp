@@ -62,6 +62,7 @@ namespace Ra
             const ShaderProgram* drawscreen = shaderMgr->getShaderProgram("DrawScreen");
 
             m_fbo->useAsTarget();
+
             uint size  = m_pingPongSize;
 
             // first write to ping

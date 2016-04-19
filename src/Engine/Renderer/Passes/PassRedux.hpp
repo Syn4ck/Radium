@@ -34,8 +34,7 @@ namespace Ra
             virtual std::shared_ptr<Texture> getInternTextures(uint i);
             virtual Texture* getOut(uint slot) override;
 
-
-            uint  m_ratio;       // the ratio by which the size is divided each iteration
+            uint m_ratio;       // the ratio by which the size is divided each iteration
 
         private:
             enum TextureOutTags
@@ -63,5 +62,6 @@ namespace Ra
 
     }
 }
+
 
 #endif // RADIUMENGINE_RENDERER_REDUX_HPP
