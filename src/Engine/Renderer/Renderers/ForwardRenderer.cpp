@@ -53,7 +53,6 @@ namespace Ra
             : Renderer( width, height )
             , m_fbo( nullptr )
             , m_postprocessFbo( nullptr )
-            , m_dummy( "YoloPass",      width, height, 1, 1, nullptr, 1 )
             , m_lumin( "LumPass",       width, height, 1, 1, nullptr, 2 )
             , m_highp( "HighPass",      width, height, 2, 1, nullptr, 3 )
             , m_blurp( "BlurPass",      width, height, 1, 1, nullptr, 4, 16 )  // 16 ping-pongs
@@ -81,7 +80,6 @@ namespace Ra
         void ForwardRenderer::initPasses()
         {
             // create the vector of passes
-            m_passes.push_back(&m_dummy);
             m_passes.push_back(&m_lumin);
             m_passes.push_back(&m_highp);
             m_passes.push_back(&m_blurp);
@@ -93,16 +91,14 @@ namespace Ra
             Pass::sort(m_passes);
 
             // branching
-            m_dummy.setIn(0, m_textures[TEX_LIT].get());
+            m_lumin.setIn(0, m_textures[TEX_LIT].get());
 
-            m_lumin.setIn(0, m_dummy.getOut(0));
-
-            m_highp.setIn(0, m_dummy.getOut(0));
+            m_highp.setIn(0, m_textures[TEX_LIT].get());
             m_highp.setIn(1, m_lumin.getOut(0));
 
             m_blurp.setIn(0, m_highp.getOut(0));
 
-            m_tonmp.setIn(0, m_dummy.getOut(0));
+            m_tonmp.setIn(0, m_textures[TEX_LIT].get());
             m_tonmp.setIn(1, m_lumin.getOut(0));
 
             m_compp.setIn(0, m_tonmp.getOut(0));
@@ -117,7 +113,6 @@ namespace Ra
             }
 
             // set hashmap
-            m_passmap["dummy0"]     = &m_dummy;
             m_passmap["luminance0"] = &m_lumin;
             m_passmap["high0"]      = &m_highp;
             m_passmap["blur0"]      = &m_blurp;
@@ -423,15 +418,12 @@ namespace Ra
                 // TODO(Hugo) one day it should be possible to loop over every pass
                 // and just magically call Pass::renderPass() but for now there are
                 // additionnal parameters that ruin the whole thing
-                // I'm absolutely not thinking of lumM*
+                //
                 // we SHOULD be able to do that ↓!
-                //for (auto const& pass: m_passes)
-                //{
-                //    pass->renderPass();
-                //}
-
-                // dummy pass
-                m_dummy.renderPass();
+                //  for (auto const& pass: m_passes)
+                //  {
+                //      pass->renderPass(); // the vector is already sorted by priority
+                //  }
 
                 // luminance pass
                 m_lumin.renderPass();
