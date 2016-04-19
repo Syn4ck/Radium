@@ -53,6 +53,7 @@ namespace Ra
             : Renderer( width, height )
             , m_fbo( nullptr )
             , m_postprocessFbo( nullptr )
+            , m_dummy( "DUMMYPass",     width, height, 1, 1, nullptr, 1 )
             , m_lumin( "LumPass",       width, height, 1, 1, nullptr, 2 )
             , m_highp( "HighPass",      width, height, 2, 1, nullptr, 3 )
             , m_blurp( "BlurPass",      width, height, 1, 1, nullptr, 4, 16 )  // 16 ping-pongs
@@ -80,6 +81,7 @@ namespace Ra
         void ForwardRenderer::initPasses()
         {
             // create the vector of passes
+            m_passes.push_back(&m_dummy);
             m_passes.push_back(&m_lumin);
             m_passes.push_back(&m_highp);
             m_passes.push_back(&m_blurp);
@@ -91,14 +93,19 @@ namespace Ra
             Pass::sort(m_passes);
 
             // branching
-            m_lumin.setIn(0, m_textures[TEX_LIT].get());
+            m_dummy.setIn(0, m_textures[TEX_LIT].get());
 
-            m_highp.setIn(0, m_textures[TEX_LIT].get());
+//            m_lumin.setIn(0, m_textures[TEX_LIT].get());
+            m_lumin.setIn(0, m_dummy.getOut(0));
+
+//            m_highp.setIn(0, m_textures[TEX_LIT].get());
+            m_highp.setIn(0, m_dummy.getOut(0));
             m_highp.setIn(1, m_lumin.getOut(0));
 
             m_blurp.setIn(0, m_highp.getOut(0));
 
-            m_tonmp.setIn(0, m_textures[TEX_LIT].get());
+//            m_tonmp.setIn(0, m_textures[TEX_LIT].get());
+            m_tonmp.setIn(0, m_dummy.getOut(0));
             m_tonmp.setIn(1, m_lumin.getOut(0));
 
             m_compp.setIn(0, m_tonmp.getOut(0));
@@ -113,6 +120,7 @@ namespace Ra
             }
 
             // set hashmap
+            m_passmap["dummy"]      = &m_dummy;
             m_passmap["luminance0"] = &m_lumin;
             m_passmap["high0"]      = &m_highp;
             m_passmap["blur0"]      = &m_blurp;
@@ -130,7 +138,6 @@ namespace Ra
         {
             m_shaderMgr->addShaderProgram("DepthAmbientPass", "../Shaders/DepthAmbientPass.vert.glsl", "../Shaders/DepthAmbientPass.frag.glsl");
             m_shaderMgr->addShaderProgram("FinalCompose", "../Shaders/Basic2D.vert.glsl", "../Shaders/FinalCompose.frag.glsl");
-            m_shaderMgr->addShaderProgram("HighpassTEST", "../Shaders/Basic2D.vert.glsl", "../Shaders/HighpassNoFetch.frag.glsl");
         }
 
         void ForwardRenderer::initBuffers()
@@ -426,6 +433,8 @@ namespace Ra
                 //  }
 
                 // luminance pass
+                m_dummy.renderPass();
+
                 m_lumin.renderPass();
                 Core::Color lum = m_lumin.getOut(0)->getTexel(0, 0);
                 Scalar lumMin  = lum.x();

@@ -22,7 +22,7 @@ namespace Ra {
 
             // shader program
             ShaderProgramManager* shaderMgr = ShaderProgramManager::getInstance();
-            m_shader = shaderMgr->addShaderProgram("Highpass", "../Shaders/Basic2D.vert.glsl", "../Shaders/Highpass.frag.glsl"); // TODO(Hugo) replace with HighpassTEST
+            m_shader = shaderMgr->addShaderProgram("Highpass", "../Shaders/Basic2D.vert.glsl", "../Shaders/Highpass.frag.glsl");
         }
 
         void PassHighpass::resizePass(uint w, uint h)

@@ -7,8 +7,6 @@ uniform float lumMin;
 uniform float lumMax;
 uniform float lumMean;
 
-uniform sampler2D lum;
-
 #include "Tonemap.glsl"
 
 void main()
@@ -35,7 +33,6 @@ void main()
 
     if (isnan(color.r) || isnan(color.g) || isnan(color.b))
         color = vec3(0.0) ;
-
 
     fragColor = vec4(color, 1.0);
 }

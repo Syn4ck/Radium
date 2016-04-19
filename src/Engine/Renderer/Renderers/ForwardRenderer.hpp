@@ -58,6 +58,7 @@ namespace Ra
             std::map<std::string, Pass*> m_passmap;
             std::vector<Pass*> m_passes;
 
+            PassDummy     m_dummy;
             PassLuminance m_lumin;
             PassHighpass  m_highp;
             PassBlur      m_blurp;
