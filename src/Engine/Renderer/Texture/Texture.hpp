@@ -34,7 +34,7 @@ namespace Ra
              * @param type Internal type of the texture. Can be either <b>TEXTURE_1D</b>, <b>TEXTURE_2D</b>, <b>TEXTURE_3D</b>
              * or <b>TEXTURE_CUBE</b>.
              *
-             * @param zoffset The offset of a 2D image within the 3D texture. Not used otherwised.
+             * @param zoffset The offset of a 2D image within the 3D texture. Not used otherwise.
              *
              * @todo Add anonym textures ?
              * @todo Redundancy between target and type ?

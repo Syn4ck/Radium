@@ -57,7 +57,7 @@ namespace Ra
             void addShader(ShaderType type, const std::string& name);
 
             void addProperty(const std::string& prop);
-            void addProperties(const std::list<std::string>& props );
+            void addProperties(const std::list<std::string>& props);
             void removeProperty(const std::string& prop);
 
             /// Tell if a shader configuration has at least a vertex and a fragment shader, or a compute shader.
@@ -100,6 +100,12 @@ namespace Ra
             std::string preprocessIncludes(const std::string& shader, int level, struct LineErr& lerr);
             void compile( const std::string& shader, const std::set<std::string>& properties );
             bool check();
+            bool lineInside(const struct LineErr* node, uint line) const;
+            uint lineParseGLMesg(const std::string& msg) const;
+            void linePrint(const struct LineErr* node, uint level = 0) const;
+            std::string lineFind(const struct LineErr* node, uint line) const;
+
+            // functions involved in the retrival of errors in included shaders
             bool lineInside(const struct LineErr* node, uint line) const;
             uint lineParseGLMesg(const std::string& msg) const;
             void linePrint(const struct LineErr* node, uint level = 0) const;

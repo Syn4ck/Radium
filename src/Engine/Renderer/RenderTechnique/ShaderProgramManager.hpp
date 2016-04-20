@@ -54,7 +54,7 @@ namespace Ra
             void insertShader(const ShaderConfiguration& config, const std::shared_ptr<ShaderProgram>& shader);
 
         private:
-            std::string m_shaderPath;
+            //std::vector<std::string> m_shaderPath;
 
             std::map<std::string, ShaderConfiguration> m_shaderProgramIds;
             std::map<ShaderConfiguration, std::shared_ptr<ShaderProgram>> m_shaderPrograms;
