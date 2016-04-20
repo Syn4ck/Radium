@@ -58,15 +58,8 @@ namespace Ra
 
             std::array<std::unique_ptr<Texture>, TEX_COUNT> m_textures;
 
-            std::map<std::string, Pass*> m_passmap;
-            std::vector<Pass*> m_passes;
-
-            PassDummy     m_dummy;
-            PassLuminance m_lumin;
-            PassHighpass  m_highp;
-            PassBlur      m_blurp;
-            PassTonemap   m_tonmp;
-            PassCompose   m_compp;
+            std::map<std::string, Pass*>       m_passmap;
+            std::vector<std::unique_ptr<Pass>> m_passes;
         };
 
 

@@ -17,8 +17,8 @@ namespace Ra
         ShaderProgramManager::ShaderProgramManager(const std::string& vs, const std::string& fs)
         {
             m_defaultShaderProgram = addShaderProgram("Default Program", vs, fs);
-//            m_shaderPath.push_back("../Shaders/");
-//            m_shaderPath.push_back("../src/Engine/Renderer/Passes/Shaders/");
+            m_shaderPath.push_back("../Shaders/");
+            m_shaderPath.push_back("../src/Engine/Renderer/Passes/Shaders/");
         }
 
         ShaderProgramManager::~ShaderProgramManager()

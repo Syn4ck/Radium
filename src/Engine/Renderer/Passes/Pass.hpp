@@ -32,9 +32,11 @@ namespace Ra
             virtual Texture* getIn(uint slot);
             virtual Texture* getOut(uint slot);
 
+            std::string getName() const;
+
             virtual std::shared_ptr<Texture> getInternTextures(uint i) = 0;
 
-            static void sort(std::vector<Pass*>& passVector); // static ?
+            static void sort(std::vector<std::unique_ptr<Pass>> &passVector); // static ?
 
         protected:
             std::string m_name;

@@ -45,25 +45,21 @@ namespace Ra
 
         void Pass::setIn(uint slot, Texture* tex)
         {
-            //CORE_ASSERT( m_texIn[slot] = tex, "bad m_texIn array index" );
             m_texIn[slot] = tex;
         }
 
         void Pass::setOut(uint slot, Texture* tex)
         {
-            //CORE_ASSERT( m_texOut[slot].reset(tex), "bad m_texOut array index");
             m_texOut[slot].reset(tex);
         }
 
         Texture* Pass::getIn(uint slot)
         {
-            //CORE_ASSERT( return m_texIn[slot], "bad m_texIn array index" );
             return m_texIn[slot];
         }
 
         Texture* Pass::getOut(uint slot)
         {
-            //CORE_ASSERT( return m_texOut[slot].get(), "bad m_texOut array index" );
             return m_texOut[slot].get();
         }
 
@@ -72,13 +68,18 @@ namespace Ra
             m_canvas = canvas;
         }
 
-
-        void Pass::sort(std::vector<Pass*>& passVector)
+        std::string Pass::getName() const
         {
-            auto f = [](const Pass* p1, const Pass* p2) -> bool
+            return m_name;
+        }
+
+
+        void Pass::sort(std::vector<std::unique_ptr<Pass>>& passVector)
+        {
+            auto f = [](const std::unique_ptr<Pass>& p1, const std::unique_ptr<Pass>& p2) -> bool
             {
                 // return true if p1 is before p2 and is non-0 or if p2 is 0
-                return ((p1->m_priority < p2->m_priority) && (p1->m_priority != 0)) || (p2->m_priority == 0);
+                return ((p1.get()->m_priority < p2.get()->m_priority) && (p1.get()->m_priority != 0)) || (p2.get()->m_priority == 0);
             };
 
             std::sort(passVector.begin(), passVector.end(), f);
