@@ -581,6 +581,7 @@ namespace Ra
 
         void ShaderProgram::link()
         {
+            // attach shader objs to shader program
             for ( auto shader : m_shaderObjects )
             {
                 if ( shader )
@@ -590,6 +591,37 @@ namespace Ra
             }
 
             GL_ASSERT( glLinkProgram( m_shaderId ) );
+
+            // and generate the texure bindings (the logic comes from Vortex's Vortex Engine)
+            int texunit = 0, total = -1;
+
+            // get the number of active uniforms for the program
+            glGetProgramiv(m_shaderId, GL_ACTIVE_UNIFORMS, &total);
+
+            textureUnits.clear();
+
+            // for every uniform, create a binding
+            for (int i = 0; i < total; ++i)
+            {
+                int name_len = -1, num = -1;
+                char name[100];
+                GLenum type = GL_ZERO;
+
+                // get the i-th uniform
+                glGetActiveUniform(m_shaderId, GLuint(i), sizeof(name)-1,
+                                   &name_len, &num, &type, name);
+                name[name_len] = 0;
+
+                // and bind if type is know and compatible
+                if (   type == GL_SAMPLER_2D
+                    || type == GL_SAMPLER_CUBE
+                    || type == GL_SAMPLER_2D_RECT
+                    || type == GL_SAMPLER_2D_SHADOW )
+                {
+                    GLuint loc = glGetUniformLocation(m_shaderId, name);
+                    textureUnits[std::string(name)] = TextureBinding(texunit++, loc);
+                }
+            }
         }
 
         void ShaderProgram::bind() const
@@ -716,6 +748,20 @@ namespace Ra
         {
             tex->bind( texUnit );
             GL_ASSERT( glUniform1i( glGetUniformLocation( m_shaderId, name ), texUnit ) );
+        }
+
+        // the purpose of this is to enable auto. management of textures unit
+        // by associating a location and a texture unit at creation
+        void ShaderProgram::setUniform( const char* name, Texture* tex ) const
+        {
+            // try to find the required texture
+            TexUnit_t::const_iterator itr = textureUnits.find(std::string(name));
+            if (itr != textureUnits.end())
+            {
+                // and if found, bind it to the automatically generated location
+                tex->bind(itr->second.texUnit);
+                GL_ASSERT( glUniform1i(itr->second.location, itr->second.texUnit) );
+            }
         }
 
 

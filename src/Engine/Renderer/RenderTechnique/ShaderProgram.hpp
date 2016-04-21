@@ -164,6 +164,7 @@ namespace Ra
             void setUniform( const char* name, const Core::Matrix4d& value ) const;
 
             void setUniform( const char* name, Texture* tex, int texUnit ) const;
+            void setUniform( const char* name, Texture* tex ) const;
 
         private:
             //  bool exists(const std::string& filename);
@@ -171,6 +172,16 @@ namespace Ra
             uint getTypeAsGLEnum(ShaderType type) const;
 
             void link();
+
+            // automatic texture unit management
+            struct TextureBinding {
+                int texUnit;
+                int location;
+                TextureBinding(int unit=-1, int loc=-1): texUnit(unit), location(loc) {}
+            };
+
+            typedef std::map<std::string, TextureBinding> TexUnit_t;
+            TexUnit_t textureUnits;
 
         private:
             ShaderConfiguration m_configuration;
