@@ -86,7 +86,7 @@ namespace Ra
                 GL_ASSERT( glViewport(0, 0, size, size) );
                 GL_ASSERT( glDrawBuffers(1, buffers + 1 + m_pingpong) );
                 m_shader->bind();
-                m_shader->setUniform("color", m_texOut[(m_pingpong+1)%2].get(), 0);
+                m_shader->setUniform("color", m_texOut[(m_pingpong+1)%2].get());
                 m_canvas->render();
             }
 
@@ -97,7 +97,7 @@ namespace Ra
             // bring the result back to parent fbo
             m_parentFbo->useAsTarget();
             drawscreen->bind();
-            drawscreen->setUniform("screenTexture", m_texOut[(m_pingpong+1)%2].get(), 0);
+            drawscreen->setUniform("screenTexture", m_texOut[(m_pingpong+1)%2].get());
             m_canvas->render();
         }
 

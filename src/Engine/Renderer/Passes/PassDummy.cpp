@@ -66,7 +66,7 @@ namespace Ra
             GL_ASSERT( glDrawBuffers(1, buffers+1) );
 
             m_shader->bind();
-            m_shader->setUniform("color", m_texIn[TEX_COLOR], 0);
+            m_shader->setUniform("color", m_texIn[TEX_COLOR]);
             m_canvas->render();
         }
 

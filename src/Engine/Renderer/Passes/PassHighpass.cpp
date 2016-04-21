@@ -68,8 +68,8 @@ namespace Ra {
             GL_ASSERT( glDrawBuffers(1, buffers+2) );
 
             m_shader->bind();
-            m_shader->setUniform("hdr", m_texIn[TEX_LIT], 0);
-            m_shader->setUniform("lum", m_texIn[TEX_LUM], 1);
+            m_shader->setUniform("hdr", m_texIn[TEX_LIT]);
+            m_shader->setUniform("lum", m_texIn[TEX_LUM]);
             m_shader->setUniform("pingpongsz", m_pingPongSize);
             m_canvas->render();
         }
@@ -83,7 +83,7 @@ namespace Ra {
             GL_ASSERT( glDrawBuffers(1, buffers+2) );
 
             m_shader->bind();
-            m_shader->setUniform("hdr",     m_texIn[TEX_LIT], 0);
+            m_shader->setUniform("hdr",     m_texIn[TEX_LIT]);
             m_shader->setUniform("lumMin",  min);
             m_shader->setUniform("lumMax",  max);
             m_shader->setUniform("lumMean", mean);

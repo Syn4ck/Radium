@@ -32,7 +32,7 @@ namespace Ra {
             m_redux.init();
 
             // tell it to use the min-max shader
-            m_params.addParameter("color", m_texOut[TEX_LUM].get(), 0);
+            m_params.addParameter("color", m_texOut[TEX_LUM].get());   // <|<|<| HERE
             m_redux.setShader(m_shader[SHADER_MIN_MAX], &m_params);
 
             // then tell it to return result at GL_COLOR_ATTACHMENT1
@@ -80,7 +80,7 @@ namespace Ra {
 
             // luminance transformation
             m_shader[SHADER_LUMINANCE]->bind();
-            m_shader[SHADER_LUMINANCE]->setUniform("hdr", m_texIn[TEX_HDR], 0);
+            m_shader[SHADER_LUMINANCE]->setUniform("hdr", m_texIn[TEX_HDR]);
             m_canvas->render();
 
             // apply min-max

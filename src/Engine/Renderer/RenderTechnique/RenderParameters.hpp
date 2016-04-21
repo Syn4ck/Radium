@@ -52,7 +52,7 @@ namespace Ra
             {
             public:
                 TextureParameter() = default;
-                TextureParameter( const char* name, Texture* tex, int texUnit )
+                TextureParameter( const char* name, Texture* tex, int texUnit = -1 )
                     :  Parameter( name ), m_texture( tex ), m_texUnit( texUnit ) {}
                 virtual void bind( const ShaderProgram* shader ) const override;
 
@@ -92,6 +92,7 @@ namespace Ra
             void addParameter( const char* name, const Core::Matrix4& value );
 
             void addParameter( const char* name, Texture* tex, int texUnit );
+            void addParameter( const char* name, Texture* tex );
 
             void updateParameter( const char* name, int    value );
             void updateParameter( const char* name, uint   value );

@@ -23,7 +23,7 @@ namespace Ra
 
         inline void RenderParameters::TextureParameter::bind(const ShaderProgram* shader ) const
         {
-            shader->setUniform( m_name, m_texture, m_texUnit );
+            shader->setUniform( m_name, m_texture/*, m_texUnit*/ ); // remove for auto management
         }
 
     } // namespace Engine

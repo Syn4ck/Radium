@@ -72,6 +72,11 @@ namespace Ra
             m_texParamsVector[name] = TextureParameter( name, tex, texUnit );
         }
 
+        void RenderParameters::addParameter( const char* name, Texture* tex )
+        {
+            m_texParamsVector[name] = TextureParameter( name, tex );
+        }
+
         void RenderParameters::updateParameter( const char* name, int    value )
         {
             m_intParamsVector[name] = IntParameter( name, value );

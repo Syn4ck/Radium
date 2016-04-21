@@ -61,8 +61,8 @@ namespace Ra
             GL_ASSERT( glDrawBuffers(1, buffers+2) );
 
             m_shader->bind();
-            m_shader->setUniform("texA", m_texIn[TEX_A], 0);
-            m_shader->setUniform("texB", m_texIn[TEX_B], 1);
+            m_shader->setUniform("texA", m_texIn[TEX_A]);
+            m_shader->setUniform("texB", m_texIn[TEX_B]);
             m_canvas->render();
         }
 
