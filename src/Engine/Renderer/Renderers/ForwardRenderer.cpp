@@ -53,13 +53,6 @@ namespace Ra
             : Renderer( width, height )
             , m_fbo( nullptr )
             , m_postprocessFbo( nullptr )
-            , m_dummy( "DUMMYPass",     width, height, 1, 1, nullptr, 1 )
-            , m_lumin( "LumPass",       width, height, 1, 1, nullptr, 2 )
-            , m_highp( "HighPass",      width, height, 2, 1, nullptr, 3 )
-            , m_blurp( "BlurPass",      width, height, 1, 1, nullptr, 4, 16 )  // 16 ping-pongs
-            , m_tonmp( "TonemapPass",   width, height, 1, 1, nullptr, 5 )
-            , m_compp( "CompositePass", width, height, 1, 1, nullptr, 6 )
-            //         name             width  height in out canvas  order
         {
         }
 
@@ -81,41 +74,42 @@ namespace Ra
         void ForwardRenderer::initPasses()
         {
             // create the vector of passes
-            m_passes.push_back(&m_dummy);
-            m_passes.push_back(&m_lumin);
-            m_passes.push_back(&m_highp);
-            m_passes.push_back(&m_blurp);
-            m_passes.push_back(&m_tonmp);
-            m_passes.push_back(&m_compp);
+            m_passes.push_back(std::unique_ptr<Pass>(new PassDummy    ("dummy",     m_width, m_height, 1, 1, nullptr, 1)));
+            m_passes.push_back(std::unique_ptr<Pass>(new PassLuminance("luminance", m_width, m_height, 1, 1, nullptr, 2)));
+            m_passes.push_back(std::unique_ptr<Pass>(new PassHighpass ("highpass",  m_width, m_height, 2, 1, nullptr, 3)));
+            m_passes.push_back(std::unique_ptr<Pass>(new PassBlur     ("blur",      m_width, m_height, 1, 1, nullptr, 4, 16)));
+            m_passes.push_back(std::unique_ptr<Pass>(new PassTonemap  ("tonemap",   m_width, m_height, 1, 1, nullptr, 5)));
+            m_passes.push_back(std::unique_ptr<Pass>(new PassCompose  ("composite", m_width, m_height, 1, 1, nullptr, 6)));
+            //                                                       name         width    height    in out canvas  order
+
+            // set hashmap
+            for (auto const& pass: m_passes)
+            {
+                m_passmap[pass->getName()] = &(*pass);
+            }
 
             // and sort the vector to have passes
             // being rendered in the specified order
             Pass::sort(m_passes);
 
             // branching
-            m_dummy.setIn(0, m_textures[TEX_LIT].get());
-            m_dummy.init();
+            m_passmap["dummy"]->setIn(0, m_textures[TEX_LIT].get());
 
-//            m_lumin.setIn(0, m_textures[TEX_LIT].get());
-            m_lumin.setIn(0, m_dummy.getOut(0));
-            m_lumin.init();
+            // m_passmap["luminance"].setIn(0, m_textures[TEX_LIT].get());
+            m_passmap["luminance"]->setIn(0, m_passmap["dummy"]->getOut(0));
 
-//            m_highp.setIn(0, m_textures[TEX_LIT].get());
-            m_highp.setIn(0, m_dummy.getOut(0));
-            m_highp.setIn(1, m_lumin.getOut(0));
-            m_highp.init();
+            // m_passmap["highpass"].setIn(0, m_textures[TEX_LIT].get());
+            m_passmap["highpass"]->setIn(0, m_passmap["dummy"]->getOut(0));
+            m_passmap["highpass"]->setIn(1, m_passmap["luminance"]->getOut(0));
 
-            m_blurp.setIn(0, m_highp.getOut(0));
-            m_blurp.init();
+            m_passmap["blur"]->setIn(0, m_passmap["highpass"]->getOut(0));
 
-//            m_tonmp.setIn(0, m_textures[TEX_LIT].get());
-            m_tonmp.setIn(0, m_dummy.getOut(0));
-            m_tonmp.setIn(1, m_lumin.getOut(0));
-            m_tonmp.init();
+            // m_passmap["tonemap"].setIn(0, m_textures[TEX_LIT].get());
+            m_passmap["tonemap"]->setIn(0, m_passmap["dummy"]->getOut(0));
+            m_passmap["tonemap"]->setIn(1, m_passmap["luminance"]->getOut(0));
 
-            m_compp.setIn(0, m_tonmp.getOut(0));
-            m_compp.setIn(1, m_blurp.getOut(0));
-            m_compp.init();
+            m_passmap["composite"]->setIn(0, m_passmap["tonemap"]->getOut(0));
+            m_passmap["composite"]->setIn(1, m_passmap["blur"]->getOut(0));
 
             // initialize everything
             for (auto const& pass: m_passes)
@@ -125,53 +119,28 @@ namespace Ra
                 pass->init();
             }
 
-            // set hashmap
-            m_passmap["dummy"]      = &m_dummy;
-            m_passmap["luminance0"] = &m_lumin;
-            m_passmap["high0"]      = &m_highp;
-            m_passmap["blur0"]      = &m_blurp;
-            m_passmap["tonemap0"]   = &m_tonmp;
-            m_passmap["composite0"] = &m_compp;
-
             // and add them in Qt
             for (auto const it_pass: m_passmap)
             {
-                m_secondaryTextures["[pass] " + it_pass.first] = it_pass.second->getOut(0);
+                m_secondaryTextures["[post-fx] " + it_pass.first] = it_pass.second->getOut(0);
             }
         }
 
         void ForwardRenderer::initShaders()
         {
             m_shaderMgr->addShaderProgram("DepthAmbientPass", "../Shaders/DepthAmbientPass.vert.glsl", "../Shaders/DepthAmbientPass.frag.glsl");
-            m_shaderMgr->addShaderProgram("Luminance", "../Shaders/Basic2D.vert.glsl", "../Shaders/Luminance.frag.glsl");
-            m_shaderMgr->addShaderProgram("Tonemapping", "../Shaders/Basic2D.vert.glsl", "../Shaders/Tonemapping.frag.glsl");
-            m_shaderMgr->addShaderProgram("MinMax", "../Shaders/Basic2D.vert.glsl", "../Shaders/MinMax.frag.glsl");
-            m_shaderMgr->addShaderProgram("Highpass", "../Shaders/Basic2D.vert.glsl", "../Shaders/Highpass.frag.glsl");
-            m_shaderMgr->addShaderProgram("Blur", "../Shaders/Basic2D.vert.glsl", "../Shaders/Blur.frag.glsl");
             m_shaderMgr->addShaderProgram("FinalCompose", "../Shaders/Basic2D.vert.glsl", "../Shaders/FinalCompose.frag.glsl");
-            m_shaderMgr->addShaderProgram("Dummy", "../Shaders/Basic2D.vert.glsl", "../Shaders/Dummy.frag.glsl");
-            m_shaderMgr->addShaderProgram("DummyGreen", "../Shaders/Basic2D.vert.glsl", "../Shaders/DummyGreen.frag.glsl");
-            m_shaderMgr->addShaderProgram("HighpassTEST", "../Shaders/Basic2D.vert.glsl", "../Shaders/HighpassNoFetch.frag.glsl");
         }
 
         void ForwardRenderer::initBuffers()
         {
             m_fbo.reset( new FBO( FBO::Components( FBO::COLOR | FBO::DEPTH ), m_width, m_height ) );
             m_postprocessFbo.reset( new FBO( FBO::Components( FBO::COLOR ), m_width, m_height ) );
-            m_pingPongFbo.reset(new FBO(FBO::Components(FBO::COLOR), 1, 1));
-            m_bloomFbo.reset(new FBO(FBO::Components(FBO::COLOR), m_width / 8, m_height / 8));
 
             // Render pass
             m_textures[TEX_DEPTH].reset( new Texture( "Depth", GL_TEXTURE_2D ) );
             m_textures[TEX_NORMAL].reset( new Texture( "Normal", GL_TEXTURE_2D ) );
             m_textures[TEX_LIT].reset( new Texture( "HDR", GL_TEXTURE_2D ) );
-            m_textures[TEX_LUMINANCE].reset(new Texture("Luminance", GL_TEXTURE_2D));
-            m_textures[TEX_TONEMAPPED].reset(new Texture("Tonemapped", GL_TEXTURE_2D));
-            m_textures[TEX_BLOOM_PING].reset(new Texture("Bloom Ping", GL_TEXTURE_2D));
-            m_textures[TEX_BLOOM_PONG].reset(new Texture("Bloom Pong", GL_TEXTURE_2D));
-            m_textures[TEX_TONEMAP_PING].reset(new Texture("Minmax Ping", GL_TEXTURE_2D));
-            m_textures[TEX_TONEMAP_PONG].reset(new Texture("Minmax Pong", GL_TEXTURE_2D));
-            m_textures[TEX_DUMMY].reset(new Texture("Dummytex", GL_TEXTURE_2D));
 
             m_secondaryTextures["Depth Texture"]  = m_textures[TEX_DEPTH].get();
             m_secondaryTextures["Normal Texture"] = m_textures[TEX_NORMAL].get();
@@ -438,16 +407,6 @@ namespace Ra
 
             if (m_postProcessEnabled)
             {
-                // Get per pixel luminance
-                GL_ASSERT(glDrawBuffers(1, buffers + 1));
-                shader = m_shaderMgr->getShaderProgram("Luminance");
-                shader->bind();
-                shader->setUniform("hdr", m_textures[TEX_LIT].get(), 0);
-                m_quadMesh->render();
-
-                m_pingPongFbo->useAsTarget();
-
-                uint size = m_pingPongSize;
                 glDrawBuffers(1, buffers);
                 glViewport(0, 0, m_width, m_height);
                 shader = m_shaderMgr->getShaderProgram("DrawScreen");
@@ -466,26 +425,23 @@ namespace Ra
                 //  }
 
                 // luminance pass
-                m_dummy.renderPass();
+                m_passmap["dummy"]->renderPass();
 
-                // luminance pass : TODO(Hugo) remove fetch
-                m_lumin.renderPass();
-                Core::Color lum = m_lumin.getOut(0)->getTexel(0, 0);
+                m_passmap["luminance"]->renderPass();
+                Core::Color lum = m_passmap["luminance"]->getOut(0)->getTexel(0, 0);
                 Scalar lumMin  = lum.x();
                 Scalar lumMax  = lum.y();
                 Scalar lumMean = std::exp(lum.z() / (m_pingPongSize * m_pingPongSize));
 
                 // tonemapping pass
-                //m_tonmp.renderPass(m_shaderMgr, m_quadMesh.get(), m_pingPongSize);
-                m_tonmp.renderPass(lumMin, lumMax, lumMean);
+                ((PassTonemap*)m_passmap["tonemap"])->renderPass(lumMin, lumMax, lumMean);
 
                 // bloom pass : TODO(Hugo) do a bloom pass to group highpass and blur
-                //m_highp.renderPass(m_shaderMgr, m_quadMesh.get(), m_pingPongSize);
-                m_highp.renderPass(lumMin, lumMax, lumMean);
-                m_blurp.renderPass();
+                ((PassHighpass*)m_passmap["highpass"])->renderPass(lumMin, lumMax, lumMean);
+                m_passmap["blur"]->renderPass();
 
                 // do final composition
-                m_compp.renderPass();
+                m_passmap["composite"]->renderPass();
 
                 GL_ASSERT( glDepthFunc( GL_LESS ) );
                 m_postprocessFbo->unbind();
@@ -508,13 +464,6 @@ namespace Ra
             m_textures[TEX_DEPTH]->initGL(GL_DEPTH_COMPONENT24, m_width, m_height, GL_DEPTH_COMPONENT, GL_UNSIGNED_INT, nullptr);
             m_textures[TEX_NORMAL]->initGL(GL_RGBA32F, m_width, m_height, GL_RGBA, GL_FLOAT, nullptr);
             m_textures[TEX_LIT]->initGL(GL_RGBA32F, m_width, m_height, GL_RGBA, GL_FLOAT, nullptr);
-            m_textures[TEX_LUMINANCE]->initGL(GL_RGBA32F, m_width, m_height, GL_RGBA, GL_FLOAT, nullptr);
-            m_textures[TEX_TONEMAPPED]->initGL(GL_RGBA32F, m_width, m_height, GL_RGBA, GL_FLOAT, nullptr);
-            m_textures[TEX_TONEMAP_PING]->initGL(GL_RGBA32F, m_pingPongSize, m_pingPongSize, GL_RGBA, GL_FLOAT, nullptr);
-            m_textures[TEX_TONEMAP_PONG]->initGL(GL_RGBA32F, m_pingPongSize, m_pingPongSize, GL_RGBA, GL_FLOAT, nullptr);
-            m_textures[TEX_BLOOM_PING]->initGL(GL_RGBA32F, m_width / 8, m_height / 8, GL_RGBA, GL_FLOAT, nullptr);
-            m_textures[TEX_BLOOM_PONG]->initGL(GL_RGBA32F, m_width / 8, m_height / 8, GL_RGBA, GL_FLOAT, nullptr);
-            m_textures[TEX_DUMMY]->initGL(GL_RGBA32F, m_width, m_height, GL_RGBA, GL_FLOAT, nullptr);
 
             m_fbo->bind();
             m_fbo->setSize( m_width, m_height );
@@ -527,9 +476,6 @@ namespace Ra
             m_postprocessFbo->bind();
             m_postprocessFbo->setSize( m_width, m_height );
             m_postprocessFbo->attachTexture(GL_COLOR_ATTACHMENT0, m_fancyTexture.get());
-            m_postprocessFbo->attachTexture(GL_COLOR_ATTACHMENT1, m_textures[TEX_LUMINANCE].get());
-            m_postprocessFbo->attachTexture(GL_COLOR_ATTACHMENT2, m_textures[TEX_TONEMAPPED].get());
-            m_postprocessFbo->attachTexture(GL_COLOR_ATTACHMENT3, m_textures[TEX_DUMMY].get());
             m_postprocessFbo->check();
             m_postprocessFbo->unbind( true );
 
@@ -537,9 +483,6 @@ namespace Ra
             {
                 pass->resizePass(m_width, m_height);
             }
-
-            // Reset framebuffer state
-            GL_CHECK_ERROR;
 
             // Reset framebuffer state
             GL_CHECK_ERROR;
