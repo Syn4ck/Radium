@@ -14,12 +14,6 @@ namespace Ra {
             // parameters to set as uniforms to SHADER_PINGPONG
             m_params[0].addParameter("offset", Core::Vector2(1.0 / m_width,  0.0));
             m_params[1].addParameter("offset", Core::Vector2(0.0, 1.0 / m_height));
-
-            m_params[0].addParameter("view_width", (int) m_width);
-            m_params[1].addParameter("view_width", (int) m_width);
-
-            m_params[0].addParameter("view_height", (int) m_height);
-            m_params[1].addParameter("view_height", (int) m_height);
         }
 
         PassBlur::~PassBlur()

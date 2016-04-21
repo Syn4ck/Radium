@@ -3,7 +3,7 @@ out vec4 fragColor;
 
 uniform sampler2D hdr;
 uniform sampler2D lum;
-uniform float     pingpongsz;
+uniform uint pingpongsz;
 
 #include "Tonemap.glsl"
 
@@ -13,10 +13,10 @@ void main()
 
     // get lum. values
     vec2 varNullcoord = vec2(0,0);
-    vec3 lum = texture(lum, varNullcoord).xyz;  // fetch bad ?
-    float lumMin  = lum.x;
-    float lumMax  = lum.y;
-    float lumMean = exp(lum.z / pow(pingpongsz, 2));
+    vec3  lumvec  = texelFetch(lum, ivec2(0,0), 0).xyz;
+    float lumMin  = lumvec.x;
+    float lumMax  = lumvec.y;
+    float lumMean = exp(lumvec.z / (pingpongsz * pingpongsz));
 
     vec3 Yxy = rgb2Yxy(color);
 

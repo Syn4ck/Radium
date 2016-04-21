@@ -5,17 +5,17 @@ out vec4 fragColor;
 uniform sampler2D hdr;
 uniform sampler2D lum;
 
-uniform int pingpongsz;
+uniform uint pingpongsz;
 
 #include "Tonemap.glsl"
 
 void main()
 {
     // extract luminance data
-    vec3 lumvec   = texelFetch(lum, ivec2(0,0), 0);
+    vec3 lumvec   = texelFetch(lum, ivec2(0,0), 0).xyz;
     float lumMin  = lumvec.x;
     float lumMax  = lumvec.y;
-    float lumMean = exp(lumvec.z / pingpongsz * pingpongsz);
+    float lumMean = exp(lumvec.z / (pingpongsz * pingpongsz));
 
     vec3 color = texelFetch(hdr, ivec2(gl_FragCoord), 0).rgb;
 

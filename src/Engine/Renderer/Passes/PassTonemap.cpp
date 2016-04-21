@@ -29,7 +29,7 @@ namespace Ra
 
             // shaders
             ShaderProgramManager* shaderMgr = ShaderProgramManager::getInstance();
-            m_shader = shaderMgr->addShaderProgram("Tonemapping", "../Shaders/Basic2D.vert.glsl", "../Shaders/Tonemapping.frag.glsl");
+            m_shader = shaderMgr->addShaderProgram("Tonemapping", "../Shaders/Basic2D.vert.glsl", "../Shaders/TonemappingNoFetch.frag.glsl");
         }
 
         void PassTonemap::resizePass(uint w, uint h)

@@ -74,13 +74,13 @@ namespace Ra
         void ForwardRenderer::initPasses()
         {
             // create the vector of passes
-            m_passes.push_back(std::unique_ptr<Pass>(new PassDummy    ("dummy",     m_width, m_height, 1, 1, nullptr, 1)));
+            //m_passes.push_back(std::unique_ptr<Pass>(new PassDummy    ("dummy",     m_width, m_height, 1, 1, nullptr, 1)));
             m_passes.push_back(std::unique_ptr<Pass>(new PassLuminance("luminance", m_width, m_height, 1, 1, nullptr, 2)));
             m_passes.push_back(std::unique_ptr<Pass>(new PassHighpass ("highpass",  m_width, m_height, 2, 1, nullptr, 3)));
             m_passes.push_back(std::unique_ptr<Pass>(new PassBlur     ("blur",      m_width, m_height, 1, 1, nullptr, 4, 16)));
             m_passes.push_back(std::unique_ptr<Pass>(new PassTonemap  ("tonemap",   m_width, m_height, 1, 1, nullptr, 5)));
             m_passes.push_back(std::unique_ptr<Pass>(new PassCompose  ("composite", m_width, m_height, 1, 1, nullptr, 6)));
-            //                                                       name         width    height    in out canvas  order
+            //                                                         name         width    height    in out canvas  order
 
             // set hashmap
             for (auto const& pass: m_passes)
@@ -93,19 +93,19 @@ namespace Ra
             Pass::sort(m_passes);
 
             // branching
-            m_passmap["dummy"]->setIn(0, m_textures[TEX_LIT].get());
+            //m_passmap["dummy"]->setIn(0, m_textures[TEX_LIT].get());
 
-            // m_passmap["luminance"].setIn(0, m_textures[TEX_LIT].get());
-            m_passmap["luminance"]->setIn(0, m_passmap["dummy"]->getOut(0));
+            m_passmap["luminance"]->setIn(0, m_textures[TEX_LIT].get());
+            //m_passmap["luminance"]->setIn(0, m_passmap["dummy"]->getOut(0));
 
-            // m_passmap["highpass"].setIn(0, m_textures[TEX_LIT].get());
-            m_passmap["highpass"]->setIn(0, m_passmap["dummy"]->getOut(0));
+            m_passmap["highpass"]->setIn(0, m_textures[TEX_LIT].get());
+            //m_passmap["highpass"]->setIn(0, m_passmap["dummy"]->getOut(0));
             m_passmap["highpass"]->setIn(1, m_passmap["luminance"]->getOut(0));
 
             m_passmap["blur"]->setIn(0, m_passmap["highpass"]->getOut(0));
 
-            // m_passmap["tonemap"].setIn(0, m_textures[TEX_LIT].get());
-            m_passmap["tonemap"]->setIn(0, m_passmap["dummy"]->getOut(0));
+            m_passmap["tonemap"]->setIn(0, m_textures[TEX_LIT].get());
+            //m_passmap["tonemap"]->setIn(0, m_passmap["dummy"]->getOut(0));
             m_passmap["tonemap"]->setIn(1, m_passmap["luminance"]->getOut(0));
 
             m_passmap["composite"]->setIn(0, m_passmap["tonemap"]->getOut(0));
@@ -414,34 +414,11 @@ namespace Ra
                 shader->setUniform("screenTexture", m_textures[TEX_LIT].get(), 0);
                 m_quadMesh->render();
 
-                // TODO(Hugo) one day it should be possible to loop over every pass
-                // and just magically call Pass::renderPass() but for now there are
-                // additionnal parameters that ruin the whole thing
-                //
-                // we SHOULD be able to do that ↓!
-                //  for (auto const& pass: m_passes)
-                //  {
-                //      pass->renderPass(); // the vector is already sorted by priority
-                //  }
+                for (auto const& pass: m_passes)
+                {
+                    pass->renderPass();
+                }
 
-                // luminance pass
-                m_passmap["dummy"]->renderPass();
-
-                m_passmap["luminance"]->renderPass();
-                Core::Color lum = m_passmap["luminance"]->getOut(0)->getTexel(0, 0);
-                Scalar lumMin  = lum.x();
-                Scalar lumMax  = lum.y();
-                Scalar lumMean = std::exp(lum.z() / (m_pingPongSize * m_pingPongSize));
-
-                // tonemapping pass
-                ((PassTonemap*)m_passmap["tonemap"])->renderPass(lumMin, lumMax, lumMean);
-
-                // bloom pass : TODO(Hugo) do a bloom pass to group highpass and blur
-                ((PassHighpass*)m_passmap["highpass"])->renderPass(lumMin, lumMax, lumMean);
-                m_passmap["blur"]->renderPass();
-
-                // do final composition
-                m_passmap["composite"]->renderPass();
 
                 GL_ASSERT( glDepthFunc( GL_LESS ) );
                 m_postprocessFbo->unbind();
