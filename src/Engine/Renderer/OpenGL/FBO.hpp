@@ -27,8 +27,8 @@ namespace Ra
         public:
             enum Components
             {
-                COLOR = 1 << 0,
-                DEPTH = 1 << 1,
+                COLOR   = 1 << 0,
+                DEPTH   = 1 << 1,
                 STENCIL = 1 << 2,
                 ALL_COMPONENTS = COLOR | DEPTH | STENCIL
             };
@@ -68,6 +68,8 @@ namespace Ra
             std::map<uint, Texture*> m_textures;
 
             bool m_isBound;
+
+            static FBO* currentlyBound;
         };
 
     } // namespace Engine

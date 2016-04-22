@@ -7,6 +7,7 @@
 
 namespace Ra
 {
+    Engine::FBO* Engine::FBO::currentlyBound = nullptr;
 
     Engine::FBO::FBO( Components components, uint width, uint height )
         : m_components( components )
@@ -25,8 +26,12 @@ namespace Ra
 
     void Engine::FBO::bind()
     {
-        GL_ASSERT( glBindFramebuffer( GL_FRAMEBUFFER, m_fboID ) );
-        m_isBound = true;
+        if (currentlyBound != this)
+        {
+            GL_ASSERT( glBindFramebuffer( GL_FRAMEBUFFER, m_fboID ) );
+            m_isBound = true;
+            currentlyBound = this;
+        }
     }
 
     void Engine::FBO::useAsTarget()
@@ -43,10 +48,15 @@ namespace Ra
 
     void Engine::FBO::unbind( bool complete )
     {
-        m_isBound = false;
-        if ( complete )
+        if (currentlyBound == this)
         {
-            GL_ASSERT( glBindFramebuffer( GL_FRAMEBUFFER, 0 ) );
+            currentlyBound = nullptr;
+            m_isBound = false;
+
+            if ( complete )
+            {
+                GL_ASSERT( glBindFramebuffer( GL_FRAMEBUFFER, 0 ) );
+            }
         }
     }
 
