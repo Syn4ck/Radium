@@ -58,7 +58,7 @@ namespace Ra
             if ( tex != nullptr )
             {
                 tex->bind( texUnit );
-                shader->setUniform( "material.tex.kd", tex, texUnit );
+                shader->setUniform( "material.tex.kd", tex );
                 shader->setUniform( "material.tex.hasKd", 1 );
                 ++texUnit;
             }
@@ -71,7 +71,7 @@ namespace Ra
             if ( tex != nullptr )
             {
                 tex->bind( texUnit );
-                shader->setUniform( "material.tex.ks", tex, texUnit );
+                shader->setUniform( "material.tex.ks", tex );
                 shader->setUniform( "material.tex.hasKs", 1 );
                 ++texUnit;
             }
@@ -84,7 +84,7 @@ namespace Ra
             if ( tex != nullptr )
             {
                 tex->bind( texUnit );
-                shader->setUniform( "material.tex.normal", tex, texUnit );
+                shader->setUniform( "material.tex.normal", tex );
                 shader->setUniform( "material.tex.hasNormal", 1 );
                 ++texUnit;
             }
@@ -97,7 +97,7 @@ namespace Ra
             if ( tex != nullptr )
             {
                 tex->bind( texUnit );
-                shader->setUniform( "material.tex.ns", tex, texUnit );
+                shader->setUniform( "material.tex.ns", tex );
                 shader->setUniform( "material.tex.hasNs", 1 );
                 ++texUnit;
             }
@@ -110,7 +110,7 @@ namespace Ra
             if ( tex != nullptr )
             {
                 tex->bind( texUnit );
-                shader->setUniform( "material.tex.alpha", tex, texUnit );
+                shader->setUniform( "material.tex.alpha", tex );
                 shader->setUniform( "material.tex.hasAlpha", 1 );
                 ++texUnit;
             }

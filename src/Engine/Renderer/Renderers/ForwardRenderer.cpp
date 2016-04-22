@@ -85,12 +85,17 @@ namespace Ra
             // set hashmap
             for (auto const& pass: m_passes)
             {
-                m_passmap[pass->getName()] = &(*pass);
+                m_passmap[pass->getName()] = pass.get();
             }
 
             // and sort the vector to have passes
-            // being rendered in the specified order
-            Pass::sort(m_passes);
+            // being rendered in the specified order            
+            std::sort(m_passes.begin(), m_passes.end(), [](const std::unique_ptr<Pass>& p1, const std::unique_ptr<Pass>& p2)
+                                                             {
+                                                                // return true if p1 is before p2 and is non-0 or if p2 is 0
+                                                                return (p1->m_priority < p2->m_priority);
+            });
+
 
             // branching
             //m_passmap["dummy"]->setIn(0, m_textures[TEX_LIT].get());
@@ -411,7 +416,7 @@ namespace Ra
                 glViewport(0, 0, m_width, m_height);
                 shader = m_shaderMgr->getShaderProgram("DrawScreen");
                 shader->bind();
-                shader->setUniform("screenTexture", m_textures[TEX_LIT].get(), 0);
+                shader->setUniform("screenTexture", m_textures[TEX_LIT].get());
                 m_quadMesh->render();
 
                 for (auto const& pass: m_passes)
@@ -429,7 +434,7 @@ namespace Ra
                 glViewport(0, 0, m_width, m_height);
                 shader = m_shaderMgr->getShaderProgram("DrawScreen");
                 shader->bind();
-                shader->setUniform("screenTexture", m_textures[TEX_LIT].get(), 0);
+                shader->setUniform("screenTexture", m_textures[TEX_LIT].get());
                 m_quadMesh->render();
             }
         }

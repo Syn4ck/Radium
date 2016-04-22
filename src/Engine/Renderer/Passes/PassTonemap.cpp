@@ -78,7 +78,7 @@ namespace Ra
             GL_ASSERT( glDrawBuffers(1, buffers + 2) );
 
             m_shader->bind();
-            m_shader->setUniform("hdr", m_texIn[TEX_HDR], 0);
+            m_shader->setUniform("hdr", m_texIn[TEX_HDR]);
             m_shader->setUniform("lumMin",  lumMin);
             m_shader->setUniform("lumMax",  lumMax);
             m_shader->setUniform("lumMean", lumMean);

@@ -23,8 +23,8 @@ namespace Ra
 
         Pass::Pass(const std::string& name, uint w, uint h, uint nTexIn, uint nTexOut,
                    Mesh* canvas, uint priority)
-            : m_name     ( name )
-            , m_priority ( priority )
+            : m_priority ( priority )
+            , m_name     ( name )
             , m_width    ( w )
             , m_height   ( h )
             , m_nTexIn   ( nTexIn )
@@ -74,16 +74,16 @@ namespace Ra
         }
 
 
-        void Pass::sort(std::vector<std::unique_ptr<Pass>>& passVector)
-        {
-            auto f = [](const std::unique_ptr<Pass>& p1, const std::unique_ptr<Pass>& p2) -> bool
-            {
-                // return true if p1 is before p2 and is non-0 or if p2 is 0
-                return ((p1.get()->m_priority < p2.get()->m_priority) && (p1.get()->m_priority != 0)) || (p2.get()->m_priority == 0);
-            };
+//        void Pass::sort(std::vector<std::unique_ptr<Pass>>& passVector)
+//        {
+//            auto f = [](const std::unique_ptr<Pass>& p1, const std::unique_ptr<Pass>& p2) -> bool
+//            {
+//                // return true if p1 is before p2 and is non-0 or if p2 is 0
+//                return ((p1->m_priority < p2->m_priority) && (p1->m_priority != 0)) || (p2->m_priority == 0);
+//            };
 
-            std::sort(passVector.begin(), passVector.end(), f);
-        }
+//            std::sort(passVector.begin(), passVector.end(), f);
+//        }
 
 
     }

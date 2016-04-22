@@ -159,7 +159,7 @@ namespace Ra
             void setUniform( const char* name, const Core::Matrix4f& value ) const;
             void setUniform( const char* name, const Core::Matrix4d& value ) const;
 
-            void setUniform( const char* name, Texture* tex, int texUnit ) const;
+            //void setUniform( const char* name, Texture* tex, int texUnit ) const;
             void setUniform( const char* name, Texture* tex ) const;
 
         private:

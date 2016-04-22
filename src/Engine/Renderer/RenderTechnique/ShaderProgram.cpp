@@ -661,11 +661,11 @@ namespace Ra
         }
 
         // TODO : Provide Texture support
-        void ShaderProgram::setUniform( const char* name, Texture* tex, int texUnit ) const
-        {
-            tex->bind( texUnit );
-            GL_ASSERT( glUniform1i( glGetUniformLocation( m_shaderId, name ), texUnit ) );
-        }
+//        void ShaderProgram::setUniform( const char* name, Texture* tex, int texUnit ) const
+//        {
+//            tex->bind( texUnit );
+//            GL_ASSERT( glUniform1i( glGetUniformLocation( m_shaderId, name ), texUnit ) );
+//        }
 
         // the purpose of this is to enable auto. management of textures unit
         // by associating a location and a texture unit at creation

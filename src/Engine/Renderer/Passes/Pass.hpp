@@ -36,11 +36,13 @@ namespace Ra
 
             virtual std::shared_ptr<Texture> getInternTextures(uint i) = 0;
 
-            static void sort(std::vector<std::unique_ptr<Pass>> &passVector); // static ?
+            //static void sort(std::vector<std::unique_ptr<Pass>> &passVector); // static ?
+
+        public:
+            uint m_priority;
 
         protected:
             std::string m_name;
-            uint m_priority;
 
             uint m_width;
             uint m_height;

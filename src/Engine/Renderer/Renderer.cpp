@@ -383,7 +383,7 @@ namespace Ra
 
             auto shader = m_shaderMgr->getShaderProgram("DrawScreen");
             shader->bind();
-            shader->setUniform( "screenTexture", m_displayedTexture, 0 );
+            shader->setUniform( "screenTexture", m_displayedTexture );
             m_quadMesh->render();
 
             GL_ASSERT( glDepthFunc( GL_LESS ) );
