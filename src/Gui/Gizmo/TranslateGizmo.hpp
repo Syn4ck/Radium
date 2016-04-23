@@ -4,7 +4,7 @@
 #include <Gui/Gizmo/Gizmo.hpp>
 namespace Ra
 {
-    namespace Gui
+    namespace Guibase
     {
         class RA_GUIBASE_API TranslateGizmo : public Gizmo
         {

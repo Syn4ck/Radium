@@ -15,7 +15,7 @@ namespace Ra { namespace Engine { class Camera; } }
 
 namespace Ra
 {
-    namespace Gui
+    namespace Guibase
     {
         /// Base class for gizmos, i.e. graphic tools to manipulate a transform.
         /// Do not feed after midnight.

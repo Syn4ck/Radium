@@ -15,7 +15,7 @@
 
 namespace Ra
 {
-    namespace Gui
+    namespace Guibase
     {
         TranslateGizmo::TranslateGizmo(Engine::Component* c, const Core::Transform &worldTo, const Core::Transform& t, Mode mode)
                 : Gizmo(c, worldTo, t, mode), m_startPoint(Core::Vector3::Zero()), m_initialPix(Core::Vector2::Zero()), m_selectedAxis(-1)
