@@ -18,7 +18,7 @@
 #include <MainApplication/MainApplication.hpp>
 #include <MainApplication/Gui/EntityTreeModel.hpp>
 #include <MainApplication/Gui/EntityTreeItem.hpp>
-#include <MainApplication/Gui/MaterialEditor.hpp>>
+#include <MainApplication/Gui/MaterialEditor.hpp>
 
 #include <assimp/Importer.hpp>
 
@@ -637,7 +637,7 @@ namespace Ra
 
         QSignalBlocker blockTextures( m_displayedTextureCombo );
 
-        auto texs = m_viewer->getRenderer()->getAvailableTextures();
+        auto texs = m_viewer->getRenderer()->getAvailableTextures(m_viewer->getRenderer()->getRendererName());
         for ( const auto& tex : texs )
         {
             m_displayedTextureCombo->addItem( tex.c_str() );

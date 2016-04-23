@@ -5,7 +5,8 @@
 #include <Core/Event/Key.hpp>
 
 #include <Engine/Renderer/Renderers/ForwardRenderer.hpp>
-#include <Engine/Renderer/Light/DirLight.hpp>
+#include <Engine/Renderer/Renderers/DeferredRenderer.hpp>
+#include <Engine/Renderer/Light/Light.hpp>
 
 #include <Gui/Camera/TrackballCamera.hpp>
 
@@ -50,13 +51,13 @@ namespace Ra
             LOG( logINFO ) << "OpenGL   : " << glGetString( GL_VERSION );
             LOG( logINFO ) << "GLSL     : " << glGetString( GL_SHADING_LANGUAGE_VERSION );
 
-            m_renderer = Core::make_shared<Engine::ForwardRenderer>(width, height);
+            m_renderer = Core::make_shared<Engine::DeferredRenderer>(width, height);
             m_renderer->initialize();
 
             m_cameras.push_back(Core::make_shared<TrackballCamera>(width, height));
             m_currentCamera = m_cameras.back().get();
 
-            auto light = Core::make_shared<Engine::DirectionalLight>();
+            auto light = Core::make_shared<Engine::Light>(Engine::Light::LightType_Directional);
             m_renderer->addLight(light);
             m_currentCamera->attachLight(light);
         }

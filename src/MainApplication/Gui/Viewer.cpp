@@ -6,18 +6,6 @@
 #include <QKeyEvent>
 #include <QPainter>
 
-#include <Core/String/StringUtils.hpp>
-#include <Core/Log/Log.hpp>
-#include <Core/Math/ColorPresets.hpp>
-
-#include <Engine/Renderer/OpenGL/OpenGL.hpp>
-#include <Engine/Component/Component.hpp>
-#include <Engine/Renderer/Renderer.hpp>
-#include <Engine/Renderer/Light/DirLight.hpp>
-#include <Engine/Renderer/Camera/Camera.hpp>
-#include <Engine/Managers/SystemDisplay/SystemDisplay.hpp>
-#include <Engine/Renderer/Renderers/ForwardRenderer.hpp>
-
 #include <MainApplication/Gui/MainWindow.hpp>
 #include <MainApplication/MainApplication.hpp>
 #include <MainApplication/EventTranslator.hpp>
