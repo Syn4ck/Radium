@@ -23,28 +23,28 @@
 namespace Ra
 {
 
-    Gui::MainWindow::MainWindow( QWidget* parent )
-        : QMainWindow( parent )
+    Gui::MainWindow::MainWindow(QWidget* parent)
+        : QMainWindow(parent)
     {
         // Note : at this point most of the components (including the Engine) are
         // not initialized. Listen to the "started" signal.
 
-        setupUi( this );
+        setupUi(this);
 
-        setWindowIcon( QPixmap( ":/Assets/Images/RadiumIcon.png" ) );
-        setWindowTitle( QString( "Radium Engine" ) );
+        setWindowIcon(QPixmap(":/Assets/Images/RadiumIcon.png"));
+        setWindowTitle(QString("Radium Engine"));
 
         QStringList headers;
-        headers << tr( "Entities -> Components" );
-        m_entityTreeModel = new EntityTreeModel( headers );
-        m_entitiesTreeView->setModel( m_entityTreeModel );
+        headers << tr("Entities -> Components");
+        m_entityTreeModel = new EntityTreeModel(headers);
+        m_entitiesTreeView->setModel(m_entityTreeModel);
 
         m_materialEditor = new MaterialEditor();
 
         m_lastSelectedRO = -1;
         createConnections();
 
-        mainApp->framesCountForStatsChanged( m_avgFramesCount->value() );
+        mainApp->framesCountForStatsChanged(m_avgFramesCount->value());
     }
 
     Gui::MainWindow::~MainWindow()
@@ -60,35 +60,33 @@ namespace Ra
 
     void Gui::MainWindow::createConnections()
     {
-        connect( actionOpenMesh, &QAction::triggered, this, &MainWindow::loadFile );
-        connect( actionReload_Shaders, &QAction::triggered, m_viewer, &Viewer::reloadShaders );
-        connect( actionOpen_Material_Editor, &QAction::triggered, this, &MainWindow::openMaterialEditor );
+        connect(actionOpenMesh, &QAction::triggered, this, &MainWindow::loadFile);
+        connect(actionReload_Shaders, &QAction::triggered, m_viewer, &Viewer::reloadShaders);
+        connect(actionOpen_Material_Editor, &QAction::triggered, this, &MainWindow::openMaterialEditor);
 
         // Toolbox setup
-        connect( actionToggle_Local_Global, &QAction::toggled, m_viewer->getGizmoManager(), &GizmoManager::setLocal );
-        connect( actionGizmoOff,            &QAction::triggered, this, &MainWindow::gizmoShowNone );
-        connect( actionGizmoTranslate,      &QAction::triggered, this, &MainWindow::gizmoShowTranslate );
-        connect( actionGizmoRotate,         &QAction::triggered, this, &MainWindow::gizmoShowRotate );
+        connect(actionToggle_Local_Global, &QAction::toggled, m_viewer->getGizmoManager(), &GizmoManager::setLocal);
+        connect(actionGizmoOff, &QAction::triggered, this, &MainWindow::gizmoShowNone);
+        connect(actionGizmoTranslate, &QAction::triggered, this, &MainWindow::gizmoShowTranslate);
+        connect(actionGizmoRotate, &QAction::triggered, this, &MainWindow::gizmoShowRotate);
 
         // Loading setup.
-        connect( this, &MainWindow::fileLoading, mainApp, &MainApplication::loadFile );
-        connect( mainApp, &MainApplication::loadComplete, this, &MainWindow::onEntitiesUpdated);
+        connect(this, &MainWindow::fileLoading, mainApp, &MainApplication::loadFile);
+        connect(mainApp, &MainApplication::loadComplete, this, &MainWindow::onEntitiesUpdated);
 
         // Side menu setup.
-        connect( m_entityTreeModel, &EntityTreeModel::dataChanged, m_entityTreeModel, &EntityTreeModel::handleRename );
+        connect(m_entityTreeModel, &EntityTreeModel::dataChanged, m_entityTreeModel, &EntityTreeModel::handleRename);
 
-        connect( m_entitiesTreeView->selectionModel(), &QItemSelectionModel::selectionChanged,
-            this, &MainWindow::onSelectionChanged );
+        connect(m_entitiesTreeView->selectionModel(), &QItemSelectionModel::selectionChanged, this, &MainWindow::onSelectionChanged);
 
         // Connect picking results (TODO Val : use events to dispatch picking directly)
-        connect( m_viewer, &Viewer::rightClickPicking, this, &MainWindow::handlePicking );
-        connect (m_viewer, &Viewer::leftClickPicking, m_viewer->getGizmoManager(), &GizmoManager::handlePickingResult );
+        connect(m_viewer, &Viewer::rightClickPicking, this, &MainWindow::handlePicking);
+        connect(m_viewer, &Viewer::leftClickPicking, m_viewer->getGizmoManager(), &GizmoManager::handlePickingResult);
 
         // Update entities when the engine starts.
-        connect( mainApp, &MainApplication::starting, this, &MainWindow::onEntitiesUpdated );
+        connect(mainApp, &MainApplication::starting, this, &MainWindow::onEntitiesUpdated);
 
-        connect( m_avgFramesCount, static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged),
-            mainApp , &MainApplication::framesCountForStatsChanged );
+        connect(m_avgFramesCount, static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged), mainApp, &MainApplication::framesCountForStatsChanged);
         connect(mainApp, &MainApplication::updateFrameStats, this, &MainWindow::onUpdateFramestats);
 
         // Inform property editors of new selections
@@ -96,36 +94,32 @@ namespace Ra
         connect(this, &MainWindow::selectedEntity, m_viewer->getGizmoManager(), &GizmoManager::setEditable);
         connect(this, &MainWindow::selectedComponent, m_viewer->getGizmoManager(), &GizmoManager::setEditable);
 
-        connect( this, &MainWindow::selectedEntity, this, &MainWindow::displayEntityRenderObjects );
-        connect( this, &MainWindow::selectedComponent, this, &MainWindow::displayComponentRenderObjects );
+        connect(this, &MainWindow::selectedEntity, this, &MainWindow::displayEntityRenderObjects);
+        connect(this, &MainWindow::selectedComponent, this, &MainWindow::displayComponentRenderObjects);
 
         // Enable changing shaders
-        connect( m_renderObjectsListView, &QListWidget::currentRowChanged, this, &MainWindow::renderObjectListItemClicked );
-        connect( m_currentShaderBox, static_cast<void (QComboBox::*)(const QString&)>( &QComboBox::currentIndexChanged ),
-                 this, &MainWindow::changeRenderObjectShader );
+        connect(m_renderObjectsListView, &QListWidget::currentRowChanged, this, &MainWindow::renderObjectListItemClicked);
+        connect(m_currentShaderBox, static_cast<void (QComboBox::*)(const QString&)>(&QComboBox::currentIndexChanged), this, &MainWindow::changeRenderObjectShader);
 
         // RO Stuff
-        connect( m_toggleRenderObjectButton, &QPushButton::clicked, this, &MainWindow::toggleVisisbleRO );
-        connect( m_removeRenderObjectButton, &QPushButton::clicked, this, &MainWindow::toggleXRayRO );
-        connect( m_editRenderObjectButton, &QPushButton::clicked, this, &MainWindow::editRO );
+        connect(m_toggleRenderObjectButton, &QPushButton::clicked, this, &MainWindow::toggleVisisbleRO);
+        connect(m_removeRenderObjectButton, &QPushButton::clicked, this, &MainWindow::toggleXRayRO);
+        connect(m_editRenderObjectButton, &QPushButton::clicked, this, &MainWindow::editRO);
 
         // Renderer stuff
-        connect( m_viewer, &Viewer::rendererReady, this, &MainWindow::onRendererReady );
+        connect(m_viewer, &Viewer::rendererReady, this, &MainWindow::onRendererReady);
 
-        connect( m_displayedTextureCombo, static_cast<void (QComboBox::*)(const QString&)>( &QComboBox::currentIndexChanged ),
-                 m_viewer, &Viewer::displayTexture );
-        connect( m_currentRendererCombo, static_cast<void (QComboBox::*)( int )>( &QComboBox::currentIndexChanged ),
-                 m_viewer, &Viewer::changeRenderer );
+        connect(m_displayedTextureCombo, static_cast<void (QComboBox::*)(const QString&)>(&QComboBox::currentIndexChanged), m_viewer, &Viewer::displayTexture);
+        connect(m_currentRendererCombo, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), m_viewer, &Viewer::changeRenderer);
 
         connect(m_enablePostProcess, &QCheckBox::stateChanged, m_viewer, &Viewer::enablePostProcess);
 
         // Connect engine signals to the appropriate callbacks
-        std::function<void(void)> f =  std::bind(&MainWindow::onEntitiesUpdated, this);
+        std::function<void(void)> f = std::bind(&MainWindow::onEntitiesUpdated, this);
         mainApp->m_engine->getSignalManager()->m_entityCreatedCallbacks.push_back(f);
         mainApp->m_engine->getSignalManager()->m_entityDestroyedCallbacks.push_back(f);
         mainApp->m_engine->getSignalManager()->m_componentAddedCallbacks.push_back(f);
         mainApp->m_engine->getSignalManager()->m_componentRemovedCallbacks.push_back(f);
-
     }
 
     void Gui::MainWindow::onEntitiesUpdated()
@@ -143,79 +137,78 @@ namespace Ra
         std::replace(extListStd.begin(), extListStd.end(), ';', ' ');
         QString filter = QString::fromStdString(extListStd);
 
-        QString path = QFileDialog::getOpenFileName( this, "Open File", "..", filter);
-        if ( path.size() > 0 )
+        QString path = QFileDialog::getOpenFileName(this, "Open File", "..", filter);
+        if (path.size() > 0)
         {
-            emit fileLoading( path );
+            emit fileLoading(path);
         }
     }
 
-    void Gui::MainWindow::onUpdateFramestats( const std::vector<FrameTimerData>& stats )
+    void Gui::MainWindow::onUpdateFramestats(const std::vector<FrameTimerData>& stats)
     {
-        QString framesA2B = QString( "Frames #%1 to #%2 stats :" )
-                            .arg( stats.front().numFrame ).arg( stats.back().numFrame );
-        m_frameA2BLabel->setText( framesA2B );
+        QString framesA2B = QString("Frames #%1 to #%2 stats :").arg(stats.front().numFrame).arg(stats.back().numFrame);
+        m_frameA2BLabel->setText(framesA2B);
 
-        long sumEvents = 0;
-        long sumRender = 0;
-        long sumTasks = 0;
-        long sumFrame = 0;
+        long sumEvents     = 0;
+        long sumRender     = 0;
+        long sumTasks      = 0;
+        long sumFrame      = 0;
         long sumInterFrame = 0;
 
-        for ( uint i = 0; i < stats.size(); ++i )
+        for (uint i = 0; i < stats.size(); ++i)
         {
             sumEvents += Core::Timer::getIntervalMicro(stats[i].eventsStart, stats[i].eventsEnd);
-            sumRender += Core::Timer::getIntervalMicro(stats[i].renderData.renderStart, stats[i].renderData.renderEnd );
-            sumTasks  += Core::Timer::getIntervalMicro(stats[i].tasksStart, stats[i].tasksEnd );
-            sumFrame  += Core::Timer::getIntervalMicro(stats[i].frameStart, stats[i].frameEnd );
+            sumRender += Core::Timer::getIntervalMicro(stats[i].renderData.renderStart, stats[i].renderData.renderEnd);
+            sumTasks += Core::Timer::getIntervalMicro(stats[i].tasksStart, stats[i].tasksEnd);
+            sumFrame += Core::Timer::getIntervalMicro(stats[i].frameStart, stats[i].frameEnd);
 
-            if ( i > 0 )
+            if (i > 0)
             {
-                sumInterFrame += Core::Timer::getIntervalMicro(stats[i - 1].frameEnd, stats[i].frameEnd );
+                sumInterFrame += Core::Timer::getIntervalMicro(stats[i - 1].frameEnd, stats[i].frameEnd);
             }
         }
 
         const uint N = stats.size();
-        const Scalar T( N * 1000000.0 );
+        const Scalar T(N * 1000000.0);
 
         m_eventsTime->setValue(sumEvents / N);
         m_eventsUpdates->setValue(T / Scalar(sumEvents));
-        m_renderTime->setValue( sumRender / N );
-        m_renderUpdates->setValue( T / Scalar( sumRender ) );
-        m_tasksTime->setValue( sumTasks / N );
-        m_tasksUpdates->setValue( T / Scalar( sumTasks ) );
-        m_frameTime->setValue( sumFrame / N );
-        m_frameUpdates->setValue( T / Scalar( sumFrame ) );
-        m_avgFramerate->setValue( ( N - 1 ) * Scalar( 1000000.0 / sumInterFrame ) );
+        m_renderTime->setValue(sumRender / N);
+        m_renderUpdates->setValue(T / Scalar(sumRender));
+        m_tasksTime->setValue(sumTasks / N);
+        m_tasksUpdates->setValue(T / Scalar(sumTasks));
+        m_frameTime->setValue(sumFrame / N);
+        m_frameUpdates->setValue(T / Scalar(sumFrame));
+        m_avgFramerate->setValue((N - 1) * Scalar(1000000.0 / sumInterFrame));
     }
 
-    void Gui::MainWindow::keyPressEvent( QKeyEvent* event )
+    void Gui::MainWindow::keyPressEvent(QKeyEvent* event)
     {
-        QMainWindow::keyPressEvent( event );
-        m_keyEvents.push_back( keyEventQtToRadium( event ) );
+        QMainWindow::keyPressEvent(event);
+        m_keyEvents.push_back(keyEventQtToRadium(event));
     }
 
-    void Gui::MainWindow::keyReleaseEvent( QKeyEvent* event )
+    void Gui::MainWindow::keyReleaseEvent(QKeyEvent* event)
     {
-        QMainWindow::keyReleaseEvent( event );
-        m_keyEvents.push_back( keyEventQtToRadium( event ) );
+        QMainWindow::keyReleaseEvent(event);
+        m_keyEvents.push_back(keyEventQtToRadium(event));
     }
 
-    Core::MouseEvent Gui::MainWindow::wheelEventQtToRadium( const QWheelEvent* qtEvent )
+    Core::MouseEvent Gui::MainWindow::wheelEventQtToRadium(const QWheelEvent* qtEvent)
     {
         Core::MouseEvent raEvent;
         raEvent.wheelDelta = qtEvent->delta();
-        if ( qtEvent->modifiers().testFlag( Qt::ControlModifier ) )
+        if (qtEvent->modifiers().testFlag(Qt::ControlModifier))
         {
             raEvent.modifier |= Core::Modifier::RA_CTRL_KEY;
         }
 
-        if ( qtEvent->modifiers().testFlag( Qt::ShiftModifier ) )
+        if (qtEvent->modifiers().testFlag(Qt::ShiftModifier))
         {
             raEvent.modifier |= Core::Modifier::RA_SHIFT_KEY;
         }
 
-        if ( qtEvent->modifiers().testFlag( Qt::AltModifier ) )
+        if (qtEvent->modifiers().testFlag(Qt::AltModifier))
         {
             raEvent.modifier |= Core::Modifier::RA_ALT_KEY;
         }
@@ -225,10 +218,10 @@ namespace Ra
         return raEvent;
     }
 
-    Core::MouseEvent Gui::MainWindow::mouseEventQtToRadium( const QMouseEvent* qtEvent )
+    Core::MouseEvent Gui::MainWindow::mouseEventQtToRadium(const QMouseEvent* qtEvent)
     {
         Core::MouseEvent raEvent;
-        switch ( qtEvent->button() )
+        switch (qtEvent->button())
         {
             case Qt::LeftButton:
             {
@@ -250,22 +243,23 @@ namespace Ra
 
             default:
             {
-            } break;
+            }
+            break;
         }
 
         raEvent.modifier = 0;
 
-        if ( qtEvent->modifiers().testFlag( Qt::ControlModifier ) )
+        if (qtEvent->modifiers().testFlag(Qt::ControlModifier))
         {
             raEvent.modifier |= Core::Modifier::RA_CTRL_KEY;
         }
 
-        if ( qtEvent->modifiers().testFlag( Qt::ShiftModifier ) )
+        if (qtEvent->modifiers().testFlag(Qt::ShiftModifier))
         {
             raEvent.modifier |= Core::Modifier::RA_SHIFT_KEY;
         }
 
-        if ( qtEvent->modifiers().testFlag( Qt::AltModifier ) )
+        if (qtEvent->modifiers().testFlag(Qt::AltModifier))
         {
             raEvent.modifier |= Core::Modifier::RA_ALT_KEY;
         }
@@ -275,24 +269,24 @@ namespace Ra
         return raEvent;
     }
 
-    Core::KeyEvent Gui::MainWindow::keyEventQtToRadium( const QKeyEvent* qtEvent )
+    Core::KeyEvent Gui::MainWindow::keyEventQtToRadium(const QKeyEvent* qtEvent)
     {
         Core::KeyEvent raEvent;
         raEvent.key = qtEvent->key();
 
         raEvent.modifier = 0;
 
-        if ( qtEvent->modifiers().testFlag( Qt::ControlModifier ) )
+        if (qtEvent->modifiers().testFlag(Qt::ControlModifier))
         {
             raEvent.modifier |= Core::Modifier::RA_CTRL_KEY;
         }
 
-        if ( qtEvent->modifiers().testFlag( Qt::ShiftModifier ) )
+        if (qtEvent->modifiers().testFlag(Qt::ShiftModifier))
         {
             raEvent.modifier |= Core::Modifier::RA_SHIFT_KEY;
         }
 
-        if ( qtEvent->modifiers().testFlag( Qt::AltModifier ) )
+        if (qtEvent->modifiers().testFlag(Qt::AltModifier))
         {
             raEvent.modifier |= Core::Modifier::RA_ALT_KEY;
         }
@@ -304,69 +298,67 @@ namespace Ra
         return m_viewer;
     }
 
-    void Gui::MainWindow::handlePicking( int drawableIndex )
+    void Gui::MainWindow::handlePicking(int drawableIndex)
     {
         if (m_lastSelectedRO >= 0)
         {
 
-            if ( mainApp->m_engine->getRenderObjectManager()->exists( m_lastSelectedRO ))
+            if (mainApp->m_engine->getRenderObjectManager()->exists(m_lastSelectedRO))
             {
-                const std::shared_ptr<Engine::RenderObject>& ro =
-                    mainApp->m_engine->getRenderObjectManager()->getRenderObject( m_lastSelectedRO );
+                const std::shared_ptr<Engine::RenderObject>& ro = mainApp->m_engine->getRenderObjectManager()->getRenderObject(m_lastSelectedRO);
 
                 Engine::Component* comp = ro->getComponent();
                 Engine::Entity* ent = comp->getEntity();
-                comp->picked( -1 );
+                comp->picked(-1);
                 ent->picked(-1);
             }
         }
 
-        if ( drawableIndex >= 0 )
+        if (drawableIndex >= 0)
         {
-            const std::shared_ptr<Engine::RenderObject>& ro =
-                mainApp->m_engine->getRenderObjectManager()->getRenderObject( drawableIndex );
+            const std::shared_ptr<Engine::RenderObject>& ro = mainApp->m_engine->getRenderObjectManager()->getRenderObject(drawableIndex);
 
             // Ignore UI render objects.
-            if(ro->getType() == Engine::RenderObjectType::UI)
+            if (ro->getType() == Engine::RenderObjectType::UI)
             {
                 return;
             }
 
-            LOG( logDEBUG ) << "Picked RO: " << ro->idx.getValue();
-            LOG( logDEBUG ) << "RO Name  : " << ro->getName();
+            LOG(logDEBUG) << "Picked RO: " << ro->idx.getValue();
+            LOG(logDEBUG) << "RO Name  : " << ro->getName();
 
-            Engine::Component* comp = ro->getComponent();
+            Engine::Component* comp   = ro->getComponent();
             const Engine::Entity* ent = comp->getEntity();
-            int compIdx = -1;
+            int compIdx               = -1;
             int i = 0;
-            for ( const auto& c : ent->getComponents() )
+            for (const auto& c : ent->getComponents())
             {
-                if ( c.get() == comp )
+                if (c.get() == comp)
                 {
                     compIdx = i;
                     break;
                 }
                 ++i;
             }
-            CORE_ASSERT( compIdx >= 0, "Component is not in entity" );
-            Core::Index entIdx = ent->idx;
-            QModelIndex entityIdx = m_entityTreeModel->index( entIdx, 0 );
+            CORE_ASSERT(compIdx >= 0, "Component is not in entity");
+            Core::Index entIdx    = ent->idx;
+            QModelIndex entityIdx = m_entityTreeModel->index(entIdx, 0);
             QModelIndex treeIdx = entityIdx;
-            if ( comp->picked(drawableIndex)) // select component.
+            if (comp->picked(drawableIndex)) // select component.
             {
                 treeIdx = entityIdx.child(compIdx, 0);
             }
-            m_entitiesTreeView->setExpanded( entityIdx, true );
-            m_entitiesTreeView->selectionModel()->select( treeIdx, QItemSelectionModel::SelectCurrent );
+            m_entitiesTreeView->setExpanded(entityIdx, true);
+            m_entitiesTreeView->selectionModel()->select(treeIdx, QItemSelectionModel::SelectCurrent);
 
-            auto foundItems = m_renderObjectsListView->findItems( QString( ro->getName().c_str() ), Qt::MatchExactly );
-            if  ( foundItems.size() > 0 )
+            auto foundItems = m_renderObjectsListView->findItems(QString(ro->getName().c_str()), Qt::MatchExactly);
+            if (foundItems.size() > 0)
             {
-                m_renderObjectsListView->setCurrentItem( foundItems.at( 0 ) );
+                m_renderObjectsListView->setCurrentItem(foundItems.at(0));
             }
             else
             {
-                LOG( logERROR ) << "Not found";
+                LOG(logERROR) << "Not found";
             }
         }
         else
@@ -376,9 +368,9 @@ namespace Ra
         m_lastSelectedRO = drawableIndex;
     }
 
-    void Gui::MainWindow::onSelectionChanged( const QItemSelection& selected, const QItemSelection& deselected )
+    void Gui::MainWindow::onSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected)
     {
-        if ( selected.size() > 0 )
+        if (selected.size() > 0)
         {
             QModelIndex selIdx = selected.indexes()[0];
 
@@ -399,12 +391,12 @@ namespace Ra
         }
         else
         {
-            emit selectedEntity( nullptr );
-            emit selectedComponent( nullptr );
+            emit selectedEntity(nullptr);
+            emit selectedComponent(nullptr);
         }
     }
 
-    void Gui::MainWindow::closeEvent( QCloseEvent *event )
+    void Gui::MainWindow::closeEvent(QCloseEvent* event)
     {
         emit closed();
         event->accept();
@@ -425,13 +417,13 @@ namespace Ra
         m_viewer->getGizmoManager()->changeGizmoType(GizmoManager::ROTATION);
     }
 
-    void Gui::MainWindow::displayEntityRenderObjects( Engine::Entity* entity )
+    void Gui::MainWindow::displayEntityRenderObjects(Engine::Entity* entity)
     {
         m_renderObjectsListView->clear();
-        m_currentShaderBox->setCurrentText( "" );
+        m_currentShaderBox->setCurrentText("");
 
         // NOTE(Charly): When clicking on UI stuff, the returned entity is null
-        if ( nullptr == entity )
+        if (nullptr == entity)
         {
             m_selectedStuffName->clear();
             return;
@@ -439,87 +431,87 @@ namespace Ra
 
         m_renderObjectsListView->clear();
 
-        QString text( "Entity : " );
-        text.append( entity->getName().c_str() );
-        m_selectedStuffName->setText( text );
+        QString text("Entity : ");
+        text.append(entity->getName().c_str());
+        m_selectedStuffName->setText(text);
 
 
-        for ( const auto& comp : entity->getComponents())
+        for (const auto& comp : entity->getComponents())
         {
-            displayRenderObjects( comp.get() );
+            displayRenderObjects(comp.get());
         }
     }
 
-    void Gui::MainWindow::displayComponentRenderObjects( Engine::Component* component )
+    void Gui::MainWindow::displayComponentRenderObjects(Engine::Component* component)
     {
         // NOTE(Charly): When clicking on UI stuff, or on nothing, the returned component is null
         m_renderObjectsListView->clear();
-        m_currentShaderBox->setCurrentText( "" );
+        m_currentShaderBox->setCurrentText("");
 
-        if ( nullptr == component )
+        if (nullptr == component)
         {
             m_selectedStuffName->clear();
             return;
         }
 
-        QString text( "Entity : " );
-        text.append( component->getName().c_str() );
-        m_selectedStuffName->setText( text );
+        QString text("Entity : ");
+        text.append(component->getName().c_str());
+        m_selectedStuffName->setText(text);
 
-        displayRenderObjects( component );
+        displayRenderObjects(component);
     }
 
-    void Gui::MainWindow::displayRenderObjects( Engine::Component* component )
+    void Gui::MainWindow::displayRenderObjects(Engine::Component* component)
     {
         auto roMgr = Engine::RadiumEngine::getInstance()->getRenderObjectManager();
-        for ( Core::Index idx : component->m_renderObjects )
+        for (Core::Index idx : component->m_renderObjects)
         {
-            QString name = roMgr->getRenderObject( idx )->getName().c_str();
+            QString name = roMgr->getRenderObject(idx)->getName().c_str();
 
-            QListWidgetItem* item = new QListWidgetItem( name, m_renderObjectsListView );
-            item->setData( 1, QVariant( idx.getValue() ) );
+            QListWidgetItem* item = new QListWidgetItem(name, m_renderObjectsListView);
+            item->setData(1, QVariant(idx.getValue()));
         }
     }
 
-    void Gui::MainWindow::renderObjectListItemClicked( int idx )
+    void Gui::MainWindow::renderObjectListItemClicked(int idx)
     {
-        if ( idx < 0 )
+        if (idx < 0)
         {
             // Got out of scope
             return;
         }
 
-        QListWidgetItem* item = m_renderObjectsListView->item( idx );
-        Core::Index itemIdx( item->data( 1 ).toInt() );
+        QListWidgetItem* item = m_renderObjectsListView->item(idx);
+        Core::Index itemIdx(item->data(1).toInt());
 
         auto roMgr = Engine::RadiumEngine::getInstance()->getRenderObjectManager();
-        auto ro = roMgr->getRenderObject( itemIdx );
+        auto ro    = roMgr->getRenderObject(itemIdx);
 
         auto shaderName = ro->getRenderTechnique()->shader->getBasicConfiguration().m_name;
 
-        m_materialEditor->changeRenderObject( ro->idx );
+        m_materialEditor->changeRenderObject(ro->idx);
 
-        if ( m_currentShaderBox->findText( shaderName.c_str() ) == -1 )
+        if (m_currentShaderBox->findText(shaderName.c_str()) == -1)
         {
-            m_currentShaderBox->addItem( QString( shaderName.c_str() ) );
-            m_currentShaderBox->setCurrentText( shaderName.c_str() );
+            m_currentShaderBox->addItem(QString(shaderName.c_str()));
+            m_currentShaderBox->setCurrentText(shaderName.c_str());
         }
         else
         {
-            m_currentShaderBox->setCurrentText( shaderName.c_str() );
+            m_currentShaderBox->setCurrentText(shaderName.c_str());
         }
     }
 
-    void Gui::MainWindow::changeRenderObjectShader( const QString& shaderName )
+    void Gui::MainWindow::changeRenderObjectShader(const QString& shaderName)
     {
         std::string name = shaderName.toStdString();
-        if ( name == "" )
+        if (name == "")
         {
             return;
         }
 
         auto ro = getSelectedRO();
-        if ( ro == nullptr )
+        if (ro == nullptr)
         {
             return;
         }
@@ -537,7 +529,7 @@ namespace Ra
     {
         auto ro = getSelectedRO();
 
-        if ( ro == nullptr )
+        if (ro == nullptr)
         {
             return;
         }
@@ -549,7 +541,7 @@ namespace Ra
     {
         auto ro = getSelectedRO();
 
-        if ( ro == nullptr )
+        if (ro == nullptr)
         {
             return;
         }
@@ -560,7 +552,7 @@ namespace Ra
     void Gui::MainWindow::editRO()
     {
         auto ro = getSelectedRO();
-        m_materialEditor->changeRenderObject( ro ? ro->idx : Core::Index::INVALID_IDX() );
+        m_materialEditor->changeRenderObject(ro ? ro->idx : Core::Index::INVALID_IDX());
         m_materialEditor->show();
     }
 
@@ -568,15 +560,15 @@ namespace Ra
     {
         QListWidgetItem* item = m_renderObjectsListView->currentItem();
 
-        if ( nullptr == item )
+        if (nullptr == item)
         {
             return nullptr;
         }
 
-        Core::Index itemIdx( item->data( 1 ).toInt() );
+        Core::Index itemIdx(item->data(1).toInt());
 
         auto roMgr = Engine::RadiumEngine::getInstance()->getRenderObjectManager();
-        auto ro = roMgr->getRenderObject( itemIdx );
+        auto ro    = roMgr->getRenderObject(itemIdx);
 
         return ro;
     }
@@ -586,38 +578,32 @@ namespace Ra
         m_materialEditor->show();
     }
 
-    void Gui::MainWindow::updateUi( Plugins::RadiumPluginInterface *plugin )
+    void Gui::MainWindow::updateUi(Plugins::RadiumPluginInterface* plugin)
     {
         QString tabName;
 
-        if ( plugin->doAddMenu() )
+        if (plugin->doAddMenu())
         {
-            QMainWindow::menuBar()->addMenu( plugin->getMenu() );
+            QMainWindow::menuBar()->addMenu(plugin->getMenu());
             // Add menu
         }
 
-        if ( plugin->doAddWidget( tabName ) )
+        if (plugin->doAddWidget(tabName))
         {
-            toolBox->addItem( plugin->getWidget(), tabName );
+            toolBox->addItem(plugin->getWidget(), tabName);
         }
     }
 
     void Gui::MainWindow::onRendererReady()
     {
         m_viewer->getCameraInterface()->resetCamera();
+        m_viewer->updateTextureNames();
 
-        QSignalBlocker blockTextures( m_displayedTextureCombo );
-        QSignalBlocker blockRenderer( m_currentRendererCombo );
+        QSignalBlocker blockRenderer(m_currentRendererCombo);
 
-        auto texs = m_viewer->getRenderer()->getAvailableTextures();
-        for ( const auto& tex : texs )
+        for (const auto& renderer : m_viewer->getRenderersName())
         {
-            m_displayedTextureCombo->addItem( tex.c_str() );
-        }
-
-        for ( const auto& renderer : m_viewer->getRenderersName() )
-        {
-            m_currentRendererCombo->addItem( renderer.c_str() );
+            m_currentRendererCombo->addItem(renderer.c_str());
         }
     }
 

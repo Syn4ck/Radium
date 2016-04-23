@@ -13,6 +13,9 @@ in VS_OUT
     vec3 eye;
 } fs_in;
 
+vec3 getPosition() { return fs_in.position; }
+vec3 getEye() { return fs_in.eye; }
+
 #include "LightingFunctions.glsl"
 
 void main()

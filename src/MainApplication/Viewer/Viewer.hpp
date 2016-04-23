@@ -2,7 +2,7 @@
 #define RADIUMENGINE_VIEWER_HPP
 
 #include <Core/CoreMacros.hpp>
-#if defined (OS_WINDOWS)
+#if defined(OS_WINDOWS)
 #include <Engine/Renderer/OpenGL/glew.h>
 #endif
 
@@ -73,7 +73,7 @@ namespace Ra
 
         public:
             /// CONSTRUCTOR
-            explicit Viewer( QWidget* parent = nullptr );
+            explicit Viewer(QWidget* parent = nullptr);
 
             /// DESTRUCTOR
             ~Viewer();
@@ -99,40 +99,34 @@ namespace Ra
             }
 
             /// Start asynchronous rendering in a separate thread.
-            void startRendering( const Scalar dt );
+            void startRendering(const Scalar dt);
 
             /// Blocks until rendering is finished.
             void waitForRendering();
 
             ///
-            void handleFileLoading( const std::string& file );
+            void handleFileLoading(const std::string& file);
 
             /// Emits signals corresponding to picking requests.
             void processPicking();
 
-            void fitCameraToScene( const Core::Aabb& sceneAabb );
+            void fitCameraToScene(const Core::Aabb& sceneAabb);
 
             std::vector<std::string> getRenderersName() const;
 
+            void updateTextureNames();
+
         signals:
             void rendererReady();
-            void leftClickPicking( int id );
-            void rightClickPicking( int id );
+            void leftClickPicking(int id);
+            void rightClickPicking(int id);
 
         public slots:
             /// Tell the renderer to reload all shaders.
             void reloadShaders();
-            void displayTexture( const QString& tex );
-            void changeRenderer( int index );
+            void displayTexture(const QString& tex);
+            void changeRenderer(int index);
             void enablePostProcess(int enabled);
-
-        private slots:
-            /// These slots are connected to the base class signals to properly handle
-            /// concurrent access to the renderer.
-            void onAboutToCompose();
-            void onAboutToResize();
-            void onFrameSwapped();
-            void onResized();
 
         private:
             /// QOpenGlWidget primitives
@@ -141,23 +135,25 @@ namespace Ra
             virtual void initializeGL() override;
 
             /// Resize the view port and the camera. Called by the resize event.
-            virtual void resizeGL( int width, int height ) override;
+            virtual void resizeGL(int width, int height) override;
 
             /// Paint event is set to a no-op to prevent synchronous rendering.
             /// We don't implement paintGL as well.
-            virtual void paintEvent( QPaintEvent* e ) override {}
+            virtual void paintEvent(QPaintEvent* e) override
+            {
+            }
 
             /// INTERACTION
 
-            virtual void keyPressEvent( QKeyEvent* event ) override;
-            virtual void keyReleaseEvent( QKeyEvent* event ) override;
+            virtual void keyPressEvent(QKeyEvent* event) override;
+            virtual void keyReleaseEvent(QKeyEvent* event) override;
 
             /// We intercept the mouse events in this widget to get the coordinates of the mouse
             /// in screen space.
-            virtual void mousePressEvent( QMouseEvent* event ) override;
-            virtual void mouseReleaseEvent( QMouseEvent* event ) override;
-            virtual void mouseMoveEvent( QMouseEvent* event ) override;
-            virtual void wheelEvent( QWheelEvent* event ) override;
+            virtual void mousePressEvent(QMouseEvent* event) override;
+            virtual void mouseReleaseEvent(QMouseEvent* event) override;
+            virtual void mouseMoveEvent(QMouseEvent* event) override;
+            virtual void wheelEvent(QWheelEvent* event) override;
 
 
         private:
@@ -170,9 +166,6 @@ namespace Ra
 
             /// Owning (QObject child) pointer to gizmo manager.
             GizmoManager* m_gizmoManager;
-
-            /// Thread in which rendering is done.
-            QThread* m_renderThread; // We have to use a QThread for MT rendering
         };
 
     } // namespace Gui

@@ -287,6 +287,7 @@ namespace Ra
                 message = getShaderInfoLog( m_id );
                 wrongline = lineParseGLMesg(message) - 2;
                 error << "\nUnable to compile " << lineFind(wrongline);
+                error << "\n" << message << "\n";
 
                 glDeleteShader( m_id );
 

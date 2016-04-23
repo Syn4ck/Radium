@@ -14,7 +14,6 @@ out vec4 fragColor;
 
 #include "Helpers.glsl"
 
-
 void main()
 {
     if ( material.tex.hasKd == 1 )

@@ -1,11 +1,5 @@
 #include <Engine/Renderer/Renderers/ForwardRenderer.hpp>
 
-#include <iostream>
-
-#include <assimp/Importer.hpp>
-#include <assimp/scene.h>
-#include <assimp/postprocess.h>
-
 #include <Core/Log/Log.hpp>
 #include <Core/Math/ColorPresets.hpp>
 
@@ -18,10 +12,6 @@
 #include <Engine/Renderer/RenderTechnique/ShaderProgram.hpp>
 #include <Engine/Renderer/RenderTechnique/RenderParameters.hpp>
 #include <Engine/Renderer/Light/Light.hpp>
-#include <Engine/Renderer/Light/DirLight.hpp>
-#include <Engine/Renderer/Light/DirLight.hpp>
-#include <Engine/Renderer/Light/PointLight.hpp>
-#include <Engine/Renderer/Light/SpotLight.hpp>
 #include <Engine/Renderer/Mesh/Mesh.hpp>
 #include <Engine/Renderer/Texture/TextureManager.hpp>
 #include <Engine/Renderer/Texture/Texture.hpp>
@@ -35,39 +25,25 @@ namespace Ra
 
         namespace
         {
-            const GLenum buffers[] =
-            {
-                GL_COLOR_ATTACHMENT0,
-                GL_COLOR_ATTACHMENT1,
-                GL_COLOR_ATTACHMENT2,
-                GL_COLOR_ATTACHMENT3,
-                GL_COLOR_ATTACHMENT4,
-                GL_COLOR_ATTACHMENT5,
-                GL_COLOR_ATTACHMENT6,
-                GL_COLOR_ATTACHMENT7
-            };
+            const GLenum buffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3, GL_COLOR_ATTACHMENT4, GL_COLOR_ATTACHMENT5, GL_COLOR_ATTACHMENT6, GL_COLOR_ATTACHMENT7 };
         }
 
-        ForwardRenderer::ForwardRenderer( uint width, uint height )
-            : Renderer( width, height )
-            , m_fbo( nullptr )
-            , m_postprocessFbo( nullptr )
+        ForwardRenderer::ForwardRenderer(uint width, uint height)
+            : Renderer(width, height)
+            , m_fbo(nullptr)
+            , m_postprocessFbo(nullptr)
             , m_pingPongFbo(nullptr)
         {
         }
 
         ForwardRenderer::~ForwardRenderer()
         {
-            ShaderProgramManager::destroyInstance();
         }
 
         void ForwardRenderer::initializeInternal()
         {
             initShaders();
             initBuffers();
-
-            DebugRender::createInstance();
-            DebugRender::getInstance()->initialize();
         }
 
         void ForwardRenderer::initShaders()
@@ -83,15 +59,15 @@ namespace Ra
 
         void ForwardRenderer::initBuffers()
         {
-            m_fbo.reset( new FBO( FBO::Components( FBO::COLOR | FBO::DEPTH ), m_width, m_height ) );
-            m_postprocessFbo.reset( new FBO( FBO::Components( FBO::COLOR ), m_width, m_height ) );
+            m_fbo.reset(new FBO(FBO::Components(FBO::COLOR | FBO::DEPTH), m_width, m_height));
+            m_postprocessFbo.reset(new FBO(FBO::Components(FBO::COLOR), m_width, m_height));
             m_pingPongFbo.reset(new FBO(FBO::Components(FBO::COLOR), 1, 1));
             m_bloomFbo.reset(new FBO(FBO::Components(FBO::COLOR), m_width / 8, m_height / 8));
 
             // Render pass
-            m_textures[TEX_DEPTH].reset( new Texture( "Depth", GL_TEXTURE_2D ) );
-            m_textures[TEX_NORMAL].reset( new Texture( "Normal", GL_TEXTURE_2D ) );
-            m_textures[TEX_LIT].reset( new Texture( "HDR", GL_TEXTURE_2D ) );
+            m_textures[TEX_DEPTH].reset(new Texture("Depth", GL_TEXTURE_2D));
+            m_textures[TEX_NORMAL].reset(new Texture("Normal", GL_TEXTURE_2D));
+            m_textures[TEX_LIT].reset(new Texture("HDR", GL_TEXTURE_2D));
             m_textures[TEX_LUMINANCE].reset(new Texture("Luminance", GL_TEXTURE_2D));
             m_textures[TEX_TONEMAPPED].reset(new Texture("Tonemapped", GL_TEXTURE_2D));
             m_textures[TEX_BLOOM_PING].reset(new Texture("Bloom Ping", GL_TEXTURE_2D));
@@ -99,23 +75,23 @@ namespace Ra
             m_textures[TEX_TONEMAP_PING].reset(new Texture("Minmax Ping", GL_TEXTURE_2D));
             m_textures[TEX_TONEMAP_PONG].reset(new Texture("Minmax Pong", GL_TEXTURE_2D));
 
-            m_secondaryTextures["Depth Texture"]        = m_textures[TEX_DEPTH].get();
-            m_secondaryTextures["Normal Texture"]       = m_textures[TEX_NORMAL].get();
-            m_secondaryTextures["HDR Texture"]          = m_textures[TEX_LIT].get();
-            m_secondaryTextures["Luminance Texture"]    = m_textures[TEX_LUMINANCE].get();
-            m_secondaryTextures["Tonemapped Texture"]   = m_textures[TEX_TONEMAPPED].get();
-            m_secondaryTextures["Bloom Texture 1"]      = m_textures[TEX_BLOOM_PING].get();
-            m_secondaryTextures["Bloom Texture 2"]      = m_textures[TEX_BLOOM_PONG].get();
-            m_secondaryTextures["Tonemaping Texture 1"] = m_textures[TEX_TONEMAP_PING].get();
-            m_secondaryTextures["Tonemaping Texture 2"] = m_textures[TEX_TONEMAP_PONG].get();
+            m_secondaryTextures["Forward Renderer"]["Depth Texture"]        = m_textures[TEX_DEPTH].get();
+            m_secondaryTextures["Forward Renderer"]["Normal Texture"]       = m_textures[TEX_NORMAL].get();
+            m_secondaryTextures["Forward Renderer"]["HDR Texture"]          = m_textures[TEX_LIT].get();
+            m_secondaryTextures["Forward Renderer"]["Luminance Texture"]    = m_textures[TEX_LUMINANCE].get();
+            m_secondaryTextures["Forward Renderer"]["Tonemapped Texture"]   = m_textures[TEX_TONEMAPPED].get();
+            m_secondaryTextures["Forward Renderer"]["Bloom Texture 1"]      = m_textures[TEX_BLOOM_PING].get();
+            m_secondaryTextures["Forward Renderer"]["Bloom Texture 2"]      = m_textures[TEX_BLOOM_PONG].get();
+            m_secondaryTextures["Forward Renderer"]["Tonemaping Texture 1"] = m_textures[TEX_TONEMAP_PING].get();
+            m_secondaryTextures["Forward Renderer"]["Tonemaping Texture 2"] = m_textures[TEX_TONEMAP_PONG].get();
         }
 
-        void ForwardRenderer::updateStepInternal( const RenderData& renderData )
+        void ForwardRenderer::updateStepInternal(const RenderData& renderData)
         {
             // Do nothing right now
         }
 
-        void ForwardRenderer::renderInternal( const RenderData& renderData )
+        void ForwardRenderer::renderInternal(const RenderData& renderData)
         {
             // FIXME(Charly): Do a bit of cleanup in the forward renderer
             // (e.g. Remove the "depth ambient pass")
@@ -123,27 +99,27 @@ namespace Ra
 
             m_fbo->useAsTarget();
 
-            GL_ASSERT( glDepthMask( GL_TRUE ) );
-            GL_ASSERT( glColorMask( 1, 1, 1, 1 ) );
+            GL_ASSERT(glDepthMask(GL_TRUE));
+            GL_ASSERT(glColorMask(1, 1, 1, 1));
 
-            GL_ASSERT( glDrawBuffers( 2, buffers ) );
+            GL_ASSERT(glDrawBuffers(2, buffers));
 
             const Core::Colorf clearColor = Core::Colors::FromChars<Core::Colorf>(42, 42, 42, 0);
             const Core::Colorf clearZeros = Core::Colors::Black<Core::Colorf>();
-            const float clearDepth( 1.0 );
+            const float clearDepth(1.0);
 
-            GL_ASSERT( glClearBufferfv( GL_COLOR, 0, clearZeros.data() ) );   // Clear normals
-            GL_ASSERT( glClearBufferfv( GL_COLOR, 1, clearColor.data() ) );   // Clear color
-            GL_ASSERT( glClearBufferfv( GL_DEPTH, 0, &clearDepth ) );   // Clear depth
+            GL_ASSERT(glClearBufferfv(GL_COLOR, 0, clearZeros.data())); // Clear normals
+            GL_ASSERT(glClearBufferfv(GL_COLOR, 1, clearColor.data())); // Clear color
+            GL_ASSERT(glClearBufferfv(GL_DEPTH, 0, &clearDepth));       // Clear depth
 
             // Z prepass
-            GL_ASSERT( glEnable( GL_DEPTH_TEST ) );
-            GL_ASSERT( glDepthFunc( GL_LESS ) );
-            GL_ASSERT( glDepthMask( GL_TRUE ) );
+            GL_ASSERT(glEnable(GL_DEPTH_TEST));
+            GL_ASSERT(glDepthFunc(GL_LESS));
+            GL_ASSERT(glDepthMask(GL_TRUE));
 
-            GL_ASSERT( glDisable( GL_BLEND ) );
+            GL_ASSERT(glDisable(GL_BLEND));
 
-            GL_ASSERT( glDrawBuffers( 1, buffers ) );
+            GL_ASSERT(glDrawBuffers(1, buffers));
 
             if (m_wireframe)
             {
@@ -156,20 +132,20 @@ namespace Ra
 
             shader = m_shaderMgr->getShaderProgram("DepthAmbientPass");
             shader->bind();
-            for ( const auto& ro : m_fancyRenderObjects )
+            for (const auto& ro : m_fancyRenderObjects)
             {
-                if ( ro->isVisible() )
+                if (ro->isVisible())
                 {
                     // bind data
                     Core::Matrix4 M = ro->getTransformAsMatrix();
                     Core::Matrix4 N = M.inverse().transpose();
 
-                    shader->setUniform( "transform.proj", renderData.projMatrix );
-                    shader->setUniform( "transform.view", renderData.viewMatrix );
-                    shader->setUniform( "transform.model", M );
-                    shader->setUniform( "transform.worldNormal", N );
+                    shader->setUniform("transform.proj", renderData.projMatrix);
+                    shader->setUniform("transform.view", renderData.viewMatrix);
+                    shader->setUniform("transform.model", M);
+                    shader->setUniform("transform.worldNormal", N);
 
-                    ro->getRenderTechnique()->material->bind( shader );
+                    ro->getRenderTechnique()->material->bind(shader);
 
                     // render
                     ro->getMesh()->render();
@@ -177,25 +153,25 @@ namespace Ra
             }
 
             // Light pass
-            GL_ASSERT( glDepthFunc( GL_LEQUAL ) );
-            GL_ASSERT( glDepthMask( GL_FALSE ) );
+            GL_ASSERT(glDepthFunc(GL_LEQUAL));
+            GL_ASSERT(glDepthMask(GL_FALSE));
 
-            GL_ASSERT( glEnable( GL_BLEND ) );
-            GL_ASSERT( glBlendFunc( GL_ONE, GL_ONE ) );
+            GL_ASSERT(glEnable(GL_BLEND));
+            GL_ASSERT(glBlendFunc(GL_ONE, GL_ONE));
 
-            GL_ASSERT( glDrawBuffers( 1, buffers + 1 ) );   // Draw color texture
+            GL_ASSERT(glDrawBuffers(1, buffers + 1)); // Draw color texture
 
-            if ( m_lights.size() > 0 )
+            if (m_lights.size() > 0)
             {
-                for ( const auto& l : m_lights )
+                for (const auto& l : m_lights)
                 {
                     // TODO(Charly): Light render params
                     RenderParameters params;
-                    l->getRenderParameters( params );
+                    l->getRenderParameters(params);
 
-                    for ( const auto& ro : m_fancyRenderObjects )
+                    for (const auto& ro : m_fancyRenderObjects)
                     {
-                        if ( ro->isVisible() )
+                        if (ro->isVisible())
                         {
                             shader = ro->getRenderTechnique()->shader;
 
@@ -205,13 +181,13 @@ namespace Ra
                             Core::Matrix4 M = ro->getTransformAsMatrix();
                             Core::Matrix4 N = M.inverse().transpose();
 
-                            shader->setUniform( "transform.proj", renderData.projMatrix );
-                            shader->setUniform( "transform.view", renderData.viewMatrix );
-                            shader->setUniform( "transform.model", M );
-                            shader->setUniform( "transform.worldNormal", N );
-                            params.bind( shader );
+                            shader->setUniform("transform.proj", renderData.projMatrix);
+                            shader->setUniform("transform.view", renderData.viewMatrix);
+                            shader->setUniform("transform.model", M);
+                            shader->setUniform("transform.worldNormal", N);
+                            params.bind(shader);
 
-                            ro->getRenderTechnique()->material->bind( shader );
+                            ro->getRenderTechnique()->material->bind(shader);
 
                             // render
                             ro->getMesh()->render();
@@ -221,24 +197,24 @@ namespace Ra
             }
             else
             {
-                DirectionalLight l;
-                l.setDirection( Core::Vector3( 0.3, -1.0, 0.0 ) );
+                Light l       = Light::DirLight();
+                l.m_direction = Core::Vector3(0.3, -1.0, 0.0);
 
                 RenderParameters params;
-                l.getRenderParameters( params );
+                l.getRenderParameters(params);
 
-                for ( const auto& ro : m_fancyRenderObjects )
+                for (const auto& ro : m_fancyRenderObjects)
                 {
                     shader = ro->getRenderTechnique()->shader;
 
                     // bind data
                     shader->bind();
-                    shader->setUniform( "proj", renderData.projMatrix );
-                    shader->setUniform( "view", renderData.viewMatrix );
-                    shader->setUniform( "model", ro->getLocalTransformAsMatrix() );
-                    params.bind( shader );
+                    shader->setUniform("proj", renderData.projMatrix);
+                    shader->setUniform("view", renderData.viewMatrix);
+                    shader->setUniform("model", ro->getLocalTransformAsMatrix());
+                    params.bind(shader);
 
-                    ro->getRenderTechnique()->material->bind( shader );
+                    ro->getRenderTechnique()->material->bind(shader);
 
                     // render
                     ro->getMesh()->render();
@@ -252,15 +228,15 @@ namespace Ra
             }
 
             // Draw debug stuff, do not overwrite depth map but do depth testing
-            GL_ASSERT( glDisable( GL_BLEND ) );
-            GL_ASSERT( glDepthMask( GL_FALSE ) );
-            GL_ASSERT( glEnable( GL_DEPTH_TEST ) );
-            GL_ASSERT( glDepthFunc( GL_LESS ) );
-            if ( m_drawDebug )
+            GL_ASSERT(glDisable(GL_BLEND));
+            GL_ASSERT(glDepthMask(GL_FALSE));
+            GL_ASSERT(glEnable(GL_DEPTH_TEST));
+            GL_ASSERT(glDepthFunc(GL_LESS));
+            if (m_drawDebug)
             {
-                for ( const auto& ro : m_debugRenderObjects )
+                for (const auto& ro : m_debugRenderObjects)
                 {
-                    if ( ro->isVisible() )
+                    if (ro->isVisible())
                     {
                         shader = ro->getRenderTechnique()->shader;
 
@@ -268,31 +244,29 @@ namespace Ra
                         shader->bind();
 
                         Core::Matrix4 M = ro->getTransformAsMatrix();
-                        shader->setUniform( "transform.proj", renderData.projMatrix );
-                        shader->setUniform( "transform.view", renderData.viewMatrix );
-                        shader->setUniform( "transform.model", M );
+                        shader->setUniform("transform.proj", renderData.projMatrix);
+                        shader->setUniform("transform.view", renderData.viewMatrix);
+                        shader->setUniform("transform.model", M);
 
-                        ro->getRenderTechnique()->material->bind( shader );
+                        ro->getRenderTechnique()->material->bind(shader);
 
                         // render
                         ro->getMesh()->render();
                     }
                 }
 
-                DebugRender::getInstance()->render(renderData.viewMatrix, 
-                                                   renderData.projMatrix);
-
+                DebugRender::getInstance()->render(renderData.viewMatrix, renderData.projMatrix);
             }
 
             // Draw X rayed objects always on top of normal objects
-            GL_ASSERT( glDepthMask( GL_TRUE ) );
-            GL_ASSERT( glClear( GL_DEPTH_BUFFER_BIT ) );
-            GL_ASSERT( glClearBufferfv( GL_DEPTH, 0, &clearDepth ) );
-            if ( m_drawDebug )
+            GL_ASSERT(glDepthMask(GL_TRUE));
+            GL_ASSERT(glClear(GL_DEPTH_BUFFER_BIT));
+            GL_ASSERT(glClearBufferfv(GL_DEPTH, 0, &clearDepth));
+            if (m_drawDebug)
             {
-                for ( const auto& ro : m_xrayRenderObjects )
+                for (const auto& ro : m_xrayRenderObjects)
                 {
-                    if ( ro->isVisible() )
+                    if (ro->isVisible())
                     {
                         shader = ro->getRenderTechnique()->shader;
 
@@ -300,11 +274,11 @@ namespace Ra
                         shader->bind();
 
                         Core::Matrix4 M = ro->getTransformAsMatrix();
-                        shader->setUniform( "transform.proj", renderData.projMatrix );
-                        shader->setUniform( "transform.view", renderData.viewMatrix );
-                        shader->setUniform( "transform.model", M );
+                        shader->setUniform("transform.proj", renderData.projMatrix);
+                        shader->setUniform("transform.view", renderData.viewMatrix);
+                        shader->setUniform("transform.model", M);
 
-                        ro->getRenderTechnique()->material->bind( shader );
+                        ro->getRenderTechnique()->material->bind(shader);
 
                         // render
                         ro->getMesh()->render();
@@ -313,33 +287,33 @@ namespace Ra
             }
 
             // Draw UI stuff, always drawn on top of everything else
-            GL_ASSERT( glDepthMask( GL_TRUE ) );
-            GL_ASSERT( glClear( GL_DEPTH_BUFFER_BIT ) );
-            GL_ASSERT( glClearBufferfv( GL_DEPTH, 0, &clearDepth ) );
-            for ( const auto& ro : m_uiRenderObjects )
+            GL_ASSERT(glDepthMask(GL_TRUE));
+            GL_ASSERT(glClear(GL_DEPTH_BUFFER_BIT));
+            GL_ASSERT(glClearBufferfv(GL_DEPTH, 0, &clearDepth));
+            for (const auto& ro : m_uiRenderObjects)
             {
-                if ( ro->isVisible() )
+                if (ro->isVisible())
                 {
                     shader = ro->getRenderTechnique()->shader;
 
                     // bind data
                     shader->bind();
 
-                    Core::Matrix4 M = ro->getTransformAsMatrix();
+                    Core::Matrix4 M  = ro->getTransformAsMatrix();
                     Core::Matrix4 MV = renderData.viewMatrix * M;
-                    Core::Vector3 V = MV.block<3, 1>( 0, 3 );
-                    Scalar d = V.norm();
+                    Core::Vector3 V  = MV.block<3, 1>(0, 3);
+                    Scalar d         = V.norm();
 
                     Core::Matrix4 S = Core::Matrix4::Identity();
-                    S( 0, 0 ) = S( 1, 1 ) = S( 2, 2 ) = d;
+                    S(0, 0) = S(1, 1) = S(2, 2) = d;
 
                     M = M * S;
 
-                    shader->setUniform( "transform.proj", renderData.projMatrix );
-                    shader->setUniform( "transform.view", renderData.viewMatrix );
-                    shader->setUniform( "transform.model", M );
+                    shader->setUniform("transform.proj", renderData.projMatrix);
+                    shader->setUniform("transform.view", renderData.viewMatrix);
+                    shader->setUniform("transform.model", M);
 
-                    ro->getRenderTechnique()->material->bind( shader );
+                    ro->getRenderTechnique()->material->bind(shader);
 
                     // render
                     ro->getMesh()->render();
@@ -347,29 +321,29 @@ namespace Ra
             }
 
             // Restore state
-            GL_ASSERT( glDepthFunc( GL_LESS ) );
-            GL_ASSERT( glDisable( GL_BLEND ) );
-            GL_ASSERT( glDepthMask( GL_TRUE ) );
-            GL_ASSERT( glDepthFunc( GL_LESS ) );
+            GL_ASSERT(glDepthFunc(GL_LESS));
+            GL_ASSERT(glDisable(GL_BLEND));
+            GL_ASSERT(glDepthMask(GL_TRUE));
+            GL_ASSERT(glDepthFunc(GL_LESS));
 
             m_fbo->unbind();
         }
 
-        void ForwardRenderer::postProcessInternal( const RenderData& renderData )
+        void ForwardRenderer::postProcessInternal(const RenderData& renderData)
         {
-            CORE_UNUSED( renderData );
+            CORE_UNUSED(renderData);
 
-            m_postprocessFbo->useAsTarget( m_width, m_height );
+            m_postprocessFbo->useAsTarget(m_width, m_height);
 
-            GL_ASSERT( glDepthMask( GL_TRUE ) );
-            GL_ASSERT( glColorMask( 1, 1, 1, 1 ) );
+            GL_ASSERT(glDepthMask(GL_TRUE));
+            GL_ASSERT(glColorMask(1, 1, 1, 1));
 
             // FIXME(Charly): Do we really need to clear buffers ?
-            GL_ASSERT(glClearColor( 1.0, 1.0, 0.0, 0.0 ) );
+            GL_ASSERT(glClearColor(1.0, 1.0, 0.0, 0.0));
             GL_ASSERT(glDrawBuffers(5, buffers));
-            m_postprocessFbo->clear( FBO::Components( FBO::COLOR) );
+            m_postprocessFbo->clear(FBO::Components(FBO::COLOR));
 
-            GL_ASSERT(glDepthFunc( GL_ALWAYS ) );
+            GL_ASSERT(glDepthFunc(GL_ALWAYS));
 
             const ShaderProgram* shader = nullptr;
 
@@ -400,7 +374,7 @@ namespace Ra
                 {
                     size /= 2;
                     // Ping pong between textures
-                    GL_ASSERT(glDrawBuffers(1, buffers + (ping + 1)%2));
+                    GL_ASSERT(glDrawBuffers(1, buffers + (ping + 1) % 2));
                     GL_ASSERT(glViewport(0, 0, size, size));
 
                     shader->setUniform("color", m_textures[TEX_TONEMAP_PING + ping].get(), 0);
@@ -467,7 +441,7 @@ namespace Ra
                 shader->setUniform("texBloom", m_textures[TEX_BLOOM_PING].get(), 1);
                 m_quadMesh->render();
 
-                GL_ASSERT( glDepthFunc( GL_LESS ) );
+                GL_ASSERT(glDepthFunc(GL_LESS));
                 m_postprocessFbo->unbind();
             }
             else
@@ -496,20 +470,20 @@ namespace Ra
             m_textures[TEX_BLOOM_PONG]->initGL(GL_RGBA32F, m_width / 8, m_height / 8, GL_RGBA, GL_FLOAT, nullptr);
 
             m_fbo->bind();
-            m_fbo->setSize( m_width, m_height );
-            m_fbo->attachTexture( GL_DEPTH_ATTACHMENT , m_textures[TEX_DEPTH]   .get() );
-            m_fbo->attachTexture( GL_COLOR_ATTACHMENT0, m_textures[TEX_NORMAL]  .get() );
-            m_fbo->attachTexture( GL_COLOR_ATTACHMENT1, m_textures[TEX_LIT] .get() );
+            m_fbo->setSize(m_width, m_height);
+            m_fbo->attachTexture(GL_DEPTH_ATTACHMENT, m_textures[TEX_DEPTH].get());
+            m_fbo->attachTexture(GL_COLOR_ATTACHMENT0, m_textures[TEX_NORMAL].get());
+            m_fbo->attachTexture(GL_COLOR_ATTACHMENT1, m_textures[TEX_LIT].get());
             m_fbo->check();
-            m_fbo->unbind( true );
+            m_fbo->unbind(true);
 
             m_postprocessFbo->bind();
-            m_postprocessFbo->setSize( m_width, m_height );
+            m_postprocessFbo->setSize(m_width, m_height);
             m_postprocessFbo->attachTexture(GL_COLOR_ATTACHMENT0, m_fancyTexture.get());
             m_postprocessFbo->attachTexture(GL_COLOR_ATTACHMENT1, m_textures[TEX_LUMINANCE].get());
             m_postprocessFbo->attachTexture(GL_COLOR_ATTACHMENT2, m_textures[TEX_TONEMAPPED].get());
             m_postprocessFbo->check();
-            m_postprocessFbo->unbind( true );
+            m_postprocessFbo->unbind(true);
 
             m_pingPongFbo->bind();
             m_pingPongFbo->setSize(m_pingPongSize, m_pingPongSize);
@@ -528,10 +502,10 @@ namespace Ra
             GL_CHECK_ERROR;
 
             // Reset framebuffer state
-            GL_ASSERT( glBindFramebuffer( GL_FRAMEBUFFER, 0 ) );
+            GL_ASSERT(glBindFramebuffer(GL_FRAMEBUFFER, 0));
 
-            GL_ASSERT( glDrawBuffer( GL_BACK ) );
-            GL_ASSERT( glReadBuffer( GL_BACK ) );
+            GL_ASSERT(glDrawBuffer(GL_BACK));
+            GL_ASSERT(glReadBuffer(GL_BACK));
         }
     }
 } // namespace Ra

@@ -41,19 +41,11 @@ struct Attenuation
     float quadratic;
 };
 
-struct DirectionalLight
+struct Light
 {
-    vec3 direction;
-};
+    int type;
 
-struct PointLight
-{
-    vec3 position;
-    Attenuation attenuation;
-};
-
-struct SpotLight
-{
+    vec4 color;
     vec3 position;
     vec3 direction;
 
@@ -61,14 +53,4 @@ struct SpotLight
 
     float innerAngle;
     float outerAngle;
-};
-
-struct Light
-{
-    int type;
-    vec4 color;
-
-    DirectionalLight directional;
-    PointLight point;
-    SpotLight spot;
 };

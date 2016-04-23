@@ -74,7 +74,7 @@ namespace Ra
             };
 
         public:
-            Renderer( uint width, uint height );
+            Renderer(uint width, uint height);
             virtual ~Renderer();
 
             // -=-=-=-=-=-=-=-=- FINAL -=-=-=-=-=-=-=-=- //
@@ -129,7 +129,7 @@ namespace Ra
              * framebuffer, and restores it before drawing the last final texture.
              * If no framebuffer was bound, it draws into GL_BACK.
              */
-            virtual void render( const RenderData& renderData ) final;
+            virtual void render(const RenderData& renderData) final;
 
             // -=-=-=-=-=-=-=-=- VIRTUAL -=-=-=-=-=-=-=-=- //
             /**
@@ -146,24 +146,24 @@ namespace Ra
              * @param width The new viewport width
              * @param height The new viewport height
              */
-            virtual void resize( uint width, uint height );
+            virtual void resize(uint width, uint height);
 
             // FIXME(Charly): Not sure the lights should be handled by the renderer.
             //                How to do this ?
-            virtual void addLight( const std::shared_ptr<Light>& light )
+            virtual void addLight(const std::shared_ptr<Light>& light)
             {
-                m_lights.push_back( light );
+                m_lights.push_back(light);
             }
 
             virtual void reloadShaders();
 
             // FIXME(Charly): Maybe there is a better way to handle lights ?
             // FIXME(Charly): Final ?
-            virtual void handleFileLoading( const std::string& filename ) final;
+            virtual void handleFileLoading(const std::string& filename) final;
 
             virtual void addPickingRequest(const PickingQuery& query)
             {
-                m_pickingQueries.push_back( query );
+                m_pickingQueries.push_back(query);
             }
 
             inline virtual const std::vector<int>& getPickingResults() const final
@@ -192,13 +192,13 @@ namespace Ra
             //                the current "fullscreen" debug mode, and some kind of
             //                "windowed" mode (that would show the debugged texture in
             //                its own viewport, without hiding the final texture.)
-            virtual void displayTexture( const std::string& texName ) final;
+            virtual void displayTexture(const std::string& texName) final;
 
             /**
              * @brief Return the names of renderer available textures
              * @return A vector of strings, containing the name of the different textures
              */
-            virtual std::vector<std::string> getAvailableTextures() const final;
+            virtual std::vector<std::string> getAvailableTextures(const std::string& rendererName) const final;
 
             /**
              * @brief Get the name of the renderer, e.g to be displayed in the UI
@@ -207,7 +207,6 @@ namespace Ra
             virtual std::string getRendererName() const = 0;
 
         protected:
-
             /**
              * @brief initializeInternal
              */
@@ -215,7 +214,7 @@ namespace Ra
             virtual void resizeInternal() = 0;
 
             // 2.1
-            virtual void updateStepInternal( const RenderData& renderData ) = 0;
+            virtual void updateStepInternal(const RenderData& renderData) = 0;
 
             // 4.
             /**
@@ -225,7 +224,7 @@ namespace Ra
              * Time elapsed since last frame, camera view matrix, camera projection matrix.
              */
             // FIXME(Charly): pure virtual ?
-            virtual void renderInternal( const RenderData& renderData ) = 0;
+            virtual void renderInternal(const RenderData& renderData) = 0;
 
             // 5.
             /**
@@ -237,21 +236,20 @@ namespace Ra
              * Time elapsed since last frame, camera view matrix, camera projection matrix.
              */
             // FIXME(Charly): pure virtual ?
-            virtual void postProcessInternal( const RenderData& renderData ) = 0;
+            virtual void postProcessInternal(const RenderData& renderData) = 0;
 
         private:
-
             // 0.
             virtual void saveExternalFBOInternal() final;
 
             // 1.
-            virtual void feedRenderQueuesInternal(const RenderData &renderData) final;
+            virtual void feedRenderQueuesInternal(const RenderData& renderData) final;
 
             // 2.0
-            virtual void updateRenderObjectsInternal( const RenderData& renderData) final;
+            virtual void updateRenderObjectsInternal(const RenderData& renderData) final;
 
             // 3.
-            virtual void doPicking( const RenderData& renderData ) final;
+            virtual void doPicking(const RenderData& renderData) final;
 
             // 6.
             virtual void drawScreenInternal() final;
@@ -277,7 +275,7 @@ namespace Ra
             Texture* m_displayedTexture;
 
             std::unique_ptr<Texture> m_fancyTexture;
-            std::map<std::string, Texture*> m_secondaryTextures;
+            std::map<std::string, std::map<std::string, Texture*>> m_secondaryTextures;
 
             // FIXME(Charly): Scene class
             std::vector<std::shared_ptr<Light>> m_lights;
@@ -292,9 +290,9 @@ namespace Ra
             // Simple quad mesh, used to render the final image
             std::unique_ptr<Mesh> m_quadMesh;
 
-            bool m_drawDebug;           // Should we render debug stuff ?
-            bool m_wireframe;           // Are we rendering in "real" wireframe mode
-            bool m_postProcessEnabled;  // Should we do post processing ?
+            bool m_drawDebug;          // Should we render debug stuff ?
+            bool m_wireframe;          // Are we rendering in "real" wireframe mode
+            bool m_postProcessEnabled; // Should we do post processing ?
 
         private:
             // Qt has the nice idea to bind an fbo before giving you the opengl context,
@@ -307,16 +305,16 @@ namespace Ra
             std::mutex m_renderMutex;
 
             // PICKING STUFF
-            std::unique_ptr<FBO>     m_pickingFbo;
+            std::unique_ptr<FBO> m_pickingFbo;
             std::unique_ptr<Texture> m_pickingTexture;
 
             // TODO(Charly): Check if this leads to some rendering / picking bugs
             // (because different depth textures would be written, and so on)
-            std::unique_ptr<Texture>    m_depthTexture;
+            std::unique_ptr<Texture> m_depthTexture;
 
-            std::vector<PickingQuery>   m_pickingQueries;
-            std::vector<PickingQuery>   m_lastFramePickingQueries;
-            std::vector<int>            m_pickingResults;
+            std::vector<PickingQuery> m_pickingQueries;
+            std::vector<PickingQuery> m_lastFramePickingQueries;
+            std::vector<int> m_pickingResults;
         };
 
     } // namespace Engine

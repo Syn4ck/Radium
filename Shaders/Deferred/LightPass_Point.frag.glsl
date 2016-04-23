@@ -1,4 +1,26 @@
-#include "Helpers.glsl"
+#include "../Structs.glsl"
+
+in vec2 vTexcoord;
+
+out vec4 fColor;
+
+uniform sampler2D uPosition;
+uniform sampler2D uNormal;
+uniform sampler2D uDiffuse;
+uniform sampler2D uSpecular;
+
+uniform mat4 uView;
+
+uniform Light light;
+
+uniform int ambientLight;
+
+vec3 getKd() { return texture(uDiffuse, vTexcoord).rgb; }
+vec3 getKs() { return texture(uSpecular, vTexcoord).rgb; }
+float getNs() { return texture(uSpecular, vTexcoord).a; }
+vec3 getPosition() { return texture(uPosition, vTexcoord).xyz; }
+vec3 getNormal() { return texture(uNormal, vTexcoord).xyz; }
+vec3 getEye() { return -vec3(uView[3].xyz * mat3(uView)); }
 
 const float Pi = 3.14159265;
 
@@ -21,7 +43,7 @@ vec3 blinnPhongInternal(vec3 d, vec3 n)
     float specFactor = pow(max(dot(normal, -halfVec), 0.0), Ns);
     vec3 spec = specFactor * light.color.xyz * Ks;
 
-    return diff + spec ;
+    return diff + spec;
 }
 
 vec3 blinnPhongSpot()
@@ -62,16 +84,37 @@ vec3 blinnPhongPoint()
 
 vec3 blinnPhongDirectional()
 {
-    return blinnPhongInternal(light.direction, getNormal()) + getKd() * 0.1;
+    return blinnPhongInternal(light.direction, getNormal());
 }
 
 vec3 computeLighting()
 {
-    switch (light.type)
+    if (ambientLight == 1)
     {
+        return getKd() * 0.1;
+    }
+    else
+    {
+        switch (light.type)
+        {
         case 0:  return blinnPhongPoint();
         case 1:  return blinnPhongDirectional();
         case 2:  return blinnPhongSpot();
         default: return vec3(0);
+        }
     }
+}
+
+void main()
+{
+    vec3 color = computeLighting();
+
+//    vec3 color = vec3(dot(getNormal(), light.position - getPosition())) * 0.1;
+//    if (length(light.position - getPosition()) > 10.0)
+//    {
+//        color = vec3(0);
+//    }
+//    color = getNormal();
+
+    fColor = vec4(color, 1.0);
 }
