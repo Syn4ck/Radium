@@ -1,12 +1,13 @@
 #ifndef RADIUMENGINE_GIZMO_HPP_
 #define RADIUMENGINE_GIZMO_HPP_
 
+#include <Gui/RaGuiBase.hpp>
+
 #include <vector>
 
 #include <Core/Math/LinearAlgebra.hpp>
 #include <Core/Index/Index.hpp>
 #include <Engine/Component/Component.hpp>
-
 
 namespace Ra { namespace Engine { class Component; } }
 namespace Ra { namespace Engine { class RenderObject; } }
@@ -14,11 +15,11 @@ namespace Ra { namespace Engine { class Camera; } }
 
 namespace Ra
 {
-    namespace Gui
+    namespace Guibase
     {
         /// Base class for gizmos, i.e. graphic tools to manipulate a transform.
         /// Do not feed after midnight.
-        class Gizmo
+        class RA_GUIBASE_API Gizmo
         {
         public:
             enum Mode

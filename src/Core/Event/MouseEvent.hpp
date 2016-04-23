@@ -14,7 +14,7 @@ namespace Ra
             /// MouseEventType: Press, Release, Move, Wheel
             int event;
             /// MouseButton : Left button, Right button, Middle button
-            int button;
+            int buttons;
 
             /// Modifier has been used ? Ctrl, Alt, Shift
             int modifier;
@@ -25,9 +25,9 @@ namespace Ra
             int absoluteYPosition;
 
             /// Wheel delta. Is only set for WheelEvent, undefined otherwise.
-            int wheelDelta;
+            int wheelDeltaX;
+            int wheelDeltaY;
         };
-
     }
 }
 

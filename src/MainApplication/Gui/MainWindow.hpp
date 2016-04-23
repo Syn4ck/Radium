@@ -58,9 +58,13 @@ namespace Ra
             inline const std::vector<Core::KeyEvent>& getKeyEvents() const;
             inline const std::vector<Core::MouseEvent>& getMouseEvents() const;
 
+<<<<<<< 54acbdd8eeee3f0c55a42d3d2410f262c7efb53b
             inline void flushEvents();
 
             void updateUi(Plugins::RadiumPluginInterface* plugin);
+=======
+            void updateUi( Plugins::RadiumPluginInterface* plugin );
+>>>>>>> Extracted some API for Gui stuff
 
             void onFrameComplete();
 
@@ -120,6 +124,7 @@ namespace Ra
 
             std::shared_ptr<Engine::RenderObject> getSelectedRO();
 
+<<<<<<< 54acbdd8eeee3f0c55a42d3d2410f262c7efb53b
         public:
             // Accept viewer mouse events.
             inline void viewerMousePressEvent(QMouseEvent* event);
@@ -137,6 +142,9 @@ namespace Ra
             std::vector<Core::MouseEvent> m_mouseEvents;
             std::vector<Core::KeyEvent> m_keyEvents;
 
+=======
+        private:
+>>>>>>> Extracted some API for Gui stuff
             EntityTreeModel* m_entityTreeModel;
 
             MaterialEditor* m_materialEditor;
@@ -146,7 +154,5 @@ namespace Ra
 
     } // namespace Gui
 } // namespace Ra
-
-#include <MainApplication/Gui/MainWindow.inl>
 
 #endif // RADIUMENGINE_MAINWINDOW_HPP

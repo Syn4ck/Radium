@@ -1,12 +1,12 @@
 #ifndef RADIUMENGINE_TRANSLATE_GIZMO_HPP_
 #define RADIUMENGINE_TRANSLATE_GIZMO_HPP_
 
-#include <MainApplication/Viewer/Gizmo/Gizmo.hpp>
+#include <Gui/Gizmo/Gizmo.hpp>
 namespace Ra
 {
-    namespace Gui
+    namespace Guibase
     {
-        class TranslateGizmo : public Gizmo
+        class RA_GUIBASE_API TranslateGizmo : public Gizmo
         {
         public:
             // Draw a frame with : 3 RGB arrows

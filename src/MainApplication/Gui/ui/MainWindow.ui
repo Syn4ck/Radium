@@ -40,7 +40,7 @@
      <x>0</x>
      <y>0</y>
      <width>1350</width>
-     <height>20</height>
+     <height>23</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFILE">
@@ -110,8 +110,8 @@
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>289</width>
-               <height>240</height>
+               <width>354</width>
+               <height>264</height>
               </rect>
              </property>
              <attribute name="label">
@@ -310,8 +310,8 @@
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>288</width>
-               <height>279</height>
+               <width>334</width>
+               <height>179</height>
               </rect>
              </property>
              <attribute name="label">
@@ -403,8 +403,8 @@
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>258</width>
-               <height>201</height>
+               <width>98</width>
+               <height>28</height>
               </rect>
              </property>
              <attribute name="label">
@@ -416,35 +416,18 @@
          </layout>
         </item>
         <item>
-         <layout class="QGridLayout" name="gridLayout_3" rowstretch="0,0,0" columnstretch="1,2">
-          <item row="0" column="0">
-           <widget class="QLabel" name="label_3">
-            <property name="text">
-             <string>Current Renderer</string>
-            </property>
-           </widget>
-          </item>
+         <layout class="QGridLayout" name="gridLayout_3" rowstretch="0,0" columnstretch="1,0">
           <item row="0" column="1">
-           <widget class="QComboBox" name="m_currentRendererCombo"/>
-          </item>
-          <item row="1" column="0">
-           <widget class="QLabel" name="label_2">
-            <property name="text">
-             <string>Displayed Texture</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="1">
            <widget class="QComboBox" name="m_displayedTextureCombo"/>
           </item>
-          <item row="2" column="0">
+          <item row="1" column="0">
            <widget class="QLabel" name="label_5">
             <property name="text">
              <string>Enable Post-Process</string>
             </property>
            </widget>
           </item>
-          <item row="2" column="1">
+          <item row="1" column="1">
            <widget class="QCheckBox" name="m_enablePostProcess">
             <property name="enabled">
              <bool>true</bool>
@@ -457,6 +440,13 @@
             </property>
             <property name="tristate">
              <bool>false</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0">
+           <widget class="QLabel" name="label_2">
+            <property name="text">
+             <string>Displayed Texture</string>
             </property>
            </widget>
           </item>
@@ -593,13 +583,13 @@
   <customwidget>
    <class>Ra::Gui::Viewer</class>
    <extends>QWidget</extends>
-   <header>MainApplication/Viewer/Viewer.hpp</header>
+   <header location="global">MainApplication/Gui/Viewer.hpp</header>
    <container>1</container>
   </customwidget>
   <customwidget>
    <class>Ra::Gui::TransformEditorWidget</class>
    <extends>QWidget</extends>
-   <header>MainApplication/Gui/TransformEditorWidget.hpp</header>
+   <header location="global">MainApplication/Gui/TransformEditorWidget.hpp</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

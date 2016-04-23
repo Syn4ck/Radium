@@ -2,6 +2,7 @@
 
 #include <QFileDialog>
 #include <QToolButton>
+#include <QCloseEvent>
 
 #include <Engine/RadiumEngine.hpp>
 #include <Engine/Component/Component.hpp>
@@ -11,13 +12,14 @@
 #include <Engine/Renderer/RenderTechnique/ShaderProgram.hpp>
 #include <Engine/Renderer/RenderTechnique/ShaderConfigFactory.hpp>
 
+#include <Gui/Gizmo/GizmoManager.hpp>
+#include <Gui/PluginBase/RadiumPluginInterface.hpp>
+
 #include <MainApplication/MainApplication.hpp>
 #include <MainApplication/Gui/EntityTreeModel.hpp>
 #include <MainApplication/Gui/EntityTreeItem.hpp>
 #include <MainApplication/Gui/MaterialEditor.hpp>
-#include <MainApplication/Viewer/CameraInterface.hpp>
 
-#include <MainApplication/PluginBase/RadiumPluginInterface.hpp>
 #include <assimp/Importer.hpp>
 
 namespace Ra
@@ -65,10 +67,17 @@ namespace Ra
         connect(actionOpen_Material_Editor, &QAction::triggered, this, &MainWindow::openMaterialEditor);
 
         // Toolbox setup
+<<<<<<< 54acbdd8eeee3f0c55a42d3d2410f262c7efb53b
         connect(actionToggle_Local_Global, &QAction::toggled, m_viewer->getGizmoManager(), &GizmoManager::setLocal);
         connect(actionGizmoOff, &QAction::triggered, this, &MainWindow::gizmoShowNone);
         connect(actionGizmoTranslate, &QAction::triggered, this, &MainWindow::gizmoShowTranslate);
         connect(actionGizmoRotate, &QAction::triggered, this, &MainWindow::gizmoShowRotate);
+=======
+        connect( actionToggle_Local_Global, &QAction::toggled, m_viewer, &Viewer::setGizmoLocal );
+        connect( actionGizmoOff,            &QAction::triggered, this, &MainWindow::gizmoShowNone );
+        connect( actionGizmoTranslate,      &QAction::triggered, this, &MainWindow::gizmoShowTranslate );
+        connect( actionGizmoRotate,         &QAction::triggered, this, &MainWindow::gizmoShowRotate );
+>>>>>>> Extracted some API for Gui stuff
 
         // Loading setup.
         connect(this, &MainWindow::fileLoading, mainApp, &MainApplication::loadFile);
@@ -81,7 +90,11 @@ namespace Ra
 
         // Connect picking results (TODO Val : use events to dispatch picking directly)
         connect(m_viewer, &Viewer::rightClickPicking, this, &MainWindow::handlePicking);
+<<<<<<< 54acbdd8eeee3f0c55a42d3d2410f262c7efb53b
         connect(m_viewer, &Viewer::leftClickPicking, m_viewer->getGizmoManager(), &GizmoManager::handlePickingResult);
+=======
+        connect(m_viewer, &Viewer::leftClickPicking, m_viewer, &Viewer::handlePickingResult);
+>>>>>>> Extracted some API for Gui stuff
 
         // Update entities when the engine starts.
         connect(mainApp, &MainApplication::starting, this, &MainWindow::onEntitiesUpdated);
@@ -91,8 +104,8 @@ namespace Ra
 
         // Inform property editors of new selections
         connect(this, &MainWindow::selectedEntity, tab_edition, &TransformEditorWidget::setEditable);
-        connect(this, &MainWindow::selectedEntity, m_viewer->getGizmoManager(), &GizmoManager::setEditable);
-        connect(this, &MainWindow::selectedComponent, m_viewer->getGizmoManager(), &GizmoManager::setEditable);
+        connect(this, &MainWindow::selectedEntity, m_viewer, &Viewer::setGizmoEditable);
+        connect(this, &MainWindow::selectedComponent, m_viewer, &Viewer::setGizmoEditable);
 
         connect(this, &MainWindow::selectedEntity, this, &MainWindow::displayEntityRenderObjects);
         connect(this, &MainWindow::selectedComponent, this, &MainWindow::displayComponentRenderObjects);
@@ -109,8 +122,13 @@ namespace Ra
         // Renderer stuff
         connect(m_viewer, &Viewer::rendererReady, this, &MainWindow::onRendererReady);
 
+<<<<<<< 54acbdd8eeee3f0c55a42d3d2410f262c7efb53b
         connect(m_displayedTextureCombo, static_cast<void (QComboBox::*)(const QString&)>(&QComboBox::currentIndexChanged), m_viewer, &Viewer::displayTexture);
         connect(m_currentRendererCombo, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), m_viewer, &Viewer::changeRenderer);
+=======
+        connect( m_displayedTextureCombo, static_cast<void (QComboBox::*)(const QString&)>( &QComboBox::currentIndexChanged ),
+                 m_viewer, &Viewer::displayTexture );
+>>>>>>> Extracted some API for Gui stuff
 
         connect(m_enablePostProcess, &QCheckBox::stateChanged, m_viewer, &Viewer::enablePostProcess);
 
@@ -184,6 +202,7 @@ namespace Ra
 
     void Gui::MainWindow::keyPressEvent(QKeyEvent* event)
     {
+<<<<<<< 54acbdd8eeee3f0c55a42d3d2410f262c7efb53b
         QMainWindow::keyPressEvent(event);
         m_keyEvents.push_back(keyEventQtToRadium(event));
     }
@@ -291,6 +310,14 @@ namespace Ra
             raEvent.modifier |= Core::Modifier::RA_ALT_KEY;
         }
         return raEvent;
+=======
+        QMainWindow::keyPressEvent( event );
+    }
+
+    void Gui::MainWindow::keyReleaseEvent(QKeyEvent* event)
+    {
+        QMainWindow::keyReleaseEvent(event);
+>>>>>>> Extracted some API for Gui stuff
     }
 
     Gui::Viewer* Gui::MainWindow::getViewer()
@@ -404,17 +431,17 @@ namespace Ra
 
     void Gui::MainWindow::gizmoShowNone()
     {
-        m_viewer->getGizmoManager()->changeGizmoType(GizmoManager::NONE);
+        m_viewer->getViewer()->getGizmoManager()->changeGizmoType(Guibase::GizmoManager::NONE);
     }
 
     void Gui::MainWindow::gizmoShowTranslate()
     {
-        m_viewer->getGizmoManager()->changeGizmoType(GizmoManager::TRANSLATION);
+        m_viewer->getViewer()->getGizmoManager()->changeGizmoType(Guibase::GizmoManager::TRANSLATION);
     }
 
     void Gui::MainWindow::gizmoShowRotate()
     {
-        m_viewer->getGizmoManager()->changeGizmoType(GizmoManager::ROTATION);
+        m_viewer->getViewer()->getGizmoManager()->changeGizmoType(Guibase::GizmoManager::ROTATION);
     }
 
     void Gui::MainWindow::displayEntityRenderObjects(Engine::Entity* entity)
@@ -596,6 +623,7 @@ namespace Ra
 
     void Gui::MainWindow::onRendererReady()
     {
+<<<<<<< 54acbdd8eeee3f0c55a42d3d2410f262c7efb53b
         m_viewer->getCameraInterface()->resetCamera();
         m_viewer->updateTextureNames();
 
@@ -604,12 +632,22 @@ namespace Ra
         for (const auto& renderer : m_viewer->getRenderersName())
         {
             m_currentRendererCombo->addItem(renderer.c_str());
+=======
+        m_viewer->getViewer()->getCurrentCamera()->resetCamera();
+
+        QSignalBlocker blockTextures( m_displayedTextureCombo );
+
+        auto texs = m_viewer->getRenderer()->getAvailableTextures();
+        for ( const auto& tex : texs )
+        {
+            m_displayedTextureCombo->addItem( tex.c_str() );
+>>>>>>> Extracted some API for Gui stuff
         }
     }
 
     void Gui::MainWindow::onFrameComplete()
     {
         tab_edition->updateValues();
-        m_viewer->getGizmoManager()->updateValues();
+        m_viewer->getViewer()->getGizmoManager()->updateValues();
     }
 } // namespace Ra

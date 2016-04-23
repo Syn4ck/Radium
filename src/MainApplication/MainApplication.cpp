@@ -33,10 +33,9 @@
 #include <MainApplication/Gui/MainWindow.hpp>
 #include <MainApplication/Version.hpp>
 
-#include <MainApplication/PluginBase/RadiumPluginInterface.hpp>
+#include <Gui/PluginBase/RadiumPluginInterface.hpp>
 
 // Const parameters : TODO : make config / command line options
-
 
 namespace Ra
 {
@@ -142,9 +141,6 @@ namespace Ra
         m_viewer = m_mainWindow->getViewer();
         CORE_ASSERT( m_viewer != nullptr, "GUI was not initialized" );
         CORE_ASSERT( m_viewer->context()->isValid(), "OpenGL was not initialized" );
-
-        // Pass the engine to the renderer to complete the initialization process.
-        m_viewer->initRenderer();
 
         // Create task queue with N-1 threads (we keep one for rendering).
         m_taskQueue.reset( new Core::TaskQueue( std::thread::hardware_concurrency() - 1 ) );
@@ -267,17 +263,9 @@ namespace Ra
 
         // ----------
         // 1. Gather user input and dispatch it.
-        auto keyEvents = m_mainWindow->getKeyEvents();
-        auto mouseEvents = m_mainWindow->getMouseEvents();
 
         // Get picking results from last frame and forward it to the selection.
         m_viewer->processPicking();
-
-        m_mainWindow->flushEvents();
-
-        // ----------
-        // 2. Kickoff rendering
-        m_viewer->startRendering( dt );
 
         timerData.tasksStart = Core::Timer::Clock::now();
 
@@ -295,8 +283,7 @@ namespace Ra
 
         // ----------
         // 4. Wait until frame is fully rendered and display.
-        m_viewer->waitForRendering();
-        m_viewer->update();
+        m_viewer->render(dt);
 
         timerData.renderData = m_viewer->getRenderer()->getTimerData();
 

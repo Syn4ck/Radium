@@ -61,7 +61,6 @@ set(engine_libs
     radiumCore
     ${GLEW_LIBRARIES}
     ${ASSIMP_LIB}
-    ${Qt5OpenGL_LIBRARIES}
     ${OPENGL_LIBRARIES})
 
 add_library(
@@ -75,7 +74,6 @@ add_library(
 
 add_dependencies( ${engine_target} ${core_target} assimp )
 
-target_compile_definitions(${engine_target} PRIVATE "-DRA_CORE_IMPORTS")
 target_compile_definitions(${engine_target} PRIVATE "-DRA_ENGINE_EXPORTS")
 
 target_link_libraries(
@@ -83,74 +81,63 @@ target_link_libraries(
     ${engine_libs}
     )
 
+set(Qt5_LIBRARIES ${Qt5Core_LIBRARIES} ${Qt5Widgets_LIBRARIES} ${Qt5OpenGL_LIBRARIES})
 
-if ( NOT ${OMIT_MAIN_APP} )
-    # Build MainApplication
-    set(app_target radium)
+set(guibase_target radiumGuiBase)
 
-    include(CMakeGenerateVersion.txt)
+file(GLOB_RECURSE guibase_sources Gui/*.cpp)
+file(GLOB_RECURSE guibase_headers Gui/*.h Gui/*.hpp)
+file(GLOB_RECURSE guibase_inlines Gui/*.inl)
 
-    set(Qt5_LIBRARIES ${Qt5Core_LIBRARIES} ${Qt5Widgets_LIBRARIES} ${Qt5OpenGL_LIBRARIES})
+set(guibase_libs
+    radiumCore
+    radiumEngine
+    ${Qt5_LIBRARIES} # FIXME(charly): This should go away, this is just for plugins
+)
 
-    if( APPLE)
-        set( PLATFORM_LIBS "" )
-    elseif( UNIX )
-        set( PLATFORM_LIBS X11 xcb )
-    else()
-        set( PLATFORM_LIBS "" )
-    endif()
+add_library(${guibase_target} SHARED ${guibase_sources} ${guibase_headers} ${guibase_inlines})
 
-    set(app_libs radiumEngine radiumCore ${Qt5_LIBRARIES} ${OPENGL_LIBRARIES} ${PLATFORM_LIBS})
+add_dependencies( ${guibase_target} ${engine_target} ${core_target})
+target_compile_definitions(${engine_target} PRIVATE "-DRA_GUIBASE_EXPORTS")
+target_link_libraries(${guibase_target} ${guibase_libs})
 
-    file(GLOB_RECURSE app_sources MainApplication/*.cpp)
-    file(GLOB_RECURSE app_headers MainApplication/*.h MainApplication/*.hpp)
-    file(GLOB_RECURSE app_inlines MainApplication/*.inl)
+# Build MainApplication
+set(qapp_target qradium)
 
-    file(GLOB_RECURSE app_uis     MainApplication/*.ui)
-    qt5_wrap_ui(app_uis_moc ${app_uis})
+include(CMakeGenerateVersion.txt)
 
-    file(GLOB resources ${CMAKE_SOURCE_DIR}/*.qrc)
+set(qapp_libs radiumGuiBase radiumEngine radiumCore ${Qt5_LIBRARIES} ${OPENGL_LIBRARIES})
 
-    # Qt5
-    set(CMAKE_INCLUDE_CURRENT_DIR ON)
-    set(CMAKE_AUTOMOC ON)
-    set(CMAKE_AUTORCC ON)
+file(GLOB_RECURSE qapp_sources MainApplication/*.cpp)
+file(GLOB_RECURSE qapp_headers MainApplication/*.h MainApplication/*.hpp)
+file(GLOB_RECURSE qapp_inlines MainApplication/*.inl)
 
-    # Fixme : Really usefull ?
-    add_definitions(${Qt5Core_DEFINITIONS})
-    add_definitions(${Qt5Widgets_DEFINITIONS})
-    add_definitions(${Qt5OpenGL_DEFINITIONS})
+file(GLOB_RECURSE qapp_uis     MainApplication/*.ui)
+qt5_wrap_ui(qapp_uis_moc ${qapp_uis})
 
-    include_directories(
-        .
-        ${CMAKE_CURRENT_BINARY_DIR} # Moc
-        ${EIGEN_INC}
-        )
+file(GLOB resources ${CMAKE_SOURCE_DIR}/*.qrc)
 
-    add_executable(
-        ${app_target}
-        ${app_sources}
-        ${app_headers}
-        ${app_inlines}
-        ${app_uis_moc}
-        ${resources}
-        )
+# Qt5
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTORCC ON)
 
-    add_dependencies( radium radiumCore radiumEngine )
+# Fixme : Really usefull ?
+add_definitions(${Qt5Core_DEFINITIONS})
+add_definitions(${Qt5Widgets_DEFINITIONS})
+add_definitions(${Qt5OpenGL_DEFINITIONS})
 
-    target_compile_definitions(${app_target} PRIVATE "-DRA_CORE_IMPORTS")
-    target_compile_definitions(${app_target} PRIVATE "-DRA_ENGINE_IMPORTS")
+include_directories(. ${CMAKE_CURRENT_BINARY_DIR}) # MOC
 
-    target_link_libraries(
-        ${app_target}
-        ${app_libs}
-        )
+add_executable(${qapp_target} ${qapp_sources} ${qapp_headers} ${qapp_inlines} ${qapp_uis_moc} ${resources})
 
-    install( DIRECTORY . DESTINATION include FILES_MATCHING PATTERN "*.hpp" PATTERN "*.inl" PATTERN "*.h" )
-    install( FILES ${engine_shaders} DESTINATION Shaders )
-    install( DIRECTORY ${CMAKE_SOURCE_DIR}/Assets/. DESTINATION Assets )
-    install( TARGETS ${app_target} ${core_target} ${engine_target}
-        RUNTIME DESTINATION bin
-        LIBRARY DESTINATION lib
-        ARCHIVE DESTINATION lib )
-endif( NOT ${OMIT_MAIN_APP} )
+add_dependencies(qradium radiumCore radiumEngine radiumGuiBase)
+target_link_libraries(${qapp_target} ${qapp_libs})
+
+install( DIRECTORY . DESTINATION include FILES_MATCHING PATTERN "*.hpp" PATTERN "*.inl" PATTERN "*.h" )
+install( FILES ${engine_shaders} DESTINATION Shaders )
+install( DIRECTORY ${CMAKE_SOURCE_DIR}/Assets/. DESTINATION Assets )
+install( TARGETS ${qapp_target} ${guibase_target} ${core_target} ${engine_target}
+    RUNTIME DESTINATION bin
+    LIBRARY DESTINATION lib
+    ARCHIVE DESTINATION lib )

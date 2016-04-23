@@ -1,0 +1,12 @@
+#ifndef RADIUMENGINE_RA_GUIBASE_HPP
+#define RADIUMENGINE_RA_GUIBASE_HPP
+
+#include <Core/CoreMacros.hpp>
+
+#if defined RA_GUIBASE_EXPORTS
+    #define RA_GUIBASE_API DLL_EXPORT
+#else
+    #define RA_GUIBASE_API DLL_IMPORT
+#endif
+
+#endif // RADIUMENGINE_RA_GUIBASE_HPP
