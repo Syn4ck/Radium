@@ -18,7 +18,7 @@
 #include <MainApplication/MainApplication.hpp>
 #include <MainApplication/Gui/EntityTreeModel.hpp>
 #include <MainApplication/Gui/EntityTreeItem.hpp>
-#include <MainApplication/Gui/MaterialEditor.hpp>
+#include <MainApplication/Gui/MaterialEditor.hpp>>
 
 #include <assimp/Importer.hpp>
 
