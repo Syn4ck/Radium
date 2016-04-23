@@ -5,16 +5,14 @@
 /// Defines the correct macro to export dll symbols.
 #if defined  FancyMesh_EXPORTS
     #define FM_PLUGIN_API DLL_EXPORT
-#elif defined FancyMesh_IMPORTS
-    #define FM_PLUGIN_API DLL_IMPORT
 #else
-    #define FM_PLUGIN_API
+    #define FM_PLUGIN_API DLL_IMPORT
 #endif
 
 #include <QObject>
 #include <QtPlugin>
 
-#include <MainApplication/PluginBase/RadiumPluginInterface.hpp>
+#include <Gui/PluginBase/RadiumPluginInterface.hpp>
 
 namespace Ra
 {

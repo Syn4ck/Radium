@@ -1,4 +1,4 @@
-#include <MainApplication/Viewer/Gizmo/RotateGizmo.hpp>
+#include <Gui/Gizmo/RotateGizmo.hpp>
 
 #include <Core/Math/RayCast.hpp>
 #include <Core/Math/ColorPresets.hpp>
@@ -13,7 +13,7 @@
 
 namespace Ra
 {
-    namespace Gui
+    namespace Guibase
     {
         RotateGizmo::RotateGizmo(Engine::Component* c, const Core::Transform &worldTo, const Core::Transform& t, Mode mode)
                 : Gizmo(c, worldTo, t, mode), m_initialPix(Core::Vector2::Zero()), m_selectedAxis(-1)

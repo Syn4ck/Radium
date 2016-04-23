@@ -5,10 +5,8 @@
 /// Defines the correct macro to export dll symbols.
 #if defined   RA_CORE_EXPORTS    
     #define RA_CORE_API DLL_EXPORT 
-#elif defined RA_CORE_IMPORTS
-    #define RA_CORE_API DLL_IMPORT 
 #else
-    #define RA_CORE_API 
+    #define RA_CORE_API DLL_IMPORT 
 #endif
 
 #endif //RADIUMENGINE_RA_CORE_HPP_

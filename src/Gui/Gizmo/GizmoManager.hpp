@@ -1,22 +1,21 @@
 #ifndef RADIUMENGINE_GIZMO_MANAGER_HPP_
 #define RADIUMENGINE_GIZMO_MANAGER_HPP_
 
-#include <QObject>
-#include <QMouseEvent>
 #include <Engine/Component/Component.hpp>
-#include <MainApplication/Viewer/Gizmo/Gizmo.hpp>
 #include <Engine/Managers/SystemDisplay/SystemDisplay.hpp>
+
+#include <Gui/Gizmo/Gizmo.hpp>
 
 namespace Ra
 {
-    namespace Gui
+    namespace Guibase
     {
+        class Viewer;
+
         /// This class interfaces the gizmos with the ui commands.
         /// It allows to change the gizmo type when editing an editable transform property.
-        class GizmoManager : public QObject
+        class RA_GUIBASE_API GizmoManager
         {
-            Q_OBJECT
-
         public:
 
             RA_CORE_ALIGNED_NEW;
@@ -28,19 +27,12 @@ namespace Ra
                 SCALE,
             };
 
-
-            GizmoManager(QObject* parent = nullptr);
+        public:
+            explicit GizmoManager(const Viewer* viewer);
             ~GizmoManager();
 
-
-        public:
             /// Receive mouse events and transmit them to the gizmos.
-            virtual bool handleMousePressEvent  ( QMouseEvent* event );
-            virtual bool handleMouseReleaseEvent( QMouseEvent* event );
-            virtual bool handleMouseMoveEvent   ( QMouseEvent* event );
-
-
-        public slots:
+            bool handleMouseEvent(const Core::MouseEvent* event);
 
             /// Change the current editable object,
             void setEditable(Engine::EditableInterface* edit);
@@ -57,7 +49,6 @@ namespace Ra
             /// Retreive the transform from the editable and update the gizmos.
             void updateValues();
 
-
         private:
             // Helper to get the transform property from the editable.
             void getTransform();
@@ -66,6 +57,7 @@ namespace Ra
             void spawnGizmo();
 
         private:
+            const Viewer* m_viewer;
             Core::Transform m_transform; //! The transform being edited.
 
             Engine::EditableInterface* m_currentEdit; //! The current editable being edited.

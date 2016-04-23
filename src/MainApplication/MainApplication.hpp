@@ -6,7 +6,7 @@
 
 #include <Core/Time/Timer.hpp>
 #include <MainApplication/TimerData/FrameTimerData.hpp>
-#include <MainApplication/Viewer/Viewer.hpp>
+#include <MainApplication/Gui/Viewer.hpp>
 
 class QTimer;
 namespace Ra

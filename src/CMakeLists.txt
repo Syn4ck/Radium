@@ -37,14 +37,14 @@ add_library(
     ${core_sources}
     ${core_headers}
     ${core_inlines}
-)
+    )
 
 target_compile_definitions(${core_target} PRIVATE "-DRA_CORE_EXPORTS")
 
 target_link_libraries(
     ${core_target}
     ${core_libs}
-)
+    )
 
 # Build Engine
 set(engine_target radiumEngine)
@@ -71,7 +71,7 @@ add_library(
     ${engine_inlines}
 
     ${engine_shaders}
-)
+    )
 
 add_dependencies( ${engine_target} ${core_target} assimp )
 
@@ -81,80 +81,65 @@ target_compile_definitions(${engine_target} PRIVATE "-DRA_ENGINE_EXPORTS")
 target_link_libraries(
     ${engine_target}
     ${engine_libs}
+    )
+
+set(Qt5_LIBRARIES ${Qt5Core_LIBRARIES} ${Qt5Widgets_LIBRARIES} ${Qt5OpenGL_LIBRARIES})
+
+set(guibase_target radiumGuiBase)
+
+file(GLOB_RECURSE guibase_sources Gui/*.cpp)
+file(GLOB_RECURSE guibase_headers Gui/*.h Gui/*.hpp)
+file(GLOB_RECURSE guibase_inlines Gui/*.inl)
+
+set(guibase_libs
+    radiumCore
+    radiumEngine
+    ${Qt5_LIBRARIES} # FIXME(charly): This should go away, this is just for plugins
 )
 
-#get_directory_property(plugins DIRECTORY "Plugins" DEFINITION SUBDIRS)
+add_library(${guibase_target} SHARED ${guibase_sources} ${guibase_headers} ${guibase_inlines})
 
-#build tests
-add_subdirectory(Tests)
+add_dependencies( ${guibase_target} ${engine_target} ${core_target})
+target_compile_definitions(${engine_target} PRIVATE "-DRA_GUIBASE_EXPORTS")
+target_link_libraries(${guibase_target} ${guibase_libs})
 
-if ( NOT ${OMIT_MAIN_APP} )
-    # Build MainApplication
-    set(app_target radium)
+# Build MainApplication
+set(qapp_target qradium)
 
-    include(CMakeGenerateVersion.txt)
+include(CMakeGenerateVersion.txt)
 
-    set(Qt5_LIBRARIES ${Qt5Core_LIBRARIES} ${Qt5Widgets_LIBRARIES} ${Qt5OpenGL_LIBRARIES})
+set(qapp_libs radiumGuiBase radiumEngine radiumCore ${Qt5_LIBRARIES} ${OPENGL_LIBRARIES})
 
-    if( APPLE)
-        set( PLATFORM_LIBS "" )
-    elseif( UNIX )
-        set( PLATFORM_LIBS X11 xcb )
-    else()
-        set( PLATFORM_LIBS "" )
-    endif()
+file(GLOB_RECURSE qapp_sources MainApplication/*.cpp)
+file(GLOB_RECURSE qapp_headers MainApplication/*.h MainApplication/*.hpp)
+file(GLOB_RECURSE qapp_inlines MainApplication/*.inl)
 
-    set(app_libs radiumEngine radiumCore ${Qt5_LIBRARIES} ${OPENGL_LIBRARIES} ${PLATFORM_LIBS})
+file(GLOB_RECURSE qapp_uis     MainApplication/*.ui)
+qt5_wrap_ui(qapp_uis_moc ${qapp_uis})
 
-    file(GLOB_RECURSE app_sources MainApplication/*.cpp)
-    file(GLOB_RECURSE app_headers MainApplication/*.h MainApplication/*.hpp)
-    file(GLOB_RECURSE app_inlines MainApplication/*.inl)
+file(GLOB resources ${CMAKE_SOURCE_DIR}/*.qrc)
 
-    file(GLOB_RECURSE app_uis     MainApplication/*.ui)
-    qt5_wrap_ui(app_uis_moc ${app_uis})
+# Qt5
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTORCC ON)
 
-    file(GLOB resources ${CMAKE_SOURCE_DIR}/*.qrc)
+# Fixme : Really usefull ?
+add_definitions(${Qt5Core_DEFINITIONS})
+add_definitions(${Qt5Widgets_DEFINITIONS})
+add_definitions(${Qt5OpenGL_DEFINITIONS})
 
-    # Qt5
-    set(CMAKE_INCLUDE_CURRENT_DIR ON)
-    set(CMAKE_AUTOMOC ON)
-    set(CMAKE_AUTORCC ON)
+include_directories(. ${CMAKE_CURRENT_BINARY_DIR}) # MOC
 
-    # Fixme : Really usefull ?
-    add_definitions(${Qt5Core_DEFINITIONS})
-    add_definitions(${Qt5Widgets_DEFINITIONS})
-    add_definitions(${Qt5OpenGL_DEFINITIONS})
+add_executable(${qapp_target} ${qapp_sources} ${qapp_headers} ${qapp_inlines} ${qapp_uis_moc} ${resources})
 
-    include_directories(
-        .
-        ${CMAKE_CURRENT_BINARY_DIR} # Moc
-        ${EIGEN_INC}
-        )
+add_dependencies(qradium radiumCore radiumEngine radiumGuiBase)
+target_link_libraries(${qapp_target} ${qapp_libs})
 
-    add_executable(
-        ${app_target}
-        ${app_sources}
-        ${app_headers}
-        ${app_inlines}
-        ${app_uis_moc}
-        ${resources}
-        )
-
-    add_dependencies( radium radiumCore radiumEngine )
-
-    target_compile_definitions(${app_target} PRIVATE "-DRA_CORE_IMPORTS")
-    target_compile_definitions(${app_target} PRIVATE "-DRA_ENGINE_IMPORTS")
-
-    target_link_libraries(
-        ${app_target}
-        ${app_libs}
-        )
-
-    install( DIRECTORY . DESTINATION include FILES_MATCHING PATTERN "*.hpp" PATTERN "*.inl" PATTERN "*.h" )
-    install( FILES ${engine_shaders} DESTINATION Shaders )
-    install( DIRECTORY ${CMAKE_SOURCE_DIR}/Assets/. DESTINATION Assets )
-    install( TARGETS ${app_target} ${core_target} ${engine_target}
-        RUNTIME DESTINATION bin
-        LIBRARY DESTINATION lib
-        ARCHIVE DESTINATION lib )
-endif( NOT ${OMIT_MAIN_APP} )
+install( DIRECTORY . DESTINATION include FILES_MATCHING PATTERN "*.hpp" PATTERN "*.inl" PATTERN "*.h" )
+install( FILES ${engine_shaders} DESTINATION Shaders )
+install( DIRECTORY ${CMAKE_SOURCE_DIR}/Assets/. DESTINATION Assets )
+install( TARGETS ${qapp_target} ${guibase_target} ${core_target} ${engine_target}
+    RUNTIME DESTINATION bin
+    LIBRARY DESTINATION lib
+    ARCHIVE DESTINATION lib )

@@ -1,14 +1,14 @@
-#ifndef RADIUMENGINE_KEYBOARD_HPP
-#define RADIUMENGINE_KEYBOARD_HPP
+#ifndef RADIUMENGINE_CORE_KEY_HPP
+#define RADIUMENGINE_CORE_KEY_HPP
 
 namespace Ra
 {
-    namespace Gui
+    namespace Core
     {
         enum Key
         {
             Key_Unknown = -1,
-            Key_A = 0,
+            Key_A       = 0,
             Key_B,
             Key_C,
             Key_D,
@@ -45,17 +45,16 @@ namespace Ra
             Key_Num8,
             Key_Num9,
             Key_Escape,
-            Key_LControl,
-            Key_LShift,
-            Key_LAlt,
-            Key_LSystem,
-            Key_RControl,
-            Key_RShift,
-            Key_RAlt,
-            Key_RSystem,
+            Key_Control,
+            Key_Alt,
+            Key_Shift,
+            Key_System,
             Key_Menu,
+            Key_Plus,
+            Key_Minus,
             Key_LBracket,
             Key_RBracket,
+            Key_Colon,
             Key_SemiColon,
             Key_Comma,
             Key_Period,
@@ -64,11 +63,15 @@ namespace Ra
             Key_BackSlash,
             Key_Tilde,
             Key_Equal,
+            Key_Less,
+            Key_Greater,
             Key_Dash,
             Key_Space,
             Key_Return,
+            Key_Enter,
             Key_BackSpace,
             Key_Tab,
+            Key_BackTab,
             Key_PageUp,
             Key_PageDown,
             Key_End,
@@ -112,9 +115,7 @@ namespace Ra
 
             Key_KeyCount,
         };
+    }
+}
 
-        extern bool isKeyPressed( Key key );
-    } // namespace Gui
-} // namespace Ra
-
-#endif // RADIUMENGINE_KEYBOARD_HPP
+#endif // RA_ENGINE_CORE_KEY_HPP

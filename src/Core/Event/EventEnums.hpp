@@ -7,48 +7,35 @@ namespace Ra
 {
     namespace Core
     {
-
-        namespace Modifier
+        enum Modifier
         {
-            enum Modifier
-            {
-                RA_EMPTY     = 0x1,
-                RA_CTRL_KEY  = 0x2,
-                RA_SHIFT_KEY = 0x4,
-                RA_ALT_KEY   = 0x8
-            };
-        } // namespace Modifier
+            Modifier_Null  = 0x1,
+            Modifier_Ctrl  = 0x2,
+            Modifier_Shift = 0x4,
+            Modifier_Alt   = 0x8
+        };
 
-        namespace KeyEventType
+        enum KeyEventType
         {
-            enum KeyEventType
-            {
-                RA_KEY_PRESSED  = 0x1,
-                RA_KEY_RELEASED = 0x2
-            };
-        } // namespace KeyEventType
+            KeyEvent_Pressed  = 0x1,
+            KeyEvent_Released = 0x2
+        };
 
-        namespace MouseEventType
+        enum MouseEventType
         {
-            enum MouseEventType
-            {
-                RA_MOUSE_PRESSED  = 0x1,
-                RA_MOUSE_RELEASED = 0x2,
-                RA_MOUSE_MOVED    = 0x4,
-                RA_MOUSE_WHEEL    = 0x8
-            };
-        }
+            MouseEvent_Pressed  = 0x1,
+            MouseEvent_Released = 0x2,
+            MouseEvent_Moved    = 0x4,
+            MouseEvent_Wheel    = 0x8
+        };
 
-        namespace MouseButton
+        enum MouseButton
         {
-            enum MouseButton
-            {
-                RA_MOUSE_LEFT_BUTTON   = 0x1,
-                RA_MOUSE_MIDDLE_BUTTON = 0x2,
-                RA_MOUSE_RIGHT_BUTTON  = 0x4
-            };
-        }
-    }
-} // namespace Ra::Core
+            MouseButton_Left   = 0x1,
+            MouseButton_Middle = 0x2,
+            MouseButton_Right  = 0x4
+        };
+    } // namespace Core
+} // namespace Ra
 
 #endif // RADIUMENGINE_EVENTENUMS_HPP

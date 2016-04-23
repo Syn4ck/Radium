@@ -2,6 +2,7 @@
 
 #include <QFileDialog>
 #include <QToolButton>
+#include <QCloseEvent>
 
 #include <Engine/RadiumEngine.hpp>
 #include <Engine/Component/Component.hpp>
@@ -11,13 +12,14 @@
 #include <Engine/Renderer/RenderTechnique/ShaderProgram.hpp>
 #include <Engine/Renderer/RenderTechnique/ShaderConfigFactory.hpp>
 
+#include <Gui/Gizmo/GizmoManager.hpp>
+#include <Gui/PluginBase/RadiumPluginInterface.hpp>
+
 #include <MainApplication/MainApplication.hpp>
 #include <MainApplication/Gui/EntityTreeModel.hpp>
 #include <MainApplication/Gui/EntityTreeItem.hpp>
 #include <MainApplication/Gui/MaterialEditor.hpp>
-#include <MainApplication/Viewer/CameraInterface.hpp>
 
-#include <MainApplication/PluginBase/RadiumPluginInterface.hpp>
 #include <assimp/Importer.hpp>
 
 namespace Ra
@@ -65,7 +67,7 @@ namespace Ra
         connect( actionOpen_Material_Editor, &QAction::triggered, this, &MainWindow::openMaterialEditor );
 
         // Toolbox setup
-        connect( actionToggle_Local_Global, &QAction::toggled, m_viewer->getGizmoManager(), &GizmoManager::setLocal );
+        connect( actionToggle_Local_Global, &QAction::toggled, m_viewer, &Viewer::setGizmoLocal );
         connect( actionGizmoOff,            &QAction::triggered, this, &MainWindow::gizmoShowNone );
         connect( actionGizmoTranslate,      &QAction::triggered, this, &MainWindow::gizmoShowTranslate );
         connect( actionGizmoRotate,         &QAction::triggered, this, &MainWindow::gizmoShowRotate );
@@ -81,8 +83,8 @@ namespace Ra
             this, &MainWindow::onSelectionChanged );
 
         // Connect picking results (TODO Val : use events to dispatch picking directly)
-        connect( m_viewer, &Viewer::rightClickPicking, this, &MainWindow::handlePicking );
-        connect (m_viewer, &Viewer::leftClickPicking, m_viewer->getGizmoManager(), &GizmoManager::handlePickingResult );
+        connect(m_viewer, &Viewer::rightClickPicking, this, &MainWindow::handlePicking);
+        connect(m_viewer, &Viewer::leftClickPicking, m_viewer, &Viewer::handlePickingResult);
 
         // Update entities when the engine starts.
         connect( mainApp, &MainApplication::starting, this, &MainWindow::onEntitiesUpdated );
@@ -93,8 +95,8 @@ namespace Ra
 
         // Inform property editors of new selections
         connect(this, &MainWindow::selectedEntity, tab_edition, &TransformEditorWidget::setEditable);
-        connect(this, &MainWindow::selectedEntity, m_viewer->getGizmoManager(), &GizmoManager::setEditable);
-        connect(this, &MainWindow::selectedComponent, m_viewer->getGizmoManager(), &GizmoManager::setEditable);
+        connect(this, &MainWindow::selectedEntity, m_viewer, &Viewer::setGizmoEditable);
+        connect(this, &MainWindow::selectedComponent, m_viewer, &Viewer::setGizmoEditable);
 
         connect( this, &MainWindow::selectedEntity, this, &MainWindow::displayEntityRenderObjects );
         connect( this, &MainWindow::selectedComponent, this, &MainWindow::displayComponentRenderObjects );
@@ -114,8 +116,6 @@ namespace Ra
 
         connect( m_displayedTextureCombo, static_cast<void (QComboBox::*)(const QString&)>( &QComboBox::currentIndexChanged ),
                  m_viewer, &Viewer::displayTexture );
-        connect( m_currentRendererCombo, static_cast<void (QComboBox::*)( int )>( &QComboBox::currentIndexChanged ),
-                 m_viewer, &Viewer::changeRenderer );
 
         connect(m_enablePostProcess, &QCheckBox::stateChanged, m_viewer, &Viewer::enablePostProcess);
 
@@ -192,111 +192,11 @@ namespace Ra
     void Gui::MainWindow::keyPressEvent( QKeyEvent* event )
     {
         QMainWindow::keyPressEvent( event );
-        m_keyEvents.push_back( keyEventQtToRadium( event ) );
     }
 
-    void Gui::MainWindow::keyReleaseEvent( QKeyEvent* event )
+    void Gui::MainWindow::keyReleaseEvent(QKeyEvent* event)
     {
-        QMainWindow::keyReleaseEvent( event );
-        m_keyEvents.push_back( keyEventQtToRadium( event ) );
-    }
-
-    Core::MouseEvent Gui::MainWindow::wheelEventQtToRadium( const QWheelEvent* qtEvent )
-    {
-        Core::MouseEvent raEvent;
-        raEvent.wheelDelta = qtEvent->delta();
-        if ( qtEvent->modifiers().testFlag( Qt::ControlModifier ) )
-        {
-            raEvent.modifier |= Core::Modifier::RA_CTRL_KEY;
-        }
-
-        if ( qtEvent->modifiers().testFlag( Qt::ShiftModifier ) )
-        {
-            raEvent.modifier |= Core::Modifier::RA_SHIFT_KEY;
-        }
-
-        if ( qtEvent->modifiers().testFlag( Qt::AltModifier ) )
-        {
-            raEvent.modifier |= Core::Modifier::RA_ALT_KEY;
-        }
-
-        raEvent.absoluteXPosition = qtEvent->x();
-        raEvent.absoluteYPosition = qtEvent->y();
-        return raEvent;
-    }
-
-    Core::MouseEvent Gui::MainWindow::mouseEventQtToRadium( const QMouseEvent* qtEvent )
-    {
-        Core::MouseEvent raEvent;
-        switch ( qtEvent->button() )
-        {
-            case Qt::LeftButton:
-            {
-                raEvent.button = Core::MouseButton::RA_MOUSE_LEFT_BUTTON;
-            }
-            break;
-
-            case Qt::MiddleButton:
-            {
-                raEvent.button = Core::MouseButton::RA_MOUSE_MIDDLE_BUTTON;
-            }
-            break;
-
-            case Qt::RightButton:
-            {
-                raEvent.button = Core::MouseButton::RA_MOUSE_RIGHT_BUTTON;
-            }
-            break;
-
-            default:
-            {
-            } break;
-        }
-
-        raEvent.modifier = 0;
-
-        if ( qtEvent->modifiers().testFlag( Qt::ControlModifier ) )
-        {
-            raEvent.modifier |= Core::Modifier::RA_CTRL_KEY;
-        }
-
-        if ( qtEvent->modifiers().testFlag( Qt::ShiftModifier ) )
-        {
-            raEvent.modifier |= Core::Modifier::RA_SHIFT_KEY;
-        }
-
-        if ( qtEvent->modifiers().testFlag( Qt::AltModifier ) )
-        {
-            raEvent.modifier |= Core::Modifier::RA_ALT_KEY;
-        }
-
-        raEvent.absoluteXPosition = qtEvent->x();
-        raEvent.absoluteYPosition = qtEvent->y();
-        return raEvent;
-    }
-
-    Core::KeyEvent Gui::MainWindow::keyEventQtToRadium( const QKeyEvent* qtEvent )
-    {
-        Core::KeyEvent raEvent;
-        raEvent.key = qtEvent->key();
-
-        raEvent.modifier = 0;
-
-        if ( qtEvent->modifiers().testFlag( Qt::ControlModifier ) )
-        {
-            raEvent.modifier |= Core::Modifier::RA_CTRL_KEY;
-        }
-
-        if ( qtEvent->modifiers().testFlag( Qt::ShiftModifier ) )
-        {
-            raEvent.modifier |= Core::Modifier::RA_SHIFT_KEY;
-        }
-
-        if ( qtEvent->modifiers().testFlag( Qt::AltModifier ) )
-        {
-            raEvent.modifier |= Core::Modifier::RA_ALT_KEY;
-        }
-        return raEvent;
+        QMainWindow::keyReleaseEvent(event);
     }
 
     Gui::Viewer* Gui::MainWindow::getViewer()
@@ -412,17 +312,17 @@ namespace Ra
 
     void Gui::MainWindow::gizmoShowNone()
     {
-        m_viewer->getGizmoManager()->changeGizmoType(GizmoManager::NONE);
+        m_viewer->getViewer()->getGizmoManager()->changeGizmoType(Guibase::GizmoManager::NONE);
     }
 
     void Gui::MainWindow::gizmoShowTranslate()
     {
-        m_viewer->getGizmoManager()->changeGizmoType(GizmoManager::TRANSLATION);
+        m_viewer->getViewer()->getGizmoManager()->changeGizmoType(Guibase::GizmoManager::TRANSLATION);
     }
 
     void Gui::MainWindow::gizmoShowRotate()
     {
-        m_viewer->getGizmoManager()->changeGizmoType(GizmoManager::ROTATION);
+        m_viewer->getViewer()->getGizmoManager()->changeGizmoType(Guibase::GizmoManager::ROTATION);
     }
 
     void Gui::MainWindow::displayEntityRenderObjects( Engine::Entity* entity )
@@ -604,26 +504,20 @@ namespace Ra
 
     void Gui::MainWindow::onRendererReady()
     {
-        m_viewer->getCameraInterface()->resetCamera();
+        m_viewer->getViewer()->getCurrentCamera()->resetCamera();
 
         QSignalBlocker blockTextures( m_displayedTextureCombo );
-        QSignalBlocker blockRenderer( m_currentRendererCombo );
 
         auto texs = m_viewer->getRenderer()->getAvailableTextures();
         for ( const auto& tex : texs )
         {
             m_displayedTextureCombo->addItem( tex.c_str() );
         }
-
-        for ( const auto& renderer : m_viewer->getRenderersName() )
-        {
-            m_currentRendererCombo->addItem( renderer.c_str() );
-        }
     }
 
     void Gui::MainWindow::onFrameComplete()
     {
         tab_edition->updateValues();
-        m_viewer->getGizmoManager()->updateValues();
+        m_viewer->getViewer()->getGizmoManager()->updateValues();
     }
 } // namespace Ra

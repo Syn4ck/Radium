@@ -70,7 +70,7 @@ namespace Ra
             struct PickingQuery
             {
                 Core::Vector2 m_screenCoords;
-                Core::MouseButton::MouseButton m_button;
+                Core::MouseButton m_button;
             };
 
         public:
