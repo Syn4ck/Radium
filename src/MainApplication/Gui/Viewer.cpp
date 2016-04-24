@@ -29,6 +29,17 @@ namespace Ra
         Viewer::Viewer( QWidget* parent )
             : QOpenGLWidget( parent )
         {
+            // Create default format for Qt.
+            QSurfaceFormat format;
+            format.setVersion( 4, 4 );
+            format.setProfile( QSurfaceFormat::CoreProfile );
+            format.setDepthBufferSize( 24 );
+            format.setStencilBufferSize( 8 );
+            format.setSamples( 16 );
+            format.setSwapBehavior( QSurfaceFormat::DoubleBuffer );
+            format.setSwapInterval( 0 );
+            QSurfaceFormat::setDefaultFormat( format );
+
             // Allow Viewer to receive events
             setFocusPolicy( Qt::StrongFocus );
             setMinimumSize( QSize( 800, 600 ) );

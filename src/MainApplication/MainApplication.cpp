@@ -41,17 +41,13 @@ namespace Ra
 {
     MainApplication::MainApplication( int argc, char** argv )
         : QApplication( argc, argv )
+        , Guibase::Application(argc, argv)
         , m_mainWindow( nullptr )
-        , m_engine( nullptr )
-        , m_taskQueue( nullptr )
         , m_viewer( nullptr )
-        , m_frameTimer( new QTimer( this ) )
-        , m_frameCounter( 0 )
-        , m_isAboutToQuit( false )
-        //, m_timerData(TIMER_AVERAGE)
+        , m_fileToLoad("")
     {
-        m_targetFPS = 60; // Default
-        std::string pluginsPath = "../Plugins/bin";
+        LOG(logINFO) << "build: "<<Version::compiler<<" - "<<Version::compileDate<<" "<<Version::compileTime;
+        LOG(logINFO) << "Qt Version: " << qVersion();
 
         QCommandLineParser parser;
         parser.setApplicationDescription("Radium Engine RPZ, TMTC");
@@ -67,101 +63,41 @@ namespace Ra
         parser.addOptions({fpsOpt, pluginOpt, fileOpt});
         parser.process(*this);
 
-        if (parser.isSet(fpsOpt))      m_targetFPS = parser.value(fpsOpt).toUInt();
-        if (parser.isSet(pluginOpt))   pluginsPath = parser.value(pluginOpt).toStdString();
-
-        // Boilerplate print.
-        LOG( logINFO ) << "*** Radium Engine Main App  ***";
-        std::stringstream config;
-#if defined (CORE_DEBUG)
-        config << "(Debug Build) -- ";
-#else
-        config << "(Release Build) -- ";
-#endif
-
-#if defined (ARCH_X86)
-        config << " 32 bits x86";
-#elif defined (ARCH_X64)
-        config << " 64 bits x64";
-#endif
-        LOG( logINFO ) << config.str();
-
-        config.str( std::string() );
-        config << "Floating point format : ";
-#if defined(CORE_USE_DOUBLE)
-        config << "double precision";
-#else
-        config << "single precision" ;
-#endif
-
-        LOG( logINFO ) << config.str();
-
-        config.str( std::string() );
-        config<<"build: "<<Version::compiler<<" - "<<Version::compileDate<<" "<<Version::compileTime;
-
-
-        LOG( logINFO ) << config.str();
-
-        LOG(logINFO) << "Qt Version: " << qVersion();
-
-        // Handle command line arguments.
-        // TODO ( e.g fps limit ) / Keep or not timer data .
-
-        // Create default format for Qt.
-        QSurfaceFormat format;
-        format.setVersion( 4, 4 );
-        format.setProfile( QSurfaceFormat::CoreProfile );
-        format.setDepthBufferSize( 24 );
-        format.setStencilBufferSize( 8 );
-        format.setSamples( 16 );
-        format.setSwapBehavior( QSurfaceFormat::DoubleBuffer );
-        format.setSwapInterval( 0 );
-        QSurfaceFormat::setDefaultFormat( format );
-
-        // Create engine
-        m_engine.reset(Engine::RadiumEngine::createInstance());
-        m_engine->initialize();
+        if (parser.isSet(fpsOpt))      m_targetFPS   = parser.value(fpsOpt).toUInt();
+        if (parser.isSet(pluginOpt))   m_pluginsPath = parser.value(pluginOpt).toStdString();
+        if (parser.isSet(fileOpt))     m_fileToLoad  = parser.value(fileOpt);
 
         // Create main window.
-        m_mainWindow.reset( new Gui::MainWindow );
+        m_mainWindow = new Gui::MainWindow;
         m_mainWindow->show();
+    }
 
+    void MainApplication::initializeInternal()
+    {
         addBasicShaders();
 
         // Allow all events to be processed (thus the viewer should have
         // initialized the OpenGL context..)
         processEvents();
 
-        // Load plugins
-        if ( !loadPlugins( pluginsPath ) )
-        {
-            LOG( logERROR ) << "An error occured while trying to load plugins.";
-        }
-
         m_viewer = m_mainWindow->getViewer();
         CORE_ASSERT( m_viewer != nullptr, "GUI was not initialized" );
         CORE_ASSERT( m_viewer->context()->isValid(), "OpenGL was not initialized" );
-
-        // Create task queue with N-1 threads (we keep one for rendering).
-        m_taskQueue.reset( new Core::TaskQueue( std::thread::hardware_concurrency() - 1 ) );
 
         createConnections();
 
         setupScene();
         emit starting();
 
-        // A file has been required, load it.
-        if (parser.isSet(fileOpt))
+        if (m_fileToLoad.size() > 0)
         {
-            loadFile(parser.value(fileOpt));
+            loadFile(m_fileToLoad);
         }
-
-        m_lastFrameStart = Core::Timer::Clock::now();
     }
 
     void MainApplication::createConnections()
     {
-        connect( m_mainWindow.get(), &Gui::MainWindow::closed , this, &MainApplication::appNeedsToQuit );
+        connect( m_mainWindow, &Gui::MainWindow::closed , this, &MainApplication::appNeedsToQuit );
     }
 
     void MainApplication::setupScene()
@@ -247,57 +183,33 @@ namespace Ra
         ShaderConfigurationFactory::addConfiguration(lConfig);
     }
 
-    void MainApplication::radiumFrame()
+    void MainApplication::updateUi(Plugins::RadiumPluginInterface *plugin)
     {
-        FrameTimerData timerData;
-        timerData.frameStart = Core::Timer::Clock::now();
+        m_mainWindow->updateUi(plugin);
+    }
 
-        // ----------
-        // 0. Compute time since last frame.
-        const Scalar dt = Core::Timer::getIntervalSeconds( m_lastFrameStart, timerData.frameStart );
-        m_lastFrameStart = timerData.frameStart;
+    void MainApplication::frameStart()
+    {
+    }
 
-        timerData.eventsStart = Core::Timer::Clock::now();
+    void MainApplication::handleEvents()
+    {
         processEvents();
-        timerData.eventsEnd = Core::Timer::Clock::now();
+    }
 
-        // ----------
-        // 1. Gather user input and dispatch it.
-
-        // Get picking results from last frame and forward it to the selection.
+    void MainApplication::handlePicking()
+    {
         m_viewer->processPicking();
+    }
 
-        timerData.tasksStart = Core::Timer::Clock::now();
+    void MainApplication::render()
+    {
+        m_viewer->render(m_dt);
+    }
 
-        // ----------
-        // 3. Run the engine task queue.
-        m_engine->getTasks( m_taskQueue.get(), dt );
-
-        // Run one frame of tasks
-        m_taskQueue->startTasks();
-        m_taskQueue->waitForTasks();
-        timerData.taskData = m_taskQueue->getTimerData();
-        m_taskQueue->flushTaskQueue();
-
-        timerData.tasksEnd = Core::Timer::Clock::now();
-
-        // ----------
-        // 4. Wait until frame is fully rendered and display.
-        m_viewer->render(dt);
-
-        timerData.renderData = m_viewer->getRenderer()->getTimerData();
-
-        // ----------
-        // 5. Synchronize whatever needs synchronisation
-        m_engine->endFrameSync();
-
-        // ----------
-        // 6. Frame end.
-        timerData.frameEnd = Core::Timer::Clock::now();
-        timerData.numFrame = m_frameCounter;
-
-        m_timerData.push_back( timerData );
-        ++m_frameCounter;
+    void MainApplication::frameEnd()
+    {
+        m_timerData.push_back( m_frameData );
 
         if ( m_frameCounter % m_frameCountBeforeUpdate == 0 )
         {
@@ -310,8 +222,8 @@ namespace Ra
 
     void MainApplication::appNeedsToQuit()
     {
-        LOG( logDEBUG ) << "About to quit.";
-        m_isAboutToQuit = true;
+        LOG(logDEBUG) << "About to quit.";
+        m_running = false;
     }
 
     MainApplication::~MainApplication()
@@ -319,77 +231,7 @@ namespace Ra
         LOG( logINFO ) << "About to quit... Cleaning RadiumEngine memory";
         emit stopping();
         m_mainWindow->cleanup();
-        m_engine->cleanup();
     }
 
-    bool MainApplication::loadPlugins( const std::string& pluginsPath )
-    {
-        LOG( logINFO )<<" *** Loading Plugins ***";
-        QDir pluginsDir( qApp->applicationDirPath() );
-        pluginsDir.cd( pluginsPath.c_str() );
 
-        bool res = true;
-        uint pluginCpt = 0;
-
-        for (const auto& filename : pluginsDir.entryList(QDir::Files))
-//        foreach (QString filename, pluginsDir.entryList( QDir::Files ) )
-        {
-            std::string ext = Core::StringUtils::getFileExt( filename.toStdString() );
-#if defined( OS_WINDOWS )
-            std::string sysDllExt = "dll";
-#elif defined( OS_LINUX )
-            std::string sysDllExt = "so";
-#elif defined( OS_MACOS )
-            std::string sysDllExt = "dylib";
-#else
-            static_assert( false, "System configuration not handled" );
-#endif
-            if ( ext == sysDllExt )
-            {
-                QPluginLoader pluginLoader( pluginsDir.absoluteFilePath( filename ) );
-                // Force symbol resolution at load time.
-                pluginLoader.setLoadHints( QLibrary::ResolveAllSymbolsHint );
-
-                LOG( logINFO ) << "Found plugin " << filename.toStdString();
-
-                QObject* plugin = pluginLoader.instance();
-                Plugins::RadiumPluginInterface* loadedPlugin;
-
-                if ( plugin )
-                {
-                    loadedPlugin = qobject_cast<Plugins::RadiumPluginInterface*>( plugin );
-                    if ( loadedPlugin )
-                    {
-                        ++pluginCpt;
-                        loadedPlugin->registerPlugin( m_engine.get() );
-                        m_mainWindow->updateUi( loadedPlugin );
-                    }
-                    else
-                    {
-                        LOG( logERROR ) << "Something went wrong while trying to cast plugin"
-                                        << filename.toStdString();
-                        res = false;
-                    }
-                }
-                else
-                {
-                    LOG( logERROR ) << "Something went wrong while trying to load plugin "
-                                    << filename.toStdString() << " : "
-                                    << pluginLoader.errorString().toStdString();
-                    res = false;
-                }
-            }
-        }
-
-        if (pluginCpt == 0)
-        {
-            LOG(logINFO) << "No plugin found or loaded.";
-        }
-        else
-        {
-            LOG(logINFO) << "Loaded " << pluginCpt << " plugins.";
-        }
-
-        return res;
-    }
 }

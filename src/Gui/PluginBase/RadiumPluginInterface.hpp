@@ -1,6 +1,8 @@
 #ifndef RADIUM_RADIUMPLUGININTERFACE_HPP
 #define RADIUM_RADIUMPLUGININTERFACE_HPP
 
+#include <QString>
+
 class QWidget;
 class QMenu;
 
@@ -35,7 +37,7 @@ namespace Ra
              * @param name Name of the tab to be added, if needed.
              * @return True if the plugin wants to add a widget, false otherwise
              */
-            virtual bool doAddWidget( QString& name ) = 0;
+            virtual bool doAddWidget(QString& name) = 0;
 
             /**
              * @brief Creates the widget to be added to the ui and then returns it.

@@ -17,10 +17,19 @@ namespace Ra
     {
         int numFrame;
         Core::Timer::TimePoint frameStart;
+
         Core::Timer::TimePoint eventsStart;
         Core::Timer::TimePoint eventsEnd;
+
+        Core::Timer::TimePoint pickingStart;
+        Core::Timer::TimePoint pickingEnd;
+
         Core::Timer::TimePoint tasksStart;
         Core::Timer::TimePoint tasksEnd;
+
+        Core::Timer::TimePoint endSyncStart;
+        Core::Timer::TimePoint endSyncEnd;
+
         Core::Timer::TimePoint frameEnd;
         Engine::Renderer::TimerData renderData;
         std::vector<Core::TaskQueue::TimerData> taskData;
