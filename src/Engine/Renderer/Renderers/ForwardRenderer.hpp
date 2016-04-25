@@ -44,7 +44,6 @@ namespace Ra
                 TEX_TONEMAP_PONG,
                 TEX_BLOOM_PING,
                 TEX_BLOOM_PONG,
-                TEX_DUMMY,          // /!\ stupid test on shaders and postFX
                 TEX_COUNT
             };
 
@@ -60,6 +59,8 @@ namespace Ra
 
             std::map<std::string, Pass*>       m_passmap;
             std::vector<std::unique_ptr<Pass>> m_passes;
+
+            PassRegular m_dudule;
         };
 
 

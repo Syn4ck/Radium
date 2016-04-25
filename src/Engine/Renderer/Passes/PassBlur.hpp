@@ -33,7 +33,7 @@ namespace Ra
 
             virtual std::shared_ptr<Texture> getInternTextures(uint i);
 
-            virtual Texture* getOut(uint slot) override;
+            virtual Texture* getOut(uint slot) const override;
 
         private:
             enum FboTags

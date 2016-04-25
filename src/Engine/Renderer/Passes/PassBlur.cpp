@@ -60,7 +60,7 @@ namespace Ra {
             return m_pingpong.getInternTextures(i);
         }
 
-        Texture* PassBlur::getOut(uint slot)
+        Texture* PassBlur::getOut(uint slot) const
         {
             return m_pingpong.getOut(slot);
         }

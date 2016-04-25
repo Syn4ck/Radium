@@ -27,10 +27,12 @@ namespace Ra
 
             void setCanvas(Mesh* canvas);
 
-            virtual Texture* getIn(uint slot);
-            virtual Texture* getOut(uint slot);
+            virtual Texture* getIn(uint slot)  const;
+            virtual Texture* getOut(uint slot) const;
 
-            uint getId();
+            uint getNIn() const;
+            uint getNOut() const;
+            uint getId() const;
             std::string getName() const;
 
             virtual std::shared_ptr<Texture> getInternTextures(uint i) = 0;
@@ -49,9 +51,14 @@ namespace Ra
             uint m_nTexOut;
 
             std::vector<Texture*> m_texIn;
-            std::vector<std::shared_ptr<Texture>> m_texOut;
+            std::vector<std::shared_ptr<Texture>> m_texOut;  // useful ?
 
-            Mesh *m_canvas;
+            Mesh* m_canvas;
+
+            // should this structure be implemented separately ?
+            // Pass* m_parent;
+            // std::vector<Pass*> m_siblings;
+            // std::vector<Pass*> m_childs;
 
             static const GLenum buffers[];
             static       uint   population;

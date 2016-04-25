@@ -56,19 +56,14 @@ namespace Ra
             m_texOut[slot].reset(tex);
         }
 
-        Texture* Pass::getIn(uint slot)
+        Texture* Pass::getIn(uint slot) const
         {
             return m_texIn[slot];
         }
 
-        Texture* Pass::getOut(uint slot)
+        Texture* Pass::getOut(uint slot) const
         {
             return m_texOut[slot].get();
-        }
-
-        uint Pass::getId()
-        {
-            return m_id;
         }
 
         void Pass::setCanvas(Mesh* canvas)
@@ -76,10 +71,13 @@ namespace Ra
             m_canvas = canvas;
         }
 
-        std::string Pass::getName() const
-        {
-            return m_name;
-        }
+        uint Pass::getNIn()  const { return m_nTexIn;  }
+
+        uint Pass::getNOut() const { return m_nTexOut; }
+
+        uint Pass::getId()   const { return m_id;      }
+
+        std::string Pass::getName() const { return m_name; }
 
     }
 }

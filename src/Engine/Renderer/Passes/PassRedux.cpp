@@ -106,7 +106,7 @@ namespace Ra
             return std::shared_ptr<Texture> (nullptr);
         }
 
-        Texture* PassRedux::getOut(uint slot)
+        Texture* PassRedux::getOut(uint slot) const
         {
             return m_texOut[(m_pingpong+1)%2].get();
         }

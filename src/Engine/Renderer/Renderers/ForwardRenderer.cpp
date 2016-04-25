@@ -53,6 +53,7 @@ namespace Ra
             : Renderer( width, height )
             , m_fbo( nullptr )
             , m_postprocessFbo( nullptr )
+            , m_dudule("dudule", width, height, 1, 1, 142, "Dummy")
         {
         }
 
@@ -88,13 +89,13 @@ namespace Ra
                 m_passmap[pass->getName()] = pass.get();
             }
 
+            m_passmap["regular dudule"] = &m_dudule;
+
             // and sort the vector to have passes
             // being rendered in the specified order            
-            std::sort(m_passes.begin(), m_passes.end(), [](const std::unique_ptr<Pass>& p1, const std::unique_ptr<Pass>& p2)
-                                                             {
-                                                                // return true if p1 is before p2 and is non-0 or if p2 is 0
-                                                                return (p1->m_priority < p2->m_priority);
-            });
+            std::sort(m_passes.begin(), m_passes.end(),
+                      [](const std::unique_ptr<Pass>& p1, const std::unique_ptr<Pass>& p2)
+                      {  return (p1->m_priority < p2->m_priority); });
 
 
             // branching
@@ -116,13 +117,21 @@ namespace Ra
             m_passmap["composite"]->setIn(0, m_passmap["tonemap"]->getOut(0));
             m_passmap["composite"]->setIn(1, m_passmap["blur"]->getOut(0));
 
+            // test for dudule
+            m_dudule.setIn(0, m_textures[TEX_LIT].get());
+            m_dudule.m_params.addParameter("color", m_textures[TEX_LIT].get());
+
             // initialize everything
             for (auto const& pass: m_passes)
             {
                 // init
+                std::cout << "init pass " << pass->getName() << std::endl;
                 pass->setCanvas(m_quadMesh.get());
                 pass->init();
             }
+
+            m_dudule.setCanvas(m_quadMesh.get());
+            m_dudule.init();
 
             // and add them in Qt
             for (auto const it_pass: m_passmap)
@@ -424,6 +433,8 @@ namespace Ra
                     pass->renderPass();
                 }
 
+                m_dudule.renderPass();
+
 
                 GL_ASSERT( glDepthFunc( GL_LESS ) );
                 m_postprocessFbo->unbind();
@@ -465,6 +476,8 @@ namespace Ra
             {
                 pass->resizePass(m_width, m_height);
             }
+
+            m_dudule.resizePass(m_width, m_height);
 
             // Reset framebuffer state
             GL_CHECK_ERROR;

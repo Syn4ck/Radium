@@ -32,7 +32,7 @@ namespace Ra
             void setReturningBuffer(FBO* fbo, uint attachOffset);
 
             virtual std::shared_ptr<Texture> getInternTextures(uint i);
-            virtual Texture* getOut(uint slot) override;
+            virtual Texture* getOut(uint slot) const override;
 
             uint m_ratio;       // the ratio by which the size is divided each iteration
 
