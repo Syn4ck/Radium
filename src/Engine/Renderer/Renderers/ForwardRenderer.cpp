@@ -133,7 +133,7 @@ namespace Ra
             m_dudule.setCanvas(m_quadMesh.get());
             m_dudule.init();
 
-            // and add them in Qt
+            // and show them into Qt
             for (auto const it_pass: m_passmap)
             {
                 m_secondaryTextures["[post-fx] " + it_pass.first] = it_pass.second->getOut(0);

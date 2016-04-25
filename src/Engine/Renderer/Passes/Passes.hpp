@@ -10,4 +10,3 @@
 #include <Engine/Renderer/Passes/PassRedux.hpp>
 
 #include <Engine/Renderer/Passes/PassRegular.hpp>
-#include <Engine/Renderer/Passes/PassNode.hpp>
