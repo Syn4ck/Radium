@@ -6,10 +6,10 @@ namespace Ra {
     namespace Engine {
 
         PassBlur::PassBlur(const std::string& name, uint w, uint h, uint nTexIn, uint nTexOut,
-                           Mesh* canvas, uint priority, uint amount, uint box)
-            : Pass(name, w, h, nTexIn, nTexOut, canvas, priority)
+                           uint priority, uint amount, uint box)
+            : Pass(name, w, h, nTexIn, nTexOut, priority)
             , m_boxfactor(box)
-            , m_pingpong("blur2", w/box, h/box, nTexIn, nTexOut, canvas, priority, amount)
+            , m_pingpong("blur2", w/box, h/box, nTexIn, nTexOut, priority, amount)
         {
             // parameters to set as uniforms to SHADER_PINGPONG
             m_params[0].addParameter("offset", Core::Vector2(1.0 / m_width,  0.0));

@@ -14,8 +14,7 @@ namespace Ra
         class RA_ENGINE_API PassDummy : public Pass
         {
         public:
-            PassDummy(const std::string& name, uint w, uint h, uint nTexIn, uint nTexOut,
-                      Mesh* canvas, uint priority);
+            PassDummy(const std::string& name, uint w, uint h, uint nTexIn, uint nTexOut, uint priority);
             ~PassDummy();
             void renderPass();
             void resizePass(uint w, uint h);

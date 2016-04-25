@@ -20,7 +20,7 @@ namespace Ra
         class RA_ENGINE_API PassPingPong : public Pass
         {
         public:
-            PassPingPong(const std::string& name, uint w, uint h, uint nTexIn, uint nTexOut, Mesh* canvas, uint priority, uint loop);
+            PassPingPong(const std::string& name, uint w, uint h, uint nTexIn, uint nTexOut, uint priority, uint loop);
             virtual ~PassPingPong();
 
             void renderPass();

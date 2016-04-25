@@ -14,8 +14,7 @@ namespace Ra
         class RA_ENGINE_API PassTonemap : public Pass
         {
         public:
-            PassTonemap(const std::string& name, uint w, uint h, uint nTexIn, uint nTexOut,
-                        Mesh* canvas, uint priority);
+            PassTonemap(const std::string& name, uint w, uint h, uint nTexIn, uint nTexOut, uint priority);
             ~PassTonemap();
             void renderPass();
             void renderPass(float lumMin, float lumMax, float lumMean);

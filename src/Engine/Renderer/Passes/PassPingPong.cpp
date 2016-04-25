@@ -5,8 +5,8 @@ namespace Ra
     namespace Engine
     {
 
-        PassPingPong::PassPingPong(const std::string& name, uint w, uint h, uint nTexIn, uint nTexOut, Mesh* canvas, uint priority, uint loop)
-            : Pass(name, w, h, nTexIn, nTexOut, canvas, priority)
+        PassPingPong::PassPingPong(const std::string& name, uint w, uint h, uint nTexIn, uint nTexOut, uint priority, uint loop)
+            : Pass(name, w, h, nTexIn, nTexOut, priority)
             , m_loop( loop )
         {
             // textures

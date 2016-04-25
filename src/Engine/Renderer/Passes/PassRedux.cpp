@@ -5,8 +5,8 @@ namespace Ra
     namespace Engine
     {
 
-        PassRedux::PassRedux(const std::string& name, uint w, uint h, uint nTexIn, uint nTexOut, Mesh* canvas, uint priority, uint ratio)
-            : Pass(name, w, h, nTexIn, nTexOut, canvas, priority)
+        PassRedux::PassRedux(const std::string& name, uint w, uint h, uint nTexIn, uint nTexOut, uint priority, uint ratio)
+            : Pass(name, w, h, nTexIn, nTexOut, priority)
             , m_ratio   ( ratio )
             , m_pingpong( 0 )
         {

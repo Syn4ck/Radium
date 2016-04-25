@@ -21,8 +21,9 @@ namespace Ra
                     GL_COLOR_ATTACHMENT7
                 };
 
-        Pass::Pass(const std::string& name, uint w, uint h, uint nTexIn, uint nTexOut,
-                   Mesh* canvas, uint priority)
+        uint Pass::population = 0;
+
+        Pass::Pass(const std::string& name, uint w, uint h, uint nTexIn, uint nTexOut, uint priority)
             : m_priority ( priority )
             , m_name     ( name )
             , m_width    ( w )
@@ -31,7 +32,7 @@ namespace Ra
             , m_nTexOut  ( nTexOut )
             , m_texIn    ( nTexIn )
             , m_texOut   ( nTexOut )
-            , m_canvas   ( canvas )
+            , m_canvas   ( nullptr )
         {
             // resize vectors of textures if necessary
             if (m_nTexIn > 1)
@@ -39,6 +40,8 @@ namespace Ra
 
             if (m_nTexOut > 1)
                 m_texOut.resize(m_nTexOut, nullptr);
+
+            m_id = population ++;
         }
 
         Pass::~Pass() {}
@@ -63,6 +66,11 @@ namespace Ra
             return m_texOut[slot].get();
         }
 
+        uint Pass::getId()
+        {
+            return m_id;
+        }
+
         void Pass::setCanvas(Mesh* canvas)
         {
             m_canvas = canvas;
@@ -72,19 +80,6 @@ namespace Ra
         {
             return m_name;
         }
-
-
-//        void Pass::sort(std::vector<std::unique_ptr<Pass>>& passVector)
-//        {
-//            auto f = [](const std::unique_ptr<Pass>& p1, const std::unique_ptr<Pass>& p2) -> bool
-//            {
-//                // return true if p1 is before p2 and is non-0 or if p2 is 0
-//                return ((p1->m_priority < p2->m_priority) && (p1->m_priority != 0)) || (p2->m_priority == 0);
-//            };
-
-//            std::sort(passVector.begin(), passVector.end(), f);
-//        }
-
 
     }
 }

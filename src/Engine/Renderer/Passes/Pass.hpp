@@ -10,12 +10,10 @@ namespace Ra
     namespace Engine
     {
 
-
         class RA_ENGINE_API Pass
         {
         public:
-            Pass(const std::string& name, uint w, uint h, uint nTexIn, uint nTexOut,
-                 Mesh* canvas, uint priority);
+            Pass(const std::string& name, uint w, uint h, uint nTexIn, uint nTexOut, uint priority);
             virtual ~Pass() = 0;
 
             virtual std::string getPassName() const { return m_name; }
@@ -32,17 +30,17 @@ namespace Ra
             virtual Texture* getIn(uint slot);
             virtual Texture* getOut(uint slot);
 
+            uint getId();
             std::string getName() const;
 
             virtual std::shared_ptr<Texture> getInternTextures(uint i) = 0;
-
-            //static void sort(std::vector<std::unique_ptr<Pass>> &passVector); // static ?
 
         public:
             uint m_priority;
 
         protected:
             std::string m_name;
+            uint m_id;
 
             uint m_width;
             uint m_height;
@@ -56,6 +54,7 @@ namespace Ra
             Mesh *m_canvas;
 
             static const GLenum buffers[];
+            static       uint   population;
         };
 
 

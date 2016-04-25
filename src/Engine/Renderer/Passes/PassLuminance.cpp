@@ -3,10 +3,9 @@
 namespace Ra {
     namespace Engine {
 
-        PassLuminance::PassLuminance(const std::string& name, uint w, uint h, uint nTexIn, uint nTexOut,
-                                     Mesh* canvas, uint priority)
-            : Pass(name, w, h, nTexIn, nTexOut, canvas, priority)
-            , m_redux("redux", w, h, 1, 2, canvas, 0, 2)
+        PassLuminance::PassLuminance(const std::string& name, uint w, uint h, uint nTexIn, uint nTexOut, uint priority)
+            : Pass(name, w, h, nTexIn, nTexOut, priority)
+            , m_redux("redux", w, h, 1, 2, 0, 2)
         {
             // pre-output only, the real output is m_redux's one
             m_texOut[TEX_LUM].reset( new Texture("Lum", GL_TEXTURE_2D) );

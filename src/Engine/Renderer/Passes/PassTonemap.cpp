@@ -11,9 +11,8 @@ namespace Ra
     namespace Engine
     {
 
-        PassTonemap::PassTonemap(const std::string& name, uint w, uint h, uint nTexIn, uint nTexOut,
-                                 Mesh* canvas, uint priority)
-            : Pass(name, w, h, nTexIn, nTexOut, canvas, priority)
+        PassTonemap::PassTonemap(const std::string& name, uint w, uint h, uint nTexIn, uint nTexOut, uint priority)
+            : Pass(name, w, h, nTexIn, nTexOut, priority)
         {
             // out
             m_texOut[TEX_TONEMAP].reset( new Texture("TonemapPass", GL_TEXTURE_2D) );

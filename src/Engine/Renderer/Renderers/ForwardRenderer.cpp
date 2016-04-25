@@ -75,12 +75,12 @@ namespace Ra
         {
             // create the vector of passes
             //m_passes.push_back(std::unique_ptr<Pass>(new PassDummy    ("dummy",     m_width, m_height, 1, 1, nullptr, 1)));
-            m_passes.push_back(std::unique_ptr<Pass>(new PassLuminance("luminance", m_width, m_height, 1, 1, nullptr, 2)));
-            m_passes.push_back(std::unique_ptr<Pass>(new PassHighpass ("highpass",  m_width, m_height, 2, 1, nullptr, 3)));
-            m_passes.push_back(std::unique_ptr<Pass>(new PassBlur     ("blur",      m_width, m_height, 1, 1, nullptr, 4, 16)));
-            m_passes.push_back(std::unique_ptr<Pass>(new PassTonemap  ("tonemap",   m_width, m_height, 1, 1, nullptr, 5)));
-            m_passes.push_back(std::unique_ptr<Pass>(new PassCompose  ("composite", m_width, m_height, 1, 1, nullptr, 6)));
-            //                                                         name         width    height    in out canvas  order
+            m_passes.push_back(std::unique_ptr<Pass>(new PassLuminance("luminance", m_width, m_height, 1, 1, 2)));
+            m_passes.push_back(std::unique_ptr<Pass>(new PassHighpass ("highpass",  m_width, m_height, 2, 1, 3)));
+            m_passes.push_back(std::unique_ptr<Pass>(new PassBlur     ("blur",      m_width, m_height, 1, 1, 4, 16)));
+            m_passes.push_back(std::unique_ptr<Pass>(new PassTonemap  ("tonemap",   m_width, m_height, 1, 1, 5)));
+            m_passes.push_back(std::unique_ptr<Pass>(new PassCompose  ("composite", m_width, m_height, 1, 1, 6)));
+            //                                                         name         width    height   in out order
 
             // set hashmap
             for (auto const& pass: m_passes)

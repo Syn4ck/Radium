@@ -20,7 +20,7 @@ namespace Ra
         class RA_ENGINE_API PassRedux : public Pass
         {
         public:
-            PassRedux(const std::string& name, uint w, uint h, uint nTexIn, uint nTexOut, Mesh* canvas, uint priority, uint ratio);
+            PassRedux(const std::string& name, uint w, uint h, uint nTexIn, uint nTexOut, uint priority, uint ratio);
             virtual ~PassRedux();
 
             void renderPass();
