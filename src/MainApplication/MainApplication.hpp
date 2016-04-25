@@ -42,13 +42,11 @@ namespace Ra
 namespace Ra
 {
     /// This class contains the main application logic. It owns the engine and the GUI.
-    class MainApplication : public QApplication, public Guibase::Application
+    class MainApplication : public Guibase::Application
     {
-        Q_OBJECT
-
     public:
-        MainApplication( int argc, char** argv );
-        ~MainApplication();
+        MainApplication(int argc, char** argv);
+        virtual ~MainApplication();
 
     signals:
         /// Fired when the engine has just started, before the frame timer is set.

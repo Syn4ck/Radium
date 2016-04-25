@@ -39,9 +39,8 @@
 
 namespace Ra
 {
-    MainApplication::MainApplication( int argc, char** argv )
-        : QApplication( argc, argv )
-        , Guibase::Application(argc, argv)
+    MainApplication::MainApplication(int argc, char** argv)
+        : Guibase::Application(argc, argv)
         , m_mainWindow( nullptr )
         , m_viewer( nullptr )
         , m_fileToLoad("")
@@ -97,7 +96,7 @@ namespace Ra
 
     void MainApplication::createConnections()
     {
-        connect( m_mainWindow, &Gui::MainWindow::closed , this, &MainApplication::appNeedsToQuit );
+        QCoreApplication::connect(m_mainWindow, &Gui::MainWindow::closed , this, &MainApplication::appNeedsToQuit);
     }
 
     void MainApplication::setupScene()
