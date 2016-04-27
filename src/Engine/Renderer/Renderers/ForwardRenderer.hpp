@@ -5,6 +5,7 @@
 #include <Engine/Renderer/Renderer.hpp>
 
 #include <Engine/Renderer/Passes/Passes.hpp> // include every Pass*.hpp, TODO(Hugo) remove it after debug
+#include <Core/GraphStructures/MultiGraph.hpp>
 
 namespace Ra
 {
@@ -31,6 +32,7 @@ namespace Ra
             void initShaders();
             void initBuffers();
             void initPasses();
+            void initGraph();
 
         private:
             enum RendererTextures
@@ -61,6 +63,7 @@ namespace Ra
             std::vector<std::unique_ptr<Pass>> m_passes;
 
             PassRegular m_dudule;
+            Core::MultiGraph<Pass> m_passgraph;
         };
 
 

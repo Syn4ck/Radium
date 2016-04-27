@@ -21,7 +21,6 @@ namespace Ra
             char c[2] = "A";
             for (auto& texout : m_texOut)
             {
-                std::cout << m_name << " generating tex " << c << std::endl;
                 texout.reset( new Texture(std::string(c), GL_TEXTURE_2D) );
                 ++ c[0];
             }

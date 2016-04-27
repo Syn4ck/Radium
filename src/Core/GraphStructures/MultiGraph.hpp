@@ -3,6 +3,7 @@
 
 #include <memory>
 #include <vector>
+#include <map>
 
 namespace Ra
 {
@@ -11,7 +12,7 @@ namespace Ra
 
         /// @brief MultiGraph is an oriented and acyclic graph
         /// whose edges are represented by each node knowing the whole
-        /// list of its childrens.
+        /// list of its parents.
         /// @note Usually the operators assume there is a unique source
         template <typename T>
         class MultiGraph
@@ -19,53 +20,67 @@ namespace Ra
 
             class Node
             {
-
                 /// this is used to represent a connection from a local slot to
                 /// a the dest slot of node target
                 struct Connection
                 {
-                    uint m_local;
-                    T*   m_target;
-                    uint m_dest;
+                    uint  m_slot;
+                    Node* m_source;
+                    uint  m_local;
+                    bool  operator==(const Connection& other);
                 };
 
             public:
-                Node(const T& data, uint n_in, uint n_out);
+                Node(const std::string& name, const std::shared_ptr<T>& data, uint nbIn, uint nbOut);
                 ~Node() {}
 
                 /// connect the local slot to other's slot
-                void setParent  (uint local, const T* other, uint slot);
-                void setChildren(uint local, const T* other, uint slot);
+                void setParent(uint local, Node* other, uint slot);
 
                 /// disconnect other's slot from local if it was previously connected
-                void removeParent  (uint local, const T* other, uint slot);
-                void removeChildren(uint local, const T* other, uint slot);
-//                void disconnect(const Connection& c);
+                void removeParent(uint local, Node* other, uint slot);
+
+                /// update the level attribute of this if parents are all positively levelled
+                void updateLevel();
+
+                /// debug indicator - TODO(hugo) remove this
+                void print();
 
             public:
                 std::shared_ptr<T>      m_data;    /// data stored by the node
-                std::vector<Connection> m_childs;  /// edges starting from this
-                std::vector<Connection> m_parents; /// edges ending to this
-
-                uint m_deps; /// level over the graph source
-
-            private:
-                uint m_nIn;
-                uint m_nOut;
-            };
+                std::vector<Connection> m_parents; /// parents of the node
+                std::string m_name;
+                uint m_level;
+                uint m_nbIn;
+                uint m_nbOut;
+            }; // end of subclass Node
 
         public:
-            MultiGraph();
-            MultiGraph(const std::vector<T>& other);
+            MultiGraph() {}
+            MultiGraph(const MultiGraph& other)
+                : m_graph(other.m_graph)
+                , m_names (other.m_names)
+            {}
             ~MultiGraph() {}
 
-            /// update the nodes' levels
-            /// default refers to the first element in m_graph
-            //void levelize(uint i=0);
+            /// add a node to the graph
+            void addNode(const std::string& name, const std::shared_ptr<T>& data, uint nb_in, uint nb_out);
+
+            /// update the nodes' levels taking in account every source
+            void levelize();
+
+            /// debug indicator - TODO(hugo) remove this
+            void print();
+
+            Node* operator[](const std::string& name);
 
         private:
-            std::vector<T> m_graph;
-        };
+            std::vector<std::unique_ptr<Node>> m_graph;
+            std::map<std::string, Node*> m_names;
+        }; // end of class MultiGraph
+
+        // TODO(hugo) ask for preference about inline / this solution
+        #include "MultiGraph.tpp"
 
     }
 }

@@ -55,11 +55,6 @@ namespace Ra
 
             Mesh* m_canvas;
 
-            // should this structure be implemented separately ?
-            // Pass* m_parent;
-            // std::vector<Pass*> m_siblings;
-            // std::vector<Pass*> m_childs;
-
             static const GLenum buffers[];
             static       uint   population;
         };

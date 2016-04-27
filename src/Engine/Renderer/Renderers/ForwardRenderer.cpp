@@ -67,21 +67,49 @@ namespace Ra
             initShaders();
             initBuffers();
             initPasses();
+            initGraph();
 
             DebugRender::createInstance();
             DebugRender::getInstance()->initialize();
         }
 
+        void ForwardRenderer::initGraph()
+        {
+            std::shared_ptr<Pass> test(&m_dudule);
+
+            // add nodes
+            m_passgraph.addNode("LIT", test, 0, 1);
+            m_passgraph.addNode("LUM", test, 1, 1);
+            m_passgraph.addNode("MINMAX", test, 1, 1);
+            m_passgraph.addNode("TONMAP", test, 2, 1);
+            m_passgraph.addNode("HGHPSS", test, 2, 1);
+            m_passgraph.addNode("BLUR", test, 1, 1);
+            m_passgraph.addNode("ADD", test, 2, 1);
+
+            // connect them
+            m_passgraph[   "LUM"]->setParent(0,m_passgraph["LIT"   ],0);
+            m_passgraph["TONMAP"]->setParent(0,m_passgraph["LIT"   ],0);
+            m_passgraph["TONMAP"]->setParent(0,m_passgraph["MINMAX"],1);
+            m_passgraph["HGHPSS"]->setParent(0,m_passgraph["LIT"   ],0);
+            m_passgraph["HGHPSS"]->setParent(0,m_passgraph["MINMAX"],1);
+            m_passgraph["MINMAX"]->setParent(0,m_passgraph["LUM"   ],0);
+            m_passgraph[  "BLUR"]->setParent(0,m_passgraph["HGHPSS"],0);
+            m_passgraph[   "ADD"]->setParent(0,m_passgraph["BLUR"  ],0);
+            m_passgraph[   "ADD"]->setParent(0,m_passgraph["TONMAP"],1);
+
+            // levelize and show
+            m_passgraph.levelize();
+            m_passgraph.print();
+        }
+
         void ForwardRenderer::initPasses()
         {
-            // create the vector of passes
-            //m_passes.push_back(std::unique_ptr<Pass>(new PassDummy    ("dummy",     m_width, m_height, 1, 1, nullptr, 1)));
+            // create the vector of passes                             name         width    height   in out order
             m_passes.push_back(std::unique_ptr<Pass>(new PassLuminance("luminance", m_width, m_height, 1, 1, 2)));
             m_passes.push_back(std::unique_ptr<Pass>(new PassHighpass ("highpass",  m_width, m_height, 2, 1, 3)));
             m_passes.push_back(std::unique_ptr<Pass>(new PassBlur     ("blur",      m_width, m_height, 1, 1, 4, 16)));
             m_passes.push_back(std::unique_ptr<Pass>(new PassTonemap  ("tonemap",   m_width, m_height, 1, 1, 5)));
             m_passes.push_back(std::unique_ptr<Pass>(new PassCompose  ("composite", m_width, m_height, 1, 1, 6)));
-            //                                                         name         width    height   in out order
 
             // set hashmap
             for (auto const& pass: m_passes)
@@ -99,19 +127,14 @@ namespace Ra
 
 
             // branching
-            //m_passmap["dummy"]->setIn(0, m_textures[TEX_LIT].get());
-
             m_passmap["luminance"]->setIn(0, m_textures[TEX_LIT].get());
-            //m_passmap["luminance"]->setIn(0, m_passmap["dummy"]->getOut(0));
 
             m_passmap["highpass"]->setIn(0, m_textures[TEX_LIT].get());
-            //m_passmap["highpass"]->setIn(0, m_passmap["dummy"]->getOut(0));
             m_passmap["highpass"]->setIn(1, m_passmap["luminance"]->getOut(0));
 
             m_passmap["blur"]->setIn(0, m_passmap["highpass"]->getOut(0));
 
             m_passmap["tonemap"]->setIn(0, m_textures[TEX_LIT].get());
-            //m_passmap["tonemap"]->setIn(0, m_passmap["dummy"]->getOut(0));
             m_passmap["tonemap"]->setIn(1, m_passmap["luminance"]->getOut(0));
 
             m_passmap["composite"]->setIn(0, m_passmap["tonemap"]->getOut(0));
@@ -125,7 +148,6 @@ namespace Ra
             for (auto const& pass: m_passes)
             {
                 // init
-                std::cout << "init pass " << pass->getName() << std::endl;
                 pass->setCanvas(m_quadMesh.get());
                 pass->init();
             }
