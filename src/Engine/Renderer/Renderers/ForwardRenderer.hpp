@@ -62,8 +62,7 @@ namespace Ra
             std::map<std::string, Pass*>       m_passmap;
             std::vector<std::unique_ptr<Pass>> m_passes;
 
-            PassRegular m_dudule;
-            Core::MultiGraph<Pass> m_passgraph;
+            // Core::MultiGraph<Pass> m_passgraph;
         };
 
 

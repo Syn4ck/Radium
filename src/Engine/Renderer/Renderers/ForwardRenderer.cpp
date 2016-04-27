@@ -53,7 +53,6 @@ namespace Ra
             : Renderer( width, height )
             , m_fbo( nullptr )
             , m_postprocessFbo( nullptr )
-            , m_dudule("dudule", width, height, 1, 1, 142, "Dummy")
         {
         }
 
@@ -75,41 +74,42 @@ namespace Ra
 
         void ForwardRenderer::initGraph()
         {
-            std::shared_ptr<Pass> test(&m_dudule);
+//            std::shared_ptr<Pass> test(&m_dudule);
 
-            // add nodes
-            m_passgraph.addNode("LIT", test, 0, 1);
-            m_passgraph.addNode("LUM", test, 1, 1);
-            m_passgraph.addNode("MINMAX", test, 1, 1);
-            m_passgraph.addNode("TONMAP", test, 2, 1);
-            m_passgraph.addNode("HGHPSS", test, 2, 1);
-            m_passgraph.addNode("BLUR", test, 1, 1);
-            m_passgraph.addNode("ADD", test, 2, 1);
+//            // add nodes
+//            m_passgraph.addNode("LIT", test, 0, 1);
+//            m_passgraph.addNode("LUM", test, 1, 1);
+//            m_passgraph.addNode("MINMAX", test, 1, 1);
+//            m_passgraph.addNode("TONMAP", test, 2, 1);
+//            m_passgraph.addNode("HGHPSS", test, 2, 1);
+//            m_passgraph.addNode("BLUR", test, 1, 1);
+//            m_passgraph.addNode("ADD", test, 2, 1);
 
-            // connect them
-            m_passgraph[   "LUM"]->setParent(0,m_passgraph["LIT"   ],0);
-            m_passgraph["TONMAP"]->setParent(0,m_passgraph["LIT"   ],0);
-            m_passgraph["TONMAP"]->setParent(0,m_passgraph["MINMAX"],1);
-            m_passgraph["HGHPSS"]->setParent(0,m_passgraph["LIT"   ],0);
-            m_passgraph["HGHPSS"]->setParent(0,m_passgraph["MINMAX"],1);
-            m_passgraph["MINMAX"]->setParent(0,m_passgraph["LUM"   ],0);
-            m_passgraph[  "BLUR"]->setParent(0,m_passgraph["HGHPSS"],0);
-            m_passgraph[   "ADD"]->setParent(0,m_passgraph["BLUR"  ],0);
-            m_passgraph[   "ADD"]->setParent(0,m_passgraph["TONMAP"],1);
+//            // connect them
+//            m_passgraph[   "LUM"]->setParent(0,m_passgraph["LIT"   ],0);
+//            m_passgraph["TONMAP"]->setParent(0,m_passgraph["LIT"   ],0);
+//            m_passgraph["TONMAP"]->setParent(0,m_passgraph["MINMAX"],1);
+//            m_passgraph["HGHPSS"]->setParent(0,m_passgraph["LIT"   ],0);
+//            m_passgraph["HGHPSS"]->setParent(0,m_passgraph["MINMAX"],1);
+//            m_passgraph["MINMAX"]->setParent(0,m_passgraph["LUM"   ],0);
+//            m_passgraph[  "BLUR"]->setParent(0,m_passgraph["HGHPSS"],0);
+//            m_passgraph[   "ADD"]->setParent(0,m_passgraph["BLUR"  ],0);
+//            m_passgraph[   "ADD"]->setParent(0,m_passgraph["TONMAP"],1);
 
-            // levelize and show
-            m_passgraph.levelize();
-            m_passgraph.print();
+//            // levelize and show
+//            m_passgraph.levelize();
+//            m_passgraph.print();
         }
 
         void ForwardRenderer::initPasses()
         {
-            // create the vector of passes                             name         width    height   in out order
-            m_passes.push_back(std::unique_ptr<Pass>(new PassLuminance("luminance", m_width, m_height, 1, 1, 2)));
-            m_passes.push_back(std::unique_ptr<Pass>(new PassHighpass ("highpass",  m_width, m_height, 2, 1, 3)));
-            m_passes.push_back(std::unique_ptr<Pass>(new PassBlur     ("blur",      m_width, m_height, 1, 1, 4, 16)));
-            m_passes.push_back(std::unique_ptr<Pass>(new PassTonemap  ("tonemap",   m_width, m_height, 1, 1, 5)));
-            m_passes.push_back(std::unique_ptr<Pass>(new PassCompose  ("composite", m_width, m_height, 1, 1, 6)));
+            m_passes.push_back(std::unique_ptr<Pass>(new PassRegular ("dummy",     m_width, m_height, 1, 1, "Dummy")));
+            m_passes.push_back(std::unique_ptr<Pass>(new PassRegular ("luminance", m_width, m_height, 1, 1, "Luminance")));
+            m_passes.push_back(std::unique_ptr<Pass>(new PassRedux   ("minmax",    m_width, m_height, 1, 1, 2, "MinMax")));
+            m_passes.push_back(std::unique_ptr<Pass>(new PassRegular ("highpass",  m_width, m_height, 2, 1, "Highpass")));
+            m_passes.push_back(std::unique_ptr<Pass>(new PassPingPong("blur",      m_width, m_height, 1, 1, 16, "Blur")));
+            m_passes.push_back(std::unique_ptr<Pass>(new PassRegular ("tonemap",   m_width, m_height, 1, 1, "Tonemapping")));
+            m_passes.push_back(std::unique_ptr<Pass>(new PassRegular ("composite", m_width, m_height, 1, 1, "FinalCompose")));
 
             // set hashmap
             for (auto const& pass: m_passes)
@@ -117,32 +117,20 @@ namespace Ra
                 m_passmap[pass->getName()] = pass.get();
             }
 
-            m_passmap["regular dudule"] = &m_dudule;
-
-            // and sort the vector to have passes
-            // being rendered in the specified order            
-            std::sort(m_passes.begin(), m_passes.end(),
-                      [](const std::unique_ptr<Pass>& p1, const std::unique_ptr<Pass>& p2)
-                      {  return (p1->m_priority < p2->m_priority); });
-
-
             // branching
-            m_passmap["luminance"]->setIn(0, m_textures[TEX_LIT].get());
+//            m_passmap["luminance"]->m_params.addParameter("hdr", m_textures[TEX_LIT].get());
+//            m_passmap["minmax"   ]->m_params.addParameter("hdr", m_passmap["luminance"]->getOut(0));
 
-            m_passmap["highpass"]->setIn(0, m_textures[TEX_LIT].get());
-            m_passmap["highpass"]->setIn(1, m_passmap["luminance"]->getOut(0));
+//            m_passmap["highpass"]->setIn(0, m_textures[TEX_LIT].get());
+//            m_passmap["highpass"]->setIn(1, m_passmap["luminance"]->getOut(0));
 
-            m_passmap["blur"]->setIn(0, m_passmap["highpass"]->getOut(0));
+//            m_passmap["blur"]->setIn(0, m_passmap["highpass"]->getOut(0));
 
-            m_passmap["tonemap"]->setIn(0, m_textures[TEX_LIT].get());
-            m_passmap["tonemap"]->setIn(1, m_passmap["luminance"]->getOut(0));
+//            m_passmap["tonemap"]->setIn(0, m_textures[TEX_LIT].get());
+//            m_passmap["tonemap"]->setIn(1, m_passmap["luminance"]->getOut(0));
 
-            m_passmap["composite"]->setIn(0, m_passmap["tonemap"]->getOut(0));
-            m_passmap["composite"]->setIn(1, m_passmap["blur"]->getOut(0));
-
-            // test for dudule
-            m_dudule.setIn(0, m_textures[TEX_LIT].get());
-            m_dudule.m_params.addParameter("color", m_textures[TEX_LIT].get());
+//            m_passmap["composite"]->setIn(0, m_passmap["tonemap"]->getOut(0));
+//            m_passmap["composite"]->setIn(1, m_passmap["blur"]->getOut(0));
 
             // initialize everything
             for (auto const& pass: m_passes)
@@ -151,9 +139,6 @@ namespace Ra
                 pass->setCanvas(m_quadMesh.get());
                 pass->init();
             }
-
-            m_dudule.setCanvas(m_quadMesh.get());
-            m_dudule.init();
 
             // and show them into Qt
             for (auto const it_pass: m_passmap)
@@ -455,9 +440,6 @@ namespace Ra
                     pass->renderPass();
                 }
 
-                m_dudule.renderPass();
-
-
                 GL_ASSERT( glDepthFunc( GL_LESS ) );
                 m_postprocessFbo->unbind();
             }
@@ -498,8 +480,6 @@ namespace Ra
             {
                 pass->resizePass(m_width, m_height);
             }
-
-            m_dudule.resizePass(m_width, m_height);
 
             // Reset framebuffer state
             GL_CHECK_ERROR;

@@ -14,20 +14,20 @@ namespace Ra
         class RA_ENGINE_API PassRegular : public Pass
         {
         public:
-            PassRegular(const std::string& name, uint w, uint h, uint nTexIn, uint nTexOut, uint priority, std::string shader);
+            PassRegular(const std::string& name, uint w, uint h, uint nTexIn, uint nTexOut, std::string shader);
             ~PassRegular();
-            void renderPass();
-            void resizePass(uint w, uint h);
-            void resizePass();
-            void init();
+            virtual void renderPass();
+            virtual void resizePass(uint w, uint h);
+            virtual void resizePass();
+            virtual void init();
 
             virtual Texture* getOut(uint slot);
-            virtual std::shared_ptr<Texture> getInternTextures(uint i);
+            virtual std::shared_ptr<Texture> getInternTextures(uint i) const;
 
         public:
-            RenderParameters     m_params;
-            const ShaderProgram* m_shader;
             std::string      m_shadername;
+            const ShaderProgram* m_shader;
+            RenderParameters     m_params;
 
         private:
             std::unique_ptr<FBO> m_fbo;

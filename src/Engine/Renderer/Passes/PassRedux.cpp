@@ -5,14 +5,17 @@ namespace Ra
     namespace Engine
     {
 
-        PassRedux::PassRedux(const std::string& name, uint w, uint h, uint nTexIn, uint nTexOut, uint priority, uint ratio)
-            : Pass(name, w, h, nTexIn, nTexOut, priority)
-            , m_ratio   ( ratio )
+        PassRedux::PassRedux(const std::string& name, uint w, uint h, uint nTexIn, uint nTexOut, uint ratio,
+                             const std::string& shader)
+            : Pass(name, w, h, nTexIn, nTexOut)
+            , m_ratio( ratio )
+            , m_shadername(shader)
             , m_pingpong( 0 )
         {
             // textures
             m_texOut[TEX_PING].reset( new Texture("Ping", GL_TEXTURE_2D) );
-            m_texOut[TEX_PONG].reset( new Texture("Pong", GL_TEXTURE_2D) );
+
+           m_texOut[TEX_PONG].reset( new Texture("Pong", GL_TEXTURE_2D) );
         }
 
         PassRedux::~PassRedux()
@@ -23,6 +26,10 @@ namespace Ra
         {
             // internal FBO
             m_fbo.reset( new FBO( FBO::Components(FBO::COLOR), 1, 1 ));
+
+            // get shader
+            ShaderProgramManager* shaderMgr = ShaderProgramManager::getInstance();
+            m_shader = shaderMgr->addShaderProgram(m_shadername, "../Shaders/Basic2D.vert.glsl", "../Shaders/" + m_shadername + ".frag.glsl");
         }
 
         void PassRedux::resizePass(uint w, uint h)
@@ -71,7 +78,7 @@ namespace Ra
 
             // bring the texture to internal fbo
             drawscreen->bind();
-            m_params->bind(drawscreen);
+            m_params.bind(drawscreen);
             m_canvas->render();
 
             m_pingpong = 0;
@@ -101,7 +108,7 @@ namespace Ra
             m_canvas->render();
         }
 
-        std::shared_ptr<Texture> PassRedux::getInternTextures(uint i)
+        std::shared_ptr<Texture> PassRedux::getInternTextures(uint i) const
         {
             return std::shared_ptr<Texture> (nullptr);
         }
@@ -109,12 +116,6 @@ namespace Ra
         Texture* PassRedux::getOut(uint slot) const
         {
             return m_texOut[(m_pingpong+1)%2].get();
-        }
-
-        void PassRedux::setShader(const ShaderProgram* shader, RenderParameters* params)
-        {
-            m_shader = shader;
-            m_params = params;
         }
 
         void PassRedux::setReturningBuffer(FBO* fbo, uint attachOffset)

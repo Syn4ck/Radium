@@ -13,12 +13,13 @@ namespace Ra
         class RA_ENGINE_API Pass
         {
         public:
-            Pass(const std::string& name, uint w, uint h, uint nTexIn, uint nTexOut, uint priority);
+            Pass(const std::string& name, uint w, uint h, uint nTexIn, uint nTexOut);
             virtual ~Pass() = 0;
 
             virtual std::string getPassName() const { return m_name; }
 
             virtual void renderPass() = 0;
+            virtual void resizePass() = 0;
             virtual void resizePass( uint w, uint h ) = 0;
             virtual void init() = 0;
 
@@ -35,10 +36,7 @@ namespace Ra
             uint getId() const;
             std::string getName() const;
 
-            virtual std::shared_ptr<Texture> getInternTextures(uint i) = 0;
-
-        public:
-            uint m_priority;
+            virtual std::shared_ptr<Texture> getInternTextures(uint i) const = 0;
 
         protected:
             std::string m_name;
@@ -56,7 +54,6 @@ namespace Ra
             Mesh* m_canvas;
 
             static const GLenum buffers[];
-            static       uint   population;
         };
 
 

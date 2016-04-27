@@ -13,8 +13,8 @@ namespace Ra
     namespace Engine
     {
 
-        PassRegular::PassRegular(const std::string& name, uint w, uint h, uint nTexIn, uint nTexOut, uint priority, std::string shader)
-            : Pass(name, w, h, nTexIn, nTexOut, priority)
+        PassRegular::PassRegular(const std::string& name, uint w, uint h, uint nTexIn, uint nTexOut, std::string shader)
+            : Pass(name, w, h, nTexIn, nTexOut)
             , m_shadername(shader)
         {
             // generate output textures
@@ -83,7 +83,7 @@ namespace Ra
             m_canvas->render();
         }
 
-        std::shared_ptr<Texture> PassRegular::getInternTextures(uint i)
+        std::shared_ptr<Texture> PassRegular::getInternTextures(uint i) const
         {
             return std::shared_ptr<Texture>( nullptr );
         }

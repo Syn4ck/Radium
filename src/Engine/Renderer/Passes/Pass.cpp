@@ -21,11 +21,8 @@ namespace Ra
                     GL_COLOR_ATTACHMENT7
                 };
 
-        uint Pass::population = 0;
-
-        Pass::Pass(const std::string& name, uint w, uint h, uint nTexIn, uint nTexOut, uint priority)
-            : m_priority ( priority )
-            , m_name     ( name )
+        Pass::Pass(const std::string& name, uint w, uint h, uint nTexIn, uint nTexOut)
+            : m_name     ( name )
             , m_width    ( w )
             , m_height   ( h )
             , m_nTexIn   ( nTexIn )
@@ -40,8 +37,6 @@ namespace Ra
 
             if (m_nTexOut > 1)
                 m_texOut.resize(m_nTexOut, nullptr);
-
-            m_id = population ++;
         }
 
         Pass::~Pass() {}

@@ -20,18 +20,18 @@ namespace Ra
         class RA_ENGINE_API PassRedux : public Pass
         {
         public:
-            PassRedux(const std::string& name, uint w, uint h, uint nTexIn, uint nTexOut, uint priority, uint ratio);
+            PassRedux(const std::string& name, uint w, uint h, uint nTexIn, uint nTexOut, uint ratio,
+                      const std::string& shader);
             virtual ~PassRedux();
 
-            void renderPass();
-            void resizePass(uint w, uint h);
-            void resizePass();
-            void init();
+            virtual void renderPass();
+            virtual void resizePass(uint w, uint h);
+            virtual void resizePass();
+            virtual void init();
 
-            void setShader(const ShaderProgram* shader, RenderParameters* params);
             void setReturningBuffer(FBO* fbo, uint attachOffset);
 
-            virtual std::shared_ptr<Texture> getInternTextures(uint i);
+            virtual std::shared_ptr<Texture> getInternTextures(uint i) const;
             virtual Texture* getOut(uint slot) const override;
 
             uint m_ratio;       // the ratio by which the size is divided each iteration
@@ -52,8 +52,9 @@ namespace Ra
             uint m_parentAttachOffset;
 
             // parameters for redux to know what to do
+            std::string      m_shadername;
             const ShaderProgram* m_shader;
-            RenderParameters*    m_params;
+            RenderParameters     m_params;
 
             // ping-pong specific variable
             uint m_pingpong;
