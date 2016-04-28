@@ -58,7 +58,7 @@ namespace Ra
 
             std::string     m_shadernames[SHADER_COUNT];
             const ShaderProgram* m_shader[SHADER_COUNT];
-            RenderParameters     m_params[SHADER_COUNT];
+            //RenderParameters     m_params[SHADER_COUNT];
         };
 
     }

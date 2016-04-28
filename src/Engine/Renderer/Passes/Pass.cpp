@@ -22,14 +22,14 @@ namespace Ra
                 };
 
         Pass::Pass(const std::string& name, uint w, uint h, uint nTexIn, uint nTexOut)
-            : m_name     ( name )
-            , m_width    ( w )
-            , m_height   ( h )
-            , m_nTexIn   ( nTexIn )
-            , m_nTexOut  ( nTexOut )
-            , m_texIn    ( nTexIn )
-            , m_texOut   ( nTexOut )
-            , m_canvas   ( nullptr )
+            : m_name    ( name )
+            , m_width   ( w )
+            , m_height  ( h )
+            , m_nTexIn  ( nTexIn )
+            , m_nTexOut ( nTexOut )
+            , m_texIn   ( nTexIn )
+            , m_texOut  ( nTexOut )
+            , m_canvas  ( nullptr )
         {
             // resize vectors of textures if necessary
             if (m_nTexIn > 1)
@@ -41,14 +41,57 @@ namespace Ra
 
         Pass::~Pass() {}
 
-        void Pass::setIn(uint slot, Texture* tex)
+        void Pass::setIn(const char* name, Texture* tex, uint slot, uint paramSet)
         {
             m_texIn[slot] = tex;
+            m_params[paramSet].addParameter(name, tex);
+
         }
 
-        void Pass::setOut(uint slot, Texture* tex)
+        void Pass::setIn(const char* name, int value, uint slot, uint paramSet)
         {
-            m_texOut[slot].reset(tex);
+            m_params[paramSet].addParameter(name, value);
+        }
+
+        void Pass::setIn(const char* name, uint value, uint slot, uint paramSet)
+        {
+            m_params[paramSet].addParameter(name, value);
+        }
+
+        void Pass::setIn(const char* name, Scalar value, uint slot, uint paramSet)
+        {
+            m_params[paramSet].addParameter(name, value);
+        }
+
+        void Pass::setIn(const char* name, const Core::Vector2& value, uint slot, uint paramSet)
+        {
+            m_params[paramSet].addParameter(name, value);
+        }
+
+        void Pass::setIn(const char* name, const Core::Vector3& value, uint slot, uint paramSet)
+        {
+            m_params[paramSet].addParameter(name, value);
+        }
+
+        void Pass::setIn(const char* name, const Core::Vector4& value, uint slot, uint paramSet)
+        {
+            m_params[paramSet].addParameter(name, value);
+        }
+
+        void Pass::setIn(const char* name, const Core::Matrix2& value, uint slot, uint paramSet)
+        {
+            m_params[paramSet].addParameter(name, value);
+        }
+
+        void Pass::setIn(const char* name, const Core::Matrix3& value, uint slot, uint paramSet)
+        {
+            m_params[paramSet].addParameter(name, value);
+        }
+
+        void Pass::setIn(const char* name, const Core::Matrix4& value, uint slot, uint paramSet)
+
+        {
+            m_params[paramSet].addParameter(name, value);
         }
 
         Texture* Pass::getIn(uint slot) const

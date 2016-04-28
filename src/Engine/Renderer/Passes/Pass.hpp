@@ -23,8 +23,18 @@ namespace Ra
             virtual void resizePass( uint w, uint h ) = 0;
             virtual void init() = 0;
 
-            virtual void setIn(uint slot, Texture* tex);
-            virtual void setOut(uint slot, Texture* tex);
+            /// set of functions used to set RenderParameters to a shader
+            /// @param paramSet is used when a pass has multiple sets of parameters (like ping-pong)
+            void setIn(const char* name, Texture* tex,               uint slot = 0, uint paramSet = 0);
+            void setIn(const char* name, int      value,             uint slot = 0, uint paramSet = 0);
+            void setIn(const char* name, uint     value,             uint slot = 0, uint paramSet = 0);
+            void setIn(const char* name, Scalar   value,             uint slot = 0, uint paramSet = 0);
+            void setIn(const char* name, const Core::Vector2& value, uint slot = 0, uint paramSet = 0);
+            void setIn(const char* name, const Core::Vector3& value, uint slot = 0, uint paramSet = 0);
+            void setIn(const char* name, const Core::Vector4& value, uint slot = 0, uint paramSet = 0);
+            void setIn(const char* name, const Core::Matrix2& value, uint slot = 0, uint paramSet = 0);
+            void setIn(const char* name, const Core::Matrix3& value, uint slot = 0, uint paramSet = 0);
+            void setIn(const char* name, const Core::Matrix4& value, uint slot = 0, uint paramSet = 0);
 
             void setCanvas(Mesh* canvas);
 
@@ -38,6 +48,9 @@ namespace Ra
 
             virtual std::shared_ptr<Texture> getInternTextures(uint i) const = 0;
 
+        public:
+            RenderParameters m_params[2];
+
         protected:
             std::string m_name;
             uint m_id;
@@ -49,7 +62,7 @@ namespace Ra
             uint m_nTexOut;
 
             std::vector<Texture*> m_texIn;
-            std::vector<std::shared_ptr<Texture>> m_texOut;  // useful ?
+            std::vector<std::shared_ptr<Texture>> m_texOut;
 
             Mesh* m_canvas;
 

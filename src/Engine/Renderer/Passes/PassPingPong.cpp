@@ -10,10 +10,6 @@ namespace Ra
             : Pass(name, w, h, nTexIn, nTexOut)
             , m_loop( loop )
         {
-            // textures
-            m_texOut   [TEX_PONG].reset( new Texture("Pong", GL_TEXTURE_2D) );
-            m_texIntern[TEX_PING].reset( new Texture("Ping", GL_TEXTURE_2D) );
-
             // shader names
             m_shadernames[SHADER_PINGPONG] = shaderPingPong;
             m_shadernames[SHADER_PONGPING] = shaderPingPong;
@@ -28,6 +24,10 @@ namespace Ra
             // internal FBO
             m_fbo.reset( new FBO( FBO::Components(FBO::COLOR), m_width, m_height ));
 
+            // textures
+            m_texOut   [TEX_PONG].reset( new Texture(m_name + "-pong", GL_TEXTURE_2D) );
+            m_texIntern[TEX_PING].reset( new Texture(m_name + "-ping", GL_TEXTURE_2D) );
+
             // shaders
             ShaderProgramManager* shaderMgr = ShaderProgramManager::getInstance();
 
@@ -35,7 +35,8 @@ namespace Ra
             m_shader[SHADER_PINGPONG] = shaderMgr->addShaderProgram(m_shadernames[SHADER_PINGPONG], "../Shaders/Basic2D.vert.glsl",
                                                                     "../Shaders/" + m_shadernames[SHADER_PINGPONG] + ".frag.glsl");
             // now if a different shader is wanted on ping-pong, load it
-            if (m_shadernames[SHADER_PONGPING] == "")
+
+            if (m_shadernames[SHADER_PONGPING].length() == 0)
             {
                 m_shader[SHADER_PONGPING] = m_shader[SHADER_PINGPONG];
             }
@@ -60,9 +61,8 @@ namespace Ra
 
             m_fbo->bind();
             m_fbo->setSize(m_width, m_height);
-            m_fbo->attachTexture( GL_COLOR_ATTACHMENT0, m_texIn[0] );
-            m_fbo->attachTexture( GL_COLOR_ATTACHMENT1, m_texIntern[TEX_PING].get() );
-            m_fbo->attachTexture( GL_COLOR_ATTACHMENT2, m_texOut[TEX_PONG].get() );
+            m_fbo->attachTexture( GL_COLOR_ATTACHMENT0, m_texIntern[TEX_PING].get() );
+            m_fbo->attachTexture( GL_COLOR_ATTACHMENT1, m_texOut[TEX_PONG].get() );
             m_fbo->unbind( true );
 
             GL_CHECK_ERROR;
@@ -81,24 +81,24 @@ namespace Ra
             GL_ASSERT( glViewport(0, 0, m_width, m_height) );
 
             // first write to pong
-            GL_ASSERT( glDrawBuffers(1, buffers + 2) );
+            GL_ASSERT( glDrawBuffers(1, buffers + 1) );
             m_shader[SHADER_PINGPONG]->bind();
             m_params[SHADER_PINGPONG].bind(m_shader[SHADER_PINGPONG]);
-            m_shader[SHADER_PINGPONG]->setUniform("color",  m_texIn[0]);
+            m_shader[SHADER_PINGPONG]->setUniform("color", m_texIn[0]);
             m_canvas->render();
 
             // actually do the ping-pong
             for (uint i = 0; i < m_loop; ++i)
             {
                 // pong->ping
-                GL_ASSERT( glDrawBuffers(1, buffers + 1) );
+                GL_ASSERT( glDrawBuffers(1, buffers) );
                 m_shader[SHADER_PONGPING]->bind();
                 m_params[SHADER_PONGPING].bind(m_shader[SHADER_PONGPING]);
                 m_shader[SHADER_PONGPING]->setUniform("color", m_texOut[TEX_PONG].get());
                 m_canvas->render();
 
                 // ping->pong
-                GL_ASSERT( glDrawBuffers(1, buffers + 2) );
+                GL_ASSERT( glDrawBuffers(1, buffers + 1) );
                 m_shader[SHADER_PINGPONG]->bind();
                 m_params[SHADER_PINGPONG].bind(m_shader[SHADER_PINGPONG]);
                 m_shader[SHADER_PINGPONG]->setUniform("color", m_texIntern[TEX_PING].get());

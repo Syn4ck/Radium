@@ -27,7 +27,7 @@ namespace Ra
         public:
             std::string      m_shadername;
             const ShaderProgram* m_shader;
-            RenderParameters     m_params;
+            //RenderParameters     m_params;
 
         private:
             std::unique_ptr<FBO> m_fbo;

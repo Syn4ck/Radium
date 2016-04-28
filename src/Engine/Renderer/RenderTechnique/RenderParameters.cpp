@@ -67,11 +67,6 @@ namespace Ra
             m_mat4ParamsVector[name] = Mat4Parameter( name, value );
         }
 
-        void RenderParameters::addParameter( const char* name, Texture* tex, int texUnit )
-        {
-            m_texParamsVector[name] = TextureParameter( name, tex, texUnit );
-        }
-
         void RenderParameters::addParameter( const char* name, Texture* tex )
         {
             m_texParamsVector[name] = TextureParameter( name, tex );

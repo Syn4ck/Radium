@@ -91,7 +91,6 @@ namespace Ra
             void addParameter( const char* name, const Core::Matrix3& value );
             void addParameter( const char* name, const Core::Matrix4& value );
 
-            void addParameter( const char* name, Texture* tex, int texUnit );
             void addParameter( const char* name, Texture* tex );
 
             void updateParameter( const char* name, int    value );

@@ -17,13 +17,6 @@ namespace Ra
             : Pass(name, w, h, nTexIn, nTexOut)
             , m_shadername(shader)
         {
-            // generate output textures
-            char c[2] = "A";
-            for (auto& texout : m_texOut)
-            {
-                texout.reset( new Texture(std::string(c), GL_TEXTURE_2D) );
-                ++ c[0];
-            }
         }
 
         PassRegular::~PassRegular()
@@ -34,6 +27,14 @@ namespace Ra
         {
             // initialize internal FBO
             m_fbo.reset( new FBO( FBO::Components(FBO::COLOR), m_width, m_height ));
+
+            // generate output textures
+            char c[3] = "-A";
+            for (auto& texout : m_texOut)
+            {
+                texout.reset( new Texture(m_name + std::string(c), GL_TEXTURE_2D) );
+                ++ c[1];
+            }
 
             // get shader
             ShaderProgramManager* shaderMgr = ShaderProgramManager::getInstance();
@@ -79,7 +80,7 @@ namespace Ra
             GL_ASSERT( glDrawBuffers(1, buffers) );
 
             m_shader->bind();
-            m_params.bind(m_shader);
+            m_params->bind(m_shader);
             m_canvas->render();
         }
 

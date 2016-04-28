@@ -103,34 +103,22 @@ namespace Ra
 
         void ForwardRenderer::initPasses()
         {
-            m_passes.push_back(std::unique_ptr<Pass>(new PassRegular ("dummy",     m_width, m_height, 1, 1, "Dummy")));
-            m_passes.push_back(std::unique_ptr<Pass>(new PassRegular ("luminance", m_width, m_height, 1, 1, "Luminance")));
+            // create passes
+            m_passes.push_back(std::unique_ptr<Pass>(new PassRegular ("dummy",     m_width, m_height, 1, 1,    "Dummy")));
+            m_passes.push_back(std::unique_ptr<Pass>(new PassRegular ("luminance", m_width, m_height, 1, 1,    "Luminance")));
             m_passes.push_back(std::unique_ptr<Pass>(new PassRedux   ("minmax",    m_width, m_height, 1, 1, 2, "MinMax")));
-            m_passes.push_back(std::unique_ptr<Pass>(new PassRegular ("highpass",  m_width, m_height, 2, 1, "Highpass")));
-            m_passes.push_back(std::unique_ptr<Pass>(new PassPingPong("blur",      m_width, m_height, 1, 1, 16, "Blur")));
-            m_passes.push_back(std::unique_ptr<Pass>(new PassRegular ("tonemap",   m_width, m_height, 1, 1, "Tonemapping")));
-            m_passes.push_back(std::unique_ptr<Pass>(new PassRegular ("composite", m_width, m_height, 1, 1, "FinalCompose")));
+//            m_passes.push_back(std::unique_ptr<Pass>(new PassRegular ("highpass",  m_width, m_height, 2, 1,    "Highpass")));
+            m_passes.push_back(std::unique_ptr<Pass>(new PassRegular ("highpass",  m_width, m_height, 2, 1,    "Highpasschose")));
+            m_passes.push_back(std::unique_ptr<Pass>(new PassPingPong("blur",      m_width, m_height, 1, 1, 8, "Blur")));
+//            m_passes.push_back(std::unique_ptr<Pass>(new PassRegular ("tonemap",   m_width, m_height, 2, 1,    "Tonemapping")));
+            m_passes.push_back(std::unique_ptr<Pass>(new PassRegular ("tonemap",   m_width, m_height, 2, 1,    "Tonemapchose")));
+            m_passes.push_back(std::unique_ptr<Pass>(new PassRegular ("composite", m_width, m_height, 2, 1,    "FinalCompose")));
 
             // set hashmap
             for (auto const& pass: m_passes)
             {
                 m_passmap[pass->getName()] = pass.get();
             }
-
-            // branching
-//            m_passmap["luminance"]->m_params.addParameter("hdr", m_textures[TEX_LIT].get());
-//            m_passmap["minmax"   ]->m_params.addParameter("hdr", m_passmap["luminance"]->getOut(0));
-
-//            m_passmap["highpass"]->setIn(0, m_textures[TEX_LIT].get());
-//            m_passmap["highpass"]->setIn(1, m_passmap["luminance"]->getOut(0));
-
-//            m_passmap["blur"]->setIn(0, m_passmap["highpass"]->getOut(0));
-
-//            m_passmap["tonemap"]->setIn(0, m_textures[TEX_LIT].get());
-//            m_passmap["tonemap"]->setIn(1, m_passmap["luminance"]->getOut(0));
-
-//            m_passmap["composite"]->setIn(0, m_passmap["tonemap"]->getOut(0));
-//            m_passmap["composite"]->setIn(1, m_passmap["blur"]->getOut(0));
 
             // initialize everything
             for (auto const& pass: m_passes)
@@ -139,6 +127,28 @@ namespace Ra
                 pass->setCanvas(m_quadMesh.get());
                 pass->init();
             }
+
+            // branching (hard-wired now, but will change)
+            m_passmap["luminance"]->setIn("hdr",   m_textures[TEX_LIT].get());
+            m_passmap["minmax"]->setIn("color", m_passmap["luminance"]->getOut(0));
+            m_passmap["dummy"]->setIn("color", m_textures[TEX_LIT].get());
+
+            m_passmap["highpass"]->setIn("hdr", m_textures[TEX_LIT].get(),      0);
+            //m_passmap["highpass"]->setIn("lum", m_passmap["minmax"]->getOut(0), 1);
+            //m_passmap["highpass"]->setIn("pingpongsz", m_pingPongSize);
+
+            m_passmap["blur"]->setIn("hdr",    m_passmap["highpass"]->getOut(0),   0, 0);
+            m_passmap["blur"]->setIn("offset", Core::Vector2(1.0 / m_width,  0.0), 0, 0);
+
+            m_passmap["blur"]->setIn("hdr",    m_passmap["highpass"]->getOut(0),   0, 1);
+            m_passmap["blur"]->setIn("offset", Core::Vector2(0.0, 1.0 / m_height), 0, 1);
+
+            m_passmap["tonemap"]->setIn("hdr", m_textures[TEX_LIT].get(),      0);
+            //m_passmap["tonemap"]->setIn("lum", m_passmap["minmax"]->getOut(0), 1);
+            //m_passmap["tonemap"]->setIn("pingpongsz", m_pingPongSize);
+
+            m_passmap["composite"]->setIn("texA", m_passmap["tonemap"]->getOut(0), 0);
+            m_passmap["composite"]->setIn("texB", m_passmap["blur"]->getOut(0),    1);
 
             // and show them into Qt
             for (auto const it_pass: m_passmap)
@@ -428,17 +438,37 @@ namespace Ra
 
             if (m_postProcessEnabled)
             {
-                glDrawBuffers(1, buffers);
-                glViewport(0, 0, m_width, m_height);
-                shader = m_shaderMgr->getShaderProgram("DrawScreen");
-                shader->bind();
-                shader->setUniform("screenTexture", m_textures[TEX_LIT].get());
-                m_quadMesh->render();
+//                for (auto const& pass: m_passes)
+//                {
+//                    pass->renderPass();
+//                }
 
-                for (auto const& pass: m_passes)
-                {
-                    pass->renderPass();
-                }
+                m_passmap["dummy"]->renderPass();
+                m_passmap["luminance"]->renderPass();
+                m_passmap["minmax"]->renderPass();
+
+                /* test */
+                Core::Color lum = m_passmap["minmax"]->getOut(0)->getTexel(0, 0);
+
+                float lumMin  = lum.x();
+                float lumMax  = lum.y();
+                float lumMean = std::exp(lum.z() / (m_pingPongSize * m_pingPongSize));
+
+                //std::cout << "min / max / mean = " << lumMin << " / " << lumMax << " / " << lumMean << std::endl;
+                /* plus test */
+
+                m_passmap["tonemap"]->setIn("lumMin",  lumMin);
+                m_passmap["tonemap"]->setIn("lumMax",  lumMax);
+                m_passmap["tonemap"]->setIn("lumMean",  lumMean);
+
+                m_passmap["highpass"]->setIn("lumMin",  lumMin);
+                m_passmap["highpass"]->setIn("lumMax",  lumMax);
+                m_passmap["highpass"]->setIn("lumMean",  lumMean);
+
+                m_passmap["tonemap"]->renderPass();
+                m_passmap["highpass"]->renderPass();
+                m_passmap["blur"]->renderPass();
+                m_passmap["composite"]->renderPass();
 
                 GL_ASSERT( glDepthFunc( GL_LESS ) );
                 m_postprocessFbo->unbind();

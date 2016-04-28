@@ -29,8 +29,6 @@ namespace Ra
             virtual void resizePass();
             virtual void init();
 
-            void setReturningBuffer(FBO* fbo, uint attachOffset);
-
             virtual std::shared_ptr<Texture> getInternTextures(uint i) const;
             virtual Texture* getOut(uint slot) const override;
 
@@ -54,7 +52,7 @@ namespace Ra
             // parameters for redux to know what to do
             std::string      m_shadername;
             const ShaderProgram* m_shader;
-            RenderParameters     m_params;
+            //RenderParameters     m_params;
 
             // ping-pong specific variable
             uint m_pingpong;
