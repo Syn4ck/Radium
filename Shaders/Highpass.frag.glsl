@@ -12,8 +12,7 @@ void main()
     vec3 color = texture(hdr, varTexcoord).rgb;
 
     // get lum. values
-    vec2 varNullcoord = vec2(0,0);
-    vec3  lumvec  = texelFetch(lum, ivec2(0,0), 0).xyz;
+    vec3  lumvec  = texelFetch(lum, ivec2(0,0), 0).rgb;
     float lumMin  = lumvec.x;
     float lumMax  = lumvec.y;
     float lumMean = exp(lumvec.z / (pingpongsz * pingpongsz));

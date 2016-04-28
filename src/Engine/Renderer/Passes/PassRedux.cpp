@@ -91,6 +91,7 @@ namespace Ra
                 GL_ASSERT( glViewport(0, 0, size, size) );
                 GL_ASSERT( glDrawBuffers(1, buffers + m_pingpong) );
                 m_shader->setUniform("color", m_texOut[(m_pingpong+1)%2].get());
+                // TODO(hugo) find a way to enable other uniform names
                 m_canvas->render();
             }
         }
