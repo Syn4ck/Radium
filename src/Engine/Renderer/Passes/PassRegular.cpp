@@ -43,8 +43,8 @@ namespace Ra
 
         void PassRegular::resizePass(uint w, uint h)
         {
-            m_width  = w;
-            m_height = h;
+            m_width  = ((float) w * m_wModifier);
+            m_height = ((float) h * m_hModifier);
             resizePass();
         }
 

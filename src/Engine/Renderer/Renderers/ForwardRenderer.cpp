@@ -108,7 +108,7 @@ namespace Ra
             m_passes.push_back(std::unique_ptr<Pass>(new PassRegular ("luminance", m_width, m_height, 1, 1,    "Luminance")));
             m_passes.push_back(std::unique_ptr<Pass>(new PassRedux   ("minmax",    m_width, m_height, 1, 1, 2, "MinMax")));
             m_passes.push_back(std::unique_ptr<Pass>(new PassRegular ("highpass",  m_width, m_height, 2, 1,    "Highpass")));
-            m_passes.push_back(std::unique_ptr<Pass>(new PassPingPong("blur",      m_width, m_height, 1, 1,16, "Blur")));
+            m_passes.push_back(std::unique_ptr<Pass>(new PassPingPong("blur",      m_width, m_height, 1, 1, 2, "Blur")));
             m_passes.push_back(std::unique_ptr<Pass>(new PassRegular ("tonemap",   m_width, m_height, 2, 1,    "Tonemapping")));
             m_passes.push_back(std::unique_ptr<Pass>(new PassRegular ("composite", m_width, m_height, 2, 1,    "FinalCompose")));
 
@@ -117,6 +117,9 @@ namespace Ra
             {
                 m_passmap[pass->getName()] = pass.get();
             }
+
+            // reduce the size of highpass in order to obtain a box blur effect
+            m_passmap["highpass"]->setSizeModifier(0.125, 0.125);
 
             // initialize everything
             for (auto const& pass: m_passes)

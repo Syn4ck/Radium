@@ -22,14 +22,16 @@ namespace Ra
                 };
 
         Pass::Pass(const std::string& name, uint w, uint h, uint nTexIn, uint nTexOut)
-            : m_name    ( name )
-            , m_width   ( w )
-            , m_height  ( h )
-            , m_nTexIn  ( nTexIn )
-            , m_nTexOut ( nTexOut )
-            , m_texIn   ( nTexIn )
-            , m_texOut  ( nTexOut )
-            , m_canvas  ( nullptr )
+            : m_name     ( name )
+            , m_width    ( w )
+            , m_height   ( h )
+            , m_wModifier( 1.f )
+            , m_hModifier( 1.f )
+            , m_nTexIn   ( nTexIn )
+            , m_nTexOut  ( nTexOut )
+            , m_texIn    ( nTexIn )
+            , m_texOut   ( nTexOut )
+            , m_canvas   ( nullptr )
         {
             // resize vectors of textures if necessary
             if (m_nTexIn > 1)
@@ -107,6 +109,12 @@ namespace Ra
         void Pass::setCanvas(Mesh* canvas)
         {
             m_canvas = canvas;
+        }
+
+        void Pass::setSizeModifier(Scalar w, Scalar h)
+        {
+            m_wModifier = w;
+            m_hModifier = h;
         }
 
         uint Pass::getNIn()  const { return m_nTexIn;  }

@@ -37,6 +37,7 @@ namespace Ra
             void setIn(const char* name, const Core::Matrix4& value, uint slot = 0, uint paramSet = 0);
 
             void setCanvas(Mesh* canvas);
+            void setSizeModifier(Scalar w = 1.0, Scalar h = 1.0);
 
             virtual Texture* getIn(uint slot)  const;
             virtual Texture* getOut(uint slot) const;
@@ -57,6 +58,10 @@ namespace Ra
 
             uint m_width;
             uint m_height;
+
+            /// modifiers for width and height of the pass FBO (factor)
+            Scalar m_wModifier;
+            Scalar m_hModifier;
 
             uint m_nTexIn;
             uint m_nTexOut;
