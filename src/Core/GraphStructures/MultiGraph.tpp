@@ -25,8 +25,9 @@ void MultiGraph<T>::Node::setParent(uint slot, Node* other, uint local)
         m_parents.push_back(c);
 
         //! warning: this call is specific to Passes, thus ruining the whole work on templates
-        //! TODO(hugo, still him) change this with an interface or something
-        m_data->setIn(local, other->m_data->getOut(slot));
+        //! TODO(hugo, still me, I know...) change this with an interface or something
+        std::cout << "connecting " << other->m_data->getName() << ":" << slot << " to " << m_data->getName() << ":" << local << std::endl;
+        m_data->setIn(other->m_data->getOut(slot), local);
     }
 }
 

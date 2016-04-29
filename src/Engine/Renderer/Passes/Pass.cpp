@@ -35,19 +35,24 @@ namespace Ra
         {
             // resize vectors of textures if necessary
             if (m_nTexIn > 1)
+            {
                 m_texIn.resize(m_nTexIn, nullptr);
+                //m_texNames.resize(m_nTexIn);
+            }
 
             if (m_nTexOut > 1)
+            {
                 m_texOut.resize(m_nTexOut, nullptr);
+            }
         }
 
         Pass::~Pass() {}
 
-        void Pass::setIn(const char* name, Texture* tex, uint slot, uint paramSet)
+        void Pass::setIn(Texture* tex, uint slot, uint paramSet)
         {
             m_texIn[slot] = tex;
-            m_params[paramSet].addParameter(name, tex);
-
+            m_params[paramSet].addParameter(m_texNames[slot].c_str(), tex);
+            std::cout << m_name << " now has a texture for slot " << slot << " (on param set " << paramSet << ")" << std::endl;
         }
 
         void Pass::setIn(const char* name, int value, uint slot, uint paramSet)

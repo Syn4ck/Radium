@@ -62,9 +62,8 @@ namespace Ra
             std::map<std::string, Pass*>       m_passmap;
             std::vector<std::unique_ptr<Pass>> m_passes;
 
-            // Core::MultiGraph<Pass> m_passgraph;
+            Core::MultiGraph<Pass> m_passgraph;
         };
-
 
     } // namespace Engine
 } // namespace Ra

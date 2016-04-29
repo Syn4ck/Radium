@@ -25,7 +25,7 @@ namespace Ra
 
             /// set of functions used to set RenderParameters to a shader
             /// @param paramSet is used when a pass has multiple sets of parameters (like ping-pong)
-            void setIn(const char* name, Texture* tex,               uint slot = 0, uint paramSet = 0);
+            void setIn(                  Texture* tex,               uint slot = 0, uint paramSet = 0);
             void setIn(const char* name, int      value,             uint slot = 0, uint paramSet = 0);
             void setIn(const char* name, uint     value,             uint slot = 0, uint paramSet = 0);
             void setIn(const char* name, Scalar   value,             uint slot = 0, uint paramSet = 0);
@@ -50,7 +50,8 @@ namespace Ra
             virtual std::shared_ptr<Texture> getInternTextures(uint i) const = 0;
 
         public:
-            RenderParameters m_params[2];
+            RenderParameters m_params[2];           // ← this two things are to be improved
+            std::array<std::string,2> m_texNames;  //  ← this thing in particular
 
         protected:
             std::string m_name;

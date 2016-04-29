@@ -74,37 +74,35 @@ namespace Ra
 
         void ForwardRenderer::initGraph()
         {
-//            std::shared_ptr<Pass> test(&m_dudule);
+            // add nodes
+            m_passgraph.addNode("LIT",    std::shared_ptr<Pass>(m_passes[0].get()), 0, 1);
+            m_passgraph.addNode("LUM",    std::shared_ptr<Pass>(m_passes[1].get()), 1, 1);
+            m_passgraph.addNode("MINMAX", std::shared_ptr<Pass>(m_passes[2].get()), 1, 1);
+            m_passgraph.addNode("HGHPSS", std::shared_ptr<Pass>(m_passes[3].get()), 2, 1);
+            m_passgraph.addNode("BLUR",   std::shared_ptr<Pass>(m_passes[4].get()), 1, 1);
+            m_passgraph.addNode("TONMAP", std::shared_ptr<Pass>(m_passes[5].get()), 2, 1);
+            m_passgraph.addNode("ADD",    std::shared_ptr<Pass>(m_passes[6].get()), 2, 1);
 
-//            // add nodes
-//            m_passgraph.addNode("LIT", test, 0, 1);
-//            m_passgraph.addNode("LUM", test, 1, 1);
-//            m_passgraph.addNode("MINMAX", test, 1, 1);
-//            m_passgraph.addNode("TONMAP", test, 2, 1);
-//            m_passgraph.addNode("HGHPSS", test, 2, 1);
-//            m_passgraph.addNode("BLUR", test, 1, 1);
-//            m_passgraph.addNode("ADD", test, 2, 1);
+            // connect them
+            m_passgraph[   "LUM"]->setParent(0,m_passgraph["LIT"   ],0);
+            m_passgraph["TONMAP"]->setParent(0,m_passgraph["LIT"   ],0);
+            m_passgraph["TONMAP"]->setParent(0,m_passgraph["MINMAX"],1);
+            m_passgraph["HGHPSS"]->setParent(0,m_passgraph["LIT"   ],0);
+            m_passgraph["HGHPSS"]->setParent(0,m_passgraph["MINMAX"],1);
+            m_passgraph["MINMAX"]->setParent(0,m_passgraph["LUM"   ],0);
+            m_passgraph[  "BLUR"]->setParent(0,m_passgraph["HGHPSS"],0);
+            m_passgraph[   "ADD"]->setParent(0,m_passgraph["BLUR"  ],0);
+            m_passgraph[   "ADD"]->setParent(0,m_passgraph["TONMAP"],1);
 
-//            // connect them
-//            m_passgraph[   "LUM"]->setParent(0,m_passgraph["LIT"   ],0);
-//            m_passgraph["TONMAP"]->setParent(0,m_passgraph["LIT"   ],0);
-//            m_passgraph["TONMAP"]->setParent(0,m_passgraph["MINMAX"],1);
-//            m_passgraph["HGHPSS"]->setParent(0,m_passgraph["LIT"   ],0);
-//            m_passgraph["HGHPSS"]->setParent(0,m_passgraph["MINMAX"],1);
-//            m_passgraph["MINMAX"]->setParent(0,m_passgraph["LUM"   ],0);
-//            m_passgraph[  "BLUR"]->setParent(0,m_passgraph["HGHPSS"],0);
-//            m_passgraph[   "ADD"]->setParent(0,m_passgraph["BLUR"  ],0);
-//            m_passgraph[   "ADD"]->setParent(0,m_passgraph["TONMAP"],1);
-
-//            // levelize and show
-//            m_passgraph.levelize();
-//            m_passgraph.print();
+            // levelize and show
+            m_passgraph.levelize();
+            m_passgraph.print();
         }
 
         void ForwardRenderer::initPasses()
         {
             // create passes
-            m_passes.push_back(std::unique_ptr<Pass>(new PassRegular ("dummy",     m_width, m_height, 1, 1,    "Dummy")));
+            m_passes.push_back(std::unique_ptr<Pass>(new PassRegular ("source",    m_width, m_height, 1, 1,    "DrawScreen")));
             m_passes.push_back(std::unique_ptr<Pass>(new PassRegular ("luminance", m_width, m_height, 1, 1,    "Luminance")));
             m_passes.push_back(std::unique_ptr<Pass>(new PassRedux   ("minmax",    m_width, m_height, 1, 1, 2, "MinMax")));
             m_passes.push_back(std::unique_ptr<Pass>(new PassRegular ("highpass",  m_width, m_height, 2, 1,    "Highpass")));
@@ -116,38 +114,29 @@ namespace Ra
             for (auto const& pass: m_passes)
             {
                 m_passmap[pass->getName()] = pass.get();
-            }
 
-            // reduce the size of highpass in order to obtain a box blur effect
-            m_passmap["highpass"]->setSizeModifier(0.125, 0.125);
-
-            // initialize everything
-            for (auto const& pass: m_passes)
-            {
                 // init
                 pass->setCanvas(m_quadMesh.get());
                 pass->init();
             }
 
-            // branching (hard-wired now, but will change)
-            m_passmap["luminance"]->setIn("hdr",   m_textures[TEX_LIT].get());
-            m_passmap["minmax"]->setIn("color", m_passmap["luminance"]->getOut(0));
-            m_passmap["dummy"]->setIn("color", m_textures[TEX_LIT].get());
+            // initiate the HDR source FIXME(hugo) find a better way without duplication
+            m_passmap["source"]->setIn(m_textures[TEX_LIT].get());
 
-            m_passmap["highpass"]->setIn("hdr", m_textures[TEX_LIT].get(),      0);
-            m_passmap["highpass"]->setIn("lum", m_passmap["minmax"]->getOut(0), 1);
+            // set texture names
+            m_passmap["source"   ]->m_texNames[0] = "screenTexture";
+            m_passmap["luminance"]->m_texNames[0] = "hdr";
+            m_passmap["minmax"   ]->m_texNames[0] = "color";
+            m_passmap["highpass" ]->m_texNames[0] = "hdr";
+            m_passmap["highpass" ]->m_texNames[1] = "lum";
+            m_passmap["tonemap"  ]->m_texNames[0] = "hdr";
+            m_passmap["tonemap"  ]->m_texNames[1] = "lum";
+            m_passmap["blur"     ]->m_texNames[0] = "hdr";
+            m_passmap["composite"]->m_texNames[0] = "texA";
+            m_passmap["composite"]->m_texNames[1] = "texB";
 
-            m_passmap["blur"]->setIn("hdr",    m_passmap["highpass"]->getOut(0),   0, 0);
-            m_passmap["blur"]->setIn("offset", Core::Vector2(1.0 / m_width,  0.0), 0, 0);
-
-            m_passmap["blur"]->setIn("hdr",    m_passmap["highpass"]->getOut(0),   0, 1);
-            m_passmap["blur"]->setIn("offset", Core::Vector2(0.0, 1.0 / m_height), 0, 1);
-
-            m_passmap["tonemap"]->setIn("hdr", m_textures[TEX_LIT].get(),      0);
-            m_passmap["tonemap"]->setIn("lum", m_passmap["minmax"]->getOut(0), 1);
-
-            m_passmap["composite"]->setIn("texA", m_passmap["tonemap"]->getOut(0), 0);
-            m_passmap["composite"]->setIn("texB", m_passmap["blur"]->getOut(0),    1);
+            // reduce the size of highpass in order to obtain a box blur effect
+            m_passmap["highpass"]->setSizeModifier(0.125, 0.125);
 
             // and show them into Qt
             for (auto const it_pass: m_passmap)
@@ -437,6 +426,9 @@ namespace Ra
 
             if (m_postProcessEnabled)
             {
+                // special settings for shaders that do not depend on the graph
+                m_passmap["blur"]->setIn("offset", Core::Vector2(0.0, 8.0 / m_height), 0, 1);
+                m_passmap["blur"]->setIn("offset", Core::Vector2(8.0 / m_width,  0.0), 0, 0);
                 m_passmap["highpass"]->setIn("pingpongsz", m_pingPongSize);
                 m_passmap["tonemap"]->setIn("pingpongsz", m_pingPongSize);
 
