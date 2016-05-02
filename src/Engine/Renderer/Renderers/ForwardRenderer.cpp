@@ -74,14 +74,14 @@ namespace Ra
 
         void ForwardRenderer::initGraph()
         {
-            // add nodes
-            m_passgraph.addNode("LIT",    std::shared_ptr<Pass>(m_passes[0].get()), 0, 1);
-            m_passgraph.addNode("LUM",    std::shared_ptr<Pass>(m_passes[1].get()), 1, 1);
-            m_passgraph.addNode("MINMAX", std::shared_ptr<Pass>(m_passes[2].get()), 1, 1);
-            m_passgraph.addNode("HGHPSS", std::shared_ptr<Pass>(m_passes[3].get()), 2, 1);
-            m_passgraph.addNode("BLUR",   std::shared_ptr<Pass>(m_passes[4].get()), 1, 1);
-            m_passgraph.addNode("TONMAP", std::shared_ptr<Pass>(m_passes[5].get()), 2, 1);
-            m_passgraph.addNode("ADD",    std::shared_ptr<Pass>(m_passes[6].get()), 2, 1);
+            // add nodes - randomly inserted to test levels efficiency
+            m_passgraph.addNode("MINMAX", std::shared_ptr<Pass>(m_passes[2]), 1, 1);
+            m_passgraph.addNode("BLUR",   std::shared_ptr<Pass>(m_passes[4]), 1, 1);
+            m_passgraph.addNode("HGHPSS", std::shared_ptr<Pass>(m_passes[3]), 2, 1);
+            m_passgraph.addNode("TONMAP", std::shared_ptr<Pass>(m_passes[5]), 2, 1);
+            m_passgraph.addNode("LIT",    std::shared_ptr<Pass>(m_passes[0]), 0, 1);
+            m_passgraph.addNode("ADD",    std::shared_ptr<Pass>(m_passes[6]), 2, 1);
+            m_passgraph.addNode("LUM",    std::shared_ptr<Pass>(m_passes[1]), 1, 1);
 
             // connect them
             m_passgraph[   "LUM"]->setParent(0,m_passgraph["LIT"   ],0);
@@ -94,9 +94,9 @@ namespace Ra
             m_passgraph[   "ADD"]->setParent(0,m_passgraph["BLUR"  ],0);
             m_passgraph[   "ADD"]->setParent(0,m_passgraph["TONMAP"],1);
 
-            // levelize and show
-            m_passgraph.levelize();
-            m_passgraph.print();
+            // levelize and sort on the same run
+            m_passgraph.levelize(true);
+            //m_passgraph.print();
         }
 
         void ForwardRenderer::initPasses()
@@ -184,7 +184,7 @@ namespace Ra
 
             GL_ASSERT( glDrawBuffers( 2, buffers ) );
 
-            const Core::Colorf clearColor = Core::Colors::FromChars<Core::Colorf>(42, 42, 42, 0);
+            const Core::Colorf clearColor = Core::Colors::FromChars<Core::Colorf>(96, 96, 96, 0);
             const Core::Colorf clearZeros = Core::Colors::Black<Core::Colorf>();
             const float clearDepth( 1.0 );
 
@@ -432,9 +432,10 @@ namespace Ra
                 m_passmap["highpass"]->setIn("pingpongsz", m_pingPongSize);
                 m_passmap["tonemap"]->setIn("pingpongsz", m_pingPongSize);
 
-                for (auto const& pass: m_passes)
+                // render everything from the graph
+                for (auto const& nodePass: m_passgraph)
                 {
-                    pass->renderPass();
+                    nodePass->m_data->renderPass();
                 }
 
                 GL_ASSERT( glDepthFunc( GL_LESS ) );

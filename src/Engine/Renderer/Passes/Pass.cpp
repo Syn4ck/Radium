@@ -52,7 +52,6 @@ namespace Ra
         {
             m_texIn[slot] = tex;
             m_params[paramSet].addParameter(m_texNames[slot].c_str(), tex);
-            std::cout << m_name << " now has a texture for slot " << slot << " (on param set " << paramSet << ")" << std::endl;
         }
 
         void Pass::setIn(const char* name, int value, uint slot, uint paramSet)

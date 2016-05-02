@@ -26,7 +26,6 @@ void MultiGraph<T>::Node::setParent(uint slot, Node* other, uint local)
 
         //! warning: this call is specific to Passes, thus ruining the whole work on templates
         //! TODO(hugo, still me, I know...) change this with an interface or something
-        std::cout << "connecting " << other->m_data->getName() << ":" << slot << " to " << m_data->getName() << ":" << local << std::endl;
         m_data->setIn(other->m_data->getOut(slot), local);
     }
 }
@@ -85,7 +84,7 @@ void MultiGraph<T>::addNode(const std::string& name, const std::shared_ptr<T>& d
 }
 
 template <typename T>
-void MultiGraph<T>::levelize()
+void MultiGraph<T>::levelize(bool sortByLevel)
 {
     uint total = m_graph.size();
 
@@ -114,6 +113,13 @@ void MultiGraph<T>::levelize()
             }
         }
     }
+
+    // finally sort if required
+    if (sortByLevel)
+    {
+        auto comp = [](const std::unique_ptr<Node>& a, const std::unique_ptr<Node>& b) { return (a->m_level < b->m_level); };
+        std::sort(m_graph.begin(), m_graph.end(), comp);
+    }
 }
 
 template <typename T>
@@ -129,4 +135,14 @@ void MultiGraph<T>::print()
 template <typename T> typename MultiGraph<T>::Node* MultiGraph<T>::operator[](const std::string& name)
 {
     return m_names[name];
+}
+
+template <typename T> typename std::vector<std::unique_ptr<typename MultiGraph<T>::Node>>::iterator MultiGraph<T>::begin()
+{
+    return m_graph.begin();
+}
+
+template <typename T> typename std::vector<std::unique_ptr<typename MultiGraph<T>::Node>>::iterator MultiGraph<T>::end()
+{
+    return m_graph.end();
 }

@@ -1,6 +1,7 @@
 #ifndef RADIUMENGINE_MULTIGRAPH_H
 #define RADIUMENGINE_MULTIGRAPH_H
 
+#include <algorithm>
 #include <memory>
 #include <vector>
 #include <map>
@@ -67,12 +68,19 @@ namespace Ra
             void addNode(const std::string& name, const std::shared_ptr<T>& data, uint nb_in, uint nb_out);
 
             /// update the nodes' levels taking in account every source
-            void levelize();
+            void levelize(bool sortByLevel = false);
 
             /// debug indicator - TODO(hugo) remove this
             void print();
 
+            /// access a node pointer directly through the graph
             Node* operator[](const std::string& name);
+
+            /// redefine iterator begin to map over m_graph
+            typename std::vector<std::unique_ptr<Node>>::iterator begin();
+
+            /// redefine iterator end to map over m_graph
+            typename std::vector<std::unique_ptr<Node>>::iterator end();
 
         private:
             std::vector<std::unique_ptr<Node>> m_graph;

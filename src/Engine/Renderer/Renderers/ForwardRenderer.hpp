@@ -60,7 +60,7 @@ namespace Ra
             std::array<std::unique_ptr<Texture>, TEX_COUNT> m_textures;
 
             std::map<std::string, Pass*>       m_passmap;
-            std::vector<std::unique_ptr<Pass>> m_passes;
+            std::vector<std::shared_ptr<Pass>> m_passes;
 
             Core::MultiGraph<Pass> m_passgraph;
         };
