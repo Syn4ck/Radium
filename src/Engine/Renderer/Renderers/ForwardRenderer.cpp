@@ -52,7 +52,6 @@ namespace Ra
         ForwardRenderer::ForwardRenderer( uint width, uint height )
             : Renderer( width, height )
             , m_fbo( nullptr )
-            , m_postprocessFbo( nullptr )
         {
         }
 
@@ -154,7 +153,6 @@ namespace Ra
         void ForwardRenderer::initBuffers()
         {
             m_fbo.reset( new FBO( FBO::Components( FBO::COLOR | FBO::DEPTH ), m_width, m_height ) );
-            m_postprocessFbo.reset( new FBO( FBO::Components( FBO::COLOR | FBO::DEPTH), m_width, m_height ) );
 
             // Render pass
             m_textures[TEX_DEPTH].reset( new Texture( "Depth", GL_TEXTURE_2D ) );
@@ -293,8 +291,8 @@ namespace Ra
             GL_ASSERT( glEnable( GL_DEPTH_TEST ) );
             GL_ASSERT( glDepthFunc( GL_LESS ) );
 
-            m_postprocessFbo->useAsTarget( m_width, m_height );
-            glDrawBuffers(1, buffers);
+            m_fbo->useAsTarget( m_width, m_height );
+            glDrawBuffers(1, buffers + 2);
 
             glViewport(0, 0, m_width, m_height);
 
@@ -353,7 +351,7 @@ namespace Ra
                 }
             }
 
-             m_postprocessFbo->unbind();
+             m_fbo->unbind();
         }
 
         // Draw UI stuff, always drawn on top of everything else + clear ZMask
@@ -362,10 +360,10 @@ namespace Ra
             const ShaderProgram* shader;
             const float          clearDepth( 1.0 );
 
-            m_postprocessFbo->useAsTarget( m_width, m_height );
+            m_fbo->useAsTarget( m_width, m_height );
 
             glViewport(0, 0, m_width, m_height);
-            glDrawBuffers(1, buffers);
+            glDrawBuffers(1, buffers + 2);
 
             GL_ASSERT( glDepthMask( GL_FALSE ) );
             GL_ASSERT(glDisable(GL_DEPTH_TEST));
@@ -402,7 +400,7 @@ namespace Ra
                 }
             }
 
-            m_postprocessFbo->unbind();
+            m_fbo->unbind();
         }
 
         void ForwardRenderer::postProcessInternal( const RenderData& renderData )
@@ -412,7 +410,7 @@ namespace Ra
 
             GL_ASSERT( glDisable( GL_DEPTH_TEST ) );
 
-            m_postprocessFbo->useAsTarget( m_width, m_height );
+            m_fbo->useAsTarget( m_width, m_height );
 
             GL_ASSERT( glColorMask( 1, 1, 1, 1 ) );
             GL_ASSERT( glDepthMask( GL_FALSE ) );
@@ -437,8 +435,8 @@ namespace Ra
                 last = m_passmap["composite"]->getOut(0);
             }
 
-            m_postprocessFbo->useAsTarget( m_width, m_height );
-            GL_ASSERT( glDrawBuffers(1, buffers) );
+            m_fbo->useAsTarget( m_width, m_height );
+            GL_ASSERT( glDrawBuffers(1, buffers + 2) );
             GL_ASSERT( glViewport(0, 0, m_width, m_height) );
             shader = m_shaderMgr->getShaderProgram("DrawScreen");
             shader->bind();
@@ -446,7 +444,7 @@ namespace Ra
             m_quadMesh->render();
 
             GL_ASSERT( glDepthFunc( GL_LESS ) );
-            m_postprocessFbo->unbind();
+            m_fbo->unbind();
         }
 
         void ForwardRenderer::resizeInternal()
@@ -462,15 +460,9 @@ namespace Ra
             m_fbo->attachTexture( GL_DEPTH_ATTACHMENT , m_textures[TEX_DEPTH].get() );
             m_fbo->attachTexture( GL_COLOR_ATTACHMENT0, m_textures[TEX_NORMAL].get() );
             m_fbo->attachTexture( GL_COLOR_ATTACHMENT1, m_textures[TEX_LIT].get() );
+            m_fbo->attachTexture( GL_COLOR_ATTACHMENT2, m_fancyTexture.get());
             m_fbo->check();
             m_fbo->unbind( true );
-
-            m_postprocessFbo->bind();
-            m_postprocessFbo->setSize( m_width, m_height );
-            m_postprocessFbo->attachTexture(GL_DEPTH_ATTACHMENT , m_textures[TEX_DEPTH].get());
-            m_postprocessFbo->attachTexture(GL_COLOR_ATTACHMENT0, m_fancyTexture.get());
-            m_postprocessFbo->check();
-            m_postprocessFbo->unbind( true );
 
             for (auto const& pass: m_passes)
             {

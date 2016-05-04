@@ -25,7 +25,7 @@ vec3 Yxy2rgb(vec3 colorYxy){
 float getMiddleGrey(float lmean)
 {
     // FIXME(charly): 2.0 might be too high with many lights (or very shiny ones). Reinhard's suggestion is 0.18. VortexEngine uses 1.03
-    float grey = 2.0 - 2.0 / (2.0 + (log(lmean + 1) / log(10.0)));
+    float grey = 2.5 - 2.0 / (2.0 + (log(lmean + 1) / log(10.0)));
     return grey;
 }
 
