@@ -134,7 +134,8 @@ namespace Ra
         }
 
         ShaderObject::ShaderObject()
-            : m_id( 0 )
+            : m_attached(false)
+            , m_id(0)
         {
             m_lineerr.start = 1;
             m_lineerr.end   = 1;
@@ -169,8 +170,15 @@ namespace Ra
 
         bool ShaderObject::reloadAndCompile( const std::set<std::string>& properties )
         {
+            bool success = false;
             LOG( logINFO ) << "Reloading shader " << m_filename;
-            return loadAndCompile( m_type, m_filename, properties );
+            success = loadAndCompile( m_type, m_filename, properties );
+            if (success)
+                return success;
+            else {
+                LOG( logINFO ) << "Failed to reload shader" << m_filename;
+                return false;
+            }
         }
 
         uint ShaderObject::getId() const
@@ -209,7 +217,7 @@ namespace Ra
             finalStrings.reserve(shaderLines.size());
 
             uint nline = lerr.start;
-            struct LineErr sublerr;
+            LineErr sublerr;
 
             static const std::regex reg("^[ ]*#[ ]*include[ ]+[\"<](.*)[\">].*");
 
@@ -286,12 +294,14 @@ namespace Ra
             {
                 message = getShaderInfoLog( m_id );
                 wrongline = lineParseGLMesg(message) - 2;
-                error << "\nUnable to compile " << lineFind(wrongline);
-
-                glDeleteShader( m_id );
+                error << "\nUnable to compile " << lineFind(wrongline) << " :";
+                error << std::endl << message;
 
                 // For now, crash when a shader is not compiling
-                CORE_ERROR_IF( ok, error.str().c_str() );
+                if (!ok)
+                {
+                    LOG(logERROR) << error.str();
+                }
             }
             return ok;
         }
@@ -396,7 +406,8 @@ namespace Ra
         }
 
         ShaderProgram:: ShaderProgram()
-            : m_shaderId( 0 )
+            : m_linked(false)
+            , m_shaderId( 0 )
         {
             for ( uint i = 0; i < m_shaderObjects.size(); ++i )
             {
@@ -417,9 +428,12 @@ namespace Ra
             {
                 for ( auto shader : m_shaderObjects )
                 {
-                    if ( shader && ( shader->getId() != 0 ) )
+                    if ( shader )
                     {
-                        GL_ASSERT( glDetachShader( m_shaderId, shader->getId() ) );
+                        if ((shader->getId() != 0) && shader->m_attached)
+                        {
+                            GL_ASSERT( glDetachShader( m_shaderId, shader->getId() ) );
+                        }
                         delete shader;
                     }
                 }
@@ -457,7 +471,7 @@ namespace Ra
             ShaderObject* shader = new ShaderObject;
             bool status = shader->loadAndCompile(getTypeAsGLEnum(type), name, props);
             m_shaderObjects[type] = shader;
-            m_shaderStatus[type] = status;
+            m_shaderStatus[type]  = status;
         }
 
         uint ShaderProgram::getTypeAsGLEnum(ShaderType type) const
@@ -498,12 +512,15 @@ namespace Ra
 
         void ShaderProgram::link()
         {
-            // attach shader objs to shader program
-            for ( auto shader : m_shaderObjects )
+            if (! isOk())
+                return;
+
+            for (int i=0; i < ShaderType_COUNT; ++i)
             {
-                if ( shader )
+                if (m_shaderObjects[i])
                 {
-                    GL_ASSERT( glAttachShader( m_shaderId, shader->getId() ) );
+                    GL_ASSERT( glAttachShader( m_shaderId, m_shaderObjects[i]->getId() ) );
+                    m_shaderObjects[i]->m_attached = true;
                 }
             }
 

@@ -12,7 +12,7 @@ namespace Ra
         {
 
             template<typename T, uint D>
-            typename Grid<T, D>::IdxVector linearToIdxVector( uint linIdx, const typename Grid<T, D>::IdxVector& size )
+            inline typename Grid<T, D>::IdxVector linearToIdxVector( uint linIdx, const typename Grid<T, D>::IdxVector& size )
             {
                 typename Grid<T, D>::IdxVector result = Grid<T, D>::IdxVector::Zero();
 
@@ -25,7 +25,7 @@ namespace Ra
             }
 
             template<typename T, uint D>
-            uint idxVectorToLinear( const typename Grid<T, D>::IdxVector& vecIdx, const typename Grid<T, D>::IdxVector& size )
+            inline uint idxVectorToLinear( const typename Grid<T, D>::IdxVector& vecIdx, const typename Grid<T, D>::IdxVector& size )
             {
                 uint result = 0;
                 uint dimProd = 1;
@@ -131,14 +131,14 @@ namespace Ra
         }
 
         template<typename T, uint D>
-        const T& Grid<T,D>::at(const Grid<T,D>::Iterator &it) const
+        const T& Grid<T,D>::at(const typename Grid<T,D>::Iterator &it) const
         {
            CORE_ASSERT( it.getGridSize() == m_size, "Incompatible iterator" );
            return at(it.getLinear());
         }
 
         template<typename T, uint D>
-        T& Grid<T,D>::at(const Grid<T,D>::Iterator &it)
+        T& Grid<T,D>::at(const typename Grid<T,D>::Iterator &it)
         {
            CORE_ASSERT( it.getGridSize() == m_size, "Incompatible iterator" );
            return at(it.getLinear());
@@ -178,14 +178,14 @@ namespace Ra
 
 
         template<typename T, uint D>
-        inline Grid<T,D>::Iterator::Iterator(const Grid<T,D>::IdxVector &size, uint startIdx)
+        inline Grid<T,D>::Iterator::Iterator(const typename Grid<T,D>::IdxVector &size, uint startIdx)
             : m_sizes(size)
         {
             setFromLinear ( startIdx );
         }
 
         template<typename T, uint D>
-        inline Grid<T,D>::Iterator::Iterator(const Grid<T,D>::IdxVector &size, const Grid<T,D>::IdxVector &startIdx)
+        inline Grid<T,D>::Iterator::Iterator(const typename Grid<T,D>::IdxVector &size, const typename Grid<T,D>::IdxVector &startIdx)
             : m_sizes(size)
         {
             setFromVector(startIdx);
@@ -199,7 +199,7 @@ namespace Ra
         }
 
         template<typename T, uint D>
-        inline Grid<T,D>::Iterator::Iterator(const Grid<T,D>& grid, const Grid<T,D>::IdxVector &startIdx)
+        inline Grid<T,D>::Iterator::Iterator(const Grid<T,D>& grid, const typename Grid<T,D>::IdxVector &startIdx)
             : m_sizes(grid.sizeVector())
         {
             setFromVector( startIdx );
@@ -216,7 +216,7 @@ namespace Ra
         }
 
         template<typename T, uint D>
-        inline void Grid<T,D>::Iterator::setFromVector( const Grid<T,D>::IdxVector& idx )
+        inline void Grid<T,D>::Iterator::setFromVector( const typename Grid<T,D>::IdxVector& idx )
         {
             m_index = idxVectorToLinear<T,D>( idx, m_sizes ) ;
         }
@@ -296,6 +296,7 @@ namespace Ra
         template<typename T, uint D>
         typename Grid<T,D>::Iterator& Grid<T,D>::Iterator::operator+=(const typename  Grid<T,D>::IdxVector &idx)
         {
+            CORE_ASSERT( isValidOffset( idx.cast<int>() ), "Invalid offset vector.");
             setFromVector( getVector()  + idx );
             return *this;
         }
@@ -303,6 +304,7 @@ namespace Ra
         template<typename T, uint D>
         typename Grid<T,D>::Iterator& Grid<T,D>::Iterator::operator-=(const typename Grid<T,D>::IdxVector &idx)
         {
+            CORE_ASSERT( isValidOffset( -(idx.cast<int>())), "Invalid offset vector.");
             setFromVector( getVector()  - idx );
             return *this;
         }
@@ -310,6 +312,7 @@ namespace Ra
         template<typename T, uint D>
         typename Grid<T,D>::Iterator& Grid<T,D>::Iterator::operator+=(const typename  Grid<T,D>::OffsetVector &idx)
         {
+            CORE_ASSERT( isValidOffset(idx), "Invalid offset vector");
             setFromVector( (getVector().cast<int>()  + idx).cast<uint>() );
             return *this;
         }
@@ -350,5 +353,3 @@ namespace Ra
 
     }
 }
-
-#undef TYPENAME

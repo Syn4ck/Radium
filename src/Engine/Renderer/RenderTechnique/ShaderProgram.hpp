@@ -100,12 +100,13 @@ namespace Ra
             std::string preprocessIncludes(const std::string& shader, int level, struct LineErr& lerr);
             void compile( const std::string& shader, const std::set<std::string>& properties );
             bool check();
-
-            // functions involved in the retrival of errors in included shaders
             bool lineInside(const struct LineErr* node, uint line) const;
             uint lineParseGLMesg(const std::string& msg) const;
             void linePrint(const struct LineErr* node, uint level = 0) const;
             std::string lineFind(const struct LineErr* node, uint line) const;
+
+        public:
+            bool m_attached;
 
         private:
             uint m_id;
@@ -113,7 +114,7 @@ namespace Ra
             std::string m_filepath;
             uint m_type;
             std::set<std::string> m_properties;
-            struct LineErr m_lineerr;
+            LineErr m_lineerr;
         };
 
         class RA_ENGINE_API ShaderProgram
@@ -178,6 +179,9 @@ namespace Ra
 
             typedef std::map<std::string, TextureBinding> TexUnit_t;
             TexUnit_t textureUnits;
+
+        public:
+            bool m_linked;
 
         private:
             ShaderConfiguration m_configuration;

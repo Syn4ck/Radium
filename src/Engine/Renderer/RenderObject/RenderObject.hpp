@@ -93,6 +93,8 @@ namespace Ra
             void hasBeenRenderedOnce();
             void hasExpired();
 
+            virtual void render( const RenderParameters& lightParams, Core::Matrix4 viewMatrix, Core::Matrix4 projMatrix, bool lightSupZero, ShaderProgram* altShader = nullptr );
+
         private:
             Core::Transform m_localTransform;
 

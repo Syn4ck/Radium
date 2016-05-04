@@ -112,8 +112,8 @@ namespace Ra
                 if (hit1 && hit2)
                 {
                     // Do the calculations relative to the circle center.
-                    const Core::Vector3 originalHit = rayToFirstClick.at(hits1[0]) - m_worldTo * origin;
-                    const Core::Vector3 currentHit = rayToCurrentClick.at(hits2[0]) - m_worldTo * origin;
+                    const Core::Vector3 originalHit = rayToFirstClick.pointAt(hits1[0]) - m_worldTo * origin;
+                    const Core::Vector3 currentHit = rayToCurrentClick.pointAt(hits2[0]) - m_worldTo * origin;
 
                     // Get the angle between the two vectors with the correct sign
                     // (since we already know our current rotation axis).
