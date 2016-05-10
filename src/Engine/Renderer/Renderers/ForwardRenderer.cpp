@@ -2,6 +2,7 @@
 
 #include <MainApplication/ImGui/imgui.h>
 #include <MainApplication/ImGui/imgui_gl3.hpp>
+#include <MainApplication/ImGui/imgui_node_graph.hpp>
 
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
@@ -352,14 +353,9 @@ namespace Ra
 
             // and render IM-GUI !!
             ImGuiGL3::newFrame(m_width, m_height);
-            //ImGui::SetNextWindowPos(ImVec2(100,100), ImGuiSetCond_FirstUseEver);
 
-            ImVec4 clear_color = ImColor(114, 144, 154);
-            static float f = 0.0f;
-            ImGui::Text("Hello, it's meeeeEEEEeeee!"); // hello Adele world
-            ImGui::SliderFloat("float", &f, 0.0f, 1.0f);
-            ImGui::ColorEdit3("clear color", (float*)&clear_color);
-
+            bool isNodeOpened = true;
+            ImGui::NodeWindow(&isNodeOpened);
             ImGui::Render();
 
             m_postprocessFbo->unbind();

@@ -2,6 +2,8 @@ Note | The ImGui code is used as is from the repository of the project as it
      | is advised by the author (https://github.com/ocornut/imgui)
      |
      | The code for imgui_gl3 is a modified version of imgui_impl_glfw_gl3.
+     | The imgui_node_viewer is new, though :D.
+     |
      | Here is the license for the project:
 
 The MIT License (MIT)
