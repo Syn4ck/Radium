@@ -1,7 +1,7 @@
 #include <Engine/Renderer/Renderers/ForwardRenderer.hpp>
 
-#include <MainApplication/ImGui/src/imgui.h>
-#include <MainApplication/ImGui/src/imgui_gl3.hpp>
+#include <MainApplication/ImGui/imgui.h>
+#include <MainApplication/ImGui/imgui_gl3.hpp>
 
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
