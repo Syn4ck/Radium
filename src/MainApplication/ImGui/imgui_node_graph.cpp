@@ -8,22 +8,40 @@ namespace ImGui {
 static inline ImVec2 operator+(const ImVec2& lhs, const ImVec2& rhs) { return ImVec2(lhs.x+rhs.x, lhs.y+rhs.y); }
 static inline ImVec2 operator-(const ImVec2& lhs, const ImVec2& rhs) { return ImVec2(lhs.x-rhs.x, lhs.y-rhs.y); }
 
+
+
 /// the structure used to represent the graphic properties of a node
 struct NodeInfo {
-    int    m_id;
+    int    m_id, m_level, m_ylevel;
     char   m_name[32];
     ImVec2 m_pos, m_size;
     int    m_nbout, m_nbin;
 
-    // constructor
-    NodeInfo(int id, const char* name, ImVec2 pos, int nbin, int nbout)
-        : m_id(id),
-          m_pos(pos),  m_size(96, 48),
-          m_nbout(nbout), m_nbin(nbin)
+    // constructors
+    NodeInfo(int id, int level, int ylevel, const char* name, int nbin, int nbout, ImVec2 pos = ImVec2(-1, -1))
+        : m_id(id)
+        , m_level(level), m_ylevel(ylevel) // TODO(hugo) find a better way to remember number of nodes with same level
+        , m_pos(pos),     m_size(96, 48)
+        , m_nbout(nbout), m_nbin(nbin)
     {
         strncpy(m_name, name, 32);
+
+        if (pos.x < 0 && pos.y < 0)
+        {
+            autoPos();
+        }
+    }
+
+private:
+    void autoPos()
+    {
+        // estimate the best position
+        m_pos.x = (m_level+1)*60.f  + (m_level * 96.f);
+        m_pos.y = (m_ylevel+1)*60.f + (m_ylevel * 48.f);
     }
 };
+
+
 
 void BeginNode(bool* opened)
 {
@@ -41,16 +59,20 @@ void BeginNode(bool* opened)
     // short section, I know
 
     // create some fake nodes for testing
-    NodeInfo a(0, "A", ImVec2(20, 20), 0, 3), b(1, "B", ImVec2(200, 30), 3, 0);
+    NodeInfo a(0, 0, 0, "A", 0, 3), b(1, 1, 0, "B", 1, 1), c(2, 1, 1, "C", 2, 1), d(3, 2, 0, "D", 2, 0);
 
     // display those nodes
     Node(a);
     Node(b);
+    Node(c);
+    Node(d);
 
     // and the links
     NodeLink(a, 0, b, 0);
-    NodeLink(a, 1, b, 1);
-    NodeLink(a, 2, b, 2);
+    NodeLink(a, 1, c, 0);
+    NodeLink(a, 2, c, 1);
+    NodeLink(b, 0, d, 0);
+    NodeLink(c, 0, d, 1);
 }
 
 void EndNode()
@@ -73,7 +95,7 @@ void Node(const NodeInfo& info)
 
     // background
     draw_list->AddRectFilled(offset + info.m_pos, offset + info.m_pos + info.m_size, bg1,   1.5f);
-    draw_list->AddRectFilled(offset + info.m_pos + ImVec2(24, 2), offset + info.m_pos + info.m_size - ImVec2(2, 2), bg2, 1.5f);
+    draw_list->AddRectFilled(offset + info.m_pos + ImVec2(24, 2), offset + info.m_pos + info.m_size - ImVec2(2, 2), bg2, 1.4f);
 
     // input connectors
     for (int i = 0; i < info.m_nbin; ++i)
@@ -88,7 +110,7 @@ void Node(const NodeInfo& info)
 
     // beautiful text
     ImGui::SetCursorPos(info.m_pos + ImVec2(5.f,5.f));
-    ImGui::Text("%d", 18);
+    ImGui::Text("%d", info.m_level);
     ImGui::SetCursorPos(info.m_pos + ImVec2(30.f,5.f));
     ImGui::Text("Node %s", info.m_name);
 
@@ -105,6 +127,7 @@ void NodeLink(const NodeInfo& node_a, unsigned int slot_a, const NodeInfo& node_
 
     ImDrawList* draw_list = ImGui::GetWindowDrawList();
     draw_hermite(draw_list, p_a, p_b, 12, ImColor(180,180,180), 1.f);
+    //draw_list->AddLine(p_a, p_b, ImColor(180,180,180), 1.f);
 }
 
 
