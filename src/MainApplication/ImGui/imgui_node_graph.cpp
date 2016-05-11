@@ -18,7 +18,7 @@ struct NodeInfo {
     // constructor
     NodeInfo(int id, const char* name, ImVec2 pos, int nbin, int nbout)
         : m_id(id),
-          m_pos(pos),     m_size(96, 48),
+          m_pos(pos),  m_size(96, 48),
           m_nbout(nbout), m_nbin(nbin)
     {
         strncpy(m_name, name, 32);
@@ -28,10 +28,9 @@ struct NodeInfo {
 void BeginNode(bool* opened)
 {
     // try to create a window
-    ImGui::SetNextWindowSize(ImVec2(600,500), ImGuiSetCond_FirstUseEver);
-    //ImGui::SetNextWindowPos(ImVec2(32, 32));
+    ImGui::SetNextWindowPos(ImVec2(26,26));
 
-    if (! ImGui::Begin("This window is beautiful", opened))
+    if (! ImGui::Begin("This window is beautiful", opened, ImVec2(600,500), 0.3f, ImGuiWindowFlags_NoTitleBar))
     {
         ImGui::End();
         return;
@@ -42,12 +41,13 @@ void BeginNode(bool* opened)
     // short section, I know
 
     // create some fake nodes for testing
-    NodeInfo a(0, "A", ImVec2(200, 200), 0, 3), b(1, "B", ImVec2(400, 300), 3, 0);
+    NodeInfo a(0, "A", ImVec2(20, 20), 0, 3), b(1, "B", ImVec2(200, 30), 3, 0);
 
     // display those nodes
     Node(a);
     Node(b);
 
+    // and the links
     NodeLink(a, 0, b, 0);
     NodeLink(a, 1, b, 1);
     NodeLink(a, 2, b, 2);
@@ -58,34 +58,38 @@ void EndNode()
     ImGui::End();
 }
 
+
+
 void Node(const NodeInfo& info)
 {
     ImGui::PushID(info.m_id);
 
+    ImVec2 offset = ImGui::GetWindowPos(); // get the current window position
+
     const float nodeRadius = 3.5f;
-    const ImColor bg1(40,40,40), edge1(60,60,60), bg2(81, 81, 151);
+    const ImColor bg1(40,40,40), edge1(180,180,180), bg2(81, 81, 151);
 
     ImDrawList* draw_list = ImGui::GetWindowDrawList();
 
     // background
-    draw_list->AddRectFilled(info.m_pos, info.m_pos + info.m_size, bg1,   1.5f);
-    draw_list->AddRectFilled(info.m_pos + ImVec2(20, 2), info.m_pos + info.m_size - ImVec2(2, 2), bg2, 1.5f);
+    draw_list->AddRectFilled(offset + info.m_pos, offset + info.m_pos + info.m_size, bg1,   1.5f);
+    draw_list->AddRectFilled(offset + info.m_pos + ImVec2(24, 2), offset + info.m_pos + info.m_size - ImVec2(2, 2), bg2, 1.5f);
 
     // input connectors
     for (int i = 0; i < info.m_nbin; ++i)
     {
-        draw_list->AddCircleFilled(GetInputPos(info, i), nodeRadius, edge1);
+        draw_list->AddCircleFilled(GetInputPos(info, i) + offset, nodeRadius, edge1);
     }
 
     for (int i = 0; i < info.m_nbout; ++i)
     {
-        draw_list->AddCircleFilled(GetOutputPos(info, i), nodeRadius, edge1);
+        draw_list->AddCircleFilled(GetOutputPos(info, i) + offset, nodeRadius, edge1);
     }
 
     // beautiful text
-    ImGui::SetCursorPos(info.m_pos - ImVec2(26, 26));
-    ImGui::Text("%d", 0);
-    ImGui::SetCursorPos(info.m_pos - ImVec2(6, 26));
+    ImGui::SetCursorPos(info.m_pos + ImVec2(5.f,5.f));
+    ImGui::Text("%d", 18);
+    ImGui::SetCursorPos(info.m_pos + ImVec2(30.f,5.f));
     ImGui::Text("Node %s", info.m_name);
 
     ImGui::PopID();
@@ -96,14 +100,16 @@ void draw_hermite(ImDrawList* draw_list, ImVec2 p1, ImVec2 p2, int STEPS, const 
 
 void NodeLink(const NodeInfo& node_a, unsigned int slot_a, const NodeInfo& node_b, unsigned int slot_b)
 {
-    ImVec2 p_a = GetOutputPos(node_a, slot_a) , p_b = GetInputPos(node_b, slot_b);
+    ImVec2 offset = ImGui::GetWindowPos();
+    ImVec2 p_a = GetOutputPos(node_a, slot_a) + offset, p_b = GetInputPos(node_b, slot_b) + offset;
 
     ImDrawList* draw_list = ImGui::GetWindowDrawList();
-//    draw_list->AddLine(p_a, p_b, ImColor(60,60,60), 2.f);
-    draw_hermite(draw_list, p_a, p_b, 12, ImColor(60,60,60), 1.f);
+    draw_hermite(draw_list, p_a, p_b, 12, ImColor(180,180,180), 1.f);
 }
 
-ImVec2 GetInputPos(  const NodeInfo& info, unsigned int idx )
+
+
+ImVec2 GetInputPos( const NodeInfo& info, unsigned int idx )
 {
     float posY = GetSlotPosY(info, idx, info.m_nbin);
     return ImVec2(info.m_pos.x - 8.0f, posY);
@@ -123,6 +129,8 @@ float GetSlotPosY( const NodeInfo& info, unsigned int idx, unsigned int total )
     // process the real Y position of the connector
     return info.m_pos.y + (0.5 * d) + (idx * d);
 }
+
+
 
 void draw_hermite(ImDrawList* draw_list, ImVec2 p1, ImVec2 p2, int STEPS, const ImColor& col, float thickness)
 {
