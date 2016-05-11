@@ -13,10 +13,14 @@ namespace ImGui {
     struct NodeInfo; // forward declare
 
     /// window that displays nodes and links
-    void NodeWindow( bool* opened );
+    void BeginNode( bool* opened );
+    void EndNode();
 
     /// one node display
     void Node( const NodeInfo& info );
+
+    /// display link between 2 nodes
+    void NodeLink(const NodeInfo& node_a, unsigned int slot_a, const NodeInfo& node_b, unsigned int slot_b);
 
     /// get input/output slot position
     ImVec2 GetInputPos(  const NodeInfo& info, unsigned int idx );

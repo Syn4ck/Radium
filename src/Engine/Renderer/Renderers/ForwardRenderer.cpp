@@ -355,7 +355,8 @@ namespace Ra
             ImGuiGL3::newFrame(m_width, m_height);
 
             bool isNodeOpened = true;
-            ImGui::NodeWindow(&isNodeOpened);
+            ImGui::BeginNode(&isNodeOpened);
+            ImGui::EndNode();
             ImGui::Render();
 
             m_postprocessFbo->unbind();
