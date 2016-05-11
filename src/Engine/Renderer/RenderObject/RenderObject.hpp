@@ -30,6 +30,8 @@ namespace Ra
     namespace Engine
     {
 
+        struct RenderData;
+
         // FIXME(Charly): Does this need a bit of cleanup ?
         class RA_ENGINE_API RenderObject : public Core::IndexedObject
         {

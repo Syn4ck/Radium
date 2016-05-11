@@ -1,6 +1,8 @@
 #include <Engine/Renderer/Renderers/ForwardRenderer.hpp>
 
-#include <iostream>
+#include <MainApplication/ImGui/imgui.h>
+#include <MainApplication/ImGui/imgui_gl3.hpp>
+#include <MainApplication/ImGui/imgui_node_graph.hpp>
 
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
@@ -58,6 +60,7 @@ namespace Ra
         ForwardRenderer::~ForwardRenderer()
         {
             ShaderProgramManager::destroyInstance();
+            ImGuiGL3::shutdown();
         }
 
         void ForwardRenderer::initializeInternal()
@@ -69,6 +72,8 @@ namespace Ra
 
             DebugRender::createInstance();
             DebugRender::getInstance()->initialize();
+
+            ImGuiGL3::init();
         }
 
         void ForwardRenderer::initGraph()
@@ -400,6 +405,14 @@ namespace Ra
                 }
             }
 
+            // and render IM-GUI !!
+            ImGuiGL3::newFrame(m_width, m_height);
+
+            bool isNodeOpened = true;
+            ImGui::BeginNode(&isNodeOpened);
+            ImGui::EndNode();
+            ImGui::Render();
+
             m_fbo->unbind();
         }
 
@@ -408,7 +421,7 @@ namespace Ra
             Texture* last = m_textures[TEX_LIT].get();
             CORE_UNUSED( renderData );
 
-            GL_ASSERT( glDisable( GL_DEPTH_TEST ) );
+            GL_ASSERT( glDisable(GL_DEPTH_TEST) );
 
             m_fbo->useAsTarget( m_width, m_height );
 
