@@ -406,13 +406,16 @@ namespace Ra
             }
 
             // and render IM-GUI !!
-            ImGuiGL3::newFrame(m_width, m_height);
+/*          ImGuiGL3::newFrame(m_width, m_height);
 
             bool isNodeOpened = true;
-            ImGui::BeginNode(&isNodeOpened);
-            ImGui::EndNode();
-            ImGui::Render();
+            ImGui::Begin(&isNodeOpened);
 
+            // render every node
+
+            ImGui::End();
+            ImGui::Render();
+*/
             m_fbo->unbind();
         }
 

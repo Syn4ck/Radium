@@ -10,8 +10,6 @@
 
 namespace ImGuiGL3 {
 
-    struct GLFWwindow;
-
     IMGUI_API bool init();
     IMGUI_API void shutdown();
     IMGUI_API void newFrame(int w, int h);

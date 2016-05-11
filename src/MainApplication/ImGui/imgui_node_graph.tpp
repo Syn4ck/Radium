@@ -1,56 +1,18 @@
-#include "imgui_node_graph.hpp"
-
 #include <cstring>
 
-namespace ImGui {
-
-// TODO(hugo) remove these definitions - from here at least
 static inline ImVec2 operator+(const ImVec2& lhs, const ImVec2& rhs) { return ImVec2(lhs.x+rhs.x, lhs.y+rhs.y); }
 static inline ImVec2 operator-(const ImVec2& lhs, const ImVec2& rhs) { return ImVec2(lhs.x-rhs.x, lhs.y-rhs.y); }
 
 
-
-/// the structure used to represent the graphic properties of a node
-struct NodeInfo {
-    int    m_id, m_level, m_ylevel;
-    char   m_name[32];
-    ImVec2 m_pos, m_size;
-    int    m_nbout, m_nbin;
-
-    // constructors
-    NodeInfo(int id, int level, int ylevel, const char* name, int nbin, int nbout, ImVec2 pos = ImVec2(-1, -1))
-        : m_id(id)
-        , m_level(level), m_ylevel(ylevel) // TODO(hugo) find a better way to remember number of nodes with same level
-        , m_pos(pos),     m_size(96, 48)
-        , m_nbout(nbout), m_nbin(nbin)
-    {
-        strncpy(m_name, name, 32);
-
-        if (pos.x < 0 && pos.y < 0)
-        {
-            autoPos();
-        }
-    }
-
-private:
-    void autoPos()
-    {
-        // estimate the best position
-        m_pos.x = (m_level+1)*60.f  + (m_level * 96.f);
-        m_pos.y = (m_ylevel+1)*60.f + (m_ylevel * 48.f);
-    }
-};
-
-
-
-void BeginNode(bool* opened)
+template <typename T>
+void GraphViewer<T>::Begin(bool* opened)
 {
     // try to create a window
-    ImGui::SetNextWindowPos(ImVec2(26,26));
+    SetNextWindowPos(ImVec2(26,26));
 
-    if (! ImGui::Begin("This window is beautiful", opened, ImVec2(600,500), 0.3f, ImGuiWindowFlags_NoTitleBar))
+    if (! Begin("This window is beautiful", opened, ImVec2(600,500), 0.3f, ImGuiWindowFlags_NoTitleBar))
     {
-        ImGui::End();
+        End();
         return;
     }
 
@@ -58,6 +20,7 @@ void BeginNode(bool* opened)
     // ...
     // short section, I know
 
+    /* TESTING ZONE
     // create some fake nodes for testing
     NodeInfo a(0, 0, 0, "A", 0, 3), b(1, 1, 0, "B", 1, 1), c(2, 1, 1, "C", 2, 1), d(3, 2, 0, "D", 2, 0);
 
@@ -72,21 +35,23 @@ void BeginNode(bool* opened)
     NodeLink(a, 1, c, 0);
     NodeLink(a, 2, c, 1);
     NodeLink(b, 0, d, 0);
-    NodeLink(c, 0, d, 1);
+    NodeLink(c, 0, d, 1); */
 }
 
-void EndNode()
+template <typename T>
+void GraphViewer<T>::End()
 {
-    ImGui::End();
+    End();
 }
 
 
 
-void Node(const NodeInfo& info)
+template <typename T>
+void GraphViewer<T>::drawNode(const NodeProp& info)
 {
-    ImGui::PushID(info.m_id);
+    PushID(info.m_id);
 
-    ImVec2 offset = ImGui::GetWindowPos(); // get the current window position
+    ImVec2 offset = GetWindowPos(); // get the current window position
 
     const float nodeRadius = 3.5f;
     const ImColor bg1(40,40,40), edge1(180,180,180), bg2(81, 81, 151);
@@ -109,42 +74,42 @@ void Node(const NodeInfo& info)
     }
 
     // beautiful text
-    ImGui::SetCursorPos(info.m_pos + ImVec2(5.f,5.f));
-    ImGui::Text("%d", info.m_level);
-    ImGui::SetCursorPos(info.m_pos + ImVec2(30.f,5.f));
-    ImGui::Text("Node %s", info.m_name);
+    SetCursorPos(info.m_pos + ImVec2(5.f,5.f));
+    Text("%d", info.m_level);
+    SetCursorPos(info.m_pos + ImVec2(30.f,5.f));
+    Text("Node %s", info.m_name);
 
-    ImGui::PopID();
+    PopID();
 }
 
-// declaration for link use
-void draw_hermite(ImDrawList* draw_list, ImVec2 p1, ImVec2 p2, int STEPS, const ImColor &col, float thickness = 2.f);
-
-void NodeLink(const NodeInfo& node_a, unsigned int slot_a, const NodeInfo& node_b, unsigned int slot_b)
+template <typename T>
+void GraphViewer<T>::linkNode(const NodeProp& node_a, unsigned int slot_a, const NodeProp& node_b, unsigned int slot_b)
 {
-    ImVec2 offset = ImGui::GetWindowPos();
+    ImVec2 offset = GetWindowPos();
     ImVec2 p_a = GetOutputPos(node_a, slot_a) + offset, p_b = GetInputPos(node_b, slot_b) + offset;
 
-    ImDrawList* draw_list = ImGui::GetWindowDrawList();
+    ImDrawList* draw_list = GetWindowDrawList();
     draw_hermite(draw_list, p_a, p_b, 12, ImColor(180,180,180), 1.f);
     //draw_list->AddLine(p_a, p_b, ImColor(180,180,180), 1.f);
 }
 
 
-
-ImVec2 GetInputPos( const NodeInfo& info, unsigned int idx )
+template <typename T>
+ImVec2 GraphViewer<T>::getInputPos( const NodeProp& info, unsigned int idx )
 {
     float posY = GetSlotPosY(info, idx, info.m_nbin);
     return ImVec2(info.m_pos.x - 8.0f, posY);
 }
 
-ImVec2 GetOutputPos( const NodeInfo& info, unsigned int idx )
+template <typename T>
+ImVec2 GraphViewer<T>::getOutputPos( const NodeProp& info, unsigned int idx )
 {
     float posY = GetSlotPosY(info, idx, info.m_nbout);
     return ImVec2(info.m_pos.x + info.m_size.x + 8.0f, posY);
 }
 
-float GetSlotPosY( const NodeInfo& info, unsigned int idx, unsigned int total )
+template <typename T>
+float GraphViewer<T>::getSlotPosY( const NodeProp& info, unsigned int idx, unsigned int total )
 {
     // and the distance that will separe two connectors
     float d = ((info.m_pos.y + info.m_size.y) - info.m_pos.y) / ((float) total);
@@ -155,7 +120,8 @@ float GetSlotPosY( const NodeInfo& info, unsigned int idx, unsigned int total )
 
 
 
-void draw_hermite(ImDrawList* draw_list, ImVec2 p1, ImVec2 p2, int STEPS, const ImColor& col, float thickness)
+template <typename T>
+void GraphViewer<T>::draw_hermite(ImDrawList* draw_list, ImVec2 p1, ImVec2 p2, int STEPS, const ImColor& col, float thickness)
 {
     ImVec2 t1 = ImVec2(+80.0f, 0.0f);
     ImVec2 t2 = ImVec2(+80.0f, 0.0f);
@@ -171,6 +137,4 @@ void draw_hermite(ImDrawList* draw_list, ImVec2 p1, ImVec2 p2, int STEPS, const 
     }
 
     draw_list->PathStroke(col, false, thickness);
-}
-
 }

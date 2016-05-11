@@ -21,8 +21,8 @@ namespace Ra
 
             class Node
             {
-                /// this is used to represent a connection from a local slot to
-                /// a the dest slot of node target
+                /// this is used to represent a connection from the source's m_slot to
+                /// the local slot m_local
                 struct Connection
                 {
                     uint  m_slot;
