@@ -45,7 +45,7 @@ namespace QRadium
         Q_OBJECT
 
     public:
-        MainApplication(int argc, char** argv);
+        MainApplication(int& argc, char** argv);
         virtual ~MainApplication();
 
         void initializeInternal();
@@ -99,7 +99,7 @@ namespace QRadium
         virtual void frameEnd() override;
 
         virtual void runStart() override {}
-        virtual void runEnd() override { exit(0); }
+        virtual void runEnd() override {}
 
         virtual const Ra::Engine::Renderer* getRenderer() const override { return m_viewer->getRenderer(); }
 

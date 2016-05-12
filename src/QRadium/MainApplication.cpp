@@ -42,7 +42,7 @@ namespace QRadium
         : Ra::Gui::Application(argc, argv)
         , m_frameCountBeforeUpdate(60)
     {
-        m_mainApplication = new MainApplication(argc, argv);
+        m_mainApplication = new MainApplication(m_argc, m_argv);
         m_mainWindow = m_mainApplication->m_mainWindow;
     }
 
@@ -190,7 +190,7 @@ namespace QRadium
         m_mainWindow->onFrameComplete();
     }
 
-    MainApplication::MainApplication(int argc, char** argv)
+    MainApplication::MainApplication(int& argc, char** argv)
         : QApplication(argc, argv)
         , m_mainWindow(nullptr)
         , m_viewer(nullptr)

@@ -12,7 +12,7 @@ namespace Ra
 {
     namespace Gui
     {
-        Application::Application(int argc, char** argv)
+        Application::Application(int& argc, char** argv)
             : m_engine(nullptr)
             , m_taskQueue(nullptr)
             , m_targetFPS(60)
