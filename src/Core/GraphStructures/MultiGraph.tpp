@@ -9,7 +9,7 @@ MultiGraph<T>::Node::Node(const std::string& name, const std::shared_ptr<T>& dat
 }
 
 template <typename T>
-bool MultiGraph<T>::Node::Connection::operator==(const MultiGraph<T>::Node::Connection& other)
+bool MultiGraph<T>::Node::Connection::operator==(const MultiGraph<T>::Node::Connection& other) const
 {
     return (m_slot == other.m_slot) && (m_source == other.m_source) && (m_local == other.m_local);
 }
@@ -65,7 +65,13 @@ void MultiGraph<T>::Node::updateLevel()
 }
 
 template <typename T>
-void MultiGraph<T>::Node::print()
+bool MultiGraph<T>::Node::operator<(const MultiGraph<T>::Node& other) const
+{
+    return m_level < other.m_level;
+}
+
+template <typename T>
+void MultiGraph<T>::Node::print() const
 {
     // print parents
     for (Connection const& c : m_parents)
@@ -109,7 +115,10 @@ void MultiGraph<T>::levelize(bool sortByLevel)
             {
                 // if no level is found try to infere it
                 node->updateLevel();
-                total -= 1;
+
+                // decrease if ok
+                if (node->m_level != 0)
+                    total -= 1;
             }
         }
     }
@@ -123,7 +132,7 @@ void MultiGraph<T>::levelize(bool sortByLevel)
 }
 
 template <typename T>
-void MultiGraph<T>::print()
+void MultiGraph<T>::print() const
 {
     std::cout << std::endl << "DEBUG - printing graph -" << std::endl;
     for (auto const& node : m_graph)
@@ -137,6 +146,11 @@ template <typename T> typename MultiGraph<T>::Node* MultiGraph<T>::operator[](co
     return m_names[name];
 }
 
+template <typename T> typename MultiGraph<T>::Node* MultiGraph<T>::operator[](const int index)
+{
+    return m_graph[index].get();
+}
+
 template <typename T> typename std::vector<std::unique_ptr<typename MultiGraph<T>::Node>>::iterator MultiGraph<T>::begin()
 {
     return m_graph.begin();
@@ -145,4 +159,9 @@ template <typename T> typename std::vector<std::unique_ptr<typename MultiGraph<T
 template <typename T> typename std::vector<std::unique_ptr<typename MultiGraph<T>::Node>>::iterator MultiGraph<T>::end()
 {
     return m_graph.end();
+}
+
+template <typename T> uint MultiGraph<T>::size() const
+{
+    return m_graph.size();
 }

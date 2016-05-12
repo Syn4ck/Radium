@@ -4,8 +4,12 @@
 #include <Engine/RadiumEngine.hpp>
 #include <Engine/Renderer/Renderer.hpp>
 
-#include <Engine/Renderer/Passes/Passes.hpp> // include every Pass*.hpp, TODO(Hugo) remove it after debug
+#include <Engine/Renderer/Passes/Passes.hpp>
 #include <Core/GraphStructures/MultiGraph.hpp>
+
+#include <MainApplication/ImGui/imgui.h>
+#include <MainApplication/ImGui/imgui_gl3.hpp>
+#include <MainApplication/ImGui/imgui_node_graph.hpp>
 
 namespace Ra
 {
@@ -56,7 +60,8 @@ namespace Ra
             std::map<std::string, Pass*>       m_passmap;
             std::vector<std::shared_ptr<Pass>> m_passes;
 
-            Core::MultiGraph<Pass> m_passgraph;
+            Core::MultiGraph<Pass>   m_passgraph;
+            ImGui::GraphViewer<Pass> m_graphview;
         };
 
     } // namespace Engine

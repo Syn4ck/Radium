@@ -1,9 +1,5 @@
 #include <Engine/Renderer/Renderers/ForwardRenderer.hpp>
 
-#include <MainApplication/ImGui/imgui.h>
-#include <MainApplication/ImGui/imgui_gl3.hpp>
-#include <MainApplication/ImGui/imgui_node_graph.hpp>
-
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
@@ -54,6 +50,7 @@ namespace Ra
         ForwardRenderer::ForwardRenderer( uint width, uint height )
             : Renderer( width, height )
             , m_fbo( nullptr )
+            , m_graphview(&m_passgraph)
         {
         }
 
@@ -69,6 +66,7 @@ namespace Ra
             initBuffers();
             initPasses();
             initGraph();
+
 
             DebugRender::createInstance();
             DebugRender::getInstance()->initialize();
@@ -101,6 +99,7 @@ namespace Ra
             // levelize and sort on the same run
             m_passgraph.levelize(true);
             //m_passgraph.print();
+            m_graphview.init();
         }
 
         void ForwardRenderer::initPasses()
@@ -406,16 +405,13 @@ namespace Ra
             }
 
             // and render IM-GUI !!
-/*          ImGuiGL3::newFrame(m_width, m_height);
+            ImGuiGL3::newFrame(m_width, m_height);
 
-            bool isNodeOpened = true;
-            ImGui::Begin(&isNodeOpened);
-
-            // render every node
-
-            ImGui::End();
+            bool isNodeOpened = false;
+            m_graphview.Begin(&isNodeOpened);
+            m_graphview.End();
             ImGui::Render();
-*/
+
             m_fbo->unbind();
         }
 

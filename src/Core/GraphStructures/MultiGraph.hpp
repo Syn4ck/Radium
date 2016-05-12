@@ -19,8 +19,10 @@ namespace Ra
         class MultiGraph
         {
 
+        public:
             class Node
             {
+            public:
                 /// this is used to represent a connection from the source's m_slot to
                 /// the local slot m_local
                 struct Connection
@@ -28,7 +30,7 @@ namespace Ra
                     uint  m_slot;
                     Node* m_source;
                     uint  m_local;
-                    bool  operator==(const Connection& other);
+                    bool  operator==(const Connection& other) const;
                 };
 
             public:
@@ -45,7 +47,10 @@ namespace Ra
                 void updateLevel();
 
                 /// debug indicator - TODO(hugo) remove this
-                void print();
+                void print() const;
+
+                /// for sorting
+                bool operator<(const Node& other) const;
 
             public:
                 std::shared_ptr<T>      m_data;    /// data stored by the node
@@ -71,16 +76,20 @@ namespace Ra
             void levelize(bool sortByLevel = false);
 
             /// debug indicator - TODO(hugo) remove this
-            void print();
+            void print() const;
 
             /// access a node pointer directly through the graph
             Node* operator[](const std::string& name);
+            Node* operator[](const int index);
 
             /// redefine iterator begin to map over m_graph
             typename std::vector<std::unique_ptr<Node>>::iterator begin();
 
             /// redefine iterator end to map over m_graph
             typename std::vector<std::unique_ptr<Node>>::iterator end();
+
+            /// redefine size() function
+            uint size() const;
 
         private:
             std::vector<std::unique_ptr<Node>> m_graph;
