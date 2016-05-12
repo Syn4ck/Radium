@@ -21,7 +21,7 @@ namespace Ra
 
 namespace Ra
 {
-    namespace Guibase
+    namespace Gui
     {
         class Application
         {

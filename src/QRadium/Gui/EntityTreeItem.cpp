@@ -38,52 +38,52 @@
 **
 ****************************************************************************/
 
-#include <MainApplication/Gui/EntityTreeItem.hpp>
+#include <QRadium/Gui/EntityTreeItem.hpp>
 
 #include <cstdio>
 
 #include <QVector>
 
-namespace Ra
+namespace QRadium
 {
 
-    Gui::EntityTreeItem::EntityTreeItem( const QVector<ItemData>& data, EntityTreeItem* parent )
+    EntityTreeItem::EntityTreeItem( const QVector<ItemData>& data, EntityTreeItem* parent )
         : m_parentItem( parent )
     {
         m_itemData = data;
     }
 
-    Gui::EntityTreeItem::~EntityTreeItem()
+    EntityTreeItem::~EntityTreeItem()
     {
         qDeleteAll( m_childItems );
     }
 
-    Gui::EntityTreeItem* Gui::EntityTreeItem::getChild( int row )
+    EntityTreeItem* EntityTreeItem::getChild( int row )
     {
         return m_childItems.value( row );
     }
 
-    uint Gui::EntityTreeItem::getChildCount() const
+    uint EntityTreeItem::getChildCount() const
     {
         return m_childItems.count();
     }
 
-    uint Gui::EntityTreeItem::getColumnCount() const
+    uint EntityTreeItem::getColumnCount() const
     {
         return m_itemData.count();
     }
 
-    Gui::EntityTreeItem::ItemData Gui::EntityTreeItem::getData( int column ) const
+    EntityTreeItem::ItemData EntityTreeItem::getData( int column ) const
     {
         return m_itemData.value( column );
     }
 
-    Gui::EntityTreeItem* Gui::EntityTreeItem::getParentItem()
+    EntityTreeItem* EntityTreeItem::getParentItem()
     {
         return m_parentItem;
     }
 
-    uint Gui::EntityTreeItem::getRow() const
+    uint EntityTreeItem::getRow() const
     {
         if ( m_parentItem )
         {
@@ -92,7 +92,7 @@ namespace Ra
         return 0;
     }
 
-    bool Gui::EntityTreeItem::insertChildren( uint position, uint count, uint columns )
+    bool EntityTreeItem::insertChildren( uint position, uint count, uint columns )
     {
         if ( int( position ) > m_childItems.size() )
         {
@@ -109,7 +109,7 @@ namespace Ra
         return true;
     }
 
-    bool Gui::EntityTreeItem::insertColumns( uint position, uint columns )
+    bool EntityTreeItem::insertColumns( uint position, uint columns )
     {
         if ( int( position ) > m_itemData.size() )
         {
@@ -129,7 +129,7 @@ namespace Ra
         return true;
     }
 
-    bool Gui::EntityTreeItem::removeChildren( uint position, uint count )
+    bool EntityTreeItem::removeChildren( uint position, uint count )
     {
         if ( int( position + count ) > m_childItems.size() )
         {
@@ -144,7 +144,7 @@ namespace Ra
         return true;
     }
 
-    bool Gui::EntityTreeItem::removeColumns( uint position, uint columns )
+    bool EntityTreeItem::removeColumns( uint position, uint columns )
     {
         if ( int( position + columns ) > m_itemData.size() )
         {
@@ -164,7 +164,7 @@ namespace Ra
         return true;
     }
 
-    bool Gui::EntityTreeItem::setData( uint column, const ItemData& value )
+    bool EntityTreeItem::setData( uint column, const ItemData& value )
     {
         if ( int( column ) >= m_itemData.size() )
         {

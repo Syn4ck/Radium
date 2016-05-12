@@ -5,17 +5,15 @@
 
 namespace Ra
 {
-    namespace Guibase
+    namespace Gui
     {
-
         class RA_GUIBASE_API TrackballCamera : public CameraInterface
         {
         public:
             TrackballCamera(uint width, uint height);
             virtual ~TrackballCamera();
 
-            virtual bool handleMouseEvent(const Ra::Core::MouseEvent* event) override;
-            virtual bool handleKeyEvent(const Ra::Core::KeyEvent* event) override;
+            virtual void handleEvents() override;
 
             virtual void update(Scalar dt) override;
 
@@ -43,9 +41,7 @@ namespace Ra
 
         private:
             Core::Vector3 m_trackballCenter;
-
-            Scalar m_lastMouseX;
-            Scalar m_lastMouseY;
+            Core::Vector2 m_lastMousePos;
 
             Scalar m_quickCameraModifier;
             Scalar m_wheelSpeedModifier;

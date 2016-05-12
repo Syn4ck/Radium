@@ -10,7 +10,7 @@
 
 namespace Ra
 {
-    namespace Guibase
+    namespace Gui
     {
         Application::Application(int argc, char** argv)
             : m_engine(nullptr)

@@ -9,31 +9,19 @@ namespace Ra
     {
         enum Modifier
         {
-            Modifier_Null  = 0x1,
-            Modifier_Ctrl  = 0x2,
-            Modifier_Shift = 0x4,
-            Modifier_Alt   = 0x8
-        };
-
-        enum KeyEventType
-        {
-            KeyEvent_Pressed  = 0x1,
-            KeyEvent_Released = 0x2
-        };
-
-        enum MouseEventType
-        {
-            MouseEvent_Pressed  = 0x1,
-            MouseEvent_Released = 0x2,
-            MouseEvent_Moved    = 0x4,
-            MouseEvent_Wheel    = 0x8
+            Modifier_None  = 0,
+            Modifier_Ctrl  = 1 << 0,
+            Modifier_Shift = 1 << 1,
+            Modifier_Alt   = 1 << 2,
         };
 
         enum MouseButton
         {
-            MouseButton_Left   = 0x1,
-            MouseButton_Middle = 0x2,
-            MouseButton_Right  = 0x4
+            MouseButton_Unknown = 1,
+            MouseButton_Left = 0,
+            MouseButton_Middle,
+            MouseButton_Right,
+            MouseButton_Count,
         };
     } // namespace Core
 } // namespace Ra

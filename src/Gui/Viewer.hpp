@@ -22,7 +22,7 @@
 
 namespace Ra
 {
-    namespace Guibase
+    namespace Gui
     {
         /// The whole purpose of the viewer is to call Engine::Renderer stuff and forward
         /// events to cameras or gizmos
@@ -38,7 +38,7 @@ namespace Ra
 
             const Engine::Renderer* getRenderer() const { return m_renderer.get(); }
 
-            void addCamera(const std::shared_ptr<Ra::Guibase::CameraInterface>& camera) { m_cameras.push_back(camera); }
+            void addCamera(const std::shared_ptr<Ra::Gui::CameraInterface>& camera) { m_cameras.push_back(camera); }
             const CameraInterface* getCurrentCamera() const { return m_currentCamera; }
             CameraInterface* getCurrentCamera() { return m_currentCamera; }
             uint getCameraCount() const { return m_cameras.size(); }
@@ -60,8 +60,7 @@ namespace Ra
 
             void processPicking(std::vector<int>& leftClickQueries, std::vector<int>& middleClickQueries, std::vector<int>& rightClickQueries);
 
-            bool keyEvent(const Core::KeyEvent* event);
-            bool mouseEvent(const Core::MouseEvent* event);
+            void handleEvents();
 
         private:
             uint m_width, m_height;

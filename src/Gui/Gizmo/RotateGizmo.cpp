@@ -13,10 +13,10 @@
 
 namespace Ra
 {
-    namespace Guibase
+    namespace Gui
     {
         RotateGizmo::RotateGizmo(Engine::Component* c, const Core::Transform &worldTo, const Core::Transform& t, Mode mode)
-                : Gizmo(c, worldTo, t, mode), m_initialPix(Core::Vector2::Zero()), m_selectedAxis(-1)
+            : Gizmo(c, worldTo, t, mode), m_initialPix(Core::Vector2::Zero()), m_selectedAxis(-1)
         {
             constexpr Scalar torusOutRadius = 0.1f;
             constexpr Scalar torusAspectRatio = 0.1f;
@@ -74,7 +74,7 @@ namespace Ra
             for (auto roIdx : m_renderObjects)
             {
                 Engine::RadiumEngine::getInstance()->getRenderObjectManager()->getRenderObject(
-                        roIdx)->setLocalTransform(m_worldTo * displayTransform);
+                            roIdx)->setLocalTransform(m_worldTo * displayTransform);
             }
         }
 

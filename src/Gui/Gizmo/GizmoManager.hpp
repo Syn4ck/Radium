@@ -8,7 +8,7 @@
 
 namespace Ra
 {
-    namespace Guibase
+    namespace Gui
     {
         class Viewer;
 
@@ -32,7 +32,7 @@ namespace Ra
             ~GizmoManager();
 
             /// Receive mouse events and transmit them to the gizmos.
-            bool handleMouseEvent(const Core::MouseEvent* event);
+            void handleEvents();
 
             /// Change the current editable object,
             void setEditable(Engine::EditableInterface* edit);

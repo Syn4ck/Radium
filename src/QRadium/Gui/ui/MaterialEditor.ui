@@ -117,10 +117,10 @@
        </widget>
       </item>
       <item row="0" column="2">
-       <widget class="Ra::Gui::ColorWidget" name="kdColorWidget" native="true"/>
+       <widget class="QRadium::ColorWidget" name="kdColorWidget" native="true"/>
       </item>
       <item row="1" column="2">
-       <widget class="Ra::Gui::ColorWidget" name="ksColorWidget" native="true"/>
+       <widget class="QRadium::ColorWidget" name="ksColorWidget" native="true"/>
       </item>
       <item row="2" column="0">
        <widget class="QLabel" name="label_4">
@@ -212,9 +212,9 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>Ra::Gui::ColorWidget</class>
+   <class>QRadium::ColorWidget</class>
    <extends>QWidget</extends>
-   <header location="global">MainApplication/Gui/ColorWidget.hpp</header>
+   <header location="global">QRadium/Gui/ColorWidget.hpp</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

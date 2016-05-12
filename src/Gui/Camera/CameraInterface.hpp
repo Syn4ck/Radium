@@ -22,7 +22,7 @@ namespace Ra
 
 namespace Ra
 {
-    namespace Guibase
+    namespace Gui
     {
 
         class RA_GUIBASE_API CameraInterface
@@ -37,11 +37,7 @@ namespace Ra
             Core::Matrix4 getProjMatrix() const;
             Core::Matrix4 getViewMatrix() const;
 
-            /// @return true if the event has been taken into account, false otherwise
-            virtual bool handleMouseEvent(const Ra::Core::MouseEvent* event) = 0;
-
-            /// @return true if the event has been taken into account, false otherwise
-            virtual bool handleKeyEvent(const Ra::Core::KeyEvent* event) = 0;
+            virtual void handleEvents() = 0;
 
             const Engine::Camera* getCamera() const
             {

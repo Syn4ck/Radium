@@ -103,18 +103,18 @@ add_dependencies( ${guibase_target} ${engine_target} ${core_target})
 target_compile_definitions(${engine_target} PRIVATE "-DRA_GUIBASE_EXPORTS")
 target_link_libraries(${guibase_target} ${guibase_libs})
 
-# Build MainApplication
+# Build QRadium
 set(qapp_target qradium)
 
 include(CMakeGenerateVersion.txt)
 
 set(qapp_libs radiumGuiBase radiumEngine radiumCore ${Qt5_LIBRARIES} ${OPENGL_LIBRARIES})
 
-file(GLOB_RECURSE qapp_sources MainApplication/*.cpp)
-file(GLOB_RECURSE qapp_headers MainApplication/*.h MainApplication/*.hpp)
-file(GLOB_RECURSE qapp_inlines MainApplication/*.inl)
+file(GLOB_RECURSE qapp_sources QRadium/*.cpp)
+file(GLOB_RECURSE qapp_headers QRadium/*.h QRadium/*.hpp)
+file(GLOB_RECURSE qapp_inlines QRadium/*.inl)
 
-file(GLOB_RECURSE qapp_uis     MainApplication/*.ui)
+file(GLOB_RECURSE qapp_uis     QRadium/*.ui)
 qt5_wrap_ui(qapp_uis_moc ${qapp_uis})
 
 file(GLOB resources ${CMAKE_SOURCE_DIR}/*.qrc)

@@ -11,7 +11,7 @@
 
 namespace Ra
 {
-    namespace Guibase
+    namespace Gui
     {
         GizmoManager::GizmoManager(const Viewer* viewer)
                 : m_viewer(viewer)
@@ -20,7 +20,6 @@ namespace Ra
                 , m_currentGizmoType(NONE)
                 , m_mode(Gizmo::GLOBAL)
         {}
-
 
         GizmoManager::~GizmoManager() { }
 
@@ -118,71 +117,51 @@ namespace Ra
             }
         }
 
-        bool GizmoManager::handleMouseEvent(const Core::MouseEvent* event)
+        void GizmoManager::handleEvents()
         {
-            switch (event->event)
+            using namespace Core;
+            const auto& ins = Engine::RadiumEngine::getInstance()->getInputStatus();
+
+            if (ins.buttonWasPressed[MouseButton_Left] && m_currentEdit && m_currentGizmoType != NONE)
             {
-                case Core::MouseEvent_Pressed:
-                {
-                    if (event->buttons != Core::MouseButton_Left || !m_currentEdit || m_currentGizmoType == NONE)
-                    {
-                        return false;
-                    }
+                // If we are there it means that we should have a valid gizmo.
+                CORE_ASSERT(m_currentGizmo, "Gizmo is not there !");
 
-                    // If we are there it means that we should have a valid gizmo.
-                    CORE_ASSERT(m_currentGizmo, "Gizmo is not there !");
-
-                    // Access the camera from the viewer. (TODO : a cleaner way to access the camera).
-                    const Engine::Camera& cam = *m_viewer->getCurrentCamera()->getCamera();
-                    m_currentGizmo->setInitialState(cam, Core::Vector2(event->absoluteXPosition, event->absoluteYPosition));
-
-                    return true;
-                }
-
-                case Core::MouseEvent_Released:
-                {
-                    if ( event->buttons == Core::MouseButton_Left && m_currentGizmo)
-                    {
-                        m_currentGizmo->selectConstraint(-1);
-                    }
-
-                    return (m_currentGizmo != nullptr);
-                }
-
-                case Core::MouseEvent_Moved:
-                {
-                    if (event->buttons & Core::MouseButton_Left && m_currentGizmo )
-                    {
-                        Core::Vector2 currentXY(event->absoluteXPosition, event->absoluteYPosition);
-                        const Engine::Camera& cam = *m_viewer->getCurrentCamera()->getCamera();
-                        Core::Transform newTransform = m_currentGizmo->mouseMove(cam, currentXY);
-
-                        for (auto& prim : m_transformProperty.primitives)
-                        {
-                            switch (prim.primitive.getType())
-                            {
-                                case Engine::EditablePrimitive::POSITION:
-                                {
-                                    prim.primitive.asPosition() = newTransform.translation();
-                                    break;
-                                }
-                                case Engine::EditablePrimitive::ROTATION:
-                                {
-                                    prim.primitive.asRotation() = newTransform.rotation();
-                                    break;
-                                }
-                                default:; // do nothing;
-                            }
-                        }
-
-                        CORE_ASSERT(m_currentEdit, "Nothing to edit ");
-                        m_currentEdit->setProperty(m_transformProperty);
-                    }
-                    return (m_currentGizmo != nullptr);
-                }
+                // Access the camera from the viewer. (TODO : a cleaner way to access the camera).
+                const Engine::Camera& cam = *m_viewer->getCurrentCamera()->getCamera();
+                m_currentGizmo->setInitialState(cam, ins.mousePosition);
             }
+            else if (ins.buttonWasReleased[MouseButton_Left] && m_currentGizmo)
+            {
+                m_currentGizmo->selectConstraint(-1);
+            }
+            else if (ins.buttonIsPressed[MouseButton_Left] && m_currentGizmo)
+            {
+                Vector2 currentXY = ins.mousePosition;
+                const Engine::Camera& cam = *m_viewer->getCurrentCamera()->getCamera();
+                Transform newTransform = m_currentGizmo->mouseMove(cam, currentXY);
 
-            return false;
+                for (auto& prim : m_transformProperty.primitives)
+                {
+                    switch (prim.primitive.getType())
+                    {
+                        case Engine::EditablePrimitive::POSITION:
+                        {
+                            prim.primitive.asPosition() = newTransform.translation();
+                            break;
+                        }
+                        case Engine::EditablePrimitive::ROTATION:
+                        {
+                            prim.primitive.asRotation() = newTransform.rotation();
+                            break;
+                        }
+                        default:; // do nothing;
+                    }
+                }
+
+                CORE_ASSERT(m_currentEdit, "Nothing to edit ");
+                m_currentEdit->setProperty(m_transformProperty);
+            }
         }
 
         void GizmoManager::handlePickingResult(int drawableId)

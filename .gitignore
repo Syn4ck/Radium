@@ -82,5 +82,5 @@ lib/
 *.json
 
 #Auto-generated plugins registration file
-src/MainApplication/Systems.cpp
-src/MainApplication/Version.cpp
+src/QRadium/Systems.cpp
+src/QRadium/Version.cpp

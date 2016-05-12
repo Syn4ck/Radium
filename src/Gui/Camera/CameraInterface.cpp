@@ -5,9 +5,8 @@
 
 namespace Ra
 {
-    namespace Guibase
+    namespace Gui
     {
-
         CameraInterface::CameraInterface(uint width, uint height)
             : m_cameraSensitivity(1.0)
             , m_hasLightAttached(false)

@@ -11,10 +11,11 @@
 
 #include <Engine/Renderer/Camera/Camera.hpp>
 #include <Engine/Renderer/Light/Light.hpp>
+#include <Engine/RadiumEngine.hpp>
 
 namespace Ra
 {
-    namespace Guibase
+    namespace Gui
     {
         using Core::Math::Pi;
 
@@ -51,146 +52,87 @@ namespace Ra
             updatePhiTheta();
         }
 
-        bool TrackballCamera::handleMouseEvent(const Ra::Core::MouseEvent* event)
+        void TrackballCamera::handleEvents()
         {
-            switch (event->event)
+            using namespace Core;
+            const auto& ins = Engine::RadiumEngine::getInstance()->getInputStatus();
+
+            if (ins.buttonWasPressed[MouseButton_Middle])
             {
-                case Core::MouseEvent_Pressed:
-                    return handleMousePressEvent(event);
-                case Core::MouseEvent_Released:
-                    return handleMouseReleaseEvent(event);
-                case Core::MouseEvent_Moved:
-                    return handleMouseMoveEvent(event);
-                case Core::MouseEvent_Wheel:
-                    return handleWheelEvent(event);
+                m_lastMousePos = ins.mousePosition;
+
+                if (ins.modifiers == Modifier_None)
+                {
+                    m_cameraRotateMode = true;
+                }
+
+                if ((ins.modifiers & Core::Modifier_Shift) == Modifier_Shift)
+                {
+                    m_cameraPanMode = true;
+                }
+
+                if ((ins.modifiers & Modifier_Ctrl) == Modifier_Ctrl)
+                {
+                    m_cameraZoomMode = true;
+                }
             }
-            return false;
-        }
-
-        bool TrackballCamera::handleKeyEvent(const Ra::Core::KeyEvent* event)
-        {
-
-            switch (event->event)
+            else if (ins.buttonWasReleased[MouseButton_Middle])
             {
-                case Core::KeyEvent_Pressed:
-                    return handleKeyPressEvent(event);
-                case Core::KeyEvent_Released:
-                    return handleKeyReleaseEvent(event);
+                m_cameraRotateMode    = false;
+                m_cameraPanMode       = false;
+                m_cameraZoomMode      = false;
+                m_quickCameraModifier = 1.0;
             }
-            return false;
-        }
-
-        bool TrackballCamera::handleMousePressEvent(const Core::MouseEvent* event)
-        {
-            // Whole manipulation is done with middle button and modifiers
-            if (event->buttons != Core::MouseButton_Middle)
+            else if (ins.buttonIsPressed[MouseButton_Middle])
             {
-                return false;
-            }
+                Vector2 pos = ins.mousePosition;
 
-            bool handled = false;
-            m_lastMouseX = event->absoluteXPosition;
-            m_lastMouseY = event->absoluteYPosition;
+                Scalar dx = (pos - m_lastMousePos).x() / m_camera->getWidth();
+                Scalar dy = (pos - m_lastMousePos).y() / m_camera->getHeight();
 
-            if (event->modifier & Core::Modifier_Null)
-            {
-                m_cameraRotateMode = true;
-                handled            = true;
-            }
+                if ((ins.modifiers & Modifier_Alt) == Modifier_Alt)
+                {
+                    m_quickCameraModifier = 10.0;
+                }
+                else
+                {
+                    m_quickCameraModifier = 2.0;
+                }
 
-            if (event->modifier & Core::Modifier_Shift)
-            {
-                m_cameraPanMode = true;
-                handled         = true;
-            }
+                if (m_cameraRotateMode)
+                {
+                    handleCameraRotate(dx, dy);
+                }
 
-            if (event->modifier & Core::Modifier_Ctrl)
-            {
-                m_cameraZoomMode = true;
-                handled          = true;
-            }
+                if (m_cameraPanMode)
+                {
+                    handleCameraPan(dx, dy);
+                }
 
-            return handled;
-        }
+                if (m_cameraZoomMode)
+                {
+                    handleCameraZoom(dx, dy);
+                }
 
-        bool TrackballCamera::handleMouseMoveEvent(const Core::MouseEvent* event)
-        {
-            Scalar dx = (event->absoluteXPosition - m_lastMouseX) / m_camera->getWidth();
-            Scalar dy = (event->absoluteYPosition - m_lastMouseY) / m_camera->getHeight();
+                m_lastMousePos = pos;
 
-            if (event->modifier & Core::Modifier_Alt)
-            {
-                m_quickCameraModifier = 10.0;
-            }
-            else
-            {
-                m_quickCameraModifier = 2.0;
+                if (m_hasLightAttached)
+                {
+                    m_light->setPosition(m_camera->getPosition());
+                    m_light->setDirection(m_camera->getDirection());
+                }
             }
 
-            if (m_cameraRotateMode)
+            if (ins.wheelDelta == Vector2::Zero())
             {
-                handleCameraRotate(dx, dy);
+                handleCameraZoom((ins.wheelDelta.y() + ins.wheelDelta.x() * 0.1) * m_wheelSpeedModifier);
+
+                if (m_hasLightAttached)
+                {
+                    m_light->setPosition(m_camera->getPosition());
+                    m_light->setDirection(m_camera->getDirection());
+                }
             }
-
-            if (m_cameraPanMode)
-            {
-                handleCameraPan(dx, dy);
-            }
-
-            if (m_cameraZoomMode)
-            {
-                handleCameraZoom(dx, dy);
-            }
-
-            m_lastMouseX = event->absoluteXPosition;
-            m_lastMouseY = event->absoluteYPosition;
-
-            if (m_hasLightAttached)
-            {
-                m_light->setPosition(m_camera->getPosition());
-                m_light->setDirection(m_camera->getDirection());
-            }
-
-            return true;
-        }
-
-        bool TrackballCamera::handleMouseReleaseEvent(const Core::MouseEvent* event)
-        {
-            m_cameraRotateMode    = false;
-            m_cameraPanMode       = false;
-            m_cameraZoomMode      = false;
-            m_quickCameraModifier = 1.0;
-
-            return true;
-        }
-
-        bool TrackballCamera::handleWheelEvent(const Core::MouseEvent* event)
-        {
-            handleCameraZoom((event->wheelDeltaY + event->wheelDeltaX * 0.1) * m_wheelSpeedModifier);
-
-            if (m_hasLightAttached)
-            {
-                m_light->setPosition(m_camera->getPosition());
-                m_light->setDirection(m_camera->getDirection());
-            }
-
-            return true;
-        }
-
-        bool TrackballCamera::handleKeyPressEvent(const Core::KeyEvent* e)
-        {
-            if (e->key == Core::Key_F)
-            {
-                m_rotateAround = !m_rotateAround;
-                return true;
-            }
-
-            return false;
-        }
-
-        bool TrackballCamera::handleKeyReleaseEvent(const Core::KeyEvent* e)
-        {
-            return false;
         }
 
         void TrackballCamera::update(Scalar dt)

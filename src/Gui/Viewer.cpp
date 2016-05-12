@@ -11,7 +11,7 @@
 
 namespace Ra
 {
-    namespace Guibase
+    namespace Gui
     {
         Viewer::Viewer()
             : m_gizmoManager(new GizmoManager(this))
@@ -115,37 +115,27 @@ namespace Ra
             }
         }
 
-        bool Viewer::mouseEvent(const Core::MouseEvent *event)
+        void Viewer::handleEvents()
         {
-            m_currentCamera->handleMouseEvent(event);
+            using namespace Core;
+            m_currentCamera->handleEvents();
+            m_gizmoManager->handleEvents();
 
-            if (event->event == Core::MouseEvent_Pressed)
+            const auto& ins = Engine::RadiumEngine::getInstance()->getInputStatus();
+
+            for (size_t i = 0; i < MouseButton_Count; ++i)
             {
-                Engine::Renderer::PickingQuery query = { Core::Vector2(event->absoluteXPosition, m_height - event->absoluteYPosition), Core::MouseButton::MouseButton_Left };
-                m_renderer->addPickingRequest(query);
+                if (ins.buttonWasPressed[i])
+                {
+                    Engine::Renderer::PickingQuery query = { ins.mousePosition, (MouseButton)i };
+                    m_renderer->addPickingRequest(query);
+                }
             }
 
-            m_gizmoManager->handleMouseEvent(event);
-
-            if (event->event == Core::MouseEvent_Pressed && event->buttons == Core::MouseButton_Right)
-            {
-                Engine::Renderer::PickingQuery query = { Core::Vector2(event->absoluteXPosition, m_height - event->absoluteYPosition), Core::MouseButton::MouseButton_Right };
-                m_renderer->addPickingRequest(query);
-            }
-
-            return false;
-        }
-
-        bool Viewer::keyEvent(const Core::KeyEvent *event)
-        {
-            if (event->event == Core::KeyEvent_Pressed && event->key == Core::Key_Z)
+            if (ins.keyWasPressed[Key_Z])
             {
                 m_renderer->toggleWireframe();
             }
-
-            m_currentCamera->handleKeyEvent(event);
-
-            return false;
         }
     }
 }

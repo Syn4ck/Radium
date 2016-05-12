@@ -38,20 +38,20 @@
 **
 ****************************************************************************/
 
-#include <MainApplication/Gui/EntityTreeModel.hpp>
+#include <QRadium/Gui/EntityTreeModel.hpp>
 
 #include <Core/String/StringUtils.hpp>
 
 #include <Engine/RadiumEngine.hpp>
 #include <Engine/Entity/Entity.hpp>
 #include <Engine/Component/Component.hpp>
-#include <MainApplication/Gui/EntityTreeItem.hpp>
+#include <QRadium/Gui/EntityTreeItem.hpp>
 
-namespace Ra
+namespace QRadium
 {
 
     // FIXME(Charly): Remove data from constructor
-    Gui::EntityTreeModel::EntityTreeModel( const QStringList& headers, QObject* parent )
+    EntityTreeModel::EntityTreeModel( const QStringList& headers, QObject* parent )
         : QAbstractItemModel( parent )
     {
         QVector<EntityTreeItem::ItemData> rootData;
@@ -65,17 +65,17 @@ namespace Ra
         m_rootItem = new EntityTreeItem( rootData );
     }
 
-    Gui::EntityTreeModel::~EntityTreeModel()
+    EntityTreeModel::~EntityTreeModel()
     {
         delete m_rootItem;
     }
 
-    int Gui::EntityTreeModel::columnCount( const QModelIndex& parent ) const
+    int EntityTreeModel::columnCount( const QModelIndex& parent ) const
     {
         return m_rootItem->getColumnCount();
     }
 
-    QVariant Gui::EntityTreeModel::data( const QModelIndex& index, int role ) const
+    QVariant EntityTreeModel::data( const QModelIndex& index, int role ) const
     {
         if ( !index.isValid() )
         {
@@ -92,7 +92,7 @@ namespace Ra
         return item->getData( index.column() ).data;
     }
 
-    Qt::ItemFlags Gui::EntityTreeModel::flags( const QModelIndex& index ) const
+    Qt::ItemFlags EntityTreeModel::flags( const QModelIndex& index ) const
     {
         if ( !index.isValid() )
         {
@@ -102,7 +102,7 @@ namespace Ra
         return Qt::ItemIsEditable | QAbstractItemModel::flags( index );
     }
 
-    Gui::EntityTreeItem* Gui::EntityTreeModel::getItem( const QModelIndex& index ) const
+    EntityTreeItem* EntityTreeModel::getItem( const QModelIndex& index ) const
     {
         if ( index.isValid() )
         {
@@ -116,7 +116,7 @@ namespace Ra
         return m_rootItem;
     }
 
-    QVariant Gui::EntityTreeModel::headerData( int section, Qt::Orientation orientation, int role ) const
+    QVariant EntityTreeModel::headerData( int section, Qt::Orientation orientation, int role ) const
     {
         if ( orientation == Qt::Horizontal && role == Qt::DisplayRole )
         {
@@ -126,7 +126,7 @@ namespace Ra
         return QVariant();
     }
 
-    QModelIndex Gui::EntityTreeModel::index( int row, int column, const QModelIndex& parent ) const
+    QModelIndex EntityTreeModel::index( int row, int column, const QModelIndex& parent ) const
     {
         if ( parent.isValid() && parent.column() != 0 )
         {
@@ -146,7 +146,7 @@ namespace Ra
         }
     }
 
-    bool Gui::EntityTreeModel::insertColumns( int position, int columns, const QModelIndex& parent )
+    bool EntityTreeModel::insertColumns( int position, int columns, const QModelIndex& parent )
     {
         bool success;
 
@@ -157,7 +157,7 @@ namespace Ra
         return success;
     }
 
-    bool Gui::EntityTreeModel::insertRows( int position, int rows, const QModelIndex& parent )
+    bool EntityTreeModel::insertRows( int position, int rows, const QModelIndex& parent )
     {
         EntityTreeItem* parentItem = getItem( parent );
         bool success;
@@ -169,7 +169,7 @@ namespace Ra
         return success;
     }
 
-    QModelIndex Gui::EntityTreeModel::parent( const QModelIndex& child ) const
+    QModelIndex EntityTreeModel::parent( const QModelIndex& child ) const
     {
         if ( !child.isValid() )
         {
@@ -187,7 +187,7 @@ namespace Ra
         return createIndex( parentItem->getChildCount(), 0, parentItem );
     }
 
-    bool Gui::EntityTreeModel::removeColumns( int position, int columns, const QModelIndex& parent )
+    bool EntityTreeModel::removeColumns( int position, int columns, const QModelIndex& parent )
     {
         bool success;
 
@@ -203,7 +203,7 @@ namespace Ra
         return success;
     }
 
-    bool Gui::EntityTreeModel::removeRows( int position, int rows, const QModelIndex& parent )
+    bool EntityTreeModel::removeRows( int position, int rows, const QModelIndex& parent )
     {
         EntityTreeItem* parentItem = getItem( parent );
         bool success = true;
@@ -215,13 +215,13 @@ namespace Ra
         return success;
     }
 
-    int Gui::EntityTreeModel::rowCount( const QModelIndex& parent ) const
+    int EntityTreeModel::rowCount( const QModelIndex& parent ) const
     {
         EntityTreeItem* parentItem = getItem( parent );
         return parentItem->getChildCount();
     }
 
-    bool Gui::EntityTreeModel::setData( const QModelIndex& index, const QVariant& value, int role )
+    bool EntityTreeModel::setData( const QModelIndex& index, const QVariant& value, int role )
     {
         if ( role != Qt::EditRole )
         {
@@ -241,7 +241,7 @@ namespace Ra
         return result;
     }
 
-    bool Gui::EntityTreeModel::setHeaderData( int section, Qt::Orientation orientation, const QVariant& value, int role )
+    bool EntityTreeModel::setHeaderData( int section, Qt::Orientation orientation, const QVariant& value, int role )
     {
         if ( role != Qt::EditRole || orientation != Qt::Horizontal )
         {
@@ -260,7 +260,7 @@ namespace Ra
         return result;
     }
 
-    void Gui::EntityTreeModel::entitiesUpdated()
+    void EntityTreeModel::entitiesUpdated()
     {
         if ( rowCount() > 0 )
         {
@@ -270,7 +270,7 @@ namespace Ra
         // FIXME(Charly): I guess this could be removed since it was used only to avoid duplicates
         m_entityNames.clear();
 
-        auto entities = Engine::RadiumEngine::getInstance()->getEntityManager()->getEntities();
+        auto entities = Ra::Engine::RadiumEngine::getInstance()->getEntityManager()->getEntities();
 
         for ( const auto& ent : entities )
         {
@@ -291,7 +291,7 @@ namespace Ra
         }
     }
 
-    void Gui::EntityTreeModel::insertComponents( Engine::Entity* entity, EntityTreeItem* parent )
+    void EntityTreeModel::insertComponents( Ra::Engine::Entity* entity, EntityTreeItem* parent )
     {
         for ( const auto& comp : entity->getComponents() )
         {
@@ -311,9 +311,9 @@ namespace Ra
         }
     }
 
-    void Gui::EntityTreeModel::handleRename( const QModelIndex& topLeft,
-                                             const QModelIndex& bottomRight,
-                                             const QVector<int>& )
+    void EntityTreeModel::handleRename( const QModelIndex& topLeft,
+                                        const QModelIndex& bottomRight,
+                                        const QVector<int>& )
     {
         EntityTreeItem* item = getItem( topLeft );
         EntityTreeItem::ItemData data = item->getData( 0 );

@@ -1,4 +1,4 @@
-#include <MainApplication/EventTranslator.hpp>
+#include <QRadium/EventTranslator.hpp>
 
 #include <QKeyEvent>
 #include <QMouseEvent>
@@ -6,11 +6,12 @@
 #include <Core/Event/EventEnums.hpp>
 #include <Core/Event/Key.hpp>
 
-namespace Ra
+namespace QRadium
 {
-    static Core::Key qtToCore(int k)
+    Ra::Core::Key getCoreKey(const QKeyEvent* e)
     {
-        using namespace Core;
+        using namespace Ra::Core;
+        auto k = e->key();
         switch (k)
         {
             case Qt::Key_Escape:
@@ -163,93 +164,22 @@ namespace Ra
                 return Key_Z;
 
             default:
-                return Core::Key_Unknown;
+                return Ra::Core::Key_Unknown;
         }
     }
 
-    void qtToCore(const QKeyEvent* qe, Core::KeyEvent* re)
+    Ra::Core::MouseButton getCoreButton(const QMouseEvent* e)
     {
-        re->key = qtToCore(qe->key());
-
-        re->modifier = 0;
-        if (qe->modifiers().testFlag(Qt::ControlModifier)) re->modifier |= Core::Modifier_Ctrl;
-        if (qe->modifiers().testFlag(Qt::ShiftModifier)) re->modifier |= Core::Modifier_Shift;
-        if (qe->modifiers().testFlag(Qt::AltModifier)) re->modifier |= Core::Modifier_Alt;
-        if (re->modifier == 0) re->modifier = Core::Modifier_Null;
-
-        auto type = qe->type();
-        switch (type)
+        switch (e->button())
         {
-            case QEvent::KeyPress:
-            {
-                re->event = Core::KeyEvent_Pressed;
-            }
-            break;
-
-            case QEvent::KeyRelease:
-            {
-                re->event = Core::KeyEvent_Released;
-            }
-            break;
-
+            case Qt::LeftButton:
+                return Ra::Core::MouseButton_Left;
+            case Qt::MiddleButton:
+                return Ra::Core::MouseButton_Middle;
+            case Qt::RightButton:
+                return Ra::Core::MouseButton_Right;
             default:
-                re->event = 0;
+                return Ra::Core::MouseButton_Unknown;
         }
-    }
-
-    void qtToCore(const QMouseEvent* qe, Core::MouseEvent* re)
-    {
-        re->modifier = 0;
-        if (qe->modifiers().testFlag(Qt::ControlModifier)) re->modifier |= Core::Modifier_Ctrl;
-        if (qe->modifiers().testFlag(Qt::ShiftModifier)) re->modifier |= Core::Modifier_Shift;
-        if (qe->modifiers().testFlag(Qt::AltModifier)) re->modifier |= Core::Modifier_Alt;
-        if (re->modifier == 0) re->modifier = Core::Modifier_Null;
-
-        re->absoluteXPosition = qe->pos().x();
-        re->absoluteYPosition = qe->pos().y();
-
-        auto buttons = qe->buttons();
-        re->buttons = 0;
-        if (buttons & Qt::LeftButton) re->buttons |= Core::MouseButton_Left;
-        if (buttons & Qt::MiddleButton) re->buttons |= Core::MouseButton_Middle;
-        if (buttons & Qt::RightButton) re->buttons |= Core::MouseButton_Right;
-
-        switch (qe->type())
-        {
-            case QEvent::MouseButtonPress:
-            {
-                re->event = Core::MouseEvent_Pressed;
-            }
-            break;
-
-            case QEvent::MouseButtonRelease:
-            {
-                re->event = Core::MouseEvent_Released;
-            }
-            break;
-
-            case QEvent::MouseMove:
-            {
-                re->event = Core::MouseEvent_Moved;
-            }
-            break;
-
-            default:
-                re->event = 0;
-        }
-    }
-
-    void qtToCore(const QWheelEvent* qe, Core::MouseEvent* re)
-    {
-        re->event = Core::MouseEvent_Wheel;
-
-        re->modifier = 0;
-        if (qe->modifiers().testFlag(Qt::ControlModifier)) re->modifier |= Core::Modifier_Ctrl;
-        if (qe->modifiers().testFlag(Qt::ShiftModifier)) re->modifier |= Core::Modifier_Shift;
-        if (qe->modifiers().testFlag(Qt::AltModifier)) re->modifier |= Core::Modifier_Alt;
-        if (re->modifier == 0) re->modifier = Core::Modifier_Null;
-
-        re->wheelDeltaX = qe->angleDelta().x();
-        re->wheelDeltaY = qe->angleDelta().y();
     }
 }

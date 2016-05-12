@@ -113,7 +113,7 @@ namespace Ra
             Key_F15,
             Key_Pause,
 
-            Key_KeyCount,
+            Key_Count,
         };
     }
 }

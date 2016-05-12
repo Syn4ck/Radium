@@ -54,56 +54,52 @@ namespace Ra
     }
 }
 
-namespace Ra
+namespace QRadium
 {
-    namespace Gui
+    class EntityTreeItem
     {
-
-        class EntityTreeItem
+    public:
+        struct ItemData
         {
-        public:
-            struct ItemData
-            {
-                ItemData() : data(), entity( nullptr ), component( nullptr )
-                    , isEntityNode( false ), isComponentNode( false ) {}
+            ItemData() : data(), entity( nullptr ), component( nullptr )
+              , isEntityNode( false ), isComponentNode( false ) {}
 
-                QVariant data;
-                Engine::Entity* entity;
-                Engine::Component* component;
+            QVariant data;
+            Ra::Engine::Entity* entity;
+            Ra::Engine::Component* component;
 
-                bool isEntityNode;
-                bool isComponentNode;
-            };
-
-        public:
-            explicit EntityTreeItem( const QVector<ItemData>& data, EntityTreeItem* parent = nullptr );
-            ~EntityTreeItem();
-
-            inline void appendChild( EntityTreeItem* child )
-            {
-                m_childItems.append( child );
-            }
-
-            EntityTreeItem* getChild( int row );
-            uint getChildCount() const;
-            uint getColumnCount() const;
-            ItemData getData( int column ) const;
-            EntityTreeItem* getParentItem();
-            uint getRow() const;
-
-            bool insertChildren( uint position, uint count, uint columns );
-            bool insertColumns( uint position, uint columns );
-            bool removeChildren( uint position, uint count );
-            bool removeColumns( uint position, uint columns );
-            bool setData( uint column, const ItemData& value );
-
-        private:
-            QList<EntityTreeItem*> m_childItems;
-            QVector<ItemData> m_itemData;
-            EntityTreeItem* m_parentItem;
+            bool isEntityNode;
+            bool isComponentNode;
         };
 
-    } // namespace Gui
-} // namespace Ra
+    public:
+        explicit EntityTreeItem( const QVector<ItemData>& data, EntityTreeItem* parent = nullptr );
+        ~EntityTreeItem();
+
+        inline void appendChild( EntityTreeItem* child )
+        {
+            m_childItems.append( child );
+        }
+
+        EntityTreeItem* getChild( int row );
+        uint getChildCount() const;
+        uint getColumnCount() const;
+        ItemData getData( int column ) const;
+        EntityTreeItem* getParentItem();
+        uint getRow() const;
+
+        bool insertChildren( uint position, uint count, uint columns );
+        bool insertColumns( uint position, uint columns );
+        bool removeChildren( uint position, uint count );
+        bool removeColumns( uint position, uint columns );
+        bool setData( uint column, const ItemData& value );
+
+    private:
+        QList<EntityTreeItem*> m_childItems;
+        QVector<ItemData> m_itemData;
+        EntityTreeItem* m_parentItem;
+    };
+
+} // namespace QRadium
 
 #endif // RADIUMENGINE_ENTITYTREEITEM_HPP

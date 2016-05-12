@@ -81,9 +81,9 @@ bool RA_CORE_API check_NAN( const WeightMatrix& matrix, const bool FAIL_ON_ASSER
             const Scalar      value = it.value();
             const std::string text  = "Element (" + std::to_string( i ) + "," + std::to_string(j) + ") is nan.";
             if( FAIL_ON_ASSERT ) {
-                CORE_ASSERT( !isnan( value ), text.c_str() );
+                CORE_ASSERT( !std::isnan( value ), text.c_str() );
             } else {
-                if( isnan( value ) ) {
+                if( std::isnan( value ) ) {
                     LOG( logDEBUG ) << text;
                     status = false;
                 }
