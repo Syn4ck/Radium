@@ -4,7 +4,7 @@
 #include <Gui/Gizmo/Gizmo.hpp>
 namespace Ra
 {
-    namespace Guibase
+    namespace Gui
     {
         class RotateGizmo : public Gizmo
         {

@@ -13,7 +13,7 @@
 
 namespace Ra
 {
-    namespace Guibase
+    namespace Gui
     {
         RotateGizmo::RotateGizmo(Engine::Component* c, const Core::Transform &worldTo, const Core::Transform& t, Mode mode)
             : Gizmo(c, worldTo, t, mode), m_initialPix(Core::Vector2::Zero()), m_selectedAxis(-1)
