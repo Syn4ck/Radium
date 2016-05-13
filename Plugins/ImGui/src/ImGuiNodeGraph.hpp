@@ -112,8 +112,8 @@ namespace ImGui {
 
     }; // end of MultiGraphViewer
 
-#include "ImGuiNodeGraph.tpp"
+} // namespace ImGui
 
-}
+#include "ImGuiNodeGraph.tpp"
 
 #endif // IMGUI_NODE_GRAPH_HPP

@@ -5,10 +5,10 @@ static inline ImVec2 operator+(const ImVec2& lhs, const ImVec2& rhs) { return Im
 static inline ImVec2 operator-(const ImVec2& lhs, const ImVec2& rhs) { return ImVec2(lhs.x-rhs.x, lhs.y-rhs.y); }
 
 
-template <typename T> int GraphViewer<T>::propsIds = 0;
+template <typename T> int ImGui::GraphViewer<T>::propsIds = 0;
 
 template <typename T>
-void GraphViewer<T>::Begin(bool* opened)
+void ImGui::GraphViewer<T>::Begin(bool* opened)
 {
     // try to create a window
     SetNextWindowPos(ImVec2(26,26));
@@ -44,13 +44,13 @@ void GraphViewer<T>::Begin(bool* opened)
 }
 
 template <typename T>
-void GraphViewer<T>::End()
+void ImGui::GraphViewer<T>::End()
 {
     ImGui::End();
 }
 
 template <typename T>
-void GraphViewer<T>::init()
+void ImGui::GraphViewer<T>::init()
 {
     // this is where we build the representation of the structure at the creation time
     // for every node of ther graph we create a nodeinfo struct, add it to the vector
@@ -85,7 +85,7 @@ void GraphViewer<T>::init()
 
 
 template <typename T>
-void GraphViewer<T>::drawNode(const NodeProp& info)
+void ImGui::GraphViewer<T>::drawNode(const NodeProp& info)
 {
     PushID(info.m_id);
 
@@ -122,7 +122,7 @@ void GraphViewer<T>::drawNode(const NodeProp& info)
 }
 
 template <typename T>
-void GraphViewer<T>::drawLink(const NodeProp& node_a, unsigned int slot_a,
+void ImGui::GraphViewer<T>::drawLink(const NodeProp& node_a, unsigned int slot_a,
                               const NodeProp& node_b, unsigned int slot_b)
 {
     ImVec2 offset = GetWindowPos();
@@ -135,32 +135,32 @@ void GraphViewer<T>::drawLink(const NodeProp& node_a, unsigned int slot_a,
 }
 
 template <typename T>
-void GraphViewer<T>::createNode( const NodeProp& props )
+void ImGui::GraphViewer<T>::createNode( const NodeProp& props )
 {}
 
 template <typename T>
-void GraphViewer<T>::createLink( const NodeProp& prop_a, unsigned int slot_a,
-                                 const NodeProp& node_b, unsigned int slot_b )
+void ImGui::GraphViewer<T>::createLink( const NodeProp& prop_a, unsigned int slot_a,
+                                        const NodeProp& node_b, unsigned int slot_b )
 {}
 
 
 
 template <typename T>
-ImVec2 GraphViewer<T>::getInputPos( const NodeProp& info, unsigned int idx )
+ImVec2 ImGui::GraphViewer<T>::getInputPos( const NodeProp& info, unsigned int idx )
 {
     float posY = getSlotPosY(info, idx, info.m_nbin);
     return ImVec2(info.m_pos.x - 8.0f, posY);
 }
 
 template <typename T>
-ImVec2 GraphViewer<T>::getOutputPos( const NodeProp& info, unsigned int idx )
+ImVec2 ImGui::GraphViewer<T>::getOutputPos( const NodeProp& info, unsigned int idx )
 {
     float posY = getSlotPosY(info, idx, info.m_nbout);
     return ImVec2(info.m_pos.x + info.m_size.x + 8.0f, posY);
 }
 
 template <typename T>
-float GraphViewer<T>::getSlotPosY( const NodeProp& info, unsigned int idx, unsigned int total )
+float ImGui::GraphViewer<T>::getSlotPosY( const NodeProp& info, unsigned int idx, unsigned int total )
 {
     // and the distance that will separe two connectors
     float d = ((info.m_pos.y + info.m_size.y) - info.m_pos.y) / ((float) total);
@@ -172,8 +172,8 @@ float GraphViewer<T>::getSlotPosY( const NodeProp& info, unsigned int idx, unsig
 
 
 template <typename T>
-void GraphViewer<T>::draw_hermite(ImDrawList* draw_list, ImVec2 p1, ImVec2 p2, int STEPS,
-                                  const ImColor& col, float thickness)
+void ImGui::GraphViewer<T>::draw_hermite(ImDrawList* draw_list, ImVec2 p1, ImVec2 p2, int STEPS,
+                                         const ImColor& col, float thickness)
 {
     ImVec2 t1 = ImVec2(+80.0f, 0.0f);
     ImVec2 t2 = ImVec2(+80.0f, 0.0f);

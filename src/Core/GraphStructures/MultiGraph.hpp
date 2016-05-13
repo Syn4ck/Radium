@@ -1,6 +1,8 @@
 #ifndef RADIUMENGINE_MULTIGRAPH_H
 #define RADIUMENGINE_MULTIGRAPH_H
 
+#include <iostream>
+
 #include <algorithm>
 #include <memory>
 #include <vector>
@@ -96,7 +98,6 @@ namespace Ra
             std::map<std::string, Node*> m_names;
         }; // end of class MultiGraph
 
-        // TODO(hugo) ask for preference about inline / this solution
         #include "MultiGraph.tpp"
 
     }

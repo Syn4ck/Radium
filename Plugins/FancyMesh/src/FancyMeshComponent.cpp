@@ -97,15 +97,15 @@ namespace FancyMeshPlugin
 
         Ra::Core::Vector4Array colors;
 
-        for ( const auto& v : data->getTangents() )     tangents.push_back( v );
-        for ( const auto& v : data->getBiTangents() )   bitangents.push_back( v );
-        for ( const auto& v : data->getTexCoords() )    texcoords.push_back( v );
-        for ( const auto& v : data->getColors() )       colors.push_back( v );
+        for ( const auto& v : data->getTangents() )   tangents.push_back( v );
+        for ( const auto& v : data->getBiTangents() ) bitangents.push_back( v );
+        for ( const auto& v : data->getTexCoords() )  texcoords.push_back( v );
+        for ( const auto& v : data->getColors() )     colors.push_back( v );
 
-        displayMesh->addData( Ra::Engine::Mesh::VERTEX_TANGENT, tangents );
+        displayMesh->addData( Ra::Engine::Mesh::VERTEX_TANGENT,   tangents );
         displayMesh->addData( Ra::Engine::Mesh::VERTEX_BITANGENT, bitangents );
-        displayMesh->addData( Ra::Engine::Mesh::VERTEX_TEXCOORD, texcoords );
-        displayMesh->addData( Ra::Engine::Mesh::VERTEX_COLOR, colors );
+        displayMesh->addData( Ra::Engine::Mesh::VERTEX_TEXCOORD,  texcoords );
+        displayMesh->addData( Ra::Engine::Mesh::VERTEX_COLOR,     colors );
 
         // FIXME(Charly): Should not weights be part of the geometry ?
         //        mesh->addData( Ra::Engine::Mesh::VERTEX_WEIGHTS, meshData.weights );
