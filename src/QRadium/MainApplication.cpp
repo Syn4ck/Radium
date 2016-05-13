@@ -181,11 +181,11 @@ namespace QRadium
     {
         m_timerData.push_back( m_frameData );
 
-        if ( m_frameCounter % m_frameCountBeforeUpdate == 0 )
-        {
-            m_mainWindow->onUpdateFramestats(m_timerData);
-            m_timerData.clear();
-        }
+//        if ( m_frameCounter % m_frameCountBeforeUpdate == 0 )
+//        {
+//            m_mainWindow->onUpdateFramestats(m_timerData);
+//            m_timerData.clear();
+//        }
 
         m_mainWindow->onFrameComplete();
     }

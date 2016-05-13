@@ -61,7 +61,7 @@ namespace Ra
             std::vector<std::shared_ptr<Pass>> m_passes;
 
             Core::MultiGraph<Pass>   m_passgraph;
-            ImGui::GraphViewer<Pass> m_graphview;
+            //ImGui::GraphViewer<Pass> m_graphview;
         };
 
     } // namespace Engine

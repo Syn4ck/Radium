@@ -111,6 +111,9 @@ namespace Ra
                         rightClickQueries.push_back(result);
                     }
                     break;
+
+                    default:
+                    break;
                 }
             }
         }

@@ -52,14 +52,14 @@ namespace Ra
         ForwardRenderer::ForwardRenderer( uint width, uint height )
             : Renderer( width, height )
             , m_fbo( nullptr )
-            , m_graphview(&m_passgraph)
+            //, m_graphview(&m_passgraph)
         {
         }
 
         ForwardRenderer::~ForwardRenderer()
         {
             ShaderProgramManager::destroyInstance();
-            ImGuiGL3::shutdown();
+            //ImGuiGL3::shutdown();
         }
 
         void ForwardRenderer::initializeInternal()
@@ -73,7 +73,7 @@ namespace Ra
             DebugRender::createInstance();
             DebugRender::getInstance()->initialize();
 
-            ImGuiGL3::init();
+            //ImGuiGL3::init();
         }
 
         void ForwardRenderer::initGraph()
@@ -101,7 +101,7 @@ namespace Ra
             // levelize and sort on the same run
             m_passgraph.levelize(true);
             //m_passgraph.print();
-            m_graphview.init();
+            //m_graphview.init();
         }
 
         void ForwardRenderer::initPasses()
@@ -164,20 +164,11 @@ namespace Ra
         void ForwardRenderer::initBuffers()
         {
             m_fbo.reset( new FBO( FBO::Components( FBO::COLOR | FBO::DEPTH ), m_width, m_height ) );
-            m_postprocessFbo.reset( new FBO( FBO::Components( FBO::COLOR | FBO::DEPTH), m_width, m_height ) );
-            m_pingPongFbo.reset(new FBO(FBO::Components(FBO::COLOR), 1, 1));
-            m_bloomFbo.reset(new FBO(FBO::Components(FBO::COLOR), m_width / 8, m_height / 8));
 
             // Render pass
             m_textures[TEX_DEPTH].reset( new Texture( "Depth", GL_TEXTURE_2D ) );
             m_textures[TEX_NORMAL].reset( new Texture( "Normal", GL_TEXTURE_2D ) );
             m_textures[TEX_LIT].reset( new Texture( "HDR", GL_TEXTURE_2D ) );
-            m_textures[TEX_LUMINANCE].reset(new Texture("Luminance", GL_TEXTURE_2D));
-            m_textures[TEX_TONEMAPPED].reset(new Texture("Tonemapped", GL_TEXTURE_2D));
-            m_textures[TEX_BLOOM_PING].reset(new Texture("Bloom Ping", GL_TEXTURE_2D));
-            m_textures[TEX_BLOOM_PONG].reset(new Texture("Bloom Pong", GL_TEXTURE_2D));
-            m_textures[TEX_TONEMAP_PING].reset(new Texture("Minmax Ping", GL_TEXTURE_2D));
-            m_textures[TEX_TONEMAP_PONG].reset(new Texture("Minmax Pong", GL_TEXTURE_2D));
 
             m_secondaryTextures["Depth Texture"]  = m_textures[TEX_DEPTH].get();
             m_secondaryTextures["Normal Texture"] = m_textures[TEX_NORMAL].get();
@@ -420,6 +411,7 @@ namespace Ra
                 }
             }
 
+            /*
             // and render IM-GUI !!
             ImGuiGL3::newFrame(m_width, m_height);
 
@@ -427,6 +419,7 @@ namespace Ra
             m_graphview.Begin(&isNodeOpened);
             m_graphview.End();
             ImGui::Render();
+            */
 
             m_fbo->unbind();
         }
@@ -482,12 +475,6 @@ namespace Ra
             m_textures[TEX_DEPTH]->initGL(GL_DEPTH_COMPONENT24, m_width, m_height, GL_DEPTH_COMPONENT, GL_UNSIGNED_INT, nullptr);
             m_textures[TEX_NORMAL]->initGL(GL_RGBA32F, m_width, m_height, GL_RGBA, GL_FLOAT, nullptr);
             m_textures[TEX_LIT]->initGL(GL_RGBA32F, m_width, m_height, GL_RGBA, GL_FLOAT, nullptr);
-            m_textures[TEX_LUMINANCE]->initGL(GL_RGBA32F, m_width, m_height, GL_RGBA, GL_FLOAT, nullptr);
-            m_textures[TEX_TONEMAPPED]->initGL(GL_RGBA32F, m_width, m_height, GL_RGBA, GL_FLOAT, nullptr);
-            m_textures[TEX_TONEMAP_PING]->initGL(GL_RGBA32F, m_pingPongSize, m_pingPongSize, GL_RGBA, GL_FLOAT, nullptr);
-            m_textures[TEX_TONEMAP_PONG]->initGL(GL_RGBA32F, m_pingPongSize, m_pingPongSize, GL_RGBA, GL_FLOAT, nullptr);
-            m_textures[TEX_BLOOM_PING]->initGL(GL_RGBA32F, m_width / 8, m_height / 8, GL_RGBA, GL_FLOAT, nullptr);
-            m_textures[TEX_BLOOM_PONG]->initGL(GL_RGBA32F, m_width / 8, m_height / 8, GL_RGBA, GL_FLOAT, nullptr);
 
             m_fbo->bind();
             m_fbo->setSize( m_width, m_height );
