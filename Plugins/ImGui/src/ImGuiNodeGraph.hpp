@@ -1,7 +1,7 @@
 #ifndef IMGUI_NODE_GRAPH_HPP
 #define IMGUI_NODE_GRAPH_HPP
 
-#include "imgui.h"
+#include <imgui.h>
 
 #include <Core/GraphStructures/MultiGraph.hpp>
 
@@ -112,7 +112,7 @@ namespace ImGui {
 
     }; // end of MultiGraphViewer
 
-#include "imgui_node_graph.tpp"
+#include "ImGuiNodeGraph.tpp"
 
 }
 

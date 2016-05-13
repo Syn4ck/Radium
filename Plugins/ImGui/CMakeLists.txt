@@ -30,7 +30,7 @@ if (MSVC OR MSVC_IDE)
         endforeach(OUTPUTCONFIG ${CMAKE_CONFIGURATION_TYPES})
     endif()
 endif(MSVC OR MSVC_IDE)
-    
+
 find_package( Qt5Core    REQUIRED )
 find_package( Qt5Widgets REQUIRED )
 
@@ -38,26 +38,33 @@ file( GLOB_RECURSE sources src/*.cpp )
 file( GLOB_RECURSE headers src/*.hpp )
 file( GLOB_RECURSE inlines src/*.inl )
 
+file(GLOB_RECURSE app_uis  src/*.ui)
+qt5_wrap_ui(app_uis_moc ${app_uis})
+
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTORCC ON)
 
 add_definitions( ${Qt5Core_DEFINITIONS} )
 add_definitions( ${Qt5Widges_DEFINITIONS} )
-add_definitions( ${Qt5OpenGL_DEFINITIONS} )
 
 include_directories(
+    src/
     ${CMAKE_CURRENT_BINARY_DIR} # MOC
     ${RADIUM_INCLUDE_DIR}
     ${EIGEN_INC}
     ${ASSIMP_INC}
     )
 
-add_library( ImGui SHARED ${sources} ${headers} ${inlines} )
+add_library( ImGui SHARED ${sources} ${headers} ${inlines} ${app_uis})
 add_dependencies( ImGui radiumCore radiumEngine )
+
+target_compile_definitions( ImGui PRIVATE "-DRA_CORE_IMPORTS" )
+target_compile_definitions( ImGui PRIVATE "-DRA_ENGINE_IMPORTS" )
+target_compile_definitions( ImGui PRIVATE "-DAnimation_EXPORTS" )
 
 set(Qt5_LIBRARIES ${Qt5Core_LIBRARIES} ${Qt5Widgets_LIBRARIES} ${Qt5OpenGL_LIBRARIES})
 target_link_libraries( ImGui
+                       ${Qt5_LIBRARIES}
                        ${RADIUM_LIBRARIES}
                      )
-
-

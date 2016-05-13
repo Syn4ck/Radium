@@ -7,8 +7,8 @@
 // This is a stripped down version of imgui_impl_glfw_gl3.cpp which suited really well to this needs
 // Thanks to the authors
 
-#include "imgui.h"
-#include "imgui_gl3.hpp"
+#include <imgui.h>
+#include <ImGuiGl3.hpp>
 
 
 namespace ImGuiGL3 {

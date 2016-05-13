@@ -162,7 +162,7 @@ namespace QRadium
         QPoint p1 = QCursor::pos();
         QPoint p2 = m_viewer->mapFromGlobal(p1);
 
-        LOG(logINFO) << "Global : " << p1.x() << " " << p1.y() << " - Local : " << p2.x() << " " << p2.y();
+        //LOG(logINFO) << "Global : " << p1.x() << " " << p1.y() << " - Local : " << p2.x() << " " << p2.y();
 
         m_viewer->getViewer()->handleEvents();
     }

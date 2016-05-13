@@ -62,7 +62,7 @@ namespace Ra
 
 
             /// Unregisters a component. The system will not update it.
-            void unregisterComponent(const Entity* entity, Component* component);
+            void unregisterComponent( const Entity* entity, Component* component );
 
             /// Removes all components belonging to a given entity.
             void unregisterAllComponents( const Entity* entity );
