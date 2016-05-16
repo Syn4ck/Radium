@@ -57,6 +57,7 @@ public:
     inline void displayInfo() const;
     
     void setCurrentIndex(int i) {m_currentIndex = i;}
+    int getCurrentIndex() const {return m_currentIndex; }
     int getGeometryDataSize() { return m_geometryData.size(); }
 
 protected:

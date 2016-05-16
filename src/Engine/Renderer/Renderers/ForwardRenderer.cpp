@@ -84,7 +84,7 @@ namespace Ra
         void ForwardRenderer::initBuffers()
         {
             m_fbo.reset( new FBO( FBO::Components( FBO::COLOR | FBO::DEPTH ), m_width, m_height ) );
-            m_postprocessFbo.reset( new FBO( FBO::Components( FBO::COLOR ), m_width, m_height ) );
+            m_postprocessFbo.reset( new FBO( FBO::Components( FBO::COLOR | FBO::DEPTH), m_width, m_height ) );
             m_pingPongFbo.reset(new FBO(FBO::Components(FBO::COLOR), 1, 1));
             m_bloomFbo.reset(new FBO(FBO::Components(FBO::COLOR), m_width / 8, m_height / 8));
 
@@ -128,13 +128,13 @@ namespace Ra
 
             GL_ASSERT( glDrawBuffers( 2, buffers ) );
 
-            const Core::Colorf clearColor = Core::Colors::FromChars<Core::Colorf>(42, 42, 42, 0);
+            const Core::Colorf clearColor = Core::Colors::FromChars<Core::Colorf>(128, 128, 128, 0);
             const Core::Colorf clearZeros = Core::Colors::Black<Core::Colorf>();
             const float clearDepth( 1.0 );
 
             GL_ASSERT( glClearBufferfv( GL_COLOR, 0, clearZeros.data() ) );   // Clear normals
             GL_ASSERT( glClearBufferfv( GL_COLOR, 1, clearColor.data() ) );   // Clear color
-            GL_ASSERT( glClearBufferfv( GL_DEPTH, 0, &clearDepth ) );   // Clear depth
+            GL_ASSERT( glClearBufferfv( GL_DEPTH, 0, &clearDepth ) );         // Clear depth
 
             // Z prepass
             GL_ASSERT( glEnable( GL_DEPTH_TEST ) );
@@ -189,33 +189,12 @@ namespace Ra
             {
                 for ( const auto& l : m_lights )
                 {
-                    // TODO(Charly): Light render params
                     RenderParameters params;
                     l->getRenderParameters( params );
 
                     for ( const auto& ro : m_fancyRenderObjects )
                     {
-                        if ( ro->isVisible() )
-                        {
-                            shader = ro->getRenderTechnique()->shader;
-
-                            // bind data
-                            shader->bind();
-
-                            Core::Matrix4 M = ro->getTransformAsMatrix();
-                            Core::Matrix4 N = M.inverse().transpose();
-
-                            shader->setUniform( "transform.proj", renderData.projMatrix );
-                            shader->setUniform( "transform.view", renderData.viewMatrix );
-                            shader->setUniform( "transform.model", M );
-                            shader->setUniform( "transform.worldNormal", N );
-                            params.bind( shader );
-
-                            ro->getRenderTechnique()->material->bind( shader );
-
-                            // render
-                            ro->getMesh()->render();
-                        }
+                        ro->render(params, renderData);
                     }
                 }
             }
@@ -229,19 +208,7 @@ namespace Ra
 
                 for ( const auto& ro : m_fancyRenderObjects )
                 {
-                    shader = ro->getRenderTechnique()->shader;
-
-                    // bind data
-                    shader->bind();
-                    shader->setUniform( "proj", renderData.projMatrix );
-                    shader->setUniform( "view", renderData.viewMatrix );
-                    shader->setUniform( "model", ro->getLocalTransformAsMatrix() );
-                    params.bind( shader );
-
-                    ro->getRenderTechnique()->material->bind( shader );
-
-                    // render
-                    ro->getMesh()->render();
+                    ro->render(params, renderData);
                 }
             }
 
@@ -251,11 +218,30 @@ namespace Ra
                 glDisable(GL_POLYGON_OFFSET_LINE);
             }
 
-            // Draw debug stuff, do not overwrite depth map but do depth testing
+            // Restore state
+            GL_ASSERT( glDepthFunc( GL_LESS ) );
+            GL_ASSERT( glDisable( GL_BLEND ) );
+            GL_ASSERT( glDepthMask( GL_TRUE ) );
+            GL_ASSERT( glDepthFunc( GL_LESS ) );
+
+            m_fbo->unbind();
+        }
+
+        // Draw debug stuff, do not overwrite depth map but do depth testing
+        void ForwardRenderer::debugInternal( const RenderData& renderData )
+        {
+            const ShaderProgram* shader;
+
             GL_ASSERT( glDisable( GL_BLEND ) );
             GL_ASSERT( glDepthMask( GL_FALSE ) );
             GL_ASSERT( glEnable( GL_DEPTH_TEST ) );
             GL_ASSERT( glDepthFunc( GL_LESS ) );
+
+            m_postprocessFbo->useAsTarget( m_width, m_height );
+            glDrawBuffers(1, buffers);
+
+            glViewport(0, 0, m_width, m_height);
+
             if ( m_drawDebug )
             {
                 for ( const auto& ro : m_debugRenderObjects )
@@ -279,7 +265,7 @@ namespace Ra
                     }
                 }
 
-                DebugRender::getInstance()->render(renderData.viewMatrix, 
+                DebugRender::getInstance()->render(renderData.viewMatrix,
                                                    renderData.projMatrix);
 
             }
@@ -287,7 +273,6 @@ namespace Ra
             // Draw X rayed objects always on top of normal objects
             GL_ASSERT( glDepthMask( GL_TRUE ) );
             GL_ASSERT( glClear( GL_DEPTH_BUFFER_BIT ) );
-            GL_ASSERT( glClearBufferfv( GL_DEPTH, 0, &clearDepth ) );
             if ( m_drawDebug )
             {
                 for ( const auto& ro : m_xrayRenderObjects )
@@ -312,10 +297,25 @@ namespace Ra
                 }
             }
 
-            // Draw UI stuff, always drawn on top of everything else
-            GL_ASSERT( glDepthMask( GL_TRUE ) );
-            GL_ASSERT( glClear( GL_DEPTH_BUFFER_BIT ) );
+             m_postprocessFbo->unbind();
+        }
+
+        // Draw UI stuff, always drawn on top of everything else + clear ZMask
+        void ForwardRenderer::uiInternal( const RenderData& renderData )
+        {
+            const ShaderProgram* shader;
+            const float          clearDepth( 1.0 );
+
+            m_postprocessFbo->useAsTarget( m_width, m_height );
+
+            glViewport(0, 0, m_width, m_height);
+            glDrawBuffers(1, buffers);
+
+            GL_ASSERT( glDepthMask( GL_FALSE ) );
+            GL_ASSERT(glDisable(GL_DEPTH_TEST));
+            // FIXME(charly): Clear depth ?
             GL_ASSERT( glClearBufferfv( GL_DEPTH, 0, &clearDepth ) );
+
             for ( const auto& ro : m_uiRenderObjects )
             {
                 if ( ro->isVisible() )
@@ -346,30 +346,24 @@ namespace Ra
                 }
             }
 
-            // Restore state
-            GL_ASSERT( glDepthFunc( GL_LESS ) );
-            GL_ASSERT( glDisable( GL_BLEND ) );
-            GL_ASSERT( glDepthMask( GL_TRUE ) );
-            GL_ASSERT( glDepthFunc( GL_LESS ) );
-
-            m_fbo->unbind();
+            m_postprocessFbo->unbind();
         }
 
         void ForwardRenderer::postProcessInternal( const RenderData& renderData )
         {
             CORE_UNUSED( renderData );
 
+            GL_ASSERT( glDisable(GL_DEPTH_TEST) );
+
             m_postprocessFbo->useAsTarget( m_width, m_height );
 
-            GL_ASSERT( glDepthMask( GL_TRUE ) );
             GL_ASSERT( glColorMask( 1, 1, 1, 1 ) );
+            glDepthMask(GL_FALSE);
 
             // FIXME(Charly): Do we really need to clear buffers ?
-            GL_ASSERT(glClearColor( 1.0, 1.0, 0.0, 0.0 ) );
-            GL_ASSERT(glDrawBuffers(5, buffers));
+            GL_ASSERT( glClearColor( 1.0, 1.0, 0.0, 0.0 ) );
+            GL_ASSERT( glDrawBuffers(5, buffers) );
             m_postprocessFbo->clear( FBO::Components( FBO::COLOR) );
-
-            GL_ASSERT(glDepthFunc( GL_ALWAYS ) );
 
             const ShaderProgram* shader = nullptr;
 
@@ -459,8 +453,8 @@ namespace Ra
                 // Compose final image (tonemapped + bloom + ...)
                 m_postprocessFbo->useAsTarget(m_width, m_height);
                 GL_ASSERT(glViewport(0, 0, m_width, m_height));
-
                 GL_ASSERT(glDrawBuffers(1, buffers));
+
                 shader = m_shaderMgr->getShaderProgram("FinalCompose");
                 shader->bind();
                 shader->setUniform("texColor", m_textures[TEX_TONEMAPPED].get(), 0);
@@ -472,8 +466,8 @@ namespace Ra
             }
             else
             {
-                glDrawBuffers(1, buffers);
-                glViewport(0, 0, m_width, m_height);
+                GL_ASSERT( glDrawBuffers(1, buffers) );
+                GL_ASSERT( glViewport(0, 0, m_width, m_height) );
                 shader = m_shaderMgr->getShaderProgram("DrawScreen");
                 shader->bind();
                 shader->setUniform("screenTexture", m_textures[TEX_LIT].get(), 0);
@@ -497,14 +491,15 @@ namespace Ra
 
             m_fbo->bind();
             m_fbo->setSize( m_width, m_height );
-            m_fbo->attachTexture( GL_DEPTH_ATTACHMENT , m_textures[TEX_DEPTH]   .get() );
-            m_fbo->attachTexture( GL_COLOR_ATTACHMENT0, m_textures[TEX_NORMAL]  .get() );
-            m_fbo->attachTexture( GL_COLOR_ATTACHMENT1, m_textures[TEX_LIT] .get() );
+            m_fbo->attachTexture( GL_DEPTH_ATTACHMENT , m_textures[TEX_DEPTH].get() );
+            m_fbo->attachTexture( GL_COLOR_ATTACHMENT0, m_textures[TEX_NORMAL].get() );
+            m_fbo->attachTexture( GL_COLOR_ATTACHMENT1, m_textures[TEX_LIT].get() );
             m_fbo->check();
             m_fbo->unbind( true );
 
             m_postprocessFbo->bind();
             m_postprocessFbo->setSize( m_width, m_height );
+            m_postprocessFbo->attachTexture(GL_DEPTH_ATTACHMENT , m_textures[TEX_DEPTH].get());
             m_postprocessFbo->attachTexture(GL_COLOR_ATTACHMENT0, m_fancyTexture.get());
             m_postprocessFbo->attachTexture(GL_COLOR_ATTACHMENT1, m_textures[TEX_LUMINANCE].get());
             m_postprocessFbo->attachTexture(GL_COLOR_ATTACHMENT2, m_textures[TEX_TONEMAPPED].get());

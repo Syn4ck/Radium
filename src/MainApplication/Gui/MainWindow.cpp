@@ -118,7 +118,7 @@ namespace Ra
                  m_viewer, &Viewer::changeRenderer );
 
         connect(m_enablePostProcess, &QCheckBox::stateChanged, m_viewer, &Viewer::enablePostProcess);
-
+        
         // Connect engine signals to the appropriate callbacks
         std::function<void(void)> f =  std::bind(&MainWindow::onEntitiesUpdated, this);
         mainApp->m_engine->getSignalManager()->m_entityCreatedCallbacks.push_back(f);

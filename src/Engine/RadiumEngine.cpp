@@ -110,7 +110,7 @@ namespace Ra
             for (int i = 0; i < objectCount; i++)
             {
                 fileData.setCurrentIndex(i);
-                std::string entityName = Core::StringUtils::getBaseName( filename, false ) + "_" + std::to_string(i);
+                std::string entityName = Core::StringUtils::getBaseName( filename, false ) + "_" + fileData.getGeometryData()[0]->getName();
                 Entity* entity = m_entityManager->createEntity( entityName );
                 
                 for( auto& system : m_systems )

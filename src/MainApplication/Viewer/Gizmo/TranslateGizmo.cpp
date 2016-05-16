@@ -127,7 +127,7 @@ namespace Ra
             bool hasHit = Core::RayCast::vsPlane(ray, origin, normal, hit);
             if (hasHit)
             {
-                pointOut = origin + (axis.dot(ray.at(hit[0]) - origin)) * axis;
+                pointOut = origin + (axis.dot(ray.pointAt(hit[0]) - origin)) * axis;
             }
             return hasHit;
         }
