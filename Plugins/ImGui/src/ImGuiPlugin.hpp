@@ -29,6 +29,7 @@ namespace Ra
 namespace ImGuiPlugin
 {
     class ImGuiSystem;
+    class ImGuiComponent;
 
     class ImGuiPlugin : public QObject, Ra::Plugins::RadiumPluginInterface
     {
@@ -53,7 +54,8 @@ namespace ImGuiPlugin
         // TODO(hugo) some load/save options, maybe
 
     private:
-        ImGuiSystem* m_system;
+        ImGuiSystem*    m_system;
+        ImGuiComponent* m_component;
     };
 
 } // namespace

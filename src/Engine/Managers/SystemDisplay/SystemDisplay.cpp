@@ -24,7 +24,7 @@ namespace Ra
 #ifndef RA_DISABLE_DEBUG_DISPLAY
         DebugComponent* SystemEntity::dbgCmp()
         {
-            CORE_ASSERT(getInstance()->getNumComponents() == 2,  
+            CORE_ASSERT(getInstance()->getNumComponents() == 2,
                         "This entity should have two components only");
             CORE_ASSERT(getInstance()->getTransformAsMatrix() == 
                         Core::Matrix4::Identity(), "Transform has been changed !");

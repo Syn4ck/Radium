@@ -27,6 +27,7 @@
 #include <Engine/Renderer/Mesh/Mesh.hpp>
 #include <Engine/Renderer/Texture/TextureManager.hpp>
 #include <Engine/Renderer/Texture/Texture.hpp>
+#include <Engine/Renderer/Passes/Pass.hpp>
 
 namespace Ra
 {
@@ -231,6 +232,7 @@ namespace Ra
             GL_ASSERT( glClearDepth( 1.0 ) );
             GL_ASSERT( glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT ) );
 
+            RenderParameters     params;
             const ShaderProgram* shader = m_shaderMgr->getShaderProgram("Picking");
             shader->bind();
 
@@ -239,24 +241,12 @@ namespace Ra
 
             for ( const auto& ro : m_fancyRenderObjects )
             {
-                if ( ro->isVisible() )
-                {
-                    auto id = ro->idx.getValue();
-                    float r = float( ( id & 0x000000FF ) >> 0 )  / 255.0;
-                    float g = float( ( id & 0x0000FF00 ) >> 8 )  / 255.0;
-                    float b = float( ( id & 0x00FF0000 ) >> 16 ) / 255.0;
-                    shader->setUniform( "objectId", Core::Colorf( r, g, b, 1.0 ) );
-
-                    Core::Matrix4 M = ro->getTransformAsMatrix();
-                    shader->setUniform( "transform.proj", renderData.projMatrix );
-                    shader->setUniform( "transform.view", renderData.viewMatrix );
-                    shader->setUniform( "transform.model", M );
-
-                    ro->getRenderTechnique()->material->bind( shader );
-
-                    // render
-                    ro->getMesh()->render();
-                }
+                auto id = ro->idx.getValue();
+                float r = float( ( id & 0x000000FF ) >> 0 )  / 255.0;
+                float g = float( ( id & 0x0000FF00 ) >> 8 )  / 255.0;
+                float b = float( ( id & 0x00FF0000 ) >> 16 ) / 255.0;
+                params.addParameter("objectId", Core::Colorf( r, g, b, 1.0 ));
+                ro->render(params, renderData.viewMatrix, renderData.projMatrix, shader);
             }
 
             // Draw debug objects
@@ -265,24 +255,12 @@ namespace Ra
             {
                 for ( const auto& ro : m_debugRenderObjects )
                 {
-                    if ( ro->isVisible() )
-                    {
-                        auto id = ro->idx.getValue();
-                        float r = float( ( id & 0x000000FF ) >> 0 ) / 255.0;
-                        float g = float( ( id & 0x0000FF00 ) >> 8 ) / 255.0;
-                        float b = float( ( id & 0x00FF0000 ) >> 16 ) / 255.0;
-                        shader->setUniform( "objectId", Core::Colorf( r, g, b, 1.0 ) );
-
-                        Core::Matrix4 M = ro->getTransformAsMatrix();
-                        shader->setUniform( "transform.proj", renderData.projMatrix );
-                        shader->setUniform( "transform.view", renderData.viewMatrix );
-                        shader->setUniform( "transform.model", M );
-
-                        ro->getRenderTechnique()->material->bind( shader );
-
-                        // render
-                        ro->getMesh()->render();
-                    }
+                    auto id = ro->idx.getValue();
+                    float r = float( ( id & 0x000000FF ) >> 0 ) / 255.0;
+                    float g = float( ( id & 0x0000FF00 ) >> 8 ) / 255.0;
+                    float b = float( ( id & 0x00FF0000 ) >> 16 ) / 255.0;
+                    params.addParameter("objectId", Core::Colorf( r, g, b, 1.0 ));
+                    ro->render(params, renderData.viewMatrix, renderData.projMatrix, shader);
                 }
             }
 
@@ -292,24 +270,12 @@ namespace Ra
             {
                 for ( const auto& ro : m_xrayRenderObjects )
                 {
-                    if ( ro->isVisible() )
-                    {
-                        auto id = ro->idx.getValue();
-                        float r = float( ( id & 0x000000FF ) >> 0 ) / 255.0;
-                        float g = float( ( id & 0x0000FF00 ) >> 8 ) / 255.0;
-                        float b = float( ( id & 0x00FF0000 ) >> 16 ) / 255.0;
-                        shader->setUniform( "objectId", Core::Colorf( r, g, b, 1.0 ) );
-
-                        Core::Matrix4 M = ro->getTransformAsMatrix();
-                        shader->setUniform( "transform.proj", renderData.projMatrix );
-                        shader->setUniform( "transform.view", renderData.viewMatrix );
-                        shader->setUniform( "transform.model", M );
-
-                        ro->getRenderTechnique()->material->bind( shader );
-
-                        // render
-                        ro->getMesh()->render();
-                    }
+                    auto id = ro->idx.getValue();
+                    float r = float( ( id & 0x000000FF ) >> 0 ) / 255.0;
+                    float g = float( ( id & 0x0000FF00 ) >> 8 ) / 255.0;
+                    float b = float( ( id & 0x00FF0000 ) >> 16 ) / 255.0;
+                    params.addParameter("objectId", Core::Colorf( r, g, b, 1.0 ));
+                    ro->render(params, renderData.viewMatrix, renderData.projMatrix, shader);
                 }
             }
 
@@ -317,32 +283,23 @@ namespace Ra
             GL_ASSERT( glClear( GL_DEPTH_BUFFER_BIT ) );
             for ( const auto& ro : m_uiRenderObjects )
             {
-                if ( ro->isVisible() )
-                {
-                    auto id = ro->idx.getValue();
-                    float r = float( ( id & 0x000000FF ) >> 0 ) / 255.0;
-                    float g = float( ( id & 0x0000FF00 ) >> 8 ) / 255.0;
-                    float b = float( ( id & 0x00FF0000 ) >> 16 ) / 255.0;
-                    shader->setUniform( "objectId", Core::Colorf( r, g, b, 1.0 ) );
+                auto id = ro->idx.getValue();
+                float r = float( ( id & 0x000000FF ) >> 0 ) / 255.0;
+                float g = float( ( id & 0x0000FF00 ) >> 8 ) / 255.0;
+                float b = float( ( id & 0x00FF0000 ) >> 16 ) / 255.0;
 
-                    Core::Matrix4 M = ro->getTransformAsMatrix();
-                    Core::Matrix4 MV = renderData.viewMatrix * M;
-                    Scalar d = MV.block<3, 1>( 0, 3 ).norm();
+                Core::Matrix4 M = ro->getTransformAsMatrix();
+                Core::Matrix4 MV = renderData.viewMatrix * M;
+                Scalar d = MV.block<3, 1>( 0, 3 ).norm();
 
-                    Core::Matrix4 S = Core::Matrix4::Identity();
-                    S( 0, 0 ) = S( 1, 1 ) = S( 2, 2 ) = d;
+                Core::Matrix4 S = Core::Matrix4::Identity();
+                S( 0, 0 ) = S( 1, 1 ) = S( 2, 2 ) = d;
 
-                    M = M * S;
+                M = M * S;
 
-                    shader->setUniform( "transform.proj", renderData.projMatrix );
-                    shader->setUniform( "transform.view", renderData.viewMatrix );
-                    shader->setUniform( "transform.model", M );
-
-                    ro->getRenderTechnique()->material->bind( shader );
-
-                    // render
-                    ro->getMesh()->render();
-                }
+                params.addParameter("transform.model", M);
+                params.addParameter("objectId", Core::Colorf( r, g, b, 1.0 ));
+                ro->render(params, renderData.viewMatrix, renderData.projMatrix, shader);
             }
 
             GL_ASSERT( glReadBuffer( GL_COLOR_ATTACHMENT0 ) );
@@ -470,6 +427,11 @@ namespace Ra
                 ret.push_back( tex.first );
             }
             return ret;
+        }
+
+        Ra::Core::MultiGraph<Pass>* Renderer::getPassGraph()
+        {
+            return nullptr;
         }
 
         void Renderer::reloadShaders()
@@ -611,6 +573,5 @@ namespace Ra
                 }
             }
         }
-
     }
 } // namespace Ra

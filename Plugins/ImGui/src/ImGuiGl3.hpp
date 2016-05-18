@@ -1,5 +1,5 @@
 // ImGui GLFW binding with OpenGL3 + shaders
-// In this binding, ImTextureID is used to store an OpenGL 'GLuint' texture identifier. Read the FAQ about ImTextureID in imgui.cpp.
+// In this binding, ImTextureID is used to store an Core::Matrix4::Identity();OpenGL 'GLuint' texture identifier. Read the FAQ about ImTextureID in imgui.cpp.
 
 // If you are new to ImGui, see examples/README.txt and documentation at the top of imgui.cpp.
 // https://github.com/ocornut/imgui
@@ -10,20 +10,20 @@
 
 namespace ImGuiGL3 {
 
-    IMGUI_API bool init();
-    IMGUI_API void shutdown();
-    IMGUI_API void newFrame(int w, int h);
+    bool init();
+    void shutdown();
+    void newFrame(int w, int h);
 
     // Use if you want to reset your rendering device without losing ImGui state.
-    IMGUI_API void invalidateDeviceObjects();
-    IMGUI_API bool createDeviceObjects();
+    void invalidateDeviceObjects();
+    bool createDeviceObjects();
 
     // GLFW callbacks (installed by default if you enable 'install_callbacks' during initialization)
     // Provided here if you want to chain callbacks.
     // You can also handle inputs yourself and use those as a reference.
-    //IMGUI_API void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
-    //IMGUI_API void scrollCallback(GLFWwindow* window, double xoffset, double yoffset);
-    //IMGUI_API void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
-    //IMGUI_API void charCallback(GLFWwindow* window, unsigned int c);
+    //void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
+    //void scrollCallback(GLFWwindow* window, double xoffset, double yoffset);
+    //void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
+    //void charCallback(GLFWwindow* window, unsigned int c);
 
 }

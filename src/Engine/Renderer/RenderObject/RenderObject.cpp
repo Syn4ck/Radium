@@ -260,7 +260,7 @@ namespace Ra
             m_component->notifyRenderObjectExpired( idx );
         }
 
-        void RenderObject::render( const RenderParameters& lightParams, Core::Matrix4 viewMatrix, Core::Matrix4 projMatrix, bool lightSupZero, ShaderProgram* altShader )
+        void RenderObject::render( const RenderParameters& params, Core::Matrix4 viewMatrix, Core::Matrix4 projMatrix, const ShaderProgram* altShader )
         {
             const ShaderProgram* shader;
 
@@ -269,42 +269,23 @@ namespace Ra
                 return;
             }
 
-            if (lightSupZero)
-            {
-                shader = (altShader == nullptr) ? getRenderTechnique()->shader : altShader;
+            shader = (altShader == nullptr) ? getRenderTechnique()->shader : altShader;
 
-                Core::Matrix4 M = getTransformAsMatrix();
-                Core::Matrix4 N = M.inverse().transpose();
+            Core::Matrix4 M = getTransformAsMatrix();
+            Core::Matrix4 N = M.inverse().transpose();
 
-                // bind data
-                shader->bind();
-                shader->setUniform( "transform.proj", projMatrix );
-                shader->setUniform( "transform.view", viewMatrix );
-                shader->setUniform( "transform.model", M );
-                shader->setUniform( "transform.worldNormal", N );
-                lightParams.bind( shader );
+            // bind data
+            shader->bind();
+            shader->setUniform( "transform.proj", projMatrix );
+            shader->setUniform( "transform.view", viewMatrix );
+            shader->setUniform( "transform.model", M );
+            shader->setUniform( "transform.worldNormal", N );
+            params.bind( shader );
 
-                getRenderTechnique()->material->bind( shader );
+            getRenderTechnique()->material->bind( shader );
 
-                // render
-                getMesh()->render();
-            }
-            else
-            {
-                shader = getRenderTechnique()->shader;
-
-                // bind data
-                shader->bind();
-                shader->setUniform( "proj", projMatrix );
-                shader->setUniform( "view", viewMatrix );
-                shader->setUniform( "model", getLocalTransformAsMatrix() );
-                lightParams.bind( shader );
-
-                getRenderTechnique()->material->bind( shader );
-
-                // render
-                getMesh()->render();
-            }
+            // render
+            getMesh()->render();
         }
 
     } // namespace Engine

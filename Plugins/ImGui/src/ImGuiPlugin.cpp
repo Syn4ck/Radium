@@ -1,20 +1,28 @@
 #include <ImGuiPlugin.hpp>
 
 #include <QCheckBox>
-#include <QAction>
-#include <QIcon>
 #include <QToolBar>
+#include <QIcon>
 
 #include <Engine/RadiumEngine.hpp>
+#include <Engine/Managers/EntityManager/EntityManager.hpp>
+#include <Engine/System/System.hpp>
+
 #include <ImGuiSystem.hpp>
+#include <ImGuiComponent.hpp>
 
 namespace ImGuiPlugin {
 
     /// @brief registration to the plugin system
     void ImGuiPlugin::registerPlugin( Ra::Engine::RadiumEngine *engine )
     {
-        m_system = new ImGuiSystem();
-        engine->registerSystem( "ImGuiSystem", m_system );
+        m_system    = new ImGuiSystem();
+        m_component = new ImGuiComponent( "HUD" );  // TODO(hugo) find a better name
+
+        // attach display entity to the UI component
+        Ra::Engine::Entity* ent = engine->getEntityManager()->getEntity( "System Display Entity" );
+        m_component->setEntity( ent );
+        m_system->registerComponent( ent, m_component );
     }
 
     /// @brief tells wether the plugin add a tab or not and set its name
@@ -33,14 +41,9 @@ namespace ImGuiPlugin {
         {
             // configure checkbox
             check->setCheckable(true);
-            check->setChecked(false);
+            check->setChecked(true);     // TODO(hugo) this behavior is not the wanted one in production
 
-            // create actions for this checkbox
-            QAction* togglePassesEditor = new QAction("Toggle On-display UI", widget);
-            connect( togglePassesEditor, &QAction::toggled, this, &ImGuiPlugin::togglePassesEditor );
-
-            // bind action to checkbox
-            check->addAction(togglePassesEditor);
+            connect( check, &QCheckBox::stateChanged, this, &ImGuiPlugin::togglePassesEditor );
         }
 
         // ... more widgets

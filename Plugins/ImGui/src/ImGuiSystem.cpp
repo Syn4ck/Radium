@@ -1,6 +1,8 @@
 #include <ImGuiSystem.hpp>
 #include <ImGuiComponent.hpp>
 
+//#include <Engine/Managers/SystemDisplay/SystemDisplay.hpp>
+
 namespace ImGuiPlugin
 {
 

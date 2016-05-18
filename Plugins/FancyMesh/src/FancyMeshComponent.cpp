@@ -30,7 +30,7 @@ typedef Ra::Core::VectorArray<Ra::Core::Triangle> TriangleArray;
 namespace FancyMeshPlugin
 {
     FancyMeshComponent::FancyMeshComponent(const std::string& name , bool deformable)
-        : Ra::Engine::Component( name  ) , m_deformable(deformable)
+        : Ra::Engine::Component( name ) , m_deformable(deformable)
     {
     }
 
@@ -144,7 +144,7 @@ namespace FancyMeshPlugin
         ComponentMessenger::CallbackTypes<TriangleMesh>::Getter cbOut = std::bind( &FancyMeshComponent::getMeshOutput, this );
         ComponentMessenger::getInstance()->registerOutput<TriangleMesh>( getEntity(), this, id, cbOut);
 
-        if( m_deformable)
+        if( m_deformable )
         {
             ComponentMessenger::CallbackTypes<TriangleMesh>::Setter cbIn = std::bind( &FancyMeshComponent::setMeshInput, this, std::placeholders::_1 );
             ComponentMessenger::getInstance()->registerInput<TriangleMesh>( getEntity(), this, id, cbIn);

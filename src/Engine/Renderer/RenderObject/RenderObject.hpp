@@ -46,7 +46,9 @@ namespace Ra
                           const RenderObjectType& type, int lifetime = -1 );
             ~RenderObject();
 
-            static RenderObject* createRenderObject(const std::string& name, Component* comp, const RenderObjectType& type, const std::shared_ptr<Mesh>& mesh, const ShaderConfiguration& shaderConfig = ShaderConfiguration(), Material* material = nullptr);
+            static RenderObject* createRenderObject(const std::string& name, Component* comp, const RenderObjectType& type,
+                                                    const std::shared_ptr<Mesh>& mesh, const ShaderConfiguration& shaderConfig = ShaderConfiguration(),
+                                                    Material* material = nullptr);
 
             // FIXME(Charly): Remove this
             void updateGL();
@@ -95,7 +97,7 @@ namespace Ra
             void hasBeenRenderedOnce();
             void hasExpired();
 
-            virtual void render( const RenderParameters& lightParams, Core::Matrix4 viewMatrix, Core::Matrix4 projMatrix, bool lightSupZero, ShaderProgram* altShader = nullptr );
+            virtual void render(const RenderParameters& lightParams, Core::Matrix4 viewMatrix, Core::Matrix4 projMatrix, const ShaderProgram* altShader = nullptr );
 
         private:
             Core::Transform m_localTransform;

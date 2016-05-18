@@ -27,7 +27,6 @@
 #include <Engine/Renderer/Texture/Texture.hpp>
 #include <Engine/Renderer/Renderers/DebugRender.hpp>
 
-
 #define NO_TRANSPARENCY
 namespace Ra
 {
@@ -59,7 +58,6 @@ namespace Ra
         ForwardRenderer::~ForwardRenderer()
         {
             ShaderProgramManager::destroyInstance();
-            //ImGuiGL3::shutdown();
         }
 
         void ForwardRenderer::initializeInternal()
@@ -69,11 +67,8 @@ namespace Ra
             initPasses();
             initGraph();
 
-
             DebugRender::createInstance();
             DebugRender::getInstance()->initialize();
-
-            //ImGuiGL3::init();
         }
 
         void ForwardRenderer::initGraph()
@@ -223,22 +218,8 @@ namespace Ra
             shader->bind();
             for ( const auto& ro : m_fancyRenderObjects )
             {
-                if ( ro->isVisible() )
-                {
-                    // bind data
-                    Core::Matrix4 M = ro->getTransformAsMatrix();
-                    Core::Matrix4 N = M.inverse().transpose();
-
-                    shader->setUniform( "transform.proj", renderData.projMatrix );
-                    shader->setUniform( "transform.view", renderData.viewMatrix );
-                    shader->setUniform( "transform.model", M );
-                    shader->setUniform( "transform.worldNormal", N );
-
-                    ro->getRenderTechnique()->material->bind( shader );
-
-                    // render
-                    ro->getMesh()->render();
-                }
+                RenderParameters params;
+                ro->render(params, renderData.viewMatrix, renderData.projMatrix, shader);
             }
 
             // Light pass
@@ -259,7 +240,7 @@ namespace Ra
 
                     for ( const auto& ro : m_fancyRenderObjects )
                     {
-                        ro->render(params, renderData.viewMatrix, renderData.projMatrix, true);
+                        ro->render(params, renderData.viewMatrix, renderData.projMatrix);
                     }
                 }
             }
@@ -273,7 +254,7 @@ namespace Ra
 
                 for ( const auto& ro : m_fancyRenderObjects )
                 {
-                    ro->render(params, renderData.viewMatrix, renderData.projMatrix, false);
+                    ro->render(params, renderData.viewMatrix, renderData.projMatrix);
                 }
             }
 
@@ -295,7 +276,7 @@ namespace Ra
         // Draw debug stuff, do not overwrite depth map but do depth testing
         void ForwardRenderer::debugInternal( const RenderData& renderData )
         {
-            const ShaderProgram* shader;
+            RenderParameters params;
 
             GL_ASSERT( glDisable( GL_BLEND ) );
             GL_ASSERT( glDepthMask( GL_FALSE ) );
@@ -311,27 +292,10 @@ namespace Ra
             {
                 for ( const auto& ro : m_debugRenderObjects )
                 {
-                    if ( ro->isVisible() )
-                    {
-                        shader = ro->getRenderTechnique()->shader;
-
-                        // bind data
-                        shader->bind();
-
-                        Core::Matrix4 M = ro->getTransformAsMatrix();
-                        shader->setUniform( "transform.proj", renderData.projMatrix );
-                        shader->setUniform( "transform.view", renderData.viewMatrix );
-                        shader->setUniform( "transform.model", M );
-
-                        ro->getRenderTechnique()->material->bind( shader );
-
-                        // render
-                        ro->getMesh()->render();
-                    }
+                    ro->render(params, renderData.viewMatrix, renderData.projMatrix);
                 }
 
-                DebugRender::getInstance()->render(renderData.viewMatrix,
-                                                   renderData.projMatrix);
+                DebugRender::getInstance()->render(renderData.viewMatrix, renderData.projMatrix);
 
             }
 
@@ -344,20 +308,7 @@ namespace Ra
                 {
                     if ( ro->isVisible() )
                     {
-                        shader = ro->getRenderTechnique()->shader;
-
-                        // bind data
-                        shader->bind();
-
-                        Core::Matrix4 M = ro->getTransformAsMatrix();
-                        shader->setUniform( "transform.proj", renderData.projMatrix );
-                        shader->setUniform( "transform.view", renderData.viewMatrix );
-                        shader->setUniform( "transform.model", M );
-
-                        ro->getRenderTechnique()->material->bind( shader );
-
-                        // render
-                        ro->getMesh()->render();
+                        ro->render(params, renderData.viewMatrix, renderData.projMatrix);
                     }
                 }
             }
@@ -368,8 +319,7 @@ namespace Ra
         // Draw UI stuff, always drawn on top of everything else + clear ZMask
         void ForwardRenderer::uiInternal( const RenderData& renderData )
         {
-            const ShaderProgram* shader;
-            const float          clearDepth( 1.0 );
+            const float clearDepth( 1.0 );
 
             m_fbo->useAsTarget( m_width, m_height );
 
@@ -385,11 +335,7 @@ namespace Ra
             {
                 if ( ro->isVisible() )
                 {
-                    shader = ro->getRenderTechnique()->shader;
-
-                    // bind data
-                    shader->bind();
-
+                    // scaling
                     Core::Matrix4 M = ro->getTransformAsMatrix();
                     Core::Matrix4 MV = renderData.viewMatrix * M;
                     Core::Vector3 V = MV.block<3, 1>( 0, 3 );
@@ -400,26 +346,13 @@ namespace Ra
 
                     M = M * S;
 
-                    shader->setUniform( "transform.proj", renderData.projMatrix );
-                    shader->setUniform( "transform.view", renderData.viewMatrix );
-                    shader->setUniform( "transform.model", M );
-
-                    ro->getRenderTechnique()->material->bind( shader );
+                    RenderParameters params;
+                    params.addParameter("transform.model", M);
 
                     // render
-                    ro->getMesh()->render();
+                    ro->render(params, renderData.viewMatrix, renderData.projMatrix);
                 }
             }
-
-            /*
-            // and render IM-GUI !!
-            ImGuiGL3::newFrame(m_width, m_height);
-
-            bool isNodeOpened = false;
-            m_graphview.Begin(&isNodeOpened);
-            m_graphview.End();
-            ImGui::Render();
-            */
 
             m_fbo->unbind();
         }

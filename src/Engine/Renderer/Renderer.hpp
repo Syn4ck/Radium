@@ -13,6 +13,7 @@
 #include <Core/Time/Timer.hpp>
 #include <Core/Event/EventEnums.hpp>
 
+#include <Core/GraphStructures/MultiGraph.hpp>
 
 namespace Ra
 {
@@ -37,6 +38,7 @@ namespace Ra
         class Texture;
         class TextureManager;
         class RenderObjectManager;
+        class Pass;
     }
 }
 
@@ -206,6 +208,12 @@ namespace Ra
              */
             virtual std::string getRendererName() const = 0;
 
+            /**
+             * @brief Get the pass graph of the renderer
+             * @return NULL by defaut, as there is no pass graph
+             */
+            virtual Ra::Core::MultiGraph<Pass>* getPassGraph();
+
         protected:
 
             /**
@@ -305,6 +313,9 @@ namespace Ra
             bool m_drawDebug;           // Should we render debug stuff ?
             bool m_wireframe;           // Are we rendering in "real" wireframe mode
             bool m_postProcessEnabled;  // Should we do post processing ?
+
+            // Pass Graph
+            //Ra::Core::MultiGraph<Pass> m_passgraph;
 
         private:
             // Qt has the nice idea to bind an fbo before giving you the opengl context,

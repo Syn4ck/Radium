@@ -47,6 +47,7 @@ namespace Ra
             * have been loaded.
             */
             virtual void initialize() = 0;
+
             /**
              * @brief Set entity the component is part of.
              * This method is called by the entity.

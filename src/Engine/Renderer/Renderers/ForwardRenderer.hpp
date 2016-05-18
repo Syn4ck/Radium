@@ -5,11 +5,6 @@
 #include <Engine/Renderer/Renderer.hpp>
 
 #include <Engine/Renderer/Passes/Passes.hpp>
-#include <Core/GraphStructures/MultiGraph.hpp>
-
-#include <MainApplication/ImGui/imgui.h>
-#include <MainApplication/ImGui/imgui_gl3.hpp>
-#include <MainApplication/ImGui/imgui_node_graph.hpp>
 
 namespace Ra
 {
@@ -22,6 +17,7 @@ namespace Ra
             virtual ~ForwardRenderer();
 
             virtual std::string getRendererName() const override { return "Forward Renderer"; }
+            virtual Ra::Core::MultiGraph<Pass>* getPassGraph() override { return &m_passgraph; }
 
         protected:
 
@@ -60,8 +56,7 @@ namespace Ra
             std::map<std::string, Pass*>       m_passmap;
             std::vector<std::shared_ptr<Pass>> m_passes;
 
-            Core::MultiGraph<Pass>   m_passgraph;
-            //ImGui::GraphViewer<Pass> m_graphview;
+            Ra::Core::MultiGraph<Pass> m_passgraph;
         };
 
     } // namespace Engine
