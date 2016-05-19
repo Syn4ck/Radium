@@ -14,6 +14,7 @@
 #include <Engine/RadiumEngine.hpp>
 #include <Engine/Renderer/OpenGL/OpenGL.hpp>
 #include <Engine/Renderer/OpenGL/FBO.hpp>
+#include <Engine/Managers/ComponentMessenger/ComponentMessenger.hpp>
 #include <Engine/Renderer/RenderTechnique/ShaderProgramManager.hpp>
 #include <Engine/Renderer/RenderTechnique/ShaderProgram.hpp>
 #include <Engine/Renderer/RenderTechnique/RenderParameters.hpp>
@@ -95,6 +96,12 @@ namespace Ra
             m_quadMesh->updateGL();
 
             initializeInternal();
+
+            setupIO("HUD");
+            std::cout << "------------\nsent:\n------------" << std::endl;
+            std::cout << "width " << m_width << std::endl;
+            std::cout << "height " << m_height << std::endl;
+            std::cout << "passgraph " << (void*) getPassGraphRw() << std::endl;
 
             resize( m_width, m_height );
         }
@@ -429,10 +436,36 @@ namespace Ra
             return ret;
         }
 
-        Ra::Core::MultiGraph<Pass>* Renderer::getPassGraph()
+
+
+        Core::MultiGraph<Pass>* Renderer::getPassGraphRw()
         {
-            return nullptr;
+            return (Core::MultiGraph<Pass>*) NULL;
         }
+
+        const uint* Renderer::getWidthOut()
+        {
+            return &m_width;
+        }
+
+        const uint* Renderer::getHeightOut()
+        {
+            return &m_height;
+        }
+
+        void Renderer::setupIO(const std::string& id)
+        {
+            ComponentMessenger::CallbackTypes<Core::MultiGraph<Pass>>::ReadWrite passGraphRw = std::bind( &Renderer::getPassGraphRw, this );
+            ComponentMessenger::getInstance()->registerReadWrite<Core::MultiGraph<Pass>>( nullptr, nullptr, id + "_passgraph", passGraphRw );
+
+            ComponentMessenger::CallbackTypes<uint>::Getter wOut = std::bind( &Renderer::getWidthOut, this );
+            ComponentMessenger::getInstance()->registerOutput<uint>( nullptr, nullptr, id + "_width", wOut );
+
+            ComponentMessenger::CallbackTypes<uint>::Getter hOut = std::bind( &Renderer::getHeightOut, this );
+            ComponentMessenger::getInstance()->registerOutput<uint>( nullptr, nullptr, id + "_height", hOut );
+        }
+
+
 
         void Renderer::reloadShaders()
         {

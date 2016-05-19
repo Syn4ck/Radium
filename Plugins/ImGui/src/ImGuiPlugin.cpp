@@ -63,7 +63,7 @@ namespace ImGuiPlugin {
 
     void ImGuiPlugin::togglePassesEditor(bool on)
     {
-        m_system->setPassesEditor( on );
+        m_component->setPassesEditor( on );
     }
 
 }

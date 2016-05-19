@@ -36,6 +36,8 @@ namespace Ra
         /// and rw() functions.
         /// For more efficiency the underlying function pointers are directly accessible
         /// as well and can be queried with the same identifiers.
+        /// @note the component and entity shall be nullptr, to access the system fake
+        /// component (in order to have IO between engine and plugins)
         class RA_ENGINE_API ComponentMessenger
         {
         RA_SINGLETON_INTERFACE(ComponentMessenger);
@@ -125,7 +127,7 @@ namespace Ra
             inline void set(const Entity* entity, const std::string& id, const ReturnType& x);
 
             template<typename ReturnType>
-            inline ReturnType& rw(const Entity* entity, const std::string& id);
+            inline const ReturnType& rw(const Entity* entity, const std::string& id);
 
 
             //

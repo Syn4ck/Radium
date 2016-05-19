@@ -15,14 +15,10 @@ namespace ImGuiPlugin
         ImGuiSystem();
 
         /// @brief Task generator that generate nothing
-        virtual void generateTasks( Ra::Core::TaskQueue* taskQueue, const Ra::Engine::FrameInfo& frameInfo ) override;
-
-        /// @brief State of displaying pass editor
-        void setPassesEditor( bool state );
-
-    private:
-        bool m_displayPassGraph; /// True when displaying the pass editor graph
+        virtual void generateTasks( Ra::Core::TaskQueue* taskQueue,
+                                    const Ra::Engine::FrameInfo& frameInfo ) override;
     };
+
 }
 
 

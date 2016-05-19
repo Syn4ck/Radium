@@ -3,14 +3,17 @@
 #include <imgui.h>
 #include <ImGuiGl3.hpp>
 #include <ImGuiNodeGraph.hpp>
+#include <ImGuiComponent.hpp>
 
 #include <iostream>
 
 namespace ImGuiPlugin {
 
-    ImGuiRenderObject::ImGuiRenderObject(const std::string& name, Ra::Engine::Component* comp,
+    ImGuiRenderObject::ImGuiRenderObject(const std::string& name, ImGuiComponent* comp,
                       const Ra::Engine::RenderObjectType& type, int lifetime)
-        : Ra::Engine::RenderObject(name, comp, type, lifetime)
+        : Ra::Engine::RenderObject(name, (Ra::Engine::Component*)comp, type, lifetime)
+        , m_imguicomp( comp )
+        , m_displayPassGraph( true )
     {
     }
 
@@ -22,17 +25,20 @@ namespace ImGuiPlugin {
             return;
         }
 
-        ImGuiGL3::newFrame(800, 600);  // TODO(remove this ugliness)
+        ImGuiGL3::newFrame(m_imguicomp->m_width, m_imguicomp->m_height);
 
-        bool isNodeOpened = true;
+        if (m_displayPassGraph)
+        {
+            bool isNodeOpened = true;
 
-        // test window
-        ImGui::SetNextWindowPos(ImVec2(60, 60), ImGuiSetCond_FirstUseEver);
-        ImGui::ShowTestWindow(&isNodeOpened);
+            // test window
+            ImGui::SetNextWindowPos(ImVec2(60, 60), ImGuiSetCond_FirstUseEver);
+            ImGui::ShowTestWindow(&isNodeOpened);
 
-        // pass graph window
-        //m_graphview.Begin(&isNodeOpened);
-        //m_graphview.End();
+            // pass graph window
+            //m_graphview.Begin(&isNodeOpened);
+            //m_graphview.End();
+        }
 
         ImGui::Render();
 

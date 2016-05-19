@@ -210,9 +210,24 @@ namespace Ra
 
             /**
              * @brief Get the pass graph of the renderer
-             * @return NULL by defaut, as there is no pass graph
+             * @return NULL by defaut, as there is no pass graph outside of Forward
              */
-            virtual Ra::Core::MultiGraph<Pass>* getPassGraph();
+            /*virtual*/ Core::MultiGraph<Pass>* getPassGraphRw();
+
+            /**
+             * @brief IO function to export renderer width
+             */
+            const uint* getWidthOut();
+
+            /**
+             * @brief IO function to export renderer height
+             */
+            const uint* getHeightOut();
+
+            /**
+             * @brief Setup all the IO offered by renderer to plugins
+             */
+            void setupIO(const std::string &id);
 
         protected:
 

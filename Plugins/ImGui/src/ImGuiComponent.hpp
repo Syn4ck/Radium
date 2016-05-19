@@ -4,8 +4,10 @@
 #include <ImGuiGl3.hpp>
 #include <ImGuiPlugin.hpp>
 #include <ImGuiNodeGraph.hpp>
+#include <ImGuiRenderObject.hpp>
 
 #include <Engine/RaEngine.hpp>
+#include <Engine/Renderer/Renderer.hpp>
 #include <Engine/Component/Component.hpp>
 #include <Engine/Renderer/Passes/Passes.hpp>
 
@@ -17,32 +19,45 @@ namespace ImGuiPlugin
     class IMGUI_PLUGIN_API ImGuiComponent : public Ra::Engine::Component
     {
     public:
+        /// @brief handle the initialization process of ImGui
         ImGuiComponent(const std::string& name) : Component(name), m_contentName(name)
         {
             initialize();
             ImGuiGL3::init();
         }
 
+        /// @brief handle the destruction of ImGui
         virtual ~ImGuiComponent()
         {
             ImGuiGL3::shutdown();
         }
 
+        /// @brief instantiate the RenderObject on which we will draw imgui
         virtual void initialize() override;
 
-        void update(Scalar dt);
+        /// @brief get the renderer's data from the engine
+        void setupIO( const std::string& id );
 
-    private:
-        // Component communication
-        // void setupIO( const std::string& id );
+        /// @brief State of displaying pass editor
+        void setPassesEditor( bool state );
+
+        Ra::Core::MultiGraph<Ra::Engine::Pass>* getPassGraphRw();
+        void setWidthIn(const uint* w);
+        void setHeightIn(const uint* h);
+
+        void fetch(const std::string& id); // DEBUG
 
     public:
         std::shared_ptr<Ra::Engine::Mesh> m_quadMesh;
 
+        // renderer data
+        uint m_width;
+        uint m_height;
+        Ra::Core::MultiGraph<Ra::Engine::Pass>* m_passGraph;
+
     private:
         std::string m_contentName;
-        ImGui::GraphViewer<Ra::Engine::Pass> m_passViewer;
-
+        std::unique_ptr<ImGuiRenderObject> m_ro;
     };
 
 } // namespace ImGuiPlugin

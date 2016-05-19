@@ -17,7 +17,7 @@ namespace Ra
             virtual ~ForwardRenderer();
 
             virtual std::string getRendererName() const override { return "Forward Renderer"; }
-            virtual Ra::Core::MultiGraph<Pass>* getPassGraph() override { return &m_passgraph; }
+            Ra::Core::MultiGraph<Pass>* getPassGraph() { return &m_passgraph; }
 
         protected:
 
@@ -56,7 +56,7 @@ namespace Ra
             std::map<std::string, Pass*>       m_passmap;
             std::vector<std::shared_ptr<Pass>> m_passes;
 
-            Ra::Core::MultiGraph<Pass> m_passgraph;
+            Ra::Core::MultiGraph<Pass>  m_passgraph;
         };
 
     } // namespace Engine
