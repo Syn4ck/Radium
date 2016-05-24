@@ -22,7 +22,7 @@ public:
                 __FILE__,__LINE__, #EXP, DESC);                \
         RaTests::TestManager::getInstance()->testFailed(this); \
     } else {                                                   \
-        fprintf(stdout, "[TEST PASSED]\n");                    \
+       /* fprintf(stdout, "[TEST PASSED]\n");  */              \
     }                                                          \
     MACRO_END
 

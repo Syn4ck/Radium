@@ -1,6 +1,7 @@
 #include <Drawing/SkeletonBoneDrawable.hpp>
 
 #include <Engine/Renderer/RenderObject/Primitives/DrawPrimitives.hpp>
+#include <Engine/Managers/SystemDisplay/SystemDisplay.hpp>
 #include <Engine/Renderer/RenderTechnique/ShaderConfigFactory.hpp>
 
 #include <Core/Animation/Handle/SkeletonUtils.hpp>
@@ -88,6 +89,10 @@ namespace AnimationPlugin
             Ra::Core::Triangle(1,4,3),Ra::Core::Triangle(1,5,4)
         };
         Ra::Core::MeshUtils::getAutoNormals(mesh, mesh.m_normals);
+        for (uint i = 0; i < mesh.m_normals.size(); ++i)
+        {
+            RA_DISPLAY_NORMAL(mesh.m_vertices[i], mesh.m_normals[i],Ra::Core::Colors::Red(), 0.1f);
+        }
         return mesh;
     }
 

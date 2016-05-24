@@ -14,8 +14,9 @@
 #ifndef RADIUMENGINE_CORE_HPP
 #define RADIUMENGINE_CORE_HPP
 
-#include <assert.h>
-#include <stdio.h>
+#include <cassert>
+#include <cstdio>
+#include <cstring>
 
 // ----------------------------------------------------------------------------
 // Compiler identification
@@ -243,13 +244,51 @@ typedef double Scalar;
 // Debug tools
 // ----------------------------------------------------------------------------
 
-namespace compile_time_utils
+namespace CompileTimeUtils
 {
+    // Helper to print the size of an object at compile time
     template<int x> struct size;
+
+    // Helper to get a compile-time type as a string.
+    // see https://blog.molecular-matters.com/2015/12/11/getting-the-type-of-a-template-argument-as-string-without-rtti/
+#if defined COMPILER_MSVC || defined COMPILER_CLANG
+    static const unsigned int FRONT_SIZE = sizeof("CompileTimeUtils::GetTypeNameHelper<") - 1u;
+    static const unsigned int BACK_SIZE = sizeof(">::GetTypeName") - 1u;
+#elif defined COMPILER_GCC
+    static const unsigned int FRONT_SIZE = sizeof("static const char* CompileTimeUtils::GetTypeNameHelper<T>::GetTypeName() [with T = ") - 1u;
+    static const unsigned int BACK_SIZE = sizeof("]") - 1u;
+#else
+    #error unsupported compiler
+#endif
+    template <typename T>
+    struct GetTypeNameHelper
+    {
+        static const char* GetTypeName(void)
+        {
+            static const size_t size = sizeof(__PRETTY_FUNCTION__) - FRONT_SIZE - BACK_SIZE;
+            static char typeName[size] = {};
+            std::memcpy(typeName, __PRETTY_FUNCTION__ + FRONT_SIZE, size - 1u);
+            return typeName;
+        }
+    };
+
+    // Void version
+    template <typename T>
+    const char* GetTypeName(void)
+    {
+      return GetTypeNameHelper<T>::GetTypeName();
+    }
+
+    // Const ref version for template type deduction.
+    template <typename T>
+    const char* GetTypeName(const T& )
+    {
+      return GetTypeNameHelper<T>::GetTypeName();
+    }
 }
 // This macro will print the size of a type in a compiler error
 // Note : there is a way to print it as a warning instead on StackOverflow
-#define STATIC_SIZEOF(TYPE) compile_time_utils::size<sizeof(TYPE)> static_sizeof
+#define STATIC_SIZEOF_AS_ERROR(TYPE) CompileTimeUtils::size<sizeof(TYPE)> static_sizeof
 
 // Custom assert, warn and error macros.
 // Standard assert has two main drawbacks : on some OSes it aborts the program,
