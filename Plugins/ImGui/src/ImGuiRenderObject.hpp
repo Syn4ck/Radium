@@ -20,6 +20,7 @@ namespace ImGuiPlugin
     {
     public:
         ImGuiRenderObject(const std::string& name, ImGuiComponent* comp,
+                          Ra::Core::MultiGraph<Ra::Engine::Pass>& passgraph,
                           const Ra::Engine::RenderObjectType& type, int lifetime = -1);
 
         virtual ~ImGuiRenderObject() {}
@@ -32,11 +33,17 @@ namespace ImGuiPlugin
 
     public:
         // component for the callbacks
-        const ImGuiComponent* m_imguicomp;
+        ImGuiComponent* m_imguicomp;
 
         // node viewer
-        ImGui::GraphViewer<Ra::Engine::Pass> m_passViewer;
+        Ra::Core::MultiGraph<Ra::Engine::Pass>& m_passgraph;
+        ImGui::GraphViewer<Ra::Engine::Pass>    m_viewgraph;
+
+        // statuses of imgui
         bool m_displayPassGraph;
+        bool m_demoUI;
+
+        Ra::Engine::RadiumEngine* m_engine;
     };
 
 } // namespace ImGuiPlugin

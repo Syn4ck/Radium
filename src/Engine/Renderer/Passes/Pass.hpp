@@ -23,7 +23,7 @@ namespace Ra
             virtual void resizePass( uint w, uint h ) = 0;
             virtual void init() = 0;
 
-            /// set of functions used to set RenderParameters to a shader
+            /// @brief set of functions used to set RenderParameters to a shader
             /// @param paramSet is used when a pass has multiple sets of parameters (like ping-pong)
             void setIn(                  Texture* tex,               uint slot = 0, uint paramSet = 0);
             void setIn(const char* name, int      value,             uint slot = 0, uint paramSet = 0);

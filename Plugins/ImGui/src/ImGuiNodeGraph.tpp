@@ -11,10 +11,10 @@ template <typename T>
 void ImGui::GraphViewer<T>::Begin(bool* opened)
 {
     // try to create a window
-    SetNextWindowPos(ImVec2(26,26));
+    //SetNextWindowPos(ImVec2(26,26));
     SetNextWindowSize(ImVec2(1000,600));
 
-    if (! ImGui::Begin("This window is beautiful", opened, ImVec2(900,500), 0.3f, ImGuiWindowFlags_NoTitleBar))
+    if (! ImGui::Begin("This window is beautiful", opened, ImVec2(900,500), 0.3f/*, ImGuiWindowFlags_NoTitleBar*/))
     {
         End();
         return;
@@ -24,9 +24,16 @@ void ImGui::GraphViewer<T>::Begin(bool* opened)
     // ...
     // short section, I know
 
+    // IDs management
+    unsigned int subID = 0;
+
     // here is the zone where we draw all the nodes
     for (auto const& nodeRepr : m_props)
-    {
+    {     
+        // begin a new drawlist (avoid triggering assert imgui.cpp l.2348)
+        ImGui::PushID(subID);
+        ImGui::BeginChild("pass_node");
+
         // draw the node, actually
         drawNode(*(nodeRepr.get()));
 
@@ -40,6 +47,11 @@ void ImGui::GraphViewer<T>::Begin(bool* opened)
             // and draw, finally
             drawLink(*parentProp, co.m_slot, *(nodeRepr.get()), co.m_local);
         }
+
+        // end the sub drawlist
+        ImGui::EndChild();
+        ImGui::PopID();
+        ++ subID;
     }
 }
 

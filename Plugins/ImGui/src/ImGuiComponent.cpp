@@ -13,17 +13,23 @@ namespace ImGuiPlugin
 
     void ImGuiComponent::initialize()
     {
+        // fetch pass graph
+        Ra::Core::MultiGraph<Ra::Engine::Pass>& pgraph = Ra::Engine::ComponentMessenger::getInstance()
+                ->rw<Ra::Core::MultiGraph<Ra::Engine::Pass>>(nullptr, "HUD_passgraph");
+
         // create new RenderObject of type ImGuiRO to render imgui component
-        m_ro.reset( new ImGuiRenderObject("RO_imgui_" + m_contentName, this, Ra::Engine::RenderObjectType::UI) );
+        m_ro.reset( new ImGuiRenderObject("RO_imgui_" + m_contentName, this, pgraph,  Ra::Engine::RenderObjectType::UI) );
+        m_ro->m_engine = m_engine;
 
         // setup IO to import needed informations
         setupIO("HUD");
 
-        fetch("HUD");
-
         // add the new RO to ui component
         Ra::Engine::UiComponent* comp = Ra::Engine::SystemEntity::uiCmp();
         comp->addRenderObject(m_ro.get());
+
+        // init the ImGui Gl part
+        ImGuiGL3::init(m_engine);
     }
 
     void ImGuiComponent::setupIO(const std::string &id)
@@ -38,9 +44,6 @@ namespace ImGuiPlugin
          * - height
          */
 
-        //ComponentMessenger::CallbackTypes<MultiGraph<Pass>>::ReadWrite passRw = std::bind( &ImGuiComponent::getPassGraphRw, this );
-        //ComponentMessenger::getInstance()->registerReadWrite<MultiGraph<Pass>>( nullptr, this, id + "_passgraph", passRw );
-
         ComponentMessenger::CallbackTypes<uint>::Setter wIn = std::bind( &ImGuiComponent::setWidthIn, this, std::placeholders::_1 );
         ComponentMessenger::getInstance()->registerInput<uint>( nullptr, this, id + "_width", wIn );
 
@@ -48,13 +51,12 @@ namespace ImGuiPlugin
         ComponentMessenger::getInstance()->registerInput<uint>( nullptr, this, id + "_height", hIn );
     }
 
-    void ImGuiComponent::fetch(const std::string& id)
+    void ImGuiComponent::updateSize(const std::string& id)
     {
-        bool canW, canH, canP;
+        bool canW, canH;
 
         using Ra::Engine::ComponentMessenger;
         using Ra::Core::MultiGraph;
-        using Ra::Engine::Pass;
 
         if ((canW = ComponentMessenger::getInstance()->canGet<uint>(nullptr, id + "_width")))
         {
@@ -65,16 +67,6 @@ namespace ImGuiPlugin
         {
             m_height = ComponentMessenger::getInstance()->get<uint>(nullptr, id + "_height");
         }
-
-        if ((canP = ComponentMessenger::getInstance()->canRw<MultiGraph<Pass>>(nullptr, id + "_passgraph")))
-        {
-//            m_passGraph = &ComponentMessenger::getInstance()->rw<MultiGraph<Pass>>(nullptr, id + "_passgraph");
-        }
-
-        std::cout << "------------\nreceived:\n------------" << std::endl;
-        std::cout << "width " << m_width << std::endl;
-        std::cout << "height " << m_height << std::endl;
-        std::cout << "passgraph " << (void*) &m_passGraph << std::endl;
     }
 
     void ImGuiComponent::setPassesEditor( bool state )
@@ -82,9 +74,9 @@ namespace ImGuiPlugin
         m_ro->m_displayPassGraph = state;
     }
 
-    Ra::Core::MultiGraph<Ra::Engine::Pass>* ImGuiComponent::getPassGraphRw()
+    void ImGuiComponent::setDemoUI( bool state )
     {
-        return m_passGraph;
+        m_ro->m_demoUI = state;
     }
 
     void ImGuiComponent::setWidthIn(const uint* w)

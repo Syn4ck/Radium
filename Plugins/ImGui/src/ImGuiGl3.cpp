@@ -10,6 +10,11 @@
 #include <imgui.h>
 #include <ImGuiGl3.hpp>
 
+#include <Core/Event/Key.hpp>
+#include <Core/Event/EventEnums.hpp>
+#include <QRadium/EventTranslator.hpp>
+
+#include <iostream>
 
 namespace ImGuiGL3 {
 
@@ -116,49 +121,6 @@ void renderDrawLists(ImDrawData* draw_data)
     glViewport(last_viewport[0], last_viewport[1], (GLsizei)last_viewport[2], (GLsizei)last_viewport[3]);
 }
 
-//static const char* getClipboardText()
-//{
-//    return glfwGetClipboardString(g_Window);
-//}
-
-//static void setClipboardText(const char* text)
-//{
-//    glfwSetClipboardString(g_Window, text);
-//}
-
-//void mouseButtonCallback(GLFWwindow*, int button, int action, int /*mods*/)
-//{
-//    if (action == GLFW_PRESS && button >= 0 && button < 3)
-//        g_MousePressed[button] = true;
-//}
-
-//void scrollCallback(GLFWwindow*, double /*xoffset*/, double yoffset)
-//{
-//    g_MouseWheel += (float)yoffset; // Use fractional mouse wheel, 1.0 unit 5 lines.
-//}
-
-//void keyCallback(GLFWwindow*, int key, int, int action, int mods)
-//{
-//    ImGuiIO& io = ImGui::GetIO();
-//    if (action == GLFW_PRESS)
-//        io.KeysDown[key] = true;
-//    if (action == GLFW_RELEASE)
-//        io.KeysDown[key] = false;
-
-//    (void)mods; // Modifiers are not reliable across systems
-//    io.KeyCtrl = io.KeysDown[GLFW_KEY_LEFT_CONTROL] || io.KeysDown[GLFW_KEY_RIGHT_CONTROL];
-//    io.KeyShift = io.KeysDown[GLFW_KEY_LEFT_SHIFT] || io.KeysDown[GLFW_KEY_RIGHT_SHIFT];
-//    io.KeyAlt = io.KeysDown[GLFW_KEY_LEFT_ALT] || io.KeysDown[GLFW_KEY_RIGHT_ALT];
-//    io.KeySuper = io.KeysDown[GLFW_KEY_LEFT_SUPER] || io.KeysDown[GLFW_KEY_RIGHT_SUPER];
-//}
-
-//void charCallback(GLFWwindow*, unsigned int c)
-//{
-//    ImGuiIO& io = ImGui::GetIO();
-//    if (c > 0 && c < 0x10000)
-//        io.AddInputCharacter((unsigned short)c);
-//}
-
 bool createFontsTexture()
 {
     // Build texture atlas
@@ -230,11 +192,11 @@ bool createDeviceObjects()
     glAttachShader(g_ShaderHandle, g_FragHandle);
     glLinkProgram(g_ShaderHandle);
 
-    g_AttribLocationTex = glGetUniformLocation(g_ShaderHandle, "Texture");
-    g_AttribLocationProjMtx = glGetUniformLocation(g_ShaderHandle, "ProjMtx");
-    g_AttribLocationPosition = glGetAttribLocation(g_ShaderHandle, "Position");
-    g_AttribLocationUV = glGetAttribLocation(g_ShaderHandle, "UV");
-    g_AttribLocationColor = glGetAttribLocation(g_ShaderHandle, "Color");
+    g_AttribLocationTex      = glGetUniformLocation( g_ShaderHandle, "Texture" );
+    g_AttribLocationProjMtx  = glGetUniformLocation( g_ShaderHandle, "ProjMtx" );
+    g_AttribLocationPosition = glGetAttribLocation( g_ShaderHandle, "Position");
+    g_AttribLocationUV       = glGetAttribLocation( g_ShaderHandle, "UV"   );
+    g_AttribLocationColor    = glGetAttribLocation( g_ShaderHandle, "Color");
 
     glGenBuffers(1, &g_VboHandle);
     glGenBuffers(1, &g_ElementsHandle);
@@ -288,45 +250,36 @@ void invalidateDeviceObjects()
     }
 }
 
-bool init(/* GLFWwindow* window, bool install_callbacks */)
+bool init(Ra::Engine::RadiumEngine* engine)
 {
-//    g_Window = window;
-
+    // get structures
     ImGuiIO& io = ImGui::GetIO();
-//    io.KeyMap[ImGuiKey_Tab] = GLFW_KEY_TAB;                         // Keyboard mapping. ImGui will use those indices to peek into the io.KeyDown[] array.
-//    io.KeyMap[ImGuiKey_LeftArrow] = GLFW_KEY_LEFT;
-//    io.KeyMap[ImGuiKey_RightArrow] = GLFW_KEY_RIGHT;
-//    io.KeyMap[ImGuiKey_UpArrow] = GLFW_KEY_UP;
-//    io.KeyMap[ImGuiKey_DownArrow] = GLFW_KEY_DOWN;
-//    io.KeyMap[ImGuiKey_PageUp] = GLFW_KEY_PAGE_UP;
-//    io.KeyMap[ImGuiKey_PageDown] = GLFW_KEY_PAGE_DOWN;
-//    io.KeyMap[ImGuiKey_Home] = GLFW_KEY_HOME;
-//    io.KeyMap[ImGuiKey_End] = GLFW_KEY_END;
-//    io.KeyMap[ImGuiKey_Delete] = GLFW_KEY_DELETE;
-//    io.KeyMap[ImGuiKey_Backspace] = GLFW_KEY_BACKSPACE;
-//    io.KeyMap[ImGuiKey_Enter] = GLFW_KEY_ENTER;
-//    io.KeyMap[ImGuiKey_Escape] = GLFW_KEY_ESCAPE;
-//    io.KeyMap[ImGuiKey_A] = GLFW_KEY_A;
-//    io.KeyMap[ImGuiKey_C] = GLFW_KEY_C;
-//    io.KeyMap[ImGuiKey_V] = GLFW_KEY_V;
-//    io.KeyMap[ImGuiKey_X] = GLFW_KEY_X;
-//    io.KeyMap[ImGuiKey_Y] = GLFW_KEY_Y;
-//    io.KeyMap[ImGuiKey_Z] = GLFW_KEY_Z;
+
+    // Keyboard mapping. ImGui will use those indices to peek into the io.KeyDown[] array
+    io.KeyMap[ImGuiKey_Tab]        = Ra::Core::Key_Tab;
+    io.KeyMap[ImGuiKey_LeftArrow]  = Ra::Core::Key_Left;
+    io.KeyMap[ImGuiKey_RightArrow] = Ra::Core::Key_Right;
+    io.KeyMap[ImGuiKey_UpArrow]    = Ra::Core::Key_Up;
+    io.KeyMap[ImGuiKey_DownArrow]  = Ra::Core::Key_Down;
+    io.KeyMap[ImGuiKey_PageUp]     = Ra::Core::Key_PageUp;
+    io.KeyMap[ImGuiKey_PageDown]   = Ra::Core::Key_PageDown;
+    io.KeyMap[ImGuiKey_Home]       = Ra::Core::Key_Home;
+    io.KeyMap[ImGuiKey_End]        = Ra::Core::Key_End;
+    io.KeyMap[ImGuiKey_Delete]     = Ra::Core::Key_Delete;
+    io.KeyMap[ImGuiKey_Backspace]  = Ra::Core::Key_BackSpace;
+    io.KeyMap[ImGuiKey_Enter]      = Ra::Core::Key_Enter;
+    io.KeyMap[ImGuiKey_Escape]     = Ra::Core::Key_Escape;
+    io.KeyMap[ImGuiKey_A]          = Ra::Core::Key_A;
+    io.KeyMap[ImGuiKey_C]          = Ra::Core::Key_C;
+    io.KeyMap[ImGuiKey_V]          = Ra::Core::Key_V;
+    io.KeyMap[ImGuiKey_X]          = Ra::Core::Key_X;
+    io.KeyMap[ImGuiKey_Y]          = Ra::Core::Key_Y;
+    io.KeyMap[ImGuiKey_Z]          = Ra::Core::Key_Z;
 
     io.RenderDrawListsFn = renderDrawLists;       // Alternatively you can set this to NULL and call ImGui::GetDrawData() after ImGui::Render() to get the same ImDrawData pointer.
+
 //    io.SetClipboardTextFn = setClipboardText;
 //    io.GetClipboardTextFn = getClipboardText;
-//#ifdef _WIN32
-//    io.ImeWindowHandle = glfwGetWin32Window(g_Window);
-//#endif
-
-//    if (install_callbacks)
-//    {
-//        glfwSetMouseButtonCallback(window, mouseButtonCallback);
-//        glfwSetScrollCallback(window, scrollCallback);
-//        glfwSetKeyCallback(window, keyCallback);
-//        glfwSetCharCallback(window, charCallback);
-//    }
 
     return true;
 }
@@ -337,50 +290,48 @@ void shutdown()
     ImGui::Shutdown();
 }
 
-void newFrame(int w, int h)
+void newFrame(Ra::Engine::RadiumEngine* engine, int w, int h)
 {
     if (!g_FontTexture)
+    {
         ImGuiGL3::createDeviceObjects();
+    }
 
+    // get IO structures
     ImGuiIO& io = ImGui::GetIO();
+    Ra::Engine::InputStatus& inputstts = engine->getInputStatus();
 
-//    // Setup display size (every frame to accommodate for window resizing)
-//    int w, h;
-//    int display_w, display_h;
-//    glfwGetWindowSize(g_Window, &w, &h);
-//    glfwGetFramebufferSize(g_Window, &display_w, &display_h);
-//    io.DisplaySize = ImVec2((float)w, (float)h);
-//    io.DisplayFramebufferScale = ImVec2(w > 0 ? ((float)display_w / w) : 0, h > 0 ? ((float)display_h / h) : 0);
+    // Setup display size (every frame to accommodate for window resizing)
     io.DisplaySize = ImVec2((float)w, (float)h);
     io.DisplayFramebufferScale = ImVec2(1, 1);
 
     // Setup time step
     io.DeltaTime = (float)(1.0f/60.0f);
 
-//    // Setup inputs
-//    // (we already got mouse wheel, keyboard keys & characters from glfw callbacks polled in glfwPollEvents())
-//    if (glfwGetWindowAttrib(g_Window, GLFW_FOCUSED))
-//    {
-//        double mouse_x, mouse_y;
-//        glfwGetCursorPos(g_Window, &mouse_x, &mouse_y);
-//        io.MousePos = ImVec2((float)mouse_x, (float)mouse_y);   // Mouse position in screen coordinates (set to -1,-1 if no mouse / on another screen, etc.)
-//    }
-//    else
-//    {
-//        io.MousePos = ImVec2(-1,-1);
-//    }
+    // Setup inputs
+    // we need to grab the mouse wheel / keyboard keys+chars
 
-//    for (int i = 0; i < 3; i++)
+    // mouse
+    io.MousePos     = ImVec2(inputstts.mousePosition[0], inputstts.mousePosition[1]);
+    io.MouseDown[0] = (inputstts.buttonIsPressed[Ra::Core::MouseButton_Left]   == 0) ? false : true;
+    io.MouseDown[1] = (inputstts.buttonIsPressed[Ra::Core::MouseButton_Right]  == 0) ? false : true;
+    io.MouseDown[2] = (inputstts.buttonIsPressed[Ra::Core::MouseButton_Middle] == 0) ? false : true;
+    io.MouseWheel   =  inputstts.wheelDelta[0];
+    io.MouseDrawCursor = false;   // could be enabled
+
+    // keyboard
+//    for (int i = 0; i < Ra::Core::Key_Count; ++i)
 //    {
-//        io.MouseDown[i] = g_MousePressed[i] || glfwGetMouseButton(g_Window, i) != 0;    // If a mouse press event came, always pass it as "mouse held this frame", so we don't miss click-release events that are shorter than 1 frame.
-//        g_MousePressed[i] = false;
+//         io.KeysDown[i] = inputstts.keyIsPressed[i];
 //    }
 
-//    io.MouseWheel = g_MouseWheel;
-//    g_MouseWheel = 0.0f;
+    // modifier keys
+    io.KeyCtrl  = inputstts.keyIsPressed[Ra::Core::Modifier_Ctrl];
+    io.KeyShift = inputstts.keyIsPressed[Ra::Core::Modifier_Shift];
+    io.KeyAlt   = inputstts.keyIsPressed[Ra::Core::Modifier_Alt];
+    io.KeySuper = false;   // TODO(hugo) find the corresponding modifier
 
-//    // Hide OS mouse cursor if ImGui is drawing it
-//    glfwSetInputMode(g_Window, GLFW_CURSOR, io.MouseDrawCursor ? GLFW_CURSOR_HIDDEN : GLFW_CURSOR_NORMAL);
+    // there is probably a great need for resetting the status of things to capture Qt events
 
     // Start the frame
     ImGui::NewFrame();

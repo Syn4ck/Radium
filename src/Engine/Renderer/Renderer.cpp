@@ -98,10 +98,6 @@ namespace Ra
             initializeInternal();
 
             setupIO("HUD");
-            std::cout << "------------\nsent:\n------------" << std::endl;
-            std::cout << "width " << m_width << std::endl;
-            std::cout << "height " << m_height << std::endl;
-            std::cout << "passgraph " << (void*) getPassGraphRw() << std::endl;
 
             resize( m_width, m_height );
         }
@@ -440,7 +436,7 @@ namespace Ra
 
         Core::MultiGraph<Pass>* Renderer::getPassGraphRw()
         {
-            return (Core::MultiGraph<Pass>*) NULL;
+            return nullptr;
         }
 
         const uint* Renderer::getWidthOut()

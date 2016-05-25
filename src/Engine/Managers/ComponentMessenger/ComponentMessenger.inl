@@ -50,9 +50,9 @@ namespace Ra
         }
 
         template<typename ReturnType>
-        inline const ReturnType& ComponentMessenger::rw(const Entity* entity, const std::string& id)
+        inline ReturnType& ComponentMessenger::rw(const Entity* entity, const std::string& id)
         {
-            return *(getterCallback<ReturnType>(entity, id)());
+            return *(rwCallback<ReturnType>(entity, id)());
         }
 
         template<typename ReturnType>

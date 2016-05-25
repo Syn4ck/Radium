@@ -31,6 +31,8 @@ namespace Ra
             virtual void debugInternal( const RenderData& renderData ) override;
             virtual void uiInternal( const RenderData& renderData ) override;
 
+            virtual Core::MultiGraph<Pass>* getPassGraphRw() override;
+
         private:
             void initShaders();
             void initBuffers();
@@ -56,7 +58,7 @@ namespace Ra
             std::map<std::string, Pass*>       m_passmap;
             std::vector<std::shared_ptr<Pass>> m_passes;
 
-            Ra::Core::MultiGraph<Pass>  m_passgraph;
+            Ra::Core::MultiGraph<Pass> m_passgraph;
         };
 
     } // namespace Engine

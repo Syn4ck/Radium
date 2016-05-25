@@ -6,24 +6,26 @@
 
 /// @note If you use this binding you'll need to call 4 functions: init(), newFrame(), ImGui::Render() and shutdown()
 
+#include <Engine/RaEngine.hpp>
+
+
+#include <Engine/RadiumEngine.hpp>
 #include <Engine/Renderer/OpenGL/OpenGL.hpp>
 
 namespace ImGuiGL3 {
 
-    bool init();
+    bool init(Ra::Engine::RadiumEngine* engine);
     void shutdown();
-    void newFrame(int w, int h);
+    void newFrame(Ra::Engine::RadiumEngine* engine, int w, int h);
 
     // Use if you want to reset your rendering device without losing ImGui state.
     void invalidateDeviceObjects();
     bool createDeviceObjects();
 
-    // GLFW callbacks (installed by default if you enable 'install_callbacks' during initialization)
-    // Provided here if you want to chain callbacks.
     // You can also handle inputs yourself and use those as a reference.
-    //void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
-    //void scrollCallback(GLFWwindow* window, double xoffset, double yoffset);
-    //void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
-    //void charCallback(GLFWwindow* window, unsigned int c);
+//    void mouseButtonCallback(int button, int action, int mods);
+//    void scrollCallback(double xoffset, double yoffset);
+//    void keyCallback(int key, int scancode, int action, int mods);
+//    void charCallback(window, unsigned int c);
 
 }

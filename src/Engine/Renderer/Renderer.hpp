@@ -212,7 +212,7 @@ namespace Ra
              * @brief Get the pass graph of the renderer
              * @return NULL by defaut, as there is no pass graph outside of Forward
              */
-            /*virtual*/ Core::MultiGraph<Pass>* getPassGraphRw();
+            virtual Core::MultiGraph<Pass>* getPassGraphRw();
 
             /**
              * @brief IO function to export renderer width

@@ -2,6 +2,7 @@
 #define IMGUIPLUGIN_SYSTEM_HPP_
 
 #include <Engine/System/System.hpp>
+#include <Engine/RadiumEngine.hpp>
 
 #include <ImGuiPlugin.hpp>
 
@@ -17,6 +18,7 @@ namespace ImGuiPlugin
         /// @brief Task generator that generate nothing
         virtual void generateTasks( Ra::Core::TaskQueue* taskQueue,
                                     const Ra::Engine::FrameInfo& frameInfo ) override;
+
     };
 
 }

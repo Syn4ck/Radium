@@ -5,15 +5,21 @@
 #include <ImGuiNodeGraph.hpp>
 #include <ImGuiComponent.hpp>
 
+#include <Engine/Managers/ComponentMessenger/ComponentMessenger.hpp>
+
 #include <iostream>
 
 namespace ImGuiPlugin {
 
     ImGuiRenderObject::ImGuiRenderObject(const std::string& name, ImGuiComponent* comp,
-                      const Ra::Engine::RenderObjectType& type, int lifetime)
+                                         Ra::Core::MultiGraph<Ra::Engine::Pass>& passgraph,
+                                         const Ra::Engine::RenderObjectType& type, int lifetime)
         : Ra::Engine::RenderObject(name, (Ra::Engine::Component*)comp, type, lifetime)
         , m_imguicomp( comp )
-        , m_displayPassGraph( true )
+        , m_passgraph( passgraph )
+        , m_viewgraph( &passgraph )
+        , m_displayPassGraph( false )
+        , m_demoUI( true )
     {
     }
 
@@ -25,25 +31,27 @@ namespace ImGuiPlugin {
             return;
         }
 
-        ImGuiGL3::newFrame(m_imguicomp->m_width, m_imguicomp->m_height);
+        m_imguicomp->updateSize("HUD");
+        ImGuiGL3::newFrame(m_engine, m_imguicomp->m_width, m_imguicomp->m_height);
 
-        if (m_displayPassGraph)
+        bool isNodeOpened = true;
+
+        if (m_demoUI)
         {
-            bool isNodeOpened = true;
-
             // test window
             ImGui::SetNextWindowPos(ImVec2(60, 60), ImGuiSetCond_FirstUseEver);
             ImGui::ShowTestWindow(&isNodeOpened);
+        }
 
+        if (m_displayPassGraph)
+        {
             // pass graph window
-            //m_graphview.Begin(&isNodeOpened);
-            //m_graphview.End();
+            m_viewgraph.init();
+            m_viewgraph.Begin(&isNodeOpened);
+            m_viewgraph.End();
         }
 
         ImGui::Render();
-
-        // render the mesh
-        //getMesh()->render();
     }
 
 } // namespace ImGuiPlugin

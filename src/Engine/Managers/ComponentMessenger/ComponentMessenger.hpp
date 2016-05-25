@@ -127,7 +127,7 @@ namespace Ra
             inline void set(const Entity* entity, const std::string& id, const ReturnType& x);
 
             template<typename ReturnType>
-            inline const ReturnType& rw(const Entity* entity, const std::string& id);
+            inline ReturnType& rw(const Entity* entity, const std::string& id);
 
 
             //

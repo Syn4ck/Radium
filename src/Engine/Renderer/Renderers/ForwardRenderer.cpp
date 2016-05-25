@@ -432,5 +432,11 @@ namespace Ra
             GL_ASSERT( glDrawBuffer( GL_BACK ) );
             GL_ASSERT( glReadBuffer( GL_BACK ) );
         }
+
+        Core::MultiGraph<Pass>* ForwardRenderer::getPassGraphRw()
+        {
+            return &m_passgraph;
+        }
+
     }
 } // namespace Ra

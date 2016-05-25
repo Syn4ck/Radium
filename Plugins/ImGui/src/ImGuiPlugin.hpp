@@ -51,6 +51,7 @@ namespace ImGuiPlugin
 
     public slots:
         void togglePassesEditor( bool on );
+        void toggleDemoUI( bool on );
         // TODO(hugo) some load/save options, maybe
 
     private:

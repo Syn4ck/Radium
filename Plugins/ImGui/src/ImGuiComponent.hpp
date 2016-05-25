@@ -7,6 +7,7 @@
 #include <ImGuiRenderObject.hpp>
 
 #include <Engine/RaEngine.hpp>
+#include <Engine/RadiumEngine.hpp>
 #include <Engine/Renderer/Renderer.hpp>
 #include <Engine/Component/Component.hpp>
 #include <Engine/Renderer/Passes/Passes.hpp>
@@ -22,8 +23,6 @@ namespace ImGuiPlugin
         /// @brief handle the initialization process of ImGui
         ImGuiComponent(const std::string& name) : Component(name), m_contentName(name)
         {
-            initialize();
-            ImGuiGL3::init();
         }
 
         /// @brief handle the destruction of ImGui
@@ -41,11 +40,14 @@ namespace ImGuiPlugin
         /// @brief State of displaying pass editor
         void setPassesEditor( bool state );
 
-        Ra::Core::MultiGraph<Ra::Engine::Pass>* getPassGraphRw();
-        void setWidthIn(const uint* w);
-        void setHeightIn(const uint* h);
+        /// @brief State of displaying demo code
+        void setDemoUI(bool state);
 
-        void fetch(const std::string& id); // DEBUG
+        //Ra::Core::MultiGraph<Ra::Engine::Pass>& getPassGraph();
+        void setWidthIn( const uint* w );
+        void setHeightIn( const uint* h );
+
+        void updateSize(const std::string& id);
 
     public:
         std::shared_ptr<Ra::Engine::Mesh> m_quadMesh;
@@ -53,11 +55,13 @@ namespace ImGuiPlugin
         // renderer data
         uint m_width;
         uint m_height;
-        Ra::Core::MultiGraph<Ra::Engine::Pass>* m_passGraph;
+
+        Ra::Engine::RadiumEngine* m_engine;
 
     private:
         std::string m_contentName;
         std::unique_ptr<ImGuiRenderObject> m_ro;
+
     };
 
 } // namespace ImGuiPlugin

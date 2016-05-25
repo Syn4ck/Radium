@@ -67,7 +67,7 @@ namespace Ra
             MultiGraph() {}
             MultiGraph(const MultiGraph& other)
                 : m_graph(other.m_graph)
-                , m_names (other.m_names)
+                , m_names(other.m_names)
             {}
             ~MultiGraph() {}
 
