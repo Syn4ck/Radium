@@ -309,7 +309,7 @@ void newFrame(Ra::Engine::RadiumEngine* engine, int w, int h)
     io.DeltaTime = (float)(1.0f/60.0f);
 
     // Setup inputs
-    // we need to grab the mouse wheel / keyboard keys+chars
+    // we need to grab the mouse wheel / keyboard k
 
     // mouse
     io.MousePos     = ImVec2(inputstts.mousePosition[0], inputstts.mousePosition[1]);

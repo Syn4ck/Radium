@@ -8,7 +8,7 @@ static inline ImVec2 operator-(const ImVec2& lhs, const ImVec2& rhs) { return Im
 template <typename T> int ImGui::GraphViewer<T>::propsIds = 0;
 
 template <typename T>
-void ImGui::GraphViewer<T>::Begin(bool* opened)
+void ImGui::GraphViewer<T>::Show(bool* opened)
 {
     // try to create a window
     //SetNextWindowPos(ImVec2(26,26));
@@ -16,7 +16,7 @@ void ImGui::GraphViewer<T>::Begin(bool* opened)
 
     if (! ImGui::Begin("This window is beautiful", opened, ImVec2(900,500), 0.3f/*, ImGuiWindowFlags_NoTitleBar*/))
     {
-        End();
+        ImGui::End();
         return;
     }
 
@@ -24,16 +24,13 @@ void ImGui::GraphViewer<T>::Begin(bool* opened)
     // ...
     // short section, I know
 
-    // IDs management
-    unsigned int subID = 0;
+    // channel splitting
+    ImDrawList* draw_list = ImGui::GetWindowDrawList();
+    draw_list->ChannelsSplit(2);
 
     // here is the zone where we draw all the nodes
     for (auto const& nodeRepr : m_props)
-    {     
-        // begin a new drawlist (avoid triggering assert imgui.cpp l.2348)
-        ImGui::PushID(subID);
-        ImGui::BeginChild("pass_node");
-
+    {
         // draw the node, actually
         drawNode(*(nodeRepr.get()));
 
@@ -47,22 +44,14 @@ void ImGui::GraphViewer<T>::Begin(bool* opened)
             // and draw, finally
             drawLink(*parentProp, co.m_slot, *(nodeRepr.get()), co.m_local);
         }
-
-        // end the sub drawlist
-        ImGui::EndChild();
-        ImGui::PopID();
-        ++ subID;
     }
-}
 
-template <typename T>
-void ImGui::GraphViewer<T>::End()
-{
+    draw_list->ChannelsMerge();
     ImGui::End();
 }
 
 template <typename T>
-void ImGui::GraphViewer<T>::init()
+void ImGui::GraphViewer<T>::Init()
 {
     // this is where we build the representation of the structure at the creation time
     // for every node of ther graph we create a nodeinfo struct, add it to the vector
@@ -107,9 +96,10 @@ void ImGui::GraphViewer<T>::drawNode(const NodeProp& info)
     const ImColor bg1(40,40,40), edge1(180,180,180), bg2(81, 81, 151);
 
     ImDrawList* draw_list = ImGui::GetWindowDrawList();
+    draw_list->ChannelsSetCurrent(1);
 
     // background
-    draw_list->AddRectFilled(offset + info.m_pos, offset + info.m_pos + info.m_size, bg1,   1.5f);
+    draw_list->AddRectFilled(offset + info.m_pos, offset + info.m_pos + info.m_size, bg1,   1.4f);
     draw_list->AddRectFilled(offset + info.m_pos + ImVec2(24, 2),
                              offset + info.m_pos + info.m_size - ImVec2(2, 2), bg2, 1.4f);
 
@@ -142,6 +132,8 @@ void ImGui::GraphViewer<T>::drawLink(const NodeProp& node_a, unsigned int slot_a
     ImVec2 p_b = getInputPos(node_b, slot_b) + offset;
 
     ImDrawList* draw_list = GetWindowDrawList();
+    draw_list->ChannelsSetCurrent(0);
+
     draw_hermite(draw_list, p_a, p_b, 12, ImColor(180,180,180), 1.f);
 //    draw_list->AddLine(p_a, p_b, ImColor(180,180,180), 1.f);
 }

@@ -28,7 +28,7 @@ namespace ImGuiPlugin
         Ra::Engine::UiComponent* comp = Ra::Engine::SystemEntity::uiCmp();
         comp->addRenderObject(m_ro.get());
 
-        // init the ImGui Gl part
+        // init the ImGui GL part
         ImGuiGL3::init(m_engine);
     }
 

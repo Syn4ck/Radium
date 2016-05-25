@@ -34,21 +34,18 @@ namespace ImGuiPlugin {
         m_imguicomp->updateSize("HUD");
         ImGuiGL3::newFrame(m_engine, m_imguicomp->m_width, m_imguicomp->m_height);
 
-        bool isNodeOpened = true;
-
         if (m_demoUI)
         {
             // test window
             ImGui::SetNextWindowPos(ImVec2(60, 60), ImGuiSetCond_FirstUseEver);
-            ImGui::ShowTestWindow(&isNodeOpened);
+            ImGui::ShowTestWindow(/*&m_demoUI*/);
         }
 
         if (m_displayPassGraph)
         {
             // pass graph window
-            m_viewgraph.init();
-            m_viewgraph.Begin(&isNodeOpened);
-            m_viewgraph.End();
+            m_viewgraph.Init();
+            m_viewgraph.Show(/*&m_displayPassGraph*/);
         }
 
         ImGui::Render();

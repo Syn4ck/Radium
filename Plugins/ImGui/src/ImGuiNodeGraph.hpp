@@ -56,11 +56,7 @@ namespace ImGui {
 
         /// @brief window that displays nodes and links
         /// @warning init() must have been called prior to this
-        /// @note: specialized ImGui::Begin() function
-        void Begin( bool* opened );
-
-        /// @brief ImGui term function for the window
-        void End();
+        void Show( bool* opened = nullptr );
 
         /// @brief initiate the graph representation with current graph
         /// it is assumed that nothing will modify the graph structure
@@ -68,7 +64,7 @@ namespace ImGui {
         /// this enables the grah representation to parse the graph only
         /// once and to update himself automatically while telling the
         /// graph structure to change
-        void init();
+        void Init();
 
         /// @brief one node display
         void drawNode( const NodeProp& prop );
