@@ -63,7 +63,7 @@ inline std::vector< AnimationData* > FileData::getAnimationData() const {
     std::string currentName = m_geometryData[m_currentIndex]->getName();
     for( const auto& item : m_animationData)
     {
-        if (item->getName() == currentName)
+        if (item->getName() == currentName || true)
         {
             list.push_back( item.get() );
             break;

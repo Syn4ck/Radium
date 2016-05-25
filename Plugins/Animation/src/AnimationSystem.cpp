@@ -79,7 +79,7 @@ namespace AnimationPlugin
         auto geomData = fileData->getGeometryData();
         auto skelData = fileData->getHandleData();
         auto animData = fileData->getAnimationData();
-
+        
         for ( const auto& skel : skelData )
         {
             uint geomID = uint(-1);

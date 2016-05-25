@@ -55,7 +55,7 @@ namespace SkinningPlugin
 
                     SkinningDisplayComponent* display = new SkinningDisplayComponent("SkC_DSP_" + skel->getName(), skel->getName() );
                     entity->addComponent( display );
-                    //display->display( component->getRefData() );
+//                    display->display( component->getRefData() );
                 }
             }
         }

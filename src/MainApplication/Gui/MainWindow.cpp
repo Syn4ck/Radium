@@ -143,7 +143,7 @@ namespace Ra
         std::replace(extListStd.begin(), extListStd.end(), ';', ' ');
         QString filter = QString::fromStdString(extListStd);
 
-        QString path = QFileDialog::getOpenFileName( this, "Open File", "..", filter);
+        QString path = QFileDialog::getOpenFileName( this, "Open File", "..");
         if ( path.size() > 0 )
         {
             emit fileLoading( path );

@@ -126,7 +126,7 @@ namespace AnimationPlugin
 
         // get the current pose from the animation
         if ( dt > 0 && m_animations.size() > 0)
-        {
+        {            
             m_wasReset = false;
             Ra::Core::Animation::Pose currentPose = m_animations[0].getPose(m_animationTime);
 
