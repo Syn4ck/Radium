@@ -26,7 +26,9 @@ void ImGui::GraphViewer<T>::Show(bool* opened)
 
     // channel splitting
     ImDrawList* draw_list = ImGui::GetWindowDrawList();
-    draw_list->ChannelsSplit(2);
+    //draw_list->ChannelsSplit(2);
+    std::cout << "START" << std::endl;
+    std::cout << "[$$$$] VERTEX #" << draw_list->_VtxCurrentIdx << std::endl;
 
     // here is the zone where we draw all the nodes
     for (auto const& nodeRepr : m_props)
@@ -46,7 +48,8 @@ void ImGui::GraphViewer<T>::Show(bool* opened)
         }
     }
 
-    draw_list->ChannelsMerge();
+    //draw_list->ChannelsMerge();
+    std::cout << "END" << std::endl;
     ImGui::End();
 }
 
@@ -88,6 +91,7 @@ void ImGui::GraphViewer<T>::Init()
 template <typename T>
 void ImGui::GraphViewer<T>::drawNode(const NodeProp& info)
 {
+//    BeginChild("scroll_node", ImVec2(0,0), true, ImGuiWindowFlags_NoScrollbar);
     PushID(info.m_id);
 
     ImVec2 offset = GetWindowPos(); // get the current window position
@@ -96,7 +100,8 @@ void ImGui::GraphViewer<T>::drawNode(const NodeProp& info)
     const ImColor bg1(40,40,40), edge1(180,180,180), bg2(81, 81, 151);
 
     ImDrawList* draw_list = ImGui::GetWindowDrawList();
-    draw_list->ChannelsSetCurrent(1);
+    //draw_list->ChannelsSetCurrent(1);
+    std::cout << "[node] Vertex #" << draw_list->_VtxCurrentIdx << std::endl;
 
     // background
     draw_list->AddRectFilled(offset + info.m_pos, offset + info.m_pos + info.m_size, bg1,   1.4f);
@@ -121,6 +126,7 @@ void ImGui::GraphViewer<T>::drawNode(const NodeProp& info)
     Text("%s", info.m_name);
 
     PopID();
+//    EndChild()
 }
 
 template <typename T>
@@ -132,7 +138,8 @@ void ImGui::GraphViewer<T>::drawLink(const NodeProp& node_a, unsigned int slot_a
     ImVec2 p_b = getInputPos(node_b, slot_b) + offset;
 
     ImDrawList* draw_list = GetWindowDrawList();
-    draw_list->ChannelsSetCurrent(0);
+    //draw_list->ChannelsSetCurrent(0);
+    std::cout << "[link] Vertex #" << draw_list->_VtxCurrentIdx << std::endl;
 
     draw_hermite(draw_list, p_a, p_b, 12, ImColor(180,180,180), 1.f);
 //    draw_list->AddLine(p_a, p_b, ImColor(180,180,180), 1.f);

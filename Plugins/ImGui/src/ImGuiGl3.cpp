@@ -16,6 +16,94 @@
 
 #include <iostream>
 
+static char keymap(int key, Ra::Engine::InputStatus& inputstts)
+{
+    if ((inputstts.modifiers & Ra::Core::Modifier_Shift) == 0)
+    {
+        switch (key) {
+        // letters
+        case 16: return 'q'; break;
+        case 22: return 'w'; break;
+        case 4 : return 'e'; break;
+        case 17: return 'r'; break;
+        case 19: return 't'; break;
+        case 24: return 'y'; break;
+        case 20: return 'u'; break;
+        case 8 : return 'i'; break;
+        case 14: return 'o'; break;
+        case 15: return 'p'; break;
+        case 0 : return 'a'; break;
+        case 18: return 's'; break;
+        case 3 : return 'd'; break;
+        case 5 : return 'f'; break;
+        case 6 : return 'g'; break;
+        case 7 : return 'h'; break;
+        case 9 : return 'j'; break;
+        case 10: return 'k'; break;
+        case 11: return 'l'; break;
+        case 25: return 'z'; break;
+        case 23: return 'x'; break;
+        case 2 : return 'c'; break;
+        case 21: return 'v'; break;
+        case 1 : return 'b'; break;
+        case 13: return 'n'; break;
+        case 12: return 'm'; break;
+        // numbers
+        case 26: return '0'; break;
+        case 27: return '1'; break;
+        case 28: return '2'; break;
+        case 29: return '3'; break;
+        case 30: return '4'; break;
+        case 31: return '5'; break;
+        case 32: return '6'; break;
+        case 33: return '7'; break;
+        case 34: return '8'; break;
+        case 35: return '9'; break;
+        default: break;
+        }
+    }
+    else
+    {
+        switch (key) {
+        // letters
+        case 16: return 'Q'; break;
+        case 22: return 'W'; break;
+        case 4 : return 'E'; break;
+        case 17: return 'R'; break;
+        case 19: return 'T'; break;
+        case 24: return 'Y'; break;
+        case 20: return 'U'; break;
+        case 8 : return 'I'; break;
+        case 14: return 'O'; break;
+        case 15: return 'P'; break;
+        case 0 : return 'A'; break;
+        case 18: return 'S'; break;
+        case 3 : return 'D'; break;
+        case 5 : return 'F'; break;
+        case 6 : return 'G'; break;
+        case 7 : return 'H'; break;
+        case 9 : return 'J'; break;
+        case 10: return 'K'; break;
+        case 11: return 'L'; break;
+        case 25: return 'Z'; break;
+        case 23: return 'X'; break;
+        case 2 : return 'C'; break;
+        case 21: return 'V'; break;
+        case 1 : return 'B'; break;
+        case 13: return 'N'; break;
+        case 12: return 'M'; break;
+        default: break;
+        }
+    }
+
+    // control
+    switch (key)
+    {
+    case 58: return ' '; break;
+    default: return -1;
+    }
+}
+
 namespace ImGuiGL3 {
 
 // Data
@@ -278,9 +366,6 @@ bool init(Ra::Engine::RadiumEngine* engine)
 
     io.RenderDrawListsFn = renderDrawLists;       // Alternatively you can set this to NULL and call ImGui::GetDrawData() after ImGui::Render() to get the same ImDrawData pointer.
 
-//    io.SetClipboardTextFn = setClipboardText;
-//    io.GetClipboardTextFn = getClipboardText;
-
     return true;
 }
 
@@ -319,16 +404,27 @@ void newFrame(Ra::Engine::RadiumEngine* engine, int w, int h)
     io.MouseWheel   =  inputstts.wheelDelta[0];
     io.MouseDrawCursor = false;   // could be enabled
 
-    // keyboard
-//    for (int i = 0; i < Ra::Core::Key_Count; ++i)
-//    {
-//         io.KeysDown[i] = inputstts.keyIsPressed[i];
-//    }
+    // TODO(hugo) this is an hardcoded value from Core::Key_Count (RadiumEngine.hpp)
+    // if i < 104 then when '.' is pressed the key is never released
+    char symbol = -1;
+
+    // input characters
+    for ( int i = 0; i < 103; ++ i )
+    {
+        if ((io.KeysDown[i] = inputstts.keyIsPressed[i])
+            && ((io.KeysDownDurationPrev[i] == 0.f)
+            ||  (io.KeysDownDurationPrev[i] > (20*io.DeltaTime))))
+        {
+            symbol = keymap(i, inputstts);
+            if (symbol != -1)
+                io.AddInputCharacter(symbol);
+        }
+    }
 
     // modifier keys
-    io.KeyCtrl  = inputstts.keyIsPressed[Ra::Core::Modifier_Ctrl];
-    io.KeyShift = inputstts.keyIsPressed[Ra::Core::Modifier_Shift];
-    io.KeyAlt   = inputstts.keyIsPressed[Ra::Core::Modifier_Alt];
+    io.KeyCtrl  = ((inputstts.modifiers & Ra::Core::Modifier_Ctrl)  != 0);
+    io.KeyShift = ((inputstts.modifiers & Ra::Core::Modifier_Shift) != 0);
+    io.KeyAlt   = ((inputstts.modifiers & Ra::Core::Modifier_Alt)   != 0);
     io.KeySuper = false;   // TODO(hugo) find the corresponding modifier
 
     // there is probably a great need for resetting the status of things to capture Qt events
