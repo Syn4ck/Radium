@@ -7,7 +7,11 @@ class Foo {};
 class Bar{ public: class Baz {}; };
 namespace Bunny { class Fiddle{}; }
 
+template <typename T, int N> class Frob {};
 
+// Helper macro
+// Note  : doesn't work with templates with multiple arguments because of the coma
+#define STATIC_TYPE_STR( T )  std::string(CompileTimeUtils::GetTypeName<T>()) 
 namespace RaTests {
 class BaseTests: public Test
 {
@@ -15,26 +19,31 @@ class BaseTests: public Test
     {
 
         // Test the typename mechanism
-        RA_UNIT_TEST( std::string(CompileTimeUtils::GetTypeName<int>()) == "int", "Typename mechanism fail for `int`" );
-        RA_UNIT_TEST( std::string(CompileTimeUtils::GetTypeName<float>()) == "float", "Typename mechanism fail for `float`" );
+        RA_UNIT_TEST( STATIC_TYPE_STR(int)   == "int", "Typename mechanism fail for `int`" );
+        RA_UNIT_TEST( STATIC_TYPE_STR(float) == "float", "Typename mechanism fail for `float`" );
 
-        // Testing const, references and pointers.
-        RA_UNIT_TEST( std::string(CompileTimeUtils::GetTypeName<const int>()) == "const int", "Typename mechanism fail for `const`" );
-        RA_UNIT_TEST( std::string(CompileTimeUtils::GetTypeName<int*>()) == "int*", "Typename mechanism fail for pointer" );
-        RA_UNIT_TEST( std::string(CompileTimeUtils::GetTypeName<const int*>()) == "const int*", "Typename mechanism fail for pointer to const" );
-        RA_UNIT_TEST( std::string(CompileTimeUtils::GetTypeName<const int* const>()) == "const int* const", "Typename mechanism fail for pointer const" );
-        RA_UNIT_TEST( std::string(CompileTimeUtils::GetTypeName<int&>()) == "int&", "Typename mechanism fail for reference" );
-        RA_UNIT_TEST( std::string(CompileTimeUtils::GetTypeName<const int&>()) == "const int&", "Typename mechanism fail for const reference" );
+
+
+        // Test pointers and references. Account for different spacing convention
+        RA_UNIT_TEST( STATIC_TYPE_STR(int*) == "int*" || STATIC_TYPE_STR(int*) == "int *", "Typename mechanism fail for pointer" );
+        RA_UNIT_TEST( STATIC_TYPE_STR(int&) == "int&" || STATIC_TYPE_STR(int&) == "int &" ,"Typename mechanism fail for reference" );
+
+        // Testing const. We have to account for both conventions : const T (gcc) and T const (Visual Studio)
+        RA_UNIT_TEST( STATIC_TYPE_STR(const int)  == "const int"  || STATIC_TYPE_STR(const int)  == "int const ", "Typename mechanism fail for `const`" );
 
         // Testing classes and namespaces.
-        RA_UNIT_TEST( std::string(CompileTimeUtils::GetTypeName<Foo>()) == "Foo", "Typename mechanism fail for class" );
-        RA_UNIT_TEST( std::string(CompileTimeUtils::GetTypeName<Bar::Baz>()) == "Bar::Baz", "Typename mechanism fail for nested class" );
-        RA_UNIT_TEST( std::string(CompileTimeUtils::GetTypeName<Bunny::Fiddle>()) == "Bunny::Fiddle", "Typename mechanism fail for class in namespace" );
+        RA_UNIT_TEST( STATIC_TYPE_STR (Foo) == "Foo" || STATIC_TYPE_STR(Foo) == "class Foo", "Typename mechanism fail for class" );
+        RA_UNIT_TEST( STATIC_TYPE_STR(Bar::Baz) == "Bar::Baz" || STATIC_TYPE_STR(Bar::Baz) == "class Bar::Baz", "Typename mechanism fail for nested class" );
+        RA_UNIT_TEST( STATIC_TYPE_STR(Bunny::Fiddle) == "Bunny::Fiddle" || STATIC_TYPE_STR(Bunny::Fiddle) == "class Bunny::Fiddle", "Typename mechanism fail for nested class" );
 
         // Testing typedefs
-        RA_UNIT_TEST( std::string(CompileTimeUtils::GetTypeName<uint>()) == "unsigned int", "Typename mechanism fail for typedef" );
+        RA_UNIT_TEST( STATIC_TYPE_STR(uint) == "unsigned int", "Typename mechanism fail for typedef" );
+
+        // Testing templates
+        std::cout << "||" << CompileTimeUtils::GetTypeName<Frob<int, 42>>() << "||" << std::endl;
+        RA_UNIT_TEST( (CompileTimeUtils::GetTypeName< Frob<int, 42> >()) == "class Frob<int,42> ", "Typename mechanism fail for template");
     }
-};
+}; 
 }
 
 
