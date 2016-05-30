@@ -1,7 +1,5 @@
 #include <QRadium/Gui/Viewer.hpp>
 
-#include <iostream>
-
 #include <QMouseEvent>
 #include <QKeyEvent>
 #include <QPainter>
@@ -97,27 +95,22 @@ namespace QRadium
         auto& ins = Ra::Engine::RadiumEngine::getInstance()->getInputStatus();
         int key = (int)getCoreKey(event);
 
-        std::cout << "Pressed " << key;
-
         switch (key)
         {
             case Key_Control:
             {
-                std::cout << " (CTRL)";
                 ins.modifiers |= Modifier_Ctrl;
             }
             break;
 
             case Key_Shift:
             {
-                std::cout << " (SHIFT)";
                 ins.modifiers |= Modifier_Shift;
             }
             break;
 
             case Key_Alt:
             {
-                std::cout << " (ALT)";
                 ins.modifiers |= Modifier_Alt;
             }
             break;
