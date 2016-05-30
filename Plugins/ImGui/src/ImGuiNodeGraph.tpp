@@ -14,7 +14,7 @@ void ImGui::GraphViewer<T>::Show(bool* opened)
     SetNextWindowPos(ImVec2(26,26), ImGuiSetCond_FirstUseEver);
     SetNextWindowSize(ImVec2(1000,600), ImGuiSetCond_FirstUseEver);
 
-    if (! ImGui::Begin("This window is beautiful", opened, ImVec2(900,500), 0.3f, ImGuiWindowFlags_NoTitleBar))
+    if (! ImGui::Begin("This window is beautiful", opened, ImVec2(900,500), 0.3f, ImGuiWindowFlags_NoTitleBar|ImGuiWindowFlags_NoMove))
     {
         ImGui::End();
         return;
@@ -86,33 +86,62 @@ void ImGui::GraphViewer<T>::Init()
 
 
 
+// note: l'algorithmique utilisée est notamment inspirée (pour la partie évènements)
+// de l'exemple fourni par l'auteur d'ImGui
 template <typename T>
-void ImGui::GraphViewer<T>::drawNode(const NodeProp& info)
+void ImGui::GraphViewer<T>::drawNode(NodeProp& info)
 {
     PushID(info.m_id);
 
     ImVec2 offset = GetWindowPos(); // get the current window position
 
     const float nodeRadius = 3.5f;
-    const ImColor bg1(40,40,40), edge1(180,180,180), bg2(81, 81, 151);
+    ImColor bgBox(40,40,40), bgEdge(180,180,180), bgSubBox(81, 81, 151);
+
+    static int draggedNode = -1;
 
     ImDrawList* draw_list = ImGui::GetWindowDrawList();
     draw_list->ChannelsSetCurrent(1);
 
-    // background
-    draw_list->AddRectFilled(offset + info.m_pos, offset + info.m_pos + info.m_size, bg1,   1.4f);
-    draw_list->AddRectFilled(offset + info.m_pos + ImVec2(24, 2),
-                             offset + info.m_pos + info.m_size - ImVec2(2, 2), bg2, 1.4f);
+    ImVec2 bottom = offset + info.m_pos, top = offset + info.m_pos + info.m_size;
+
+    // event management
+    info.m_isHovered = ImGui::IsMouseHoveringRect(bottom, top);
+    info.m_isDragged = info.m_isDragged && ImGui::IsMouseDragging(0);
+
+    if (info.m_isHovered)
+    {
+        bgBox = ImColor(60,60,60);
+        info.m_isDragged = ImGui::IsMouseDown(0) && ((draggedNode == -1)||info.m_isDragged);
+    }
+
+    if (info.m_isDragged)
+    {
+        info.m_pos = info.m_pos + ImGui::GetMouseDragDelta();
+        ImGui::ResetMouseDragDelta();
+        draggedNode = info.m_id;
+    }
+
+    if ((! info.m_isDragged) && (draggedNode == info.m_id))
+    {
+        draggedNode = -1;
+    }
+
+    // actual background draw
+    // draw_list->AddRectFilled(offset + info.m_pos, offset + info.m_pos + info.m_size, bgNormal, 1.4f);
+    draw_list->AddRectFilled(bottom, top, bgBox, 1.4f);
+    draw_list->AddRectFilled(bottom + ImVec2(24, 2), top - ImVec2(2, 2), bgSubBox, 1.4f);
 
     // input connectors
     for (int i = 0; i < info.m_nbin; ++i)
     {
-        draw_list->AddCircleFilled(getInputPos(info, i) + offset, nodeRadius, edge1);
+        draw_list->AddCircleFilled(getInputPos(info, i) + offset, nodeRadius, bgEdge);
     }
 
+    // output connectors
     for (int i = 0; i < info.m_nbout; ++i)
     {
-        draw_list->AddCircleFilled(getOutputPos(info, i) + offset, nodeRadius, edge1);
+        draw_list->AddCircleFilled(getOutputPos(info, i) + offset, nodeRadius, bgEdge);
     }
 
     // beautiful text
@@ -136,7 +165,6 @@ void ImGui::GraphViewer<T>::drawLink(const NodeProp& node_a, unsigned int slot_a
     draw_list->ChannelsSetCurrent(0);
 
     draw_hermite(draw_list, p_a, p_b, 12, ImColor(180,180,180), 1.f);
-//    draw_list->AddLine(p_a, p_b, ImColor(180,180,180), 1.f);
 }
 
 template <typename T>

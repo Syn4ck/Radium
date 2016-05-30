@@ -21,11 +21,16 @@ namespace ImGui {
     struct NodeProp {
         const typename Ra::Core::MultiGraph<T>::Node* m_node;
 
+        // graphic properties
         int    m_id;
         char   m_name[32];
         int    m_levelx, m_levely;
         ImVec2 m_pos   , m_size;
         int    m_nbout , m_nbin;
+
+        // events properties
+        bool m_isDragged;
+        bool m_isHovered;
 
         /// @brief instantiate the struct required to draw a node on screen
         NodeProp(const typename Ra::Core::MultiGraph<T>::Node* node, int level,
@@ -35,6 +40,8 @@ namespace ImGui {
             , m_size  ( 96, 48 )
             , m_nbout ( nbout  )
             , m_nbin  ( nbin   )
+            , m_isDragged(false)
+            , m_isHovered(false)
         {
             m_id = propsIds ++;
             strncpy(m_name, name, 32);
@@ -67,7 +74,7 @@ namespace ImGui {
         void Init();
 
         /// @brief one node display
-        void drawNode( const NodeProp& prop );
+        void drawNode( NodeProp& prop );
 
         /// @brief display link between 2 nodes
         void drawLink( const NodeProp& node_a, unsigned int slot_a, const NodeProp& node_b, unsigned int slot_b );
