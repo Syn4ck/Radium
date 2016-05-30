@@ -23,6 +23,11 @@ namespace ImGuiPlugin {
     {
     }
 
+    void ImGuiRenderObject::init()
+    {
+        m_viewgraph.Init();
+    }
+
     void ImGuiRenderObject::render(const Ra::Engine::RenderParameters& lightParams, Ra::Core::Matrix4 viewMatrix,
                                    Ra::Core::Matrix4 projMatrix, const Ra::Engine::ShaderProgram* altShader)
     {
@@ -44,7 +49,6 @@ namespace ImGuiPlugin {
         if (m_displayPassGraph)
         {
             // pass graph window
-            m_viewgraph.Init();
             m_viewgraph.Show(/*&m_displayPassGraph*/);
         }
 

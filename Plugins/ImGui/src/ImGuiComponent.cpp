@@ -20,6 +20,7 @@ namespace ImGuiPlugin
         // create new RenderObject of type ImGuiRO to render imgui component
         m_ro.reset( new ImGuiRenderObject("RO_imgui_" + m_contentName, this, pgraph,  Ra::Engine::RenderObjectType::UI) );
         m_ro->m_engine = m_engine;
+        m_ro->init();
 
         // setup IO to import needed informations
         setupIO("HUD");
