@@ -47,6 +47,17 @@ void ImGui::GraphViewer<T>::Show(bool* opened)
     }
 
     draw_list->ChannelsMerge();
+
+    // drawing the reinit button
+    SetCursorPos(GetWindowPos() + ImVec2(-13, GetWindowHeight() - 100));
+    Button("Reset view");
+
+    // used to update the graph
+    if (IsItemClicked())
+    {
+        Init();
+    }
+
     ImGui::End();
 }
 
@@ -83,7 +94,6 @@ void ImGui::GraphViewer<T>::Init()
         m_reference[*node] = m_props.back().get();
     }
 }
-
 
 
 // note: l'algorithmique utilisée est notamment inspirée (pour la partie évènements)
