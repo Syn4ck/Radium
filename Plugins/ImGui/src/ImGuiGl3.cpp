@@ -415,6 +415,7 @@ void newFrame(Ra::Engine::RadiumEngine* engine, int w, int h)
             && ((io.KeysDownDurationPrev[i] == 0.f)
             ||  (io.KeysDownDurationPrev[i] > (20*io.DeltaTime))))
         {
+            //std::cout << "pressed " << i << std::endl;
             symbol = keymap(i, inputstts);
             if (symbol != -1)
                 io.AddInputCharacter(symbol);

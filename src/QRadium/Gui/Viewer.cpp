@@ -120,8 +120,6 @@ namespace QRadium
             }
         }
 
-        std::cout << std::endl;
-
         ins.keyWasPressed[key] = true;
         ins.keyIsPressed[key] = true;
 

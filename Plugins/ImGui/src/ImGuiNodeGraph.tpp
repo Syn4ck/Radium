@@ -4,7 +4,6 @@
 static inline ImVec2 operator+(const ImVec2& lhs, const ImVec2& rhs) { return ImVec2(lhs.x+rhs.x, lhs.y+rhs.y); }
 static inline ImVec2 operator-(const ImVec2& lhs, const ImVec2& rhs) { return ImVec2(lhs.x-rhs.x, lhs.y-rhs.y); }
 
-
 template <typename T> int ImGui::GraphViewer<T>::propsIds = 0;
 
 template <typename T>
@@ -14,15 +13,11 @@ void ImGui::GraphViewer<T>::Show(bool* opened)
     SetNextWindowPos(ImVec2(26,26), ImGuiSetCond_FirstUseEver);
     SetNextWindowSize(ImVec2(1000,600), ImGuiSetCond_FirstUseEver);
 
-    if (! ImGui::Begin("This window is beautiful", opened, ImVec2(900,500), 0.3f, ImGuiWindowFlags_NoTitleBar|ImGuiWindowFlags_NoMove))
+    if (! ImGui::Begin("This window is beautiful", opened, ImVec2(900,500), 0.3f, ImGuiWindowFlags_NoTitleBar|ImGuiWindowFlags_NoMove|ImGuiWindowFlags_HorizontalScrollbar))
     {
         ImGui::End();
         return;
     }
-
-    // event manipulation
-    // ...
-    // short section, I know
 
     // channel splitting
     ImDrawList* draw_list = ImGui::GetWindowDrawList();
@@ -39,7 +34,7 @@ void ImGui::GraphViewer<T>::Show(bool* opened)
         {
             // for each parent find the corresponding prop
             typename Ra::Core::MultiGraph<T>::Node::Connection co = parent;
-            NodeProp* parentProp = m_reference[*(co.m_source)];
+            NodeProp* parentProp = m_reference[co.m_source];
 
             // and draw, finally
             drawLink(*parentProp, co.m_slot, *(nodeRepr.get()), co.m_local);
@@ -47,9 +42,10 @@ void ImGui::GraphViewer<T>::Show(bool* opened)
     }
 
     draw_list->ChannelsMerge();
+    PushStyleColor(ImGuiCol_Button, ImVec4(0.f,0.9f,0.45f,0.7f));
 
     // drawing the reinit button
-    SetCursorPos(GetWindowPos() + ImVec2(-13, GetWindowHeight() - 100));
+    SetCursorPos(GetWindowPos() + ImVec2(-13 + GetScrollX(), GetWindowHeight() - 100 + GetScrollY()));
     Button("Reset view");
 
     // used to update the graph
@@ -58,6 +54,7 @@ void ImGui::GraphViewer<T>::Show(bool* opened)
         Init();
     }
 
+    PopStyleColor();
     ImGui::End();
 }
 
@@ -74,7 +71,7 @@ void ImGui::GraphViewer<T>::Init()
 
     for (int i = 0; i < m_gr->size(); ++ i)
     {
-        const typename Ra::Core::MultiGraph<T>::Node* node = (*m_gr)[i];
+        typename Ra::Core::MultiGraph<T>::Node* node = (*m_gr)[i];
 
         // construct the node
         m_props.push_back(std::unique_ptr<NodeProp>(new NodeProp(node, node->m_level, node->m_name.c_str(), node->m_nbIn, node->m_nbOut)));
@@ -91,19 +88,18 @@ void ImGui::GraphViewer<T>::Init()
         }
 
         // add to hashmap
-        m_reference[*node] = m_props.back().get();
+        m_reference[node] = m_props.back().get();
     }
 }
 
 
-// note: l'algorithmique utilisée est notamment inspirée (pour la partie évènements)
-// de l'exemple fourni par l'auteur d'ImGui
+// note: events management is inspired from imgui's author's code
 template <typename T>
 void ImGui::GraphViewer<T>::drawNode(NodeProp& info)
 {
     PushID(info.m_id);
 
-    ImVec2 offset = GetWindowPos(); // get the current window position
+    ImVec2 offset = GetWindowPos() - ImVec2(GetScrollX(), GetScrollY());
 
     const float nodeRadius = 3.5f;
     ImColor bgBox(40,40,40), bgEdge(180,180,180), bgSubBox(81, 81, 151);
@@ -167,7 +163,7 @@ template <typename T>
 void ImGui::GraphViewer<T>::drawLink(const NodeProp& node_a, unsigned int slot_a,
                               const NodeProp& node_b, unsigned int slot_b)
 {
-    ImVec2 offset = GetWindowPos();
+    ImVec2 offset = GetWindowPos() - ImVec2(GetScrollX(), GetScrollY());
     ImVec2 p_a = getOutputPos(node_a, slot_a) + offset;
     ImVec2 p_b = getInputPos(node_b, slot_b) + offset;
 

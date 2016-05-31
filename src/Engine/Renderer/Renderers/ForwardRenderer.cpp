@@ -51,7 +51,6 @@ namespace Ra
         ForwardRenderer::ForwardRenderer( uint width, uint height )
             : Renderer( width, height )
             , m_fbo( nullptr )
-            //, m_graphview(&m_passgraph)
         {
         }
 
@@ -96,7 +95,6 @@ namespace Ra
             // levelize and sort on the same run
             m_passgraph.levelize(true);
             //m_passgraph.print();
-            //m_graphview.init();
         }
 
         void ForwardRenderer::initPasses()

@@ -8,7 +8,7 @@
 
 /**
  * @brief define some functions to represent a node widget and
- * useful things like spline rendering
+ * useful things like spline rendering, and manage the viewer
  */
 
 namespace ImGui {
@@ -98,6 +98,8 @@ namespace ImGui {
         float getSlotPosY( const NodeProp& info, unsigned int idx, unsigned int total );
 
         /// @brief draw a Hermite spline
+        /// @note this function was written by
+        /// <a href="https://gist.github.com/emoon/b8ff4b4ce4f1b43e79f2">emoon</a>
         void draw_hermite( ImDrawList* draw_list, ImVec2 p1, ImVec2 p2, int STEPS,
                            const ImColor &col, float thickness = 2.f );
 
@@ -109,7 +111,7 @@ namespace ImGui {
         std::vector<std::unique_ptr<NodeProp>> m_props;
 
         /// @brief hashmap to retrieve nodeProp from node
-        std::map<typename Ra::Core::MultiGraph<T>::Node, NodeProp*> m_reference;
+        std::map<typename Ra::Core::MultiGraph<T>::Node*, NodeProp*> m_reference;
 
         static int propsIds;
 
