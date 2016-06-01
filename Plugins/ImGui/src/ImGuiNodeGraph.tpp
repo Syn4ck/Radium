@@ -4,7 +4,13 @@
 static inline ImVec2 operator+(const ImVec2& lhs, const ImVec2& rhs) { return ImVec2(lhs.x+rhs.x, lhs.y+rhs.y); }
 static inline ImVec2 operator-(const ImVec2& lhs, const ImVec2& rhs) { return ImVec2(lhs.x-rhs.x, lhs.y-rhs.y); }
 
+// dragging state definition
+template <typename T> typename ImGui::GraphViewer<T>::DragStruct
+    ImGui::GraphViewer<T>::draggingState = {DRAG_NONE, nullptr, -1, false};
+
 template <typename T> int ImGui::GraphViewer<T>::propsIds = 0;
+
+
 
 template <typename T>
 void ImGui::GraphViewer<T>::Show(bool* opened)
@@ -13,11 +19,18 @@ void ImGui::GraphViewer<T>::Show(bool* opened)
     SetNextWindowPos(ImVec2(26,26), ImGuiSetCond_FirstUseEver);
     SetNextWindowSize(ImVec2(1000,600), ImGuiSetCond_FirstUseEver);
 
-    if (! ImGui::Begin("This window is beautiful", opened, ImVec2(900,500), 0.3f, ImGuiWindowFlags_NoTitleBar|ImGuiWindowFlags_NoMove|ImGuiWindowFlags_HorizontalScrollbar))
+    if (! ImGui::Begin("This window is beautiful", opened, ImVec2(900,500), 0.3f,
+                       ImGuiWindowFlags_NoTitleBar|ImGuiWindowFlags_NoMove|ImGuiWindowFlags_HorizontalScrollbar))
     {
         ImGui::End();
         return;
     }
+
+//    // dragging status print
+//    Text("type : %d", draggingState.m_type);
+//    Text("node : %p", draggingState.m_node);
+//    Text("slot : %d", draggingState.m_slot);
+//    Text("side : %s", (draggingState.m_side == DRAG_OUT)?"OUT":"IN");
 
     // channel splitting
     ImDrawList* draw_list = ImGui::GetWindowDrawList();
@@ -58,6 +71,7 @@ void ImGui::GraphViewer<T>::Show(bool* opened)
     ImGui::End();
 }
 
+
 template <typename T>
 void ImGui::GraphViewer<T>::Init()
 {
@@ -74,7 +88,8 @@ void ImGui::GraphViewer<T>::Init()
         typename Ra::Core::MultiGraph<T>::Node* node = (*m_gr)[i];
 
         // construct the node
-        m_props.push_back(std::unique_ptr<NodeProp>(new NodeProp(node, node->m_level, node->m_name.c_str(), node->m_nbIn, node->m_nbOut)));
+        m_props.push_back(std::unique_ptr<NodeProp>(new NodeProp(node, node->m_level, node->m_name.c_str(),
+                                                                 node->m_nbIn, node->m_nbOut)));
 
         // set position and update levely
         if (levely.size() < node->m_level)
@@ -99,42 +114,52 @@ void ImGui::GraphViewer<T>::drawNode(NodeProp& info)
 {
     PushID(info.m_id);
 
-    ImVec2 offset = GetWindowPos() - ImVec2(GetScrollX(), GetScrollY());
-
     const float nodeRadius = 3.5f;
     ImColor bgBox(40,40,40), bgEdge(180,180,180), bgSubBox(81, 81, 151);
+    ImVec2 offset = GetWindowPos() - ImVec2(GetScrollX(), GetScrollY());
 
-    static int draggedNode = -1;
-
+    // draw the nodes on the foreground (on the top of links)
     ImDrawList* draw_list = ImGui::GetWindowDrawList();
     draw_list->ChannelsSetCurrent(1);
 
     ImVec2 bottom = offset + info.m_pos, top = offset + info.m_pos + info.m_size;
 
     // event management
-    info.m_isHovered = ImGui::IsMouseHoveringRect(bottom, top);
-    info.m_isDragged = info.m_isDragged && ImGui::IsMouseDragging(0);
+    bool hovered = false, dragged = false;
 
-    if (info.m_isHovered)
+    // check if node is hovered by mouse and eventually if it's already dragged
+    hovered = IsMouseHoveringRect(bottom, top);
+    dragged = (draggingState.m_type == DRAG_NODE && draggingState.m_node == &info);
+
+    // if hovered:
+    // . change color to a lighter value
+    // . test if mouse is pressed and if no other widget was candidate
+    // . if last is true just track this node
+    if (hovered)
     {
-        bgBox = ImColor(60,60,60);
-        info.m_isDragged = ImGui::IsMouseDown(0) && ((draggedNode == -1)||info.m_isDragged);
+        bgBox = ImColor(60,60,60); // ligthen background
+
+        // update dragging state if nothing is dragged and node is clicked
+        if ((! dragged) && (draggingState.m_type == DRAG_NONE) && (IsMouseDown(0)))
+        {
+            dragged = true;
+            draggingState.m_type = DRAG_NODE;
+            draggingState.m_node = &info;
+        }
     }
 
-    if (info.m_isDragged)
+    // disable dragging if released, otherwise set position accordingly
+    if (! IsMouseDown(0))
+    {
+        draggingState.m_type = DRAG_NONE;
+    }
+    else if (dragged)
     {
         info.m_pos = info.m_pos + ImGui::GetMouseDragDelta();
         ImGui::ResetMouseDragDelta();
-        draggedNode = info.m_id;
-    }
-
-    if ((! info.m_isDragged) && (draggedNode == info.m_id))
-    {
-        draggedNode = -1;
     }
 
     // actual background draw
-    // draw_list->AddRectFilled(offset + info.m_pos, offset + info.m_pos + info.m_size, bgNormal, 1.4f);
     draw_list->AddRectFilled(bottom, top, bgBox, 1.4f);
     draw_list->AddRectFilled(bottom + ImVec2(24, 2), top - ImVec2(2, 2), bgSubBox, 1.4f);
 
@@ -150,7 +175,7 @@ void ImGui::GraphViewer<T>::drawNode(NodeProp& info)
         draw_list->AddCircleFilled(getOutputPos(info, i) + offset, nodeRadius, bgEdge);
     }
 
-    // beautiful text
+    // the node labels
     SetCursorPos(info.m_pos + ImVec2(5.f,5.f));
     Text("%d", info.m_levelx);
     SetCursorPos(info.m_pos + ImVec2(30.f,5.f));
@@ -159,29 +184,96 @@ void ImGui::GraphViewer<T>::drawNode(NodeProp& info)
     PopID();
 }
 
+
 template <typename T>
-void ImGui::GraphViewer<T>::drawLink(const NodeProp& node_a, unsigned int slot_a,
-                              const NodeProp& node_b, unsigned int slot_b)
+void ImGui::GraphViewer<T>::drawLink(NodeProp& node_a, unsigned int slot_a,
+                                     NodeProp& node_b, unsigned int slot_b)
 {
     ImVec2 offset = GetWindowPos() - ImVec2(GetScrollX(), GetScrollY());
-    ImVec2 p_a = getOutputPos(node_a, slot_a) + offset;
-    ImVec2 p_b = getInputPos(node_b, slot_b) + offset;
+    ImVec2 p_a, p_b;
 
+    // event management
+    // all the tests are done in b-then-a order because the user is most likely to drag the
+    // right side of a link, thus the first test has great chances of being the good one
+
+    bool hovered_a = false, dragged_a = false;
+    bool hovered_b = false, dragged_b = false;
+
+    dragged_b =  (draggingState.m_type == DRAG_SLOT)
+              && (draggingState.m_node == &node_b)
+              && (draggingState.m_slot == slot_b)
+              && (draggingState.m_side == DRAG_IN);
+
+    dragged_a =  (! dragged_b)
+              && (draggingState.m_type == DRAG_SLOT)
+              && (draggingState.m_node == &node_a)
+              && (draggingState.m_slot == slot_a)
+              && (draggingState.m_side == DRAG_OUT);
+
+    if (dragged_b)
+    {
+        // move the right side of the curve
+        p_a = getOutputPos(node_a, slot_a) + offset;
+        p_b = GetMousePos();
+    }
+    else if (dragged_a)
+    {
+        // move the left side of the curve
+        p_a = GetMousePos();
+        p_b = getInputPos(node_b, slot_b) + offset;
+    }
+    else
+    {
+        // base case
+        p_a = getOutputPos(node_a, slot_a) + offset;
+        p_b = getInputPos(node_b, slot_b) + offset;
+    }
+
+    hovered_b =                  IsMouseHoveringRect(p_b - ImVec2(3.5f, 3.5f), p_b + ImVec2(3.5f, 3.5f));
+    hovered_a = (! hovered_b) && IsMouseHoveringRect(p_a - ImVec2(3.5f, 3.5f), p_a + ImVec2(3.5f, 3.5f));
+
+    // check if a or b could be dragged, if available
+    if (IsMouseDown(0) && (draggingState.m_type == DRAG_NONE))
+    {
+        if (hovered_b)
+        {
+            draggingState.m_type =  DRAG_SLOT;
+            draggingState.m_node = &node_b;
+            draggingState.m_slot =  slot_b;
+            draggingState.m_side =  DRAG_IN;
+        }
+        else if (hovered_a)
+        {
+            draggingState.m_type =  DRAG_SLOT;
+            draggingState.m_node = &node_a;
+            draggingState.m_slot =  slot_a;
+            draggingState.m_side =  DRAG_OUT;
+        }
+    }
+
+    // release
+    if (! IsMouseDown(0))
+    {
+        draggingState.m_type = DRAG_NONE;
+    }
+
+    // draw below the nodes boxes
     ImDrawList* draw_list = GetWindowDrawList();
     draw_list->ChannelsSetCurrent(0);
 
     draw_hermite(draw_list, p_a, p_b, 12, ImColor(180,180,180), 1.f);
 }
 
+
 template <typename T>
 void ImGui::GraphViewer<T>::createNode( const NodeProp& props )
 {}
+
 
 template <typename T>
 void ImGui::GraphViewer<T>::createLink( const NodeProp& prop_a, unsigned int slot_a,
                                         const NodeProp& node_b, unsigned int slot_b )
 {}
-
 
 
 template <typename T>
@@ -191,12 +283,14 @@ ImVec2 ImGui::GraphViewer<T>::getInputPos( const NodeProp& info, unsigned int id
     return ImVec2(info.m_pos.x - 8.0f, posY);
 }
 
+
 template <typename T>
 ImVec2 ImGui::GraphViewer<T>::getOutputPos( const NodeProp& info, unsigned int idx )
 {
     float posY = getSlotPosY(info, idx, info.m_nbout);
     return ImVec2(info.m_pos.x + info.m_size.x + 8.0f, posY);
 }
+
 
 template <typename T>
 float ImGui::GraphViewer<T>::getSlotPosY( const NodeProp& info, unsigned int idx, unsigned int total )
@@ -207,7 +301,6 @@ float ImGui::GraphViewer<T>::getSlotPosY( const NodeProp& info, unsigned int idx
     // process the real Y position of the connector
     return info.m_pos.y + (0.5 * d) + (idx * d);
 }
-
 
 
 template <typename T>

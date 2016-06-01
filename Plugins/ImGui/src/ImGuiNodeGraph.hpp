@@ -28,10 +28,6 @@ namespace ImGui {
         ImVec2 m_pos   , m_size;
         int    m_nbout , m_nbin;
 
-        // events properties
-        bool m_isDragged;
-        bool m_isHovered;
-
         /// @brief instantiate the struct required to draw a node on screen
         NodeProp(const typename Ra::Core::MultiGraph<T>::Node* node, int level,
                  const char* name, int nbin, int nbout)
@@ -40,8 +36,6 @@ namespace ImGui {
             , m_size  ( 96, 48 )
             , m_nbout ( nbout  )
             , m_nbin  ( nbin   )
-            , m_isDragged(false)
-            , m_isHovered(false)
         {
             m_id = propsIds ++;
             strncpy(m_name, name, 32);
@@ -55,6 +49,18 @@ namespace ImGui {
             m_pos.y = (levely+1)*60.f + ((levely) * m_size.y);
         }
     }; // end of NodeProp
+
+    /// @brief dragging management
+    enum dragtype {DRAG_NONE=0, DRAG_NODE, DRAG_SLOT};
+    enum dragside {DRAG_OUT=0, DRAG_IN};
+
+    /// @brief contains the whole dragging state for imgui to remember
+    static struct DragStruct {
+        dragtype  m_type;    // determines wether we are dragging node or link
+        NodeProp* m_node;    // the node concerned with current dragging
+        int       m_slot;    // the slot associated when DRAG_SLOT
+        int       m_side;    // the side of the slot (input/output)
+    } draggingState;
 
     public:
         /// constructor
@@ -77,7 +83,7 @@ namespace ImGui {
         void drawNode( NodeProp& prop );
 
         /// @brief display link between 2 nodes
-        void drawLink( const NodeProp& node_a, unsigned int slot_a, const NodeProp& node_b, unsigned int slot_b );
+        void drawLink( NodeProp& node_a, unsigned int slot_a, NodeProp& node_b, unsigned int slot_b );
 
         /// @brief create a <br>new</br> node
         void createNode( const NodeProp& props );
