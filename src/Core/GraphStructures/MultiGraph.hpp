@@ -13,6 +13,8 @@ namespace Ra
     namespace Core
     {
 
+        enum graphstatus {GRAPH_VALID=0, GRAPH_ERROR, GRAPH_UPDATE};
+
         /// @brief MultiGraph is an oriented and acyclic graph
         /// whose edges are represented by each node knowing the whole
         /// list of its parents.
@@ -48,6 +50,10 @@ namespace Ra
                 /// update the level attribute of this if parents are all positively levelled
                 void updateLevel();
 
+//                /// @brief enumerate every disjoint graph in a possible forest
+//                /// @return the number of parts, 1 meaning it's not a forest
+//                uint countDisjoints() const;
+
                 /// debug indicator - TODO(hugo) remove this
                 void print() const;
 
@@ -68,6 +74,7 @@ namespace Ra
             MultiGraph(const MultiGraph& other)
                 : m_graph(other.m_graph)
                 , m_names(other.m_names)
+                , m_status(GRAPH_VALID)
             {}
             ~MultiGraph() {}
 
@@ -93,9 +100,13 @@ namespace Ra
             /// redefine size() function
             uint size() const;
 
+        public:
+            int m_status;
+
         private:
             std::vector<std::unique_ptr<Node>> m_graph;
             std::map<std::string, Node*> m_names;
+
         }; // end of class MultiGraph
 
         #include "MultiGraph.tpp"

@@ -36,28 +36,29 @@ void ImGui::GraphViewer<T>::Show(bool* opened)
     ImDrawList* draw_list = ImGui::GetWindowDrawList();
     draw_list->ChannelsSplit(2);
 
-    // here is the zone where we draw all the nodes
+    // draw every nodes and their links
     for (auto const& nodeRepr : m_props)
     {
-        // draw the node, actually
+        // 1. actually draw the node
         drawNode(*(nodeRepr.get()));
 
-        // and draw the connection between nodes
+        // 2. draw the connections to its parents
         for (auto const& parent : nodeRepr->m_node->m_parents)
         {
             // for each parent find the corresponding prop
             typename Ra::Core::MultiGraph<T>::Node::Connection co = parent;
             NodeProp* parentProp = m_reference[co.m_source];
 
-            // and draw, finally
+            // and draw
             drawLink(*parentProp, co.m_slot, *(nodeRepr.get()), co.m_local);
         }
     }
 
     draw_list->ChannelsMerge();
+
     PushStyleColor(ImGuiCol_Button, ImVec4(0.f,0.9f,0.45f,0.7f));
 
-    // drawing the reinit button
+    // drawing some buttons
     SetCursorPos(GetWindowPos() + ImVec2(-13 + GetScrollX(), GetWindowHeight() - 100 + GetScrollY()));
     Button("Reset view");
 
@@ -65,6 +66,22 @@ void ImGui::GraphViewer<T>::Show(bool* opened)
     if (IsItemClicked())
     {
         Init();
+    }
+
+    SetCursorPos(GetWindowPos() + ImVec2(GetScrollX() + 80, GetWindowHeight() - 100 + GetScrollY()));
+    Button("Req. update");
+
+    if (IsItemClicked())
+    {
+        m_gr->m_status = Ra::Core::GRAPH_UPDATE;
+    }
+
+    if (m_gr->m_status == Ra::Core::GRAPH_ERROR)
+    {
+        PushStyleColor(ImGuiCol_Button, ImVec4(1.f,0.3f,0.3f,0.8f));
+        SetCursorPos(GetWindowPos() + ImVec2(GetScrollX() + 180, GetWindowHeight() - 100 + GetScrollY()));
+        Button("Error");
+        PopStyleColor();
     }
 
     PopStyleColor();
@@ -148,13 +165,14 @@ void ImGui::GraphViewer<T>::drawNode(NodeProp& info)
         }
     }
 
-    // disable dragging if released, otherwise set position accordingly
-    if (! IsMouseDown(0))
-    {
-        draggingState.m_type = DRAG_NONE;
-    }
-    else if (dragged)
-    {
+    // disable dragging if released, and set position accordingly
+    if (dragged) {
+
+        if (! IsMouseDown(0))
+        {
+            draggingState.m_type = DRAG_NONE;
+        }
+
         info.m_pos = info.m_pos + ImGui::GetMouseDragDelta();
         ImGui::ResetMouseDragDelta();
     }
@@ -192,6 +210,10 @@ void ImGui::GraphViewer<T>::drawLink(NodeProp& node_a, unsigned int slot_a,
     ImVec2 offset = GetWindowPos() - ImVec2(GetScrollX(), GetScrollY());
     ImVec2 p_a, p_b;
 
+    // draw below the nodes boxes
+    ImDrawList* draw_list = GetWindowDrawList();
+    draw_list->ChannelsSetCurrent(0);
+
     // event management
     // all the tests are done in b-then-a order because the user is most likely to drag the
     // right side of a link, thus the first test has great chances of being the good one
@@ -199,16 +221,16 @@ void ImGui::GraphViewer<T>::drawLink(NodeProp& node_a, unsigned int slot_a,
     bool hovered_a = false, dragged_a = false;
     bool hovered_b = false, dragged_b = false;
 
-    dragged_b =  (draggingState.m_type == DRAG_SLOT)
+    dragged_b =  (draggingState.m_type ==  DRAG_SLOT)
               && (draggingState.m_node == &node_b)
-              && (draggingState.m_slot == slot_b)
-              && (draggingState.m_side == DRAG_IN);
+              && (draggingState.m_slot ==  slot_b)
+              && (draggingState.m_side ==  DRAG_IN);
 
     dragged_a =  (! dragged_b)
-              && (draggingState.m_type == DRAG_SLOT)
+              && (draggingState.m_type ==  DRAG_SLOT)
               && (draggingState.m_node == &node_a)
-              && (draggingState.m_slot == slot_a)
-              && (draggingState.m_side == DRAG_OUT);
+              && (draggingState.m_slot ==  slot_a)
+              && (draggingState.m_side ==  DRAG_OUT);
 
     if (dragged_b)
     {
@@ -219,8 +241,10 @@ void ImGui::GraphViewer<T>::drawLink(NodeProp& node_a, unsigned int slot_a,
     else if (dragged_a)
     {
         // move the left side of the curve
-        p_a = GetMousePos();
+        p_a = getOutputPos(node_a, slot_a) + offset;
         p_b = getInputPos(node_b, slot_b) + offset;
+
+        draw_hermite(draw_list, p_a, GetMousePos(), 12, ImColor(180,180,180), 1.f);
     }
     else
     {
@@ -241,6 +265,7 @@ void ImGui::GraphViewer<T>::drawLink(NodeProp& node_a, unsigned int slot_a,
             draggingState.m_node = &node_b;
             draggingState.m_slot =  slot_b;
             draggingState.m_side =  DRAG_IN;
+            dragged_b = true;
         }
         else if (hovered_a)
         {
@@ -248,18 +273,35 @@ void ImGui::GraphViewer<T>::drawLink(NodeProp& node_a, unsigned int slot_a,
             draggingState.m_node = &node_a;
             draggingState.m_slot =  slot_a;
             draggingState.m_side =  DRAG_OUT;
+            dragged_a = true;
         }
     }
 
     // release
-    if (! IsMouseDown(0))
+    if ((dragged_a || dragged_b) && (! IsMouseDown(0)))
     {
         draggingState.m_type = DRAG_NONE;
-    }
 
-    // draw below the nodes boxes
-    ImDrawList* draw_list = GetWindowDrawList();
-    draw_list->ChannelsSetCurrent(0);
+        // react accordingly to the point the link was dropped to
+        if (dragged_b)
+        {
+            ImVec2 slot_pos = getInputPos(node_b, slot_b);
+            if (! IsMouseHoveringRect(slot_pos - ImVec2(3.5, 3.5) + offset, slot_pos + ImVec2(3.5, 3.5) + offset))
+            {
+                node_b.m_node->removeParent(slot_a, node_a.m_node, slot_b);
+            }
+        }
+        else if (dragged_a)
+        {
+            NodeProp*    node_c = nullptr;
+            unsigned int slot_c = 0;
+            findMouseSlot(&node_c, &slot_c);
+            if (node_c != nullptr)
+            {
+                node_c->m_node->setParent(slot_a, node_a.m_node, slot_c);
+            }
+        }
+    }
 
     draw_hermite(draw_list, p_a, p_b, 12, ImColor(180,180,180), 1.f);
 }
@@ -275,6 +317,72 @@ void ImGui::GraphViewer<T>::createLink( const NodeProp& prop_a, unsigned int slo
                                         const NodeProp& node_b, unsigned int slot_b )
 {}
 
+template <typename T>
+bool ImGui::GraphViewer<T>::findMouseSlot( NodeProp** node, unsigned int* slot )
+{
+    bool   found = false;
+    ImVec2 offset = GetWindowPos() - ImVec2(GetScrollX(), GetScrollY());
+    ImVec2 mousep = GetMousePos();
+
+    auto candidate = m_props.begin();
+
+    ImDrawList* draw_list = GetWindowDrawList();
+
+    // for each node
+    while ((! found) && (candidate != m_props.end()))
+    {
+        // first detect if we are in the globing rectangle the node
+        if (IsMouseHoveringRect((*candidate)->m_pos - ImVec2(12.f,0.f) + offset,
+                                (*candidate)->m_pos + ImVec2(12.f,0.f) + offset + (*candidate)->m_size))
+        {
+            found = true;
+        }
+        else
+        {
+            ++ candidate;
+        }
+    }
+
+    // if a node was found seek for the good slot
+    if (found)
+    {
+        ImVec2 slotpos, top, bottom;
+        NodeProp& p = *((*candidate).get());
+
+        if (mousep.x <= (p.m_pos.x + offset.x))
+        {
+            for (int i = 0; i < p.m_nbin; ++ i)
+            {
+                slotpos = getInputPos(p, i) + offset;
+                top     = slotpos - ImVec2(3.5, 3.5);
+                bottom  = slotpos + ImVec2(3.5, 3.5);
+                if (IsMouseHoveringRect(top, bottom))
+                {
+                    draw_list->AddCircle(slotpos, 4.5f, ImColor(0,255,0));
+                    *node = &p;
+                    *slot =  i;
+                }
+            }
+        }
+        else
+        {
+            for (int i = 0; i < p.m_nbout; ++ i)
+            {
+                slotpos = getOutputPos(p, i) + offset;
+                top     = slotpos - ImVec2(3.5, 3.5);
+                bottom  = slotpos + ImVec2(3.5, 3.5);
+                if (IsMouseHoveringRect(top, bottom))
+                {
+                    draw_list->AddCircle(slotpos, 4.5f, ImColor(0,255,0));
+                    *node = &p;
+                    *slot =  i;
+                }
+            }
+        }
+    }
+
+    return found;
+}
 
 template <typename T>
 ImVec2 ImGui::GraphViewer<T>::getInputPos( const NodeProp& info, unsigned int idx )

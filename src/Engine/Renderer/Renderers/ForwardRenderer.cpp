@@ -80,6 +80,7 @@ namespace Ra
             m_passgraph.addNode("LIT",    std::shared_ptr<Pass>(m_passes[0]), 0, 1);
             m_passgraph.addNode("ADD",    std::shared_ptr<Pass>(m_passes[6]), 2, 1);
             m_passgraph.addNode("LUM",    std::shared_ptr<Pass>(m_passes[1]), 1, 1);
+            m_passgraph.addNode("GREEN",  std::shared_ptr<Pass>(m_passes[7]), 1, 1);
 
             // connect them
             m_passgraph[   "LUM"]->setParent(0,m_passgraph["LIT"   ],0);
@@ -91,6 +92,7 @@ namespace Ra
             m_passgraph[  "BLUR"]->setParent(0,m_passgraph["HGHPSS"],0);
             m_passgraph[   "ADD"]->setParent(0,m_passgraph["BLUR"  ],0);
             m_passgraph[   "ADD"]->setParent(0,m_passgraph["TONMAP"],1);
+            m_passgraph[ "GREEN"]->setParent(0,m_passgraph["ADD"   ],0);
 
             // levelize and sort on the same run
             m_passgraph.levelize(true);
@@ -107,6 +109,7 @@ namespace Ra
             m_passes.push_back(std::unique_ptr<Pass>(new PassPingPong("blur",      m_width, m_height, 1, 1, 2, "Blur")));
             m_passes.push_back(std::unique_ptr<Pass>(new PassRegular ("tonemap",   m_width, m_height, 2, 1,    "Tonemapping")));
             m_passes.push_back(std::unique_ptr<Pass>(new PassRegular ("composite", m_width, m_height, 2, 1,    "FinalCompose")));
+            m_passes.push_back(std::unique_ptr<Pass>(new PassRegular ("green",     m_width, m_height, 1, 1,    "Dummy")));
 
             // set hashmap
             for (auto const& pass: m_passes)
@@ -132,6 +135,7 @@ namespace Ra
             m_passmap["blur"     ]->m_texNames[0] = "hdr";
             m_passmap["composite"]->m_texNames[0] = "texA";
             m_passmap["composite"]->m_texNames[1] = "texB";
+            m_passmap["green"    ]->m_texNames[0] = "color";
 
             // reduce the size of highpass in order to obtain a box blur effect
             m_passmap["highpass"]->setSizeModifier(0.125, 0.125);
@@ -357,6 +361,22 @@ namespace Ra
 
         void ForwardRenderer::postProcessInternal( const RenderData& renderData )
         {
+            // a first check is to be performed to know wether or not the graph
+            // has changed and thus is still valid, and abort on error
+            if (m_passgraph.m_status == Core::GRAPH_UPDATE)
+            {
+                if (checkPassGraph())
+                {
+                    m_passgraph.m_status = Core::GRAPH_VALID;
+                    m_postProcessEnabled = true;
+                }
+                else
+                {
+                    m_passgraph.m_status = Core::GRAPH_ERROR;
+                    m_postProcessEnabled = false;
+                }
+            }
+
             Texture* last = m_textures[TEX_LIT].get();
             CORE_UNUSED( renderData );
 
@@ -382,9 +402,8 @@ namespace Ra
                 for (auto const& nodePass: m_passgraph)
                 {
                     nodePass->m_data->renderPass();
+                    last = nodePass->m_data->getOut(0);
                 }
-
-                last = m_passmap["composite"]->getOut(0);
             }
 
             m_fbo->useAsTarget( m_width, m_height );
@@ -434,6 +453,21 @@ namespace Ra
         Core::MultiGraph<Pass>* ForwardRenderer::getPassGraphRw()
         {
             return &m_passgraph;
+        }
+
+        bool ForwardRenderer::checkPassGraph()
+        {
+            bool valid = true;
+
+            // 1. check every input of every node
+            for (auto const& node: m_passgraph)
+            {
+                valid = valid && (node->m_parents.size() == node->m_nbIn);
+            }
+
+            // 2. check it is not a forest TODO(hugo)
+
+            return valid;
         }
 
     }

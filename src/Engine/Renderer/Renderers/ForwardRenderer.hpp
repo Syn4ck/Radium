@@ -33,6 +33,12 @@ namespace Ra
 
             virtual Core::MultiGraph<Pass>* getPassGraphRw() override;
 
+            /// @brief check the usability of the graph and render it only if ok
+            /// @note here are some conditions used to control this
+            ///     - no pass have unconnected parameters
+            ///     - no forest, only one graph
+            bool checkPassGraph();
+
         private:
             void initShaders();
             void initBuffers();

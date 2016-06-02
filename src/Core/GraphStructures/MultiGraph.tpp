@@ -131,6 +131,12 @@ void MultiGraph<T>::levelize(bool sortByLevel)
     }
 }
 
+//template <typename T>
+//uint MultiGraph<T>::countDisjoints() const
+//{
+//    // first build a list of the whole nodes
+//}
+
 template <typename T>
 void MultiGraph<T>::print() const
 {

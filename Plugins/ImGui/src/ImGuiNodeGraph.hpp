@@ -19,7 +19,7 @@ namespace ImGui {
 
     /// @brief the structure used to represent the graphic properties of a node
     struct NodeProp {
-        const typename Ra::Core::MultiGraph<T>::Node* m_node;
+        typename Ra::Core::MultiGraph<T>::Node* m_node;
 
         // graphic properties
         int    m_id;
@@ -29,7 +29,7 @@ namespace ImGui {
         int    m_nbout , m_nbin;
 
         /// @brief instantiate the struct required to draw a node on screen
-        NodeProp(const typename Ra::Core::MultiGraph<T>::Node* node, int level,
+        NodeProp(typename Ra::Core::MultiGraph<T>::Node* node, int level,
                  const char* name, int nbin, int nbout)
             : m_node  ( node   )
             , m_levelx( level  )
@@ -90,6 +90,10 @@ namespace ImGui {
 
         /// @brief create a <br>new</br> link
         void createLink( const NodeProp& prop_a, unsigned int slot_a, const NodeProp& node_b, unsigned int slot_b );
+
+        /// @brief find a node and slot to connect to
+        /// @return search result and parameters are set to the variables node & slot
+        bool findMouseSlot( NodeProp** node, unsigned int* slot );
 
     private:
         /// @brief get input slot position
