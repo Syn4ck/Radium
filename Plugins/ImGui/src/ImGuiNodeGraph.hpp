@@ -51,8 +51,8 @@ namespace ImGui {
     }; // end of NodeProp
 
     /// @brief dragging management
-    enum dragtype {DRAG_NONE=0, DRAG_NODE, DRAG_SLOT};
-    enum dragside {DRAG_OUT=0, DRAG_IN};
+    enum dragtype : unsigned int {DRAG_NONE=0, DRAG_NODE, DRAG_SLOT};
+    enum dragside : unsigned int {DRAG_OUT=0, DRAG_IN};
 
     /// @brief contains the whole dragging state for imgui to remember
     static struct DragStruct {
@@ -79,21 +79,21 @@ namespace ImGui {
         /// graph structure to change
         void Init();
 
+        /// @brief update the dragging state
+        void updateDragging();
+
         /// @brief one node display
         void drawNode( NodeProp& prop );
 
         /// @brief display link between 2 nodes
         void drawLink( NodeProp& node_a, unsigned int slot_a, NodeProp& node_b, unsigned int slot_b );
 
-        /// @brief create a <br>new</br> node
-        void createNode( const NodeProp& props );
-
         /// @brief create a <br>new</br> link
-        void createLink( const NodeProp& prop_a, unsigned int slot_a, const NodeProp& node_b, unsigned int slot_b );
+        void createLink( /*const NodeProp& prop_a, unsigned int slot_a, const NodeProp& node_b, unsigned int slot_b*/ );
 
         /// @brief find a node and slot to connect to
         /// @return search result and parameters are set to the variables node & slot
-        bool findMouseSlot( NodeProp** node, unsigned int* slot );
+        bool findMouseSlot( NodeProp** node, unsigned int* slot, unsigned int* side );
 
     private:
         /// @brief get input slot position
