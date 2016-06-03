@@ -22,6 +22,8 @@ namespace Ra
             m_texParamsVector.bind( shader );
         }
 
+
+
         void RenderParameters::addParameter( const char* name, int value )
         {
             m_intParamsVector[name] = IntParameter( name, value );
@@ -72,6 +74,8 @@ namespace Ra
             m_texParamsVector[name] = TextureParameter( name, tex );
         }
 
+
+
         void RenderParameters::updateParameter( const char* name, int    value )
         {
             m_intParamsVector[name] = IntParameter( name, value );
@@ -116,6 +120,60 @@ namespace Ra
         {
             m_mat4ParamsVector[name] = Mat4Parameter( name, value );
         }
+
+
+
+        Texture* RenderParameters::getTexParameter( const char* name )
+        {
+            return m_texParamsVector[name].m_texture;
+        }
+
+        int RenderParameters::getIntParameter ( const char* name )
+        {
+            return m_intParamsVector[name].m_value;
+        }
+
+        uint RenderParameters::getUintParameter ( const char* name )
+        {
+            return m_uintParamsVector[name].m_value;
+        }
+
+        Scalar RenderParameters::getScalarParameter( const char* name )
+        {
+            return m_scalarParamsVector[name].m_value;
+        }
+
+        Core::Vector2& RenderParameters::getVec2Parameter( const char* name )
+        {
+            return m_vec2ParamsVector[name].m_value;
+        }
+
+        Core::Vector3& RenderParameters::getVec3Parameter( const char* name )
+        {
+            return m_vec3ParamsVector[name].m_value;
+        }
+
+        Core::Vector4& RenderParameters::getVec4Parameter( const char* name )
+        {
+            return m_vec4ParamsVector[name].m_value;
+        }
+
+        Core::Matrix2& RenderParameters::getMat2Parameter( const char* name )
+        {
+            return m_mat2ParamsVector[name].m_value;
+        }
+
+        Core::Matrix3& RenderParameters::getMat3Parameter( const char* name )
+        {
+            return m_mat3ParamsVector[name].m_value;
+        }
+
+        Core::Matrix4& RenderParameters::getMat4Parameter( const char* name )
+        {
+            return m_mat4ParamsVector[name].m_value;
+        }
+
+
 
         void RenderParameters::concatParameters( const RenderParameters &params )
         {

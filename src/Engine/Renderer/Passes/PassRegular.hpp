@@ -21,7 +21,6 @@ namespace Ra
             virtual void resizePass();
             virtual void init();
 
-            virtual Texture* getOut(uint slot);
             virtual std::shared_ptr<Texture> getInternTextures(uint i) const;
 
         public:

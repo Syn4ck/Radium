@@ -29,12 +29,12 @@ namespace Ra
             m_fbo.reset( new FBO( FBO::Components(FBO::COLOR), m_width, m_height ));
 
             // generate output textures
-            char c[3] = "-A";
+            /*char c[3] = "-A";
             for (auto& texout : m_texOut)
             {
                 texout.reset( new Texture(m_name + std::string(c), GL_TEXTURE_2D) );
                 ++ c[1];
-            }
+            }*/
 
             // get shader
             ShaderProgramManager* shaderMgr = ShaderProgramManager::getInstance();
@@ -49,7 +49,7 @@ namespace Ra
         }
 
         void PassRegular::resizePass()
-        {
+        {/*
             // resize output textures accordingly
             for (auto& texout : m_texOut)
             {
@@ -69,7 +69,7 @@ namespace Ra
                 ++ i;
             }
 
-            m_fbo->unbind(true); // TODO(Hugo) remove when fbo bound status merged ?
+            m_fbo->unbind(true); // TODO(Hugo) remove when fbo bound status merged ?*/
         }
 
         void PassRegular::renderPass()
@@ -80,18 +80,13 @@ namespace Ra
             GL_ASSERT( glDrawBuffers(1, buffers) );
 
             m_shader->bind();
-            m_params->bind(m_shader);
+            //m_params->bind(m_shader);
             m_canvas->render();
         }
 
         std::shared_ptr<Texture> PassRegular::getInternTextures(uint i) const
         {
             return std::shared_ptr<Texture>( nullptr );
-        }
-
-        Texture* PassRegular::getOut(uint slot)
-        {
-            return (slot < m_nTexOut) ? m_texOut[slot].get() : nullptr;
         }
 
     }

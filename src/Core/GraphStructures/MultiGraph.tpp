@@ -28,7 +28,7 @@ void MultiGraph<T>::Node::setParent(uint slot, Node* other, uint local)
 
         //! warning: this call is specific to Passes, thus ruining the whole work on templates
         //! TODO(hugo, still me, I know...) change this with an interface or something
-        m_data->setIn(other->m_data->getOut(slot), local);
+        //m_data->setIn("color", other->m_data->getOut(slot), local);
 
         m_graph->m_status = GRAPH_UPDATE;
     }

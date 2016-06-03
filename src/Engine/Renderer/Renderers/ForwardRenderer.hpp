@@ -54,7 +54,7 @@ namespace Ra
                 TEX_COUNT
             };
 
-            // Default renderer logic here, no need to be accessed by overriding renderers.
+            /// Default renderer logic here, no need to be accessed by overriding renderers.
             std::unique_ptr<FBO> m_fbo;
 
             uint m_pingPongSize;

@@ -23,9 +23,26 @@ namespace Ra
 {
     namespace Engine
     {
+
+        enum paramType
+        {
+            PARAM_INT=0,
+            PARAM_UINT,
+            PARAM_SCALAR,
+            PARAM_VEC2,
+            PARAM_VEC3,
+            PARAM_VEC4,
+            PARAM_MAT2,
+            PARAM_MAT3,
+            PARAM_MAT4,
+            PARAM_TEX,
+            PARAM_COUNT
+        };
+
         class RA_ENGINE_API RenderParameters
         {
         public:
+
             class Parameter
             {
             public:
@@ -79,6 +96,8 @@ namespace Ra
             typedef TParameter<Core::Matrix4> Mat4Parameter;
 
         public:
+            void addParameter( const char* name, Texture* tex );
+
             void addParameter( const char* name, int    value );
             void addParameter( const char* name, uint   value );
             void addParameter( const char* name, Scalar value );
@@ -91,7 +110,6 @@ namespace Ra
             void addParameter( const char* name, const Core::Matrix3& value );
             void addParameter( const char* name, const Core::Matrix4& value );
 
-            void addParameter( const char* name, Texture* tex );
 
             void updateParameter( const char* name, int    value );
             void updateParameter( const char* name, uint   value );
@@ -104,6 +122,22 @@ namespace Ra
             void updateParameter( const char* name, const Core::Matrix2& value );
             void updateParameter( const char* name, const Core::Matrix3& value );
             void updateParameter( const char* name, const Core::Matrix4& value );
+
+
+            Texture* getTexParameter( const char* name );
+
+            int    getIntParameter   ( const char* name );
+            uint   getUintParameter  ( const char* name );
+            Scalar getScalarParameter( const char* name );
+
+            Core::Vector2& getVec2Parameter( const char* name );
+            Core::Vector3& getVec3Parameter( const char* name );
+            Core::Vector4& getVec4Parameter( const char* name );
+
+            Core::Matrix2& getMat2Parameter( const char* name );
+            Core::Matrix3& getMat3Parameter( const char* name );
+            Core::Matrix4& getMat4Parameter( const char* name );
+
 
             void concatParameters( const RenderParameters& params );
 

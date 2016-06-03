@@ -162,8 +162,8 @@ namespace QRadium
         QPoint pos = m_viewer->mapFromGlobal(QCursor::pos());
         Ra::Engine::RadiumEngine::getInstance()->getInputStatus().mousePosition = { pos.x(), pos.y() };
 
-        QPoint p1 = QCursor::pos();
-        QPoint p2 = m_viewer->mapFromGlobal(p1);
+        //QPoint p1 = QCursor::pos();
+        //QPoint p2 = m_viewer->mapFromGlobal(p1);
 
         //LOG(logINFO) << "Global : " << p1.x() << " " << p1.y() << " - Local : " << p2.x() << " " << p2.y();
 

@@ -1,3 +1,4 @@
+/*
 #include "PassPingPong.hpp"
 
 namespace Ra
@@ -115,3 +116,4 @@ namespace Ra
         }
     }
 }
+*/

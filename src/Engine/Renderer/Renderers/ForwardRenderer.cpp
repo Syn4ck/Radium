@@ -101,17 +101,13 @@ namespace Ra
             }
 
             // initiate the HDR source FIXME(hugo) find a better way without duplication
-            m_passmap["source"]->setIn(m_textures[TEX_LIT].get());
-
-            // set texture names
-            m_passmap["source"   ]->m_texNames[0] = "screenTexture";
-            m_passmap["green"    ]->m_texNames[0] = "color";
+            m_passmap["source"]->setIn("screenTexture", m_textures[TEX_LIT].get());
 
             // and show them into Qt
-            for (auto const it_pass: m_passmap)
+            /*for (auto const it_pass: m_passmap)
             {
                 m_secondaryTextures["[post-fx] " + it_pass.first] = it_pass.second->getOut(0);
-            }
+            }*/
         }
 
         void ForwardRenderer::initShaders()
@@ -365,7 +361,7 @@ namespace Ra
                 for (auto const& nodePass: m_passgraph)
                 {
                     nodePass->m_data->renderPass();
-                    last = nodePass->m_data->getOut(0);
+                    //last = nodePass->m_data->getOut(0);
                 }
             }
 
