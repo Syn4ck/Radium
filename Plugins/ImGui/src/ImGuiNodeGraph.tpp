@@ -13,90 +13,6 @@ template <typename T> int ImGui::GraphViewer<T>::propsIds = 0;
 
 
 template <typename T>
-void ImGui::GraphViewer<T>::Show(bool* opened)
-{
-    // try to create a window
-    SetNextWindowPos(ImVec2(26,26), ImGuiSetCond_FirstUseEver);
-    SetNextWindowSize(ImVec2(1000,600), ImGuiSetCond_FirstUseEver);
-
-    if (! ImGui::Begin("This window is beautiful", opened, ImVec2(900,500), 0.3f,
-                       ImGuiWindowFlags_NoTitleBar|ImGuiWindowFlags_NoMove|ImGuiWindowFlags_HorizontalScrollbar))
-    {
-        ImGui::End();
-        return;
-    }
-
-    // channel splitting
-    ImDrawList* draw_list = ImGui::GetWindowDrawList();
-    draw_list->ChannelsSplit(2);
-
-    // update dragging status
-    updateDragging();
-
-    Text("type: %d", draggingState.m_type);
-    Text("type: %p", draggingState.m_node);
-    Text("type: %d", draggingState.m_slot);
-    Text("type: %s", (draggingState.m_side == DRAG_IN) ? "IN" : "OUT");
-
-    // draw every nodes and their links
-    for (auto const& nodeRepr : m_props)
-    {
-        // 1. actually draw the node
-        drawNode(*(nodeRepr.get()));
-
-        // 2. draw the connections to its parents
-        for (auto const& parent : nodeRepr->m_node->m_parents)
-        {
-            // for each parent find the corresponding prop
-            typename Ra::Core::MultiGraph<T>::Node::Connection co = parent;
-            NodeProp* parentProp = m_reference[co.m_source];
-
-            // and draw the links
-            drawLink(*parentProp, co.m_slot, *(nodeRepr.get()), co.m_local);
-        }
-    }
-
-    if ((draggingState.m_type == DRAG_SLOT))
-    {
-        createLink();
-    }
-
-    draw_list->ChannelsMerge();
-
-    PushStyleColor(ImGuiCol_Button, ImVec4(0.f,0.9f,0.45f,0.7f));
-
-    // drawing some buttons
-    SetCursorPos(GetWindowPos() + ImVec2(-13 + GetScrollX(), GetWindowHeight() - 100 + GetScrollY()));
-    Button("Reset view");
-
-    // used to update the graph
-    if (IsItemClicked())
-    {
-        Init();
-    }
-
-    SetCursorPos(GetWindowPos() + ImVec2(GetScrollX() + 80, GetWindowHeight() - 100 + GetScrollY()));
-    Button("Req. update");
-
-    if (IsItemClicked())
-    {
-        m_gr->m_status = Ra::Core::GRAPH_UPDATE;
-    }
-
-    if (m_gr->m_status == Ra::Core::GRAPH_ERROR)
-    {
-        PushStyleColor(ImGuiCol_Button, ImVec4(1.f,0.3f,0.3f,0.8f));
-        SetCursorPos(GetWindowPos() + ImVec2(GetScrollX() + 180, GetWindowHeight() - 100 + GetScrollY()));
-        Button("Error");
-        PopStyleColor();
-    }
-
-    PopStyleColor();
-    ImGui::End();
-}
-
-
-template <typename T>
 void ImGui::GraphViewer<T>::Init()
 {
     // this is where we build the representation of the structure at the creation time
@@ -132,82 +48,99 @@ void ImGui::GraphViewer<T>::Init()
 }
 
 
+
 template <typename T>
-void ImGui::GraphViewer<T>::updateDragging()
+void ImGui::GraphViewer<T>::Show(bool* opened)
 {
-    NodeProp*    prop = nullptr;
-    unsigned int i    = 0;
-    unsigned int side = DRAG_IN;
+    // function used to display a graph viewer
+    // 1. create a window
+    // 2. update dragging status
+    // 3. for each node
+    //    1. display the node
+    //    2. display every non-dragged links
+    // 4. draw the dragged link if applicable
+    // 5. draw buttons
 
-    // release management
-    if (! IsMouseDown(0))
+
+    // try to create a window
+    SetNextWindowPos(ImVec2(26,26), ImGuiSetCond_FirstUseEver);
+    SetNextWindowSize(ImVec2(1000,600), ImGuiSetCond_FirstUseEver);
+
+    if (! ImGui::Begin("This window is beautiful", opened, ImVec2(900,500), 0.3f,
+                       ImGuiWindowFlags_NoTitleBar|ImGuiWindowFlags_NoMove|ImGuiWindowFlags_HorizontalScrollbar))
     {
-        if (draggingState.m_type == DRAG_SLOT)
-        {
-            if ( findMouseSlot(&prop, &i, &side) )
-            {
-                if ((side == DRAG_IN) && (draggingState.m_side == DRAG_OUT))
-                {
-                    prop->m_node->setParent(draggingState.m_slot, draggingState.m_node->m_node, i);
-                }
-            }
-        }
-
-        draggingState.m_type = DRAG_NONE;
-        draggingState.m_side = DRAG_IN;
-        draggingState.m_node = nullptr;
-        draggingState.m_slot = -1;
+        ImGui::End();
         return;
     }
 
-    // else if the mouse is clicked for the first time
-    if (draggingState.m_type == DRAG_NONE)
+    // channel splitting - used to draw node above links
+    ImDrawList* draw_list = ImGui::GetWindowDrawList();
+    draw_list->ChannelsSplit(2);
+
+
+    // update dragging status
+    updateDragging();
+
+
+    // draw every nodes and their links
+    for (auto const& nodeRepr : m_props)
     {
-        if ( findMouseSlot(&prop, &i, &side) ) // a slot was found
+        // 1. actually draw the node
+        drawNode(*(nodeRepr.get()));
+
+        // 2. draw the connections to its parents
+        for (auto const& parent : nodeRepr->m_node->m_parents)
         {
-            draggingState.m_type = DRAG_SLOT;
-            draggingState.m_side = side;
-            draggingState.m_slot = i;
+            // for each parent find the corresponding prop
+            typename Ra::Core::MultiGraph<T>::Node::Connection co = parent;
+            NodeProp* parentProp = m_reference[co.m_source];
 
-            if (side == DRAG_OUT)
-            {
-                draggingState.m_node = prop;
-            }
-            else
-            {
-                // find this parent
-                for (auto const& parent : prop->m_node->m_parents)
-                {
-                    // find the good parent (eg. good slot)
-                    if (parent.m_local == i)
-                    {
-                        // reference the parent as dragged node
-                        draggingState.m_side = DRAG_OUT;
-                        draggingState.m_node = m_reference[parent.m_source];
-                        draggingState.m_slot =             parent.m_slot;
-
-                        // remove parent
-                        prop->m_node->removeParent(draggingState.m_slot, draggingState.m_node->m_node, i);
-
-                        break;
-                    }
-                }
-
-                // if no child was found
-                if (draggingState.m_node == nullptr)
-                {
-                    draggingState.m_type = DRAG_NONE;
-                }
-
-            }
-        }
-        else if (prop != nullptr) // a node was found, at least
-        {
-            draggingState.m_type = DRAG_NODE;
-            draggingState.m_node = prop;
+            // and draw the links
+            drawLink(*parentProp, co.m_slot, *(nodeRepr.get()), co.m_local);
         }
     }
+
+    // draw the dragged link if currently clicked
+    if ((draggingState.m_type == DRAG_SLOT))
+    {
+        createLink();
+    }
+
+    draw_list->ChannelsMerge();
+
+
+    // drawing some buttons
+    PushStyleColor(ImGuiCol_Button, ImVec4(0.f,0.9f,0.45f,0.7f));
+
+    // update view
+    SetCursorPos(GetWindowPos() + ImVec2(-13 + GetScrollX(), GetWindowHeight() - 100 + GetScrollY()));
+    Button("Reset view");
+    if (IsItemClicked())
+    {
+        Init();
+    }
+
+    // update graph
+    SetCursorPos(GetWindowPos() + ImVec2(GetScrollX() + 80, GetWindowHeight() - 100 + GetScrollY()));
+    Button("Req. update");
+    if (IsItemClicked())
+    {
+        m_gr->m_status = Ra::Core::GRAPH_UPDATE;
+    }
+
+    // display if an error is detected
+    if (m_gr->m_status == Ra::Core::GRAPH_ERROR)
+    {
+        PushStyleColor(ImGuiCol_Button, ImVec4(1.f,0.3f,0.3f,0.8f));
+        SetCursorPos(GetWindowPos() + ImVec2(GetScrollX() + 180, GetWindowHeight() - 100 + GetScrollY()));
+        Button("Error");
+        PopStyleColor();
+    }
+
+    PopStyleColor();
+    ImGui::End();
 }
+
 
 
 template <typename T>
@@ -264,6 +197,7 @@ void ImGui::GraphViewer<T>::drawNode(NodeProp& info)
 }
 
 
+
 template <typename T>
 void ImGui::GraphViewer<T>::drawLink(NodeProp& node_a, unsigned int slot_a,
                                      NodeProp& node_b, unsigned int slot_b)
@@ -277,7 +211,7 @@ void ImGui::GraphViewer<T>::drawLink(NodeProp& node_a, unsigned int slot_a,
 
     bool dragged_b;
 
-    // event management
+    // don't draw the link if it's dragged
     dragged_b =  (draggingState.m_type ==  DRAG_SLOT)
               && (draggingState.m_node == &node_a)
               && (draggingState.m_slot ==  slot_b)
@@ -294,41 +228,65 @@ void ImGui::GraphViewer<T>::drawLink(NodeProp& node_a, unsigned int slot_a,
     draw_hermite(draw_list, p_a, p_b, 12, ImColor(180,180,180), 1.f);
 }
 
+
+
 template <typename T>
 void ImGui::GraphViewer<T>::createLink()
 {
     ImVec2 offset = GetWindowPos() - ImVec2(GetScrollX(), GetScrollY());
     ImDrawList* draw_list = ImGui::GetWindowDrawList();
 
+    // draw on links level
     draw_list->ChannelsSetCurrent(0);
 
-    draw_hermite(draw_list, getOutputPos(*(draggingState.m_node), draggingState.m_slot) + offset, GetMousePos(), 12, ImColor(200,200,200), 1.f);
+    // draw a simply link between the source node and the mouse
+    draw_hermite(draw_list,
+                 getOutputPos(*(draggingState.m_node), draggingState.m_slot) + offset,
+                 GetMousePos(),
+                 12, ImColor(200,200,200), 1.f);
 }
+
+
 
 template <typename T>
 bool ImGui::GraphViewer<T>::findMouseSlot( NodeProp** node, unsigned int* slot, unsigned int* side )
 {
+    // find the node or slot under mouse position.
+    // will return true only if a slot was found, but node will be filled if a node OR a slot is found.
+
+    // 1. loop over each nodes
+    //    1. look if in bounding box
+    //    2. look if on node or link
+    //    3. if node
+    //          return
+    // 2. if node's bounding box
+    //    1. look at every input
+    //    2. look at every output
+    // done !
+
     bool   found = false;
     ImVec2 offset = GetWindowPos() - ImVec2(GetScrollX(), GetScrollY());
     ImVec2 mousep = GetMousePos();
 
+    // node iterator
     auto candidate = m_props.begin();
 
     ImDrawList* draw_list = GetWindowDrawList();
     NodeProp*   prop      = nullptr;
 
-    // for each node
+    // iterate on nodes until a node or slot is found
     while ((! found) && (candidate != m_props.end()))
     {
-        prop = (*candidate).get();
+        prop = candidate->get();
 
         // first detect if we are in the globing rectangle the node
         if (IsMouseHoveringRect(prop->m_pos - ImVec2(12.f,0.f) + offset,
                                 prop->m_pos + ImVec2(12.f,0.f) + offset + prop->m_size))
         {
+            // if we are on the node (so not on a slot)
             if (IsMouseHoveringRect(prop->m_pos + offset, prop->m_pos + offset + prop->m_size))
             {
-                *node = (*candidate).get();
+                *node = candidate->get();
                 return false;
             }
             found = true;
@@ -342,6 +300,7 @@ bool ImGui::GraphViewer<T>::findMouseSlot( NodeProp** node, unsigned int* slot, 
     {
         ImVec2 slotpos, top, bottom;
 
+        // if mouse on the left
         if (mousep.x <= (prop->m_pos.x + offset.x))
         {
             for (int i = 0; i < prop->m_nbin; ++ i)
@@ -359,7 +318,7 @@ bool ImGui::GraphViewer<T>::findMouseSlot( NodeProp** node, unsigned int* slot, 
                 }
             }
         }
-        else
+        else // if mouse on the right
         {
             for (int i = 0; i < prop->m_nbout; ++ i)
             {
@@ -381,6 +340,108 @@ bool ImGui::GraphViewer<T>::findMouseSlot( NodeProp** node, unsigned int* slot, 
     return false;
 }
 
+
+
+template <typename T>
+void ImGui::GraphViewer<T>::updateDragging()
+{
+    // update the dragging state
+    // manage mouse release and mouse click
+
+    NodeProp*    prop = nullptr;
+    unsigned int i    = 0;
+    unsigned int side = DRAG_IN;
+
+    // release management, applicable if dragging a link
+
+    // if a newly created link is released, try to add it to a node slot if found
+    if (! IsMouseDown(0))
+    {
+        if ((draggingState.m_type == DRAG_SLOT))
+        {
+            if ( findMouseSlot(&prop, &i, &side) )
+            {
+                // only if new node is an input and if we were on output
+                if ((side == DRAG_IN) && (draggingState.m_side == DRAG_OUT))
+                {
+                    prop->m_node->setParent(draggingState.m_slot, draggingState.m_node->m_node, i);
+                }
+            }
+        }
+
+        // else just discard
+        // if the links existed before, it will be removed though
+        draggingState.m_type = DRAG_NONE;
+        draggingState.m_side = DRAG_IN;
+        draggingState.m_node = nullptr;
+        draggingState.m_slot = -1;
+        return;
+    }
+
+    // click management
+    // 1. check if a node or slot is currently hovered by mouse
+    // 2. if a slot was found we have two cases:
+    //    1. the slot is an output slot
+    //          basically create a new link
+    //    2. the slot is an input slot
+    //       1. this slot has a parent
+    //             set the parent's slot to dragged state
+    //             remove parent from initial slot
+    //       2. no parent
+    //             discard action
+    // 3. drag the node if it was a node
+
+    // else if the mouse is clicked and nothing was dragged
+    if (draggingState.m_type == DRAG_NONE)
+    {
+        if ( findMouseSlot(&prop, &i, &side) ) // a slot was found
+        {
+            draggingState.m_type = DRAG_SLOT;
+            draggingState.m_side = side;
+            draggingState.m_slot = i;
+
+            if (side == DRAG_OUT)
+            {
+                draggingState.m_node = prop;
+            }
+            else
+            {
+                // find this parent
+                for (auto const& parent : prop->m_node->m_parents)
+                {
+                    // find the good parent (eg. good slot)
+                    if (parent.m_local == i)
+                    {
+                        // reference the parent as dragged node
+                        draggingState.m_side = DRAG_OUT;
+                        draggingState.m_node = m_reference[parent.m_source];
+                        draggingState.m_slot =             parent.m_slot;
+
+                        // remove parent
+                        prop->m_node->removeParent(draggingState.m_slot, draggingState.m_node->m_node, i);
+
+                        break;
+                    }
+                }
+
+                // if no child was found
+                if (draggingState.m_node == nullptr)
+                {
+                    draggingState.m_type = DRAG_NONE;
+                }
+
+            }
+        }
+        else if (prop != nullptr) // a node was found, at least
+        {
+            draggingState.m_type = DRAG_NODE;
+            draggingState.m_node = prop;
+        }
+    }
+}
+
+
+
 template <typename T>
 ImVec2 ImGui::GraphViewer<T>::getInputPos( const NodeProp& info, unsigned int idx )
 {
@@ -388,14 +449,12 @@ ImVec2 ImGui::GraphViewer<T>::getInputPos( const NodeProp& info, unsigned int id
     return ImVec2(info.m_pos.x - 8.0f, posY);
 }
 
-
 template <typename T>
 ImVec2 ImGui::GraphViewer<T>::getOutputPos( const NodeProp& info, unsigned int idx )
 {
     float posY = getSlotPosY(info, idx, info.m_nbout);
     return ImVec2(info.m_pos.x + info.m_size.x + 8.0f, posY);
 }
-
 
 template <typename T>
 float ImGui::GraphViewer<T>::getSlotPosY( const NodeProp& info, unsigned int idx, unsigned int total )
@@ -406,6 +465,7 @@ float ImGui::GraphViewer<T>::getSlotPosY( const NodeProp& info, unsigned int idx
     // process the real Y position of the connector
     return info.m_pos.y + (0.5 * d) + (idx * d);
 }
+
 
 
 template <typename T>

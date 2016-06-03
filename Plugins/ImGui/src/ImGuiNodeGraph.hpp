@@ -67,10 +67,6 @@ namespace ImGui {
         GraphViewer(Ra::Core::MultiGraph<T>* gr = nullptr) : m_gr(gr) {}
         ~GraphViewer() {}
 
-        /// @brief window that displays nodes and links
-        /// @warning init() must have been called prior to this
-        void Show( bool* opened = nullptr );
-
         /// @brief initiate the graph representation with current graph
         /// it is assumed that nothing will modify the graph structure
         /// outside of the viewer:
@@ -79,8 +75,9 @@ namespace ImGui {
         /// graph structure to change
         void Init();
 
-        /// @brief update the dragging state
-        void updateDragging();
+        /// @brief window that displays nodes and links
+        /// @warning init() must have been called prior to this
+        void Show( bool* opened = nullptr );
 
         /// @brief one node display
         void drawNode( NodeProp& prop );
@@ -89,13 +86,20 @@ namespace ImGui {
         void drawLink( NodeProp& node_a, unsigned int slot_a, NodeProp& node_b, unsigned int slot_b );
 
         /// @brief create a <br>new</br> link
-        void createLink( /*const NodeProp& prop_a, unsigned int slot_a, const NodeProp& node_b, unsigned int slot_b*/ );
-
-        /// @brief find a node and slot to connect to
-        /// @return search result and parameters are set to the variables node & slot
-        bool findMouseSlot( NodeProp** node, unsigned int* slot, unsigned int* side );
+        void createLink();
 
     private:
+        /// @brief find a node and slot to connect to
+        /// @return true if a slot was found
+        /// @param node is used to locate which node was hit
+        /// @param slot is used to know the slot selected
+        /// @param side indicates if DRAG_IN or DRAG_OUT
+        /// @warning node could be filled even if return is false, if the node was selected
+        bool findMouseSlot( NodeProp** node, unsigned int* slot, unsigned int* side );
+
+        /// @brief update the dragging state
+        void updateDragging();
+
         /// @brief get input slot position
         /// @warning the coordinates are unaware of window offset
         ImVec2 getInputPos(  const NodeProp& node, unsigned int idx );
