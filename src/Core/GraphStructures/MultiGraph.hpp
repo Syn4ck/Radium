@@ -38,7 +38,9 @@ namespace Ra
                 };
 
             public:
-                Node(const std::string& name, const std::shared_ptr<T>& data, uint nbIn, uint nbOut);
+                Node(MultiGraph<T>* host, const std::string& name,
+                     const std::shared_ptr<T>& data, uint nbIn, uint nbOut);
+
                 ~Node() {}
 
                 /// connect the local slot to other's slot
@@ -49,10 +51,6 @@ namespace Ra
 
                 /// update the level attribute of this if parents are all positively levelled
                 void updateLevel();
-
-//                /// @brief enumerate every disjoint graph in a possible forest
-//                /// @return the number of parts, 1 meaning it's not a forest
-//                uint countDisjoints() const;
 
                 /// debug indicator - TODO(hugo) remove this
                 void print() const;
@@ -67,6 +65,10 @@ namespace Ra
                 uint m_level;
                 uint m_nbIn;
                 uint m_nbOut;
+
+            private:
+                MultiGraph<T>* m_graph;
+
             }; // end of subclass Node
 
         public:

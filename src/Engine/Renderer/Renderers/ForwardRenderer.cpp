@@ -96,7 +96,7 @@ namespace Ra
 
             // levelize and sort on the same run
             m_passgraph.levelize(true);
-            //m_passgraph.print();
+            m_passgraph.print();
         }
 
         void ForwardRenderer::initPasses()
@@ -365,14 +365,14 @@ namespace Ra
             // has changed and thus is still valid, and abort on error
             if (m_passgraph.m_status == Core::GRAPH_UPDATE)
             {
+                // and check correctness
                 if (checkPassGraph())
                 {
-                    m_passgraph.m_status = Core::GRAPH_VALID;
+                    m_passgraph.levelize( true );
                     m_postProcessEnabled = true;
                 }
                 else
                 {
-                    m_passgraph.m_status = Core::GRAPH_ERROR;
                     m_postProcessEnabled = false;
                 }
             }
@@ -466,6 +466,9 @@ namespace Ra
             }
 
             // 2. check it is not a forest TODO(hugo)
+
+            // 3. set graph status accordingly
+            m_passgraph.m_status = (valid) ? Core::GRAPH_VALID : Core::GRAPH_ERROR;
 
             return valid;
         }

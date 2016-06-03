@@ -1,10 +1,11 @@
 template <typename T>
-MultiGraph<T>::Node::Node(const std::string& name, const std::shared_ptr<T>& data, uint nbIn, uint nbOut)
+MultiGraph<T>::Node::Node( MultiGraph<T>* host, const std::string& name, const std::shared_ptr<T>& data, uint nbIn, uint nbOut)
     : m_data (data)
     , m_name (name)
     , m_level(0)
     , m_nbIn (nbIn)
     , m_nbOut(nbOut)
+    , m_graph(host)
 {
 }
 
@@ -19,6 +20,7 @@ void MultiGraph<T>::Node::setParent(uint slot, Node* other, uint local)
 {
     Connection c = {slot, other, local};
 
+    // if no existing connection is found
     if (std::find(m_parents.begin(), m_parents.end(), c) == m_parents.end())
     {
         // add the new connection in case it didn't exist before
@@ -27,6 +29,8 @@ void MultiGraph<T>::Node::setParent(uint slot, Node* other, uint local)
         //! warning: this call is specific to Passes, thus ruining the whole work on templates
         //! TODO(hugo, still me, I know...) change this with an interface or something
         m_data->setIn(other->m_data->getOut(slot), local);
+
+        m_graph->m_status = GRAPH_UPDATE;
     }
 }
 
@@ -40,6 +44,7 @@ void MultiGraph<T>::Node::removeParent(uint slot, Node* other, uint local)
     if (ref != m_parents.end())
     {
         m_parents.erase(ref);
+        m_graph->m_status = GRAPH_UPDATE;
     }
 }
 
@@ -84,7 +89,7 @@ void MultiGraph<T>::Node::print() const
 template <typename T>
 void MultiGraph<T>::addNode(const std::string& name, const std::shared_ptr<T>& data, uint nb_in, uint nb_out)
 {
-    Node* newNode = new MultiGraph<T>::Node(name, data, nb_in, nb_out);
+    Node* newNode = new MultiGraph<T>::Node(this, name, data, nb_in, nb_out);
     m_graph.push_back(std::unique_ptr<Node>(newNode));
     m_names[name] = newNode;
 }
@@ -94,7 +99,7 @@ void MultiGraph<T>::levelize(bool sortByLevel)
 {
     uint total = m_graph.size();
 
-    // first detect every sources and set level to 1
+    // first detect every sources and set level to 1 else reset to 0
     auto is_source = [](Node* n) { return n->m_nbIn == 0; };
     for (auto const& node : m_graph)
     {
@@ -102,6 +107,10 @@ void MultiGraph<T>::levelize(bool sortByLevel)
         {
             node->m_level = 1;
             total -= 1;
+        }
+        else
+        {
+            node->m_level = 0;
         }
     }
 
@@ -118,7 +127,9 @@ void MultiGraph<T>::levelize(bool sortByLevel)
 
                 // decrease if ok
                 if (node->m_level != 0)
+                {
                     total -= 1;
+                }
             }
         }
     }
@@ -130,12 +141,6 @@ void MultiGraph<T>::levelize(bool sortByLevel)
         std::sort(m_graph.begin(), m_graph.end(), comp);
     }
 }
-
-//template <typename T>
-//uint MultiGraph<T>::countDisjoints() const
-//{
-//    // first build a list of the whole nodes
-//}
 
 template <typename T>
 void MultiGraph<T>::print() const

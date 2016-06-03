@@ -122,10 +122,10 @@ void ImGui::GraphViewer<T>::Show(bool* opened)
 
     // update graph
     SetCursorPos(GetWindowPos() + ImVec2(GetScrollX() + 80, GetWindowHeight() - 100 + GetScrollY()));
-    Button("Req. update");
+    Button("Req. levelize");
     if (IsItemClicked())
     {
-        m_gr->m_status = Ra::Core::GRAPH_UPDATE;
+        m_gr->levelize( true );
     }
 
     // display if an error is detected
@@ -189,7 +189,7 @@ void ImGui::GraphViewer<T>::drawNode(NodeProp& info)
 
     // the node labels
     SetCursorPos(info.m_pos + ImVec2(5.f,5.f));
-    Text("%d", info.m_levelx);
+    Text("%d", info.m_node->m_level);
     SetCursorPos(info.m_pos + ImVec2(30.f,5.f));
     Text("%s", info.m_name);
 
