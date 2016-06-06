@@ -58,6 +58,7 @@ namespace Ra
                 /// for sorting
                 bool operator<(const Node& other) const;
 
+
             public:
                 std::shared_ptr<T>      m_data;    /// data stored by the node
                 std::vector<Connection> m_parents; /// parents of the node
@@ -101,6 +102,9 @@ namespace Ra
 
             /// redefine size() function
             uint size() const;
+
+            /// connection function pointer
+            void (*m_connect)(T* a, uint ia, T* b, uint ib);
 
         public:
             int m_status;

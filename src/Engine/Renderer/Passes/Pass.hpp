@@ -56,6 +56,8 @@ namespace Ra
             uint getId() const;
             std::string getName() const;
 
+            static void connect(Pass* a, uint ia, Pass* b, uint ib);
+
         public:
             RenderParameters m_paramIn;   /// input  render parameters
             RenderParameters m_paramOut;  /// output render parameters

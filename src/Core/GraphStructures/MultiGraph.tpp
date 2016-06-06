@@ -26,9 +26,8 @@ void MultiGraph<T>::Node::setParent(uint slot, Node* other, uint local)
         // add the new connection in case it didn't exist before
         m_parents.push_back(c);
 
-        //! warning: this call is specific to Passes, thus ruining the whole work on templates
-        //! TODO(hugo, still me, I know...) change this with an interface or something
-        //m_data->setIn("color", other->m_data->getOut(slot), local);
+        // call a specific function to connect both T
+        m_graph->m_connect(other->m_data.get(), slot, this->m_data.get(), local);
 
         m_graph->m_status = GRAPH_UPDATE;
     }
@@ -137,7 +136,11 @@ void MultiGraph<T>::levelize(bool sortByLevel)
     // finally sort if required
     if (sortByLevel)
     {
-        auto comp = [](const std::unique_ptr<Node>& a, const std::unique_ptr<Node>& b) { return (a->m_level < b->m_level); };
+        auto comp = [](const std::unique_ptr<Node>& a, const std::unique_ptr<Node>& b)
+        {
+            return (a->m_level < b->m_level);
+        };
+
         std::sort(m_graph.begin(), m_graph.end(), comp);
     }
 }
@@ -152,27 +155,32 @@ void MultiGraph<T>::print() const
     }
 }
 
-template <typename T> typename MultiGraph<T>::Node* MultiGraph<T>::operator[](const std::string& name)
+template <typename T>
+typename MultiGraph<T>::Node* MultiGraph<T>::operator[](const std::string& name)
 {
     return m_names[name];
 }
 
-template <typename T> typename MultiGraph<T>::Node* MultiGraph<T>::operator[](const int index)
+template <typename T>
+typename MultiGraph<T>::Node* MultiGraph<T>::operator[](const int index)
 {
     return m_graph[index].get();
 }
 
-template <typename T> typename std::vector<std::unique_ptr<typename MultiGraph<T>::Node>>::iterator MultiGraph<T>::begin()
+template <typename T>
+typename std::vector<std::unique_ptr<typename MultiGraph<T>::Node>>::iterator MultiGraph<T>::begin()
 {
     return m_graph.begin();
 }
 
-template <typename T> typename std::vector<std::unique_ptr<typename MultiGraph<T>::Node>>::iterator MultiGraph<T>::end()
+template <typename T>
+typename std::vector<std::unique_ptr<typename MultiGraph<T>::Node>>::iterator MultiGraph<T>::end()
 {
     return m_graph.end();
 }
 
-template <typename T> uint MultiGraph<T>::size() const
+template <typename T>
+uint MultiGraph<T>::size() const
 {
     return m_graph.size();
 }

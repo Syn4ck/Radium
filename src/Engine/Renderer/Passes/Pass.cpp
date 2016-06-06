@@ -1,5 +1,7 @@
 #include <algorithm>
 
+#include <iostream>
+
 #include <Engine/Renderer/OpenGL/FBO.hpp>
 #include <Engine/Renderer/Passes/Pass.hpp>
 #include <Engine/Renderer/Texture/Texture.hpp>
@@ -176,9 +178,66 @@ namespace Ra
             m_hModifier = h;
         }
 
-        uint Pass::getId()   const { return m_id;      }
+        uint Pass::getId()   const { return m_id; }
 
         std::string Pass::getName() const { return m_name; }
+
+
+        void Pass::connect(Pass* a, uint ia, Pass* b, uint ib)
+        {
+            std::string name_out = a->m_nameOut[ia].first;
+            std::string name_in  = b->m_nameIn [ib].first;
+
+            paramType type_out = a->m_nameOut[ia].second;
+            paramType type_in  = b->m_nameIn [ib].second;
+
+            if (type_out == type_in)
+            {
+                switch (type_in)
+                {
+                case PARAM_TEX:
+                    b->setIn(name_in.c_str(), a->getTex(name_out.c_str()), ib);
+                    break;
+                case PARAM_INT:
+                    b->setIn(name_in.c_str(), a->getInt(name_out.c_str()), ib);
+                    break;
+                case PARAM_UINT:
+                    b->setIn(name_in.c_str(), a->getUint(name_out.c_str()), ib);
+                    break;
+                case PARAM_SCALAR:
+                    b->setIn(name_in.c_str(), a->getScalar(name_out.c_str()), ib);
+                    break;
+                case PARAM_VEC2:
+                    b->setIn(name_in.c_str(), a->getVec2(name_out.c_str()), ib);
+                    break;
+                case PARAM_VEC3:
+#if 0 // this basically doesn't work, and I don't know why !
+                    b->setIn(name_in.c_str(), a->getVec3(name_out.c_str()), ib);
+#else
+                    b->setIn("add", a->getVec3(name_out.c_str()), ib);
+#endif
+                    break;
+                case PARAM_VEC4:
+                    b->setIn(name_in.c_str(), a->getVec4(name_out.c_str()), ib);
+                    break;
+                case PARAM_MAT2:
+                    b->setIn(name_in.c_str(), a->getMat2(name_out.c_str()), ib);
+                    break;
+                case PARAM_MAT3:
+                    b->setIn(name_in.c_str(), a->getMat3(name_out.c_str()), ib);
+                    break;
+                case PARAM_MAT4:
+                    b->setIn(name_in.c_str(), a->getMat4(name_out.c_str()), ib);
+                    break;
+                default:
+                    break;
+                }
+            }
+            else
+            {
+                std::cout << "Damned types are uncompatible !" << std::endl;
+            }
+        }
 
     }
 }
