@@ -31,13 +31,15 @@ namespace Ra
             /// Returns the array as an Eigen Matrix Map
             MatrixMap getMap()
             {
-                return MatrixMap( this->data()->data(), V::RowsAtCompileTime, this->size() );
+                CORE_ASSERT(!this->empty(), "Cannot map an empty vector ");
+                return MatrixMap(this->data()->data(), V::RowsAtCompileTime, this->size());
             }
 
             /// Returns the array as an Eigen Matrix Map (const version)
             ConstMatrixMap getMap() const
             {
-                return ConstMatrixMap( this->data()->data(), V::RowsAtCompileTime, this->size() );
+                CORE_ASSERT(! this->empty(), "Cannot map an empty vector ");
+                return ConstMatrixMap(this->data()->data(), V::RowsAtCompileTime, this->size());
             }
 
         };
@@ -60,22 +62,25 @@ namespace Ra
             /// Returns the array as an Eigen Matrix Map
             MatrixMap getMap()
             {
-                return MatrixMap( this->data(), 1, this->size() );
+                CORE_ASSERT(!this->empty(), "Cannot map an empty vector ");
+                return MatrixMap(this->data(), 1, this->size());
             }
 
             /// Returns the array as an Eigen Matrix Map (const version)
             ConstMatrixMap getMap() const
             {
-                return ConstMatrixMap( this->data(), 1, this->size() );
+                CORE_ASSERT(!this->empty(), "Cannot map an empty vector ");
+                return ConstMatrixMap(this->data(), 1, this->size());
             }
 
         };
 
         // Convenience typedefs
-        typedef VectorArray<Scalar>  Vector1Array;
-        typedef VectorArray<Vector2> Vector2Array;
-        typedef VectorArray<Vector3> Vector3Array;
-        typedef VectorArray<Vector4> Vector4Array;
+        typedef VectorArray<Scalar>    Vector1Array;
+        typedef VectorArray<Vector2>   Vector2Array;
+        typedef VectorArray<Vector3>   Vector3Array;
+        typedef VectorArray<Vector3ui> Vector3uiArray;
+        typedef VectorArray<Vector4>   Vector4Array;
 
         // Notes :
         // Using a map for eigen integration was recommended by [1].
