@@ -13,8 +13,8 @@ namespace Ra
     namespace Engine
     {
 
-        PassRegular::PassRegular(const std::string& name, uint w, uint h, uint nTexIn, uint nTexOut, std::string shader)
-            : Pass(name, w, h, nTexIn, nTexOut)
+        PassRegular::PassRegular(const std::string& name, uint w, uint h, uint nbIn, uint nbOut, std::string shader)
+            : Pass(name, w, h, nbIn, nbOut)
             , m_shadername(shader)
         {
         }
@@ -28,13 +28,16 @@ namespace Ra
             // initialize internal FBO
             m_fbo.reset( new FBO( FBO::Components(FBO::COLOR), m_width, m_height ));
 
-            // generate output textures
-            /*char c[3] = "-A";
-            for (auto& texout : m_texOut)
+            // generate outputs
+            for (auto& out : m_nameOut)
             {
-                texout.reset( new Texture(m_name + std::string(c), GL_TEXTURE_2D) );
-                ++ c[1];
-            }*/
+                // only for textures
+                if (out.second == PARAM_TEX)
+                {
+                    m_outputs.push_back( std::unique_ptr<Texture>( new Texture(out.first, GL_TEXTURE_2D)) );
+                    m_paramOut.addParameter( out.first.c_str(), m_outputs.back().get() );
+                }
+            }
 
             // get shader
             ShaderProgramManager* shaderMgr = ShaderProgramManager::getInstance();
@@ -49,9 +52,9 @@ namespace Ra
         }
 
         void PassRegular::resizePass()
-        {/*
+        {
             // resize output textures accordingly
-            for (auto& texout : m_texOut)
+            for (auto& texout : m_outputs)
             {
                 texout->initGL(GL_RGBA32F, m_width, m_height, GL_RGBA, GL_FLOAT, nullptr);
             }
@@ -62,10 +65,10 @@ namespace Ra
 
             // when attaching textures, the pass will try to simply attach everybody
             // until the guaranteed number of attachments is reached
-            int i = 0;
-            while ((i < 8) && (i < m_nTexOut))
+            int i = 0, nbouts = m_outputs.size();
+            while ((i < 8) && (i < nbouts))
             {
-                m_fbo->attachTexture(GL_COLOR_ATTACHMENT0 + i, m_texOut[i].get());
+                m_fbo->attachTexture(GL_COLOR_ATTACHMENT0 + i, m_outputs[i].get());
                 ++ i;
             }
 
@@ -80,13 +83,8 @@ namespace Ra
             GL_ASSERT( glDrawBuffers(1, buffers) );
 
             m_shader->bind();
-            //m_params->bind(m_shader);
+            m_paramIn.bind(m_shader);
             m_canvas->render();
-        }
-
-        std::shared_ptr<Texture> PassRegular::getInternTextures(uint i) const
-        {
-            return std::shared_ptr<Texture>( nullptr );
         }
 
     }

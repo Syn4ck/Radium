@@ -21,12 +21,9 @@ namespace Ra
             virtual void resizePass();
             virtual void init();
 
-            virtual std::shared_ptr<Texture> getInternTextures(uint i) const;
-
         public:
             std::string      m_shadername;
             const ShaderProgram* m_shader;
-            //RenderParameters     m_params;
 
         private:
             std::unique_ptr<FBO> m_fbo;

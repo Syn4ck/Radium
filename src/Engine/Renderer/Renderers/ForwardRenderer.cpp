@@ -64,31 +64,34 @@ namespace Ra
             initShaders();
             initBuffers();
             initPasses();
-            initGraph();
+            //initGraph();
 
             DebugRender::createInstance();
             DebugRender::getInstance()->initialize();
         }
 
-        void ForwardRenderer::initGraph()
+        /*void ForwardRenderer::initGraph()
         {
             // add nodes - randomly inserted to test levels efficiency
             m_passgraph.addNode("LIT",    std::shared_ptr<Pass>(m_passes[0]), 0, 1);
-            m_passgraph.addNode("GREEN",  std::shared_ptr<Pass>(m_passes[1]), 1, 1);
+            m_passgraph.addNode("FLOAT",  std::shared_ptr<Pass>(m_passes[1]), 0, 1);
+            m_passgraph.addNode("GREEN",  std::shared_ptr<Pass>(m_passes[2]), 2, 1);
 
             // connect them
             m_passgraph[ "GREEN"]->setParent(0,m_passgraph["LIT"   ],0);
+            m_passgraph[ "GREEN"]->setParent(0,m_passgraph["FLOAT" ],1);
 
             // levelize and sort on the same run
             m_passgraph.levelize(true);
             m_passgraph.print();
-        }
+        }*/
 
         void ForwardRenderer::initPasses()
         {
             // create passes
-            m_passes.push_back(std::unique_ptr<Pass>(new PassRegular ("source",    m_width, m_height, 1, 1,    "DrawScreen")));
-            m_passes.push_back(std::unique_ptr<Pass>(new PassRegular ("green",     m_width, m_height, 1, 1,    "Dummy")));
+            m_passes.push_back( std::unique_ptr<Pass>( new PassRegular("source", m_width, m_height, 1, 1, "DrawScreen")) );
+            m_passes.push_back( std::unique_ptr<Pass>( new PassT<Core::Vector3>("light", 0, 1, Core::Vector3(0.f,0.f,6.f))) );
+            m_passes.push_back( std::unique_ptr<Pass>( new PassRegular("green",  m_width, m_height, 1, 1, "Dummy")) );
 
             // set hashmap
             for (auto const& pass: m_passes)
@@ -102,12 +105,8 @@ namespace Ra
 
             // initiate the HDR source FIXME(hugo) find a better way without duplication
             m_passmap["source"]->setIn("screenTexture", m_textures[TEX_LIT].get());
-
-            // and show them into Qt
-            /*for (auto const it_pass: m_passmap)
-            {
-                m_secondaryTextures["[post-fx] " + it_pass.first] = it_pass.second->getOut(0);
-            }*/
+            m_passmap["green"]->setIn("color", m_passmap["source"]->getTex(""));
+            m_passmap["green"]->setIn("add", m_passmap["light"]->getVec3("light"));
         }
 
         void ForwardRenderer::initShaders()
@@ -326,7 +325,7 @@ namespace Ra
         {
             // a first check is to be performed to know wether or not the graph
             // has changed and thus is still valid, and abort on error
-            if (m_passgraph.m_status == Core::GRAPH_UPDATE)
+            /* if (m_passgraph.m_status == Core::GRAPH_UPDATE)
             {
                 // and check correctness
                 if (checkPassGraph())
@@ -338,7 +337,7 @@ namespace Ra
                 {
                     m_postProcessEnabled = false;
                 }
-            }
+            } */
 
             Texture* last = m_textures[TEX_LIT].get();
             CORE_UNUSED( renderData );
@@ -358,11 +357,19 @@ namespace Ra
                 // special settings for shaders that do not depend on the graph
 
                 // render everything from the graph
-                for (auto const& nodePass: m_passgraph)
+                /* for (auto const& nodePass: m_passgraph)
                 {
                     nodePass->m_data->renderPass();
                     //last = nodePass->m_data->getOut(0);
-                }
+                } */
+
+                // moar tests
+                // ...
+
+                m_passes[0]->renderPass();
+                m_passes[1]->renderPass();
+                m_passes[2]->renderPass();
+                last = m_passes[2]->getTex("");
             }
 
             m_fbo->useAsTarget( m_width, m_height );
@@ -394,10 +401,14 @@ namespace Ra
             m_fbo->check();
             m_fbo->unbind( true );
 
-            for (auto const& pass: m_passes)
+            /* for (auto const& pass: m_passes)
             {
                 pass->resizePass(m_width, m_height);
-            }
+            } */
+
+            m_passes[0]->resizePass(m_width, m_height);
+            m_passes[1]->resizePass(m_width, m_height);
+            m_passes[2]->resizePass(m_width, m_height);
 
             // Reset framebuffer state
             GL_CHECK_ERROR;

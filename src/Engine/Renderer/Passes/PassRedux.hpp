@@ -30,7 +30,6 @@ namespace Ra
             virtual void resizePass();
             virtual void init();
 
-            virtual std::shared_ptr<Texture> getInternTextures(uint i) const;
             virtual Texture* getOut(uint slot) const override;
 
             uint m_ratio;       // the ratio by which the size is divided each iteration

@@ -97,11 +97,6 @@ namespace Ra
             }
         }
 
-        std::shared_ptr<Texture> PassRedux::getInternTextures(uint i) const
-        {
-            return std::shared_ptr<Texture> (nullptr);
-        }
-
         Texture* PassRedux::getOut(uint slot) const
         {
             return m_texOut[m_pingpong].get();

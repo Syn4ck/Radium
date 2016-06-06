@@ -13,7 +13,7 @@ namespace Ra
         class RA_ENGINE_API Pass
         {
         public:
-            Pass(const std::string& name, uint w, uint h, uint nTexIn, uint nTexOut);
+            Pass(const std::string& name, uint w, uint h, uint nbIn, uint nbOut);
             virtual ~Pass() = 0;
 
             virtual std::string getPassName() const { return m_name; }
@@ -24,17 +24,16 @@ namespace Ra
             virtual void init() = 0;
 
             /// @brief set of functions used to set RenderParameters to a shader
-            /// @param paramSet is used when a pass has multiple sets of parameters (like ping-pong)
-            void setIn(const char* name, Texture* tex,               uint slot = 0, paramType p = PARAM_TEX);
-            void setIn(const char* name, int      value,             uint slot = 0, paramType p = PARAM_TEX);
-            void setIn(const char* name, uint     value,             uint slot = 0, paramType p = PARAM_TEX);
-            void setIn(const char* name, Scalar   value,             uint slot = 0, paramType p = PARAM_TEX);
-            void setIn(const char* name, const Core::Vector2& value, uint slot = 0, paramType p = PARAM_TEX);
-            void setIn(const char* name, const Core::Vector3& value, uint slot = 0, paramType p = PARAM_TEX);
-            void setIn(const char* name, const Core::Vector4& value, uint slot = 0, paramType p = PARAM_TEX);
-            void setIn(const char* name, const Core::Matrix2& value, uint slot = 0, paramType p = PARAM_TEX);
-            void setIn(const char* name, const Core::Matrix3& value, uint slot = 0, paramType p = PARAM_TEX);
-            void setIn(const char* name, const Core::Matrix4& value, uint slot = 0, paramType p = PARAM_TEX);
+            void setIn(const char* name, Texture* tex,               uint slot = 0);
+            void setIn(const char* name, int      value,             uint slot = 0);
+            void setIn(const char* name, uint     value,             uint slot = 0);
+            void setIn(const char* name, Scalar   value,             uint slot = 0);
+            void setIn(const char* name, const Core::Vector2& value, uint slot = 0);
+            void setIn(const char* name, const Core::Vector3& value, uint slot = 0);
+            void setIn(const char* name, const Core::Vector4& value, uint slot = 0);
+            void setIn(const char* name, const Core::Matrix2& value, uint slot = 0);
+            void setIn(const char* name, const Core::Matrix3& value, uint slot = 0);
+            void setIn(const char* name, const Core::Matrix4& value, uint slot = 0);
 
             /// @brief output of a pass
             Texture* getTex(const char* name);
@@ -57,24 +56,28 @@ namespace Ra
             uint getId() const;
             std::string getName() const;
 
-            virtual std::shared_ptr<Texture> getInternTextures(uint i) const = 0;
-
         public:
-            RenderParameters m_RPin;   /// input  render parameters
-            RenderParameters m_RPout;  /// output render parameters
+            RenderParameters m_paramIn;   /// input  render parameters
+            RenderParameters m_paramOut;  /// output render parameters
 
-            std::vector<std::pair<std::string, paramType>> m_paramIn;  /// mapping of names to inputs slots
-            std::vector<std::pair<std::string, paramType>> m_paramOut; /// mapping of names to outputs slots
+            std::vector<std::pair<std::string, paramType>> m_nameIn;  /// mapping of names to inputs slots
+            std::vector<std::pair<std::string, paramType>> m_nameOut; /// mapping of names to outputs slots
 
         protected:
             std::string m_name;
-            uint m_id;
+            uint        m_id;
+
+            uint m_nbin;
+            uint m_nbout;
 
             uint m_width;
             uint m_height;
 
             Scalar m_wModifier; /// modifier (factor) for the width
             Scalar m_hModifier; /// modifier (factor) for the height
+
+            /// physical space for textures
+            std::vector<std::unique_ptr<Texture>> m_outputs;
 
             /// geometry for GL to render the fragment shader to
             Mesh* m_canvas;
