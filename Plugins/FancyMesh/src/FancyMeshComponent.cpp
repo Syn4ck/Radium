@@ -130,7 +130,7 @@ namespace FancyMeshPlugin
         Ra::Engine::RenderObject* renderObject = Ra::Engine::RenderObject::createRenderObject(roName, this, Ra::Engine::RenderObjectType::Fancy, displayMesh, config, mat);
         m_meshIndex = addRenderObject(renderObject);
         
-        renderObject->setVisible(true);
+        renderObject->setVisible(false);
     }
 
     Ra::Core::Index FancyMeshComponent::getRenderObjectIndex() const
