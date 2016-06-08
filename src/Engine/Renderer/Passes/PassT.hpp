@@ -38,7 +38,9 @@ namespace Ra
         template <typename T>
         void PassT<T>::init()
         {
-            m_paramOut.addParameter(m_name.c_str(), m_value);
+            // TODO (hugo) add support for multiple outputs (for loop and distinct names)
+            setupParamOut(0, "", PARAM_VEC3);
+            m_paramOut.addParameter("", m_value);
         }
     }
 }

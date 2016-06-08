@@ -50,6 +50,18 @@ void MultiGraph<T>::Node::removeParent(uint slot, Node* other, uint local)
 }
 
 template <typename T>
+const char* MultiGraph<T>::Node::getSlotNameIn(uint slot)
+{
+    return m_graph->m_slotname_in(this->m_data.get(), slot);
+}
+
+template <typename T>
+const char* MultiGraph<T>::Node::getSlotNameOut(uint slot)
+{
+    return m_graph->m_slotname_out(this->m_data.get(), slot);
+}
+
+template <typename T>
 void MultiGraph<T>::Node::updateLevel()
 {
     bool ok = true;

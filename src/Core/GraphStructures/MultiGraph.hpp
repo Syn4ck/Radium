@@ -49,6 +49,12 @@ namespace Ra
                 /// disconnect other's slot from local if it was previously connected
                 void removeParent(uint local, Node* other, uint slot);
 
+                /// get input slot's name
+                const char* getSlotNameIn(uint slot);
+
+                /// get output slot's name
+                const char* getSlotNameOut(uint slot);
+
                 /// update the level attribute of this if parents are all positively levelled
                 void updateLevel();
 
@@ -105,6 +111,8 @@ namespace Ra
 
             /// connection function pointer
             bool (*m_connect)(T* a, uint ia, T* b, uint ib);
+            const char* (*m_slotname_in )(T* node, uint slot);
+            const char* (*m_slotname_out)(T* node, uint slot);
 
         public:
             int m_status;

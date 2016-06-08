@@ -28,6 +28,14 @@ namespace Ra
             // initialize internal FBO
             m_fbo.reset( new FBO( FBO::Components(FBO::COLOR), m_width, m_height ));
 
+            // get shader
+            ShaderProgramManager* shaderMgr = ShaderProgramManager::getInstance();
+            m_shader = shaderMgr->addShaderProgram(m_shadername, "../Shaders/Basic2D.vert.glsl", "../Shaders/"
+                                                 + m_shadername + ".frag.glsl");
+
+            // get inputs/outputs names
+            paramNamesFromShaderProgram(m_shader);
+
             // generate outputs
             for (auto const& out : m_nameOut)
             {
@@ -38,10 +46,6 @@ namespace Ra
                     m_paramOut.addParameter( out.first.c_str(), m_outputs.back().get() );
                 }
             }
-
-            // get shader
-            ShaderProgramManager* shaderMgr = ShaderProgramManager::getInstance();
-            m_shader = shaderMgr->addShaderProgram(m_shadername, "../Shaders/Basic2D.vert.glsl", "../Shaders/" + m_shadername + ".frag.glsl");
         }
 
         void PassRegular::resizePass(uint w, uint h)

@@ -16,8 +16,6 @@ namespace Ra
             Pass(const std::string& name, uint w, uint h, uint nbIn, uint nbOut);
             virtual ~Pass() = 0;
 
-            virtual std::string getPassName() const { return m_name; }
-
             virtual void renderPass() = 0;
             virtual void resizePass() = 0;
             virtual void resizePass( uint w, uint h ) = 0;
@@ -59,7 +57,13 @@ namespace Ra
             uint getId() const;
             std::string getName() const;
 
-            static bool connect(Pass* a, uint ia, Pass* b, uint ib);
+            /// @brief perform introspection on a shader program
+            /// and set inputs/outputs names
+            void paramNamesFromShaderProgram(const ShaderProgram* prog);
+
+            static bool connect (Pass* a, uint ia, Pass* b, uint ib );
+            static const char* getParamNameIn  ( Pass* p, uint slot );
+            static const char* getParamNameOut ( Pass* p, uint slot );
 
         public:
             RenderParameters m_paramIn;   /// input  render parameters

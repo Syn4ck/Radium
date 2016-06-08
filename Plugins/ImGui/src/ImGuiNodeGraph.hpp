@@ -33,7 +33,7 @@ namespace ImGui {
                  const char* name, int nbin, int nbout)
             : m_node  ( node   )
             , m_levelx( level  )
-            , m_size  ( 96, 48 )
+            , m_size  ( 128,78 )
             , m_nbout ( nbout  )
             , m_nbin  ( nbin   )
         {

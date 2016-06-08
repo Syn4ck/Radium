@@ -73,34 +73,30 @@ namespace Ra
         void ForwardRenderer::initGraph()
         {
             // set useful callbacks
-            m_passgraph.m_connect = Pass::connect;
+            m_passgraph.m_connect      = Pass::connect;
+            m_passgraph.m_slotname_in  = Pass::getParamNameIn;
+            m_passgraph.m_slotname_out = Pass::getParamNameOut;
 
             // add nodes
             m_passgraph.addNode("LIT",    std::shared_ptr<Pass>(m_passes[0]), 0, 1);
-            m_passgraph.addNode("FLOAT",  std::shared_ptr<Pass>(m_passes[1]), 0, 1);
-            m_passgraph.addNode("GREEN",  std::shared_ptr<Pass>(m_passes[2]), 2, 1);
+            m_passgraph.addNode("VEC",  std::shared_ptr<Pass>(m_passes[1]), 0, 1);
+            m_passgraph.addNode("DUMMY",  std::shared_ptr<Pass>(m_passes[2]), 2, 1);
 
             // connect them
-            m_passgraph["GREEN"]->setParent(0, m_passgraph["LIT"  ], 0);
-            m_passgraph["GREEN"]->setParent(0, m_passgraph["FLOAT"], 1);
+            m_passgraph["DUMMY"]->setParent(0, m_passgraph["LIT"], 0);
+            m_passgraph["DUMMY"]->setParent(0, m_passgraph["VEC"], 1);
 
             // levelize and sort on the same run
             m_passgraph.levelize(false);
-            m_passgraph.print();
+            //m_passgraph.print();
         }
 
         void ForwardRenderer::initPasses()
         {
             // create passes
             m_passes.push_back( std::unique_ptr<Pass>( new PassRegular("source", m_width, m_height, 1, 1, "DrawScreen")) );
-            m_passes.push_back( std::unique_ptr<Pass>( new PassT<Core::Vector3>("light", 1, Core::Vector3(0.f,0.4f,0.3f))) );
-            m_passes.push_back( std::unique_ptr<Pass>( new PassRegular("green",  m_width, m_height, 2, 1, "Dummy")) );
-
-            // set up types and names
-            m_passes[0]->setupParamOut( 0, "",      PARAM_TEX  );
-            m_passes[1]->setupParamOut( 0, "light", PARAM_VEC3 );
-            m_passes[2]->setupParamIn ( 0, "color", PARAM_TEX  );
-            m_passes[2]->setupParamIn ( 1, "vec",   PARAM_VEC3 );
+            m_passes.push_back( std::unique_ptr<Pass>( new PassT<Core::Vector3>("vec3single", 1, Core::Vector3(0.f,0.4f,0.3f))) );
+            m_passes.push_back( std::unique_ptr<Pass>( new PassRegular("dummy",  m_width, m_height, 2, 1, "Dummy")) );
 
             // init every passes
             for (auto const& pass: m_passes)

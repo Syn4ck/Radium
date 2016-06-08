@@ -149,7 +149,7 @@ void ImGui::GraphViewer<T>::drawNode(NodeProp& info)
     PushID(info.m_id);
 
     const float nodeRadius = 3.5f;
-    ImColor bgBox(40,40,40), bgEdge(180,180,180), bgSubBox(81, 81, 151);
+    ImColor bgBox(40,40,40), bgEdge(180,180,180);
     ImVec2 offset = GetWindowPos() - ImVec2(GetScrollX(), GetScrollY());
 
     // draw the nodes on the foreground (on the top of links)
@@ -173,25 +173,34 @@ void ImGui::GraphViewer<T>::drawNode(NodeProp& info)
 
     // actual background draw
     draw_list->AddRectFilled(bottom, top, bgBox, 1.4f);
-    draw_list->AddRectFilled(bottom + ImVec2(24, 2), top - ImVec2(2, 2), bgSubBox, 1.4f);
-
-    // input connectors
-    for (int i = 0; i < info.m_nbin; ++i)
-    {
-        draw_list->AddCircleFilled(getInputPos(info, i) + offset, nodeRadius, bgEdge);
-    }
-
-    // output connectors
-    for (int i = 0; i < info.m_nbout; ++i)
-    {
-        draw_list->AddCircleFilled(getOutputPos(info, i) + offset, nodeRadius, bgEdge);
-    }
 
     // the node labels
     SetCursorPos(info.m_pos + ImVec2(5.f,5.f));
     Text("%d", info.m_node->m_level);
     SetCursorPos(info.m_pos + ImVec2(30.f,5.f));
     Text("%s", info.m_name);
+
+    // input connectors
+    for (int i = 0; i < info.m_nbin; ++i)
+    {
+        top = getInputPos(info, i);
+
+        SetCursorPos(top + ImVec2(14.f, -6.f));
+        Text("%s", info.m_node->getSlotNameIn(i));
+
+        draw_list->AddCircleFilled(top + offset, nodeRadius, bgEdge);
+    }
+
+    // output connectors
+    for (int i = 0; i < info.m_nbout; ++i)
+    {
+        top = getOutputPos(info, i);
+
+        SetCursorPos(top + ImVec2(12.f, -6.f));
+        Text("%s", info.m_node->getSlotNameOut(i));
+
+        draw_list->AddCircleFilled(top + offset, nodeRadius, bgEdge);
+    }
 
     PopID();
 }
@@ -460,10 +469,10 @@ template <typename T>
 float ImGui::GraphViewer<T>::getSlotPosY( const NodeProp& info, unsigned int idx, unsigned int total )
 {
     // and the distance that will separe two connectors
-    float d = ((info.m_pos.y + info.m_size.y) - info.m_pos.y) / ((float) total);
+    float d = ((info.m_pos.y + info.m_size.y) - (info.m_pos.y + 16.f)) / ((float) total);
 
     // process the real Y position of the connector
-    return info.m_pos.y + (0.5 * d) + (idx * d);
+    return info.m_pos.y + (0.5 * d) + (idx * d) + 16.f;
 }
 
 

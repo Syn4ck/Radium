@@ -160,6 +160,7 @@ namespace Ra
             m_hModifier = h;
         }
 
+
         void Pass::setupParamIn(uint slot, const std::string& name, paramType t)
         {
             m_nameIn[slot].first  = name;
@@ -172,9 +173,33 @@ namespace Ra
             m_nameOut[slot].second = t;
         }
 
+
         uint Pass::getId()   const { return m_id; }
 
         std::string Pass::getName() const { return m_name; }
+
+        void Pass::paramNamesFromShaderProgram(const ShaderProgram* prog)
+        {
+            // perform introspection on the shader progam to tell which are the parameters
+            GLint i;
+            GLint count;
+
+            GLint  size;
+            GLenum type;
+
+            const GLsizei bufsize = 16;
+            GLchar  name[bufsize];
+            GLsizei length;
+
+            // query the number of uniform
+            glGetProgramiv(prog->getId(), GL_ACTIVE_UNIFORMS, &count);
+
+            for (i = 0; i < count; ++ i)
+            {
+                glGetActiveUniform(prog->getId(), (GLuint)i, bufsize, &length, &size, &type, name);
+                setupParamIn((GLuint)i, name, (type == 35665) ? PARAM_VEC3 : PARAM_TEX);
+            }
+        }
 
 
         bool Pass::connect(Pass* a, uint ia, Pass* b, uint ib)
@@ -228,6 +253,16 @@ namespace Ra
             {
                 return false;
             }
+        }
+
+        const char* Pass::getParamNameIn  ( Pass* p, uint slot )
+        {
+            return p->m_nameIn[slot].first.c_str();
+        }
+
+        const char* Pass::getParamNameOut ( Pass* p, uint slot )
+        {
+            return p->m_nameOut[slot].first.c_str();
         }
 
     }
