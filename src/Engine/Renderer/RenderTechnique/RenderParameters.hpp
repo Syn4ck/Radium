@@ -39,6 +39,7 @@ namespace Ra
             PARAM_COUNT
         };
 
+
         class RA_ENGINE_API RenderParameters
         {
         public:

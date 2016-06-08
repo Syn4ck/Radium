@@ -24,16 +24,16 @@ namespace Ra
             virtual void init() = 0;
 
             /// @brief set of functions used to set RenderParameters to a shader
-            void setIn(const char* name, Texture* tex,               uint slot = 0);
-            void setIn(const char* name, int      value,             uint slot = 0);
-            void setIn(const char* name, uint     value,             uint slot = 0);
-            void setIn(const char* name, Scalar   value,             uint slot = 0);
-            void setIn(const char* name, const Core::Vector2& value, uint slot = 0);
-            void setIn(const char* name, const Core::Vector3& value, uint slot = 0);
-            void setIn(const char* name, const Core::Vector4& value, uint slot = 0);
-            void setIn(const char* name, const Core::Matrix2& value, uint slot = 0);
-            void setIn(const char* name, const Core::Matrix3& value, uint slot = 0);
-            void setIn(const char* name, const Core::Matrix4& value, uint slot = 0);
+            void setIn(const char* name, Texture* tex              );
+            void setIn(const char* name, int      value            );
+            void setIn(const char* name, uint     value            );
+            void setIn(const char* name, Scalar   value            );
+            void setIn(const char* name, const Core::Vector2& value);
+            void setIn(const char* name, const Core::Vector3& value);
+            void setIn(const char* name, const Core::Vector4& value);
+            void setIn(const char* name, const Core::Matrix2& value);
+            void setIn(const char* name, const Core::Matrix3& value);
+            void setIn(const char* name, const Core::Matrix4& value);
 
             /// @brief output of a pass
             Texture* getTex(const char* name);
@@ -58,14 +58,17 @@ namespace Ra
 
             static void connect(Pass* a, uint ia, Pass* b, uint ib);
 
+            void setupParamIn  (uint slot, const std::string& name, paramType t);
+            void setupParamOut (uint slot, const std::string& name, paramType t);
+
         public:
             RenderParameters m_paramIn;   /// input  render parameters
             RenderParameters m_paramOut;  /// output render parameters
 
+        protected:
             std::vector<std::pair<std::string, paramType>> m_nameIn;  /// mapping of names to inputs slots
             std::vector<std::pair<std::string, paramType>> m_nameOut; /// mapping of names to outputs slots
 
-        protected:
             std::string m_name;
             uint        m_id;
 

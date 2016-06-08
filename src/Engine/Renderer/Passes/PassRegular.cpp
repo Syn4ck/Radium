@@ -29,7 +29,7 @@ namespace Ra
             m_fbo.reset( new FBO( FBO::Components(FBO::COLOR), m_width, m_height ));
 
             // generate outputs
-            for (auto& out : m_nameOut)
+            for (auto const& out : m_nameOut)
             {
                 // only for textures
                 if (out.second == PARAM_TEX)

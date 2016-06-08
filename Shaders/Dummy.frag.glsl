@@ -6,9 +6,9 @@ out vec4 fragColor;
 in vec2 varTexcoord;
 
 uniform sampler2D color;
-uniform vec3      add;
+uniform vec3      vec;
 
 void main()
 {
-    fragColor = texelFetch(color, ivec2(gl_FragCoord), 0).xyzw + vec4(add, 0);
+    fragColor = texelFetch(color, ivec2(gl_FragCoord), 0).xyzw + vec4(vec, 0);
 }

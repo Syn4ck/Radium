@@ -2,6 +2,8 @@
 
 #include <iostream>
 
+#include <cstring>
+
 #include <Engine/Renderer/OpenGL/FBO.hpp>
 #include <Engine/Renderer/Passes/Pass.hpp>
 #include <Engine/Renderer/Texture/Texture.hpp>
@@ -43,74 +45,54 @@ namespace Ra
 
 
 
-        void Pass::setIn(const char* name, Texture* tex, uint slot)
+        void Pass::setIn(const char* name, Texture* tex)
         {
             m_paramIn.addParameter(name, tex);
-            m_nameIn[slot].first  = name;
-            m_nameIn[slot].second = PARAM_TEX;
         }
 
-        void Pass::setIn(const char* name, int value, uint slot)
+        void Pass::setIn(const char* name, int value)
         {
             m_paramIn.addParameter(name, value);
-            m_nameIn[slot].first  = name;
-            m_nameIn[slot].second = PARAM_INT;
         }
 
-        void Pass::setIn(const char* name, uint value, uint slot)
+        void Pass::setIn(const char* name, uint value)
         {
             m_paramIn.addParameter(name, value);
-            m_nameIn[slot].first  = name;
-            m_nameIn[slot].second = PARAM_UINT;
         }
 
-        void Pass::setIn(const char* name, Scalar value, uint slot)
+        void Pass::setIn(const char* name, Scalar value)
         {
             m_paramIn.addParameter(name, value);
-            m_nameIn[slot].first  = name;
-            m_nameIn[slot].second = PARAM_SCALAR;
         }
 
-        void Pass::setIn(const char* name, const Core::Vector2& value, uint slot)
+        void Pass::setIn(const char* name, const Core::Vector2& value)
         {
             m_paramIn.addParameter(name, value);
-            m_nameIn[slot].first  = name;
-            m_nameIn[slot].second = PARAM_VEC2;
         }
 
-        void Pass::setIn(const char* name, const Core::Vector3& value, uint slot)
+        void Pass::setIn(const char* name, const Core::Vector3& value)
         {
             m_paramIn.addParameter(name, value);
-            m_nameIn[slot].first  = name;
-            m_nameIn[slot].second = PARAM_VEC3;
         }
 
-        void Pass::setIn(const char* name, const Core::Vector4& value, uint slot)
+        void Pass::setIn(const char* name, const Core::Vector4& value)
         {
             m_paramIn.addParameter(name, value);
-            m_nameIn[slot].first  = name;
-            m_nameIn[slot].second = PARAM_VEC4;
         }
 
-        void Pass::setIn(const char* name, const Core::Matrix2& value, uint slot)
+        void Pass::setIn(const char* name, const Core::Matrix2& value)
         {
             m_paramIn.addParameter(name, value);
-            m_nameIn[slot].first  = name;
-            m_nameIn[slot].second = PARAM_MAT2;
         }
 
-        void Pass::setIn(const char* name, const Core::Matrix3& value, uint slot)
+        void Pass::setIn(const char* name, const Core::Matrix3& value)
         {
             m_paramIn.addParameter(name, value);
-            m_nameIn[slot].first  = name;
-            m_nameIn[slot].second = PARAM_MAT3;
         }
 
-        void Pass::setIn(const char* name, const Core::Matrix4& value, uint slot)
+        void Pass::setIn(const char* name, const Core::Matrix4& value)
         {
             m_paramIn.addParameter(name, value);
-            m_nameIn[slot].first  = name;
-            m_nameIn[slot].second = PARAM_MAT4;
         }
 
 
@@ -178,6 +160,18 @@ namespace Ra
             m_hModifier = h;
         }
 
+        void Pass::setupParamIn(uint slot, const std::string& name, paramType t)
+        {
+            m_nameIn[slot].first  = name;
+            m_nameIn[slot].second = t;
+        }
+
+        void Pass::setupParamOut(uint slot, const std::string& name, paramType t)
+        {
+            m_nameOut[slot].first  = name;
+            m_nameOut[slot].second = t;
+        }
+
         uint Pass::getId()   const { return m_id; }
 
         std::string Pass::getName() const { return m_name; }
@@ -185,8 +179,8 @@ namespace Ra
 
         void Pass::connect(Pass* a, uint ia, Pass* b, uint ib)
         {
-            std::string name_out = a->m_nameOut[ia].first;
-            std::string name_in  = b->m_nameIn [ib].first;
+            std::string& name_out = a->m_nameOut[ia].first;
+            std::string& name_in  = b->m_nameIn [ib].first;
 
             paramType type_out = a->m_nameOut[ia].second;
             paramType type_in  = b->m_nameIn [ib].second;
@@ -196,38 +190,34 @@ namespace Ra
                 switch (type_in)
                 {
                 case PARAM_TEX:
-                    b->setIn(name_in.c_str(), a->getTex(name_out.c_str()), ib);
+                    b->setIn( name_in.c_str(), a->getTex(name_out.c_str()) );
                     break;
                 case PARAM_INT:
-                    b->setIn(name_in.c_str(), a->getInt(name_out.c_str()), ib);
+                    b->setIn( name_in.c_str(), a->getInt(name_out.c_str()) );
                     break;
                 case PARAM_UINT:
-                    b->setIn(name_in.c_str(), a->getUint(name_out.c_str()), ib);
+                    b->setIn( name_in.c_str(), a->getUint(name_out.c_str()) );
                     break;
                 case PARAM_SCALAR:
-                    b->setIn(name_in.c_str(), a->getScalar(name_out.c_str()), ib);
+                    b->setIn( name_in.c_str(), a->getScalar(name_out.c_str()) );
                     break;
                 case PARAM_VEC2:
-                    b->setIn(name_in.c_str(), a->getVec2(name_out.c_str()), ib);
+                    b->setIn( name_in.c_str(), a->getVec2(name_out.c_str()) );
                     break;
                 case PARAM_VEC3:
-#if 0 // this basically doesn't work, and I don't know why !
-                    b->setIn(name_in.c_str(), a->getVec3(name_out.c_str()), ib);
-#else
-                    b->setIn("add", a->getVec3(name_out.c_str()), ib);
-#endif
+                    b->setIn( name_in.c_str(), a->getVec3(name_out.c_str()) );
                     break;
                 case PARAM_VEC4:
-                    b->setIn(name_in.c_str(), a->getVec4(name_out.c_str()), ib);
+                    b->setIn( name_in.c_str(), a->getVec4(name_out.c_str()) );
                     break;
                 case PARAM_MAT2:
-                    b->setIn(name_in.c_str(), a->getMat2(name_out.c_str()), ib);
+                    b->setIn( name_in.c_str(), a->getMat2(name_out.c_str()) );
                     break;
                 case PARAM_MAT3:
-                    b->setIn(name_in.c_str(), a->getMat3(name_out.c_str()), ib);
+                    b->setIn( name_in.c_str(), a->getMat3(name_out.c_str()) );
                     break;
                 case PARAM_MAT4:
-                    b->setIn(name_in.c_str(), a->getMat4(name_out.c_str()), ib);
+                    b->setIn( name_in.c_str(), a->getMat4(name_out.c_str()) );
                     break;
                 default:
                     break;
@@ -235,7 +225,7 @@ namespace Ra
             }
             else
             {
-                std::cout << "Damned types are uncompatible !" << std::endl;
+                std::cout << "Uncompatible types" << std::endl;
             }
         }
 

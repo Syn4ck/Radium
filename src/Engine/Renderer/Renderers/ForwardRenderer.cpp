@@ -46,6 +46,7 @@ namespace Ra
                 GL_COLOR_ATTACHMENT6,
                 GL_COLOR_ATTACHMENT7
             };
+
         }
 
         ForwardRenderer::ForwardRenderer( uint width, uint height )
@@ -65,7 +66,6 @@ namespace Ra
             initBuffers();
             initPasses();
             initGraph();
-
             DebugRender::createInstance();
             DebugRender::getInstance()->initialize();
         }
@@ -75,7 +75,7 @@ namespace Ra
             // set useful callbacks
             m_passgraph.m_connect = Pass::connect;
 
-            // add nodes - randomly inserted to test levels efficiency
+            // add nodes
             m_passgraph.addNode("LIT",    std::shared_ptr<Pass>(m_passes[0]), 0, 1);
             m_passgraph.addNode("FLOAT",  std::shared_ptr<Pass>(m_passes[1]), 0, 1);
             m_passgraph.addNode("GREEN",  std::shared_ptr<Pass>(m_passes[2]), 2, 1);
@@ -93,10 +93,16 @@ namespace Ra
         {
             // create passes
             m_passes.push_back( std::unique_ptr<Pass>( new PassRegular("source", m_width, m_height, 1, 1, "DrawScreen")) );
-            m_passes.push_back( std::unique_ptr<Pass>( new PassT<Core::Vector3>("light", 0, 1, Core::Vector3(0.f,0.f,6.f))) );
+            m_passes.push_back( std::unique_ptr<Pass>( new PassT<Core::Vector3>("light", 1, Core::Vector3(0.f,0.f,6.f))) );
             m_passes.push_back( std::unique_ptr<Pass>( new PassRegular("green",  m_width, m_height, 2, 1, "Dummy")) );
 
-            // set hashmap
+            // set up types and names
+            m_passes[0]->setupParamOut( 0, "",      PARAM_TEX  );
+            m_passes[1]->setupParamOut( 0, "light", PARAM_VEC3 );
+            m_passes[2]->setupParamIn ( 0, "color", PARAM_TEX  );
+            m_passes[2]->setupParamIn ( 1, "vec",   PARAM_VEC3 );
+
+            // init every passes
             for (auto const& pass: m_passes)
             {
                 m_passmap[pass->getName()] = pass.get();
@@ -108,15 +114,6 @@ namespace Ra
 
             // initiate the HDR source FIXME(hugo) find a better way without duplication
             m_passmap["source"]->setIn("screenTexture", m_textures[TEX_LIT].get());
-
-            // set up types and names
-            m_passmap["light"]->m_nameOut[0].first  = "light";
-            m_passmap["light"]->m_nameOut[0].second = PARAM_VEC3;
-
-            m_passmap["green"]->m_nameIn[0].first  = "color";
-
-            m_passmap["green"]->m_nameIn[1].first  = "add";
-            m_passmap["green"]->m_nameIn[1].second = PARAM_VEC3;
         }
 
         void ForwardRenderer::initShaders()

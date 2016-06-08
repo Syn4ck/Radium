@@ -15,7 +15,7 @@ namespace Ra
         class PassT : public Pass
         {
         public:
-            PassT(const std::string& name, uint nbIn, uint nbOut, T val);
+            PassT(const std::string& name, uint nbOut, const T& val);
             ~PassT();
             virtual void renderPass() {}
             virtual void resizePass(uint w, uint h) {}
@@ -27,8 +27,8 @@ namespace Ra
         };
 
         template <typename T>
-        PassT<T>::PassT(const std::string& name, uint nbIn, uint nbOut, T val)
-                : Pass(name, 1, 1, nbIn, nbOut)
+        PassT<T>::PassT(const std::string& name, uint nbOut, const T& val)
+                : Pass(name, 1, 1, 0, nbOut)
                 , m_value(val)
         {}
 
