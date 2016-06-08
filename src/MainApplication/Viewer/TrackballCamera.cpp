@@ -25,7 +25,7 @@ namespace Ra
         , m_quickCameraModifier( 1.f )
         , m_wheelSpeedModifier(0.02f )
         , m_distFromCenter( 1.0f )
-        , m_cameraRadius( 1.0f )
+        , m_cameraRadius( 3.0f )
         , m_rotateAround( true )
         , m_cameraRotateMode( false )
         , m_cameraPanMode( false )
