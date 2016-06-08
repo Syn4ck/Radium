@@ -53,13 +53,13 @@ namespace Ra
             void setCanvas(Mesh* canvas);
             void setSizeModifier(Scalar w = 1.0, Scalar h = 1.0);
 
+            void setupParamIn  (uint slot, const std::string& name, paramType t);
+            void setupParamOut (uint slot, const std::string& name, paramType t);
+
             uint getId() const;
             std::string getName() const;
 
-            static void connect(Pass* a, uint ia, Pass* b, uint ib);
-
-            void setupParamIn  (uint slot, const std::string& name, paramType t);
-            void setupParamOut (uint slot, const std::string& name, paramType t);
+            static bool connect(Pass* a, uint ia, Pass* b, uint ib);
 
         public:
             RenderParameters m_paramIn;   /// input  render parameters

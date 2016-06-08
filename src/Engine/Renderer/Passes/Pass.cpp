@@ -177,7 +177,7 @@ namespace Ra
         std::string Pass::getName() const { return m_name; }
 
 
-        void Pass::connect(Pass* a, uint ia, Pass* b, uint ib)
+        bool Pass::connect(Pass* a, uint ia, Pass* b, uint ib)
         {
             std::string& name_out = a->m_nameOut[ia].first;
             std::string& name_in  = b->m_nameIn [ib].first;
@@ -222,10 +222,11 @@ namespace Ra
                 default:
                     break;
                 }
+                return true;
             }
             else
             {
-                std::cout << "Uncompatible types" << std::endl;
+                return false;
             }
         }
 

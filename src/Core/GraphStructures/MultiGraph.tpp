@@ -23,13 +23,15 @@ void MultiGraph<T>::Node::setParent(uint slot, Node* other, uint local)
     // if no existing connection is found
     if (std::find(m_parents.begin(), m_parents.end(), c) == m_parents.end())
     {
-        // add the new connection in case it didn't exist before
-        m_parents.push_back(c);
-
         // call a specific function to connect both T
-        m_graph->m_connect(other->m_data.get(), slot, this->m_data.get(), local);
+        if (m_graph->m_connect(other->m_data.get(), slot, this->m_data.get(), local))
+        {
+            // add the new connection in case it didn't exist before
+            m_parents.push_back(c);
 
-        m_graph->m_status = GRAPH_UPDATE;
+            // set the graph to be updated
+            m_graph->m_status = GRAPH_UPDATE;
+        }
     }
 }
 

@@ -306,8 +306,8 @@ bool ImGui::GraphViewer<T>::findMouseSlot( NodeProp** node, unsigned int* slot, 
             for (int i = 0; i < prop->m_nbin; ++ i)
             {
                 slotpos = getInputPos(*prop, i) + offset;
-                top     = slotpos - ImVec2(3.5, 3.5);
-                bottom  = slotpos + ImVec2(3.5, 3.5);
+                top     = slotpos - ImVec2(4.5, 4.5);
+                bottom  = slotpos + ImVec2(4.5, 4.5);
                 if (IsMouseHoveringRect(top, bottom))
                 {
                     draw_list->AddCircle(slotpos, 4.5f, ImColor(0,255,0));
@@ -323,8 +323,8 @@ bool ImGui::GraphViewer<T>::findMouseSlot( NodeProp** node, unsigned int* slot, 
             for (int i = 0; i < prop->m_nbout; ++ i)
             {
                 slotpos = getOutputPos(*prop, i) + offset;
-                top     = slotpos - ImVec2(3.5, 3.5);
-                bottom  = slotpos + ImVec2(3.5, 3.5);
+                top     = slotpos - ImVec2(4.5, 4.5);
+                bottom  = slotpos + ImVec2(4.5, 4.5);
                 if (IsMouseHoveringRect(top, bottom))
                 {
                     draw_list->AddCircle(slotpos, 4.5f, ImColor(0,255,0));

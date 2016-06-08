@@ -93,7 +93,7 @@ namespace Ra
         {
             // create passes
             m_passes.push_back( std::unique_ptr<Pass>( new PassRegular("source", m_width, m_height, 1, 1, "DrawScreen")) );
-            m_passes.push_back( std::unique_ptr<Pass>( new PassT<Core::Vector3>("light", 1, Core::Vector3(0.f,0.f,6.f))) );
+            m_passes.push_back( std::unique_ptr<Pass>( new PassT<Core::Vector3>("light", 1, Core::Vector3(0.f,0.4f,0.3f))) );
             m_passes.push_back( std::unique_ptr<Pass>( new PassRegular("green",  m_width, m_height, 2, 1, "Dummy")) );
 
             // set up types and names
@@ -332,7 +332,7 @@ namespace Ra
         {
             // a first check is to be performed to know wether or not the graph
             // has changed and thus is still valid, and abort on error
-            /*if (m_passgraph.m_status == Core::GRAPH_UPDATE)
+            if (m_passgraph.m_status == Core::GRAPH_UPDATE)
             {
                 // and check correctness
                 if (checkPassGraph())
@@ -344,7 +344,7 @@ namespace Ra
                 {
                     m_postProcessEnabled = false;
                 }
-            }*/
+            }
 
             Texture* last = m_textures[TEX_LIT].get();
             CORE_UNUSED( renderData );

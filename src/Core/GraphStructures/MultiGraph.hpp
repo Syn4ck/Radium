@@ -104,7 +104,7 @@ namespace Ra
             uint size() const;
 
             /// connection function pointer
-            void (*m_connect)(T* a, uint ia, T* b, uint ib);
+            bool (*m_connect)(T* a, uint ia, T* b, uint ib);
 
         public:
             int m_status;
