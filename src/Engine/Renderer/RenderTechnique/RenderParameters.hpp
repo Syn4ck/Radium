@@ -51,7 +51,7 @@ namespace Ra
                 Parameter() = default;
                 Parameter( const std::string& name ) : m_name( name ) {}
                 virtual void bind(const ShaderProgram* shader ) const = 0;
-                
+
                 std::string m_name;
             };
 
@@ -98,47 +98,47 @@ namespace Ra
             typedef TParameter<Core::Matrix4> Mat4Parameter;
 
         public:
-            void addParameter( const char* name, Texture* tex );
+            void addParameter( const std::string& name, Texture* tex );
 
-            void addParameter( const char* name, int    value );
-            void addParameter( const char* name, uint   value );
-            void addParameter( const char* name, Scalar value );
+            void addParameter( const std::string& name, int    value );
+            void addParameter( const std::string& name, uint   value );
+            void addParameter( const std::string& name, Scalar value );
 
-            void addParameter( const char* name, const Core::Vector2& value );
-            void addParameter( const char* name, const Core::Vector3& value );
-            void addParameter( const char* name, const Core::Vector4& value );
+            void addParameter( const std::string& name, const Core::Vector2& value );
+            void addParameter( const std::string& name, const Core::Vector3& value );
+            void addParameter( const std::string& name, const Core::Vector4& value );
 
-            void addParameter( const char* name, const Core::Matrix2& value );
-            void addParameter( const char* name, const Core::Matrix3& value );
-            void addParameter( const char* name, const Core::Matrix4& value );
-
-
-            void updateParameter( const char* name, int    value );
-            void updateParameter( const char* name, uint   value );
-            void updateParameter( const char* name, Scalar value );
-
-            void updateParameter( const char* name, const Core::Vector2& value );
-            void updateParameter( const char* name, const Core::Vector3& value );
-            void updateParameter( const char* name, const Core::Vector4& value );
-
-            void updateParameter( const char* name, const Core::Matrix2& value );
-            void updateParameter( const char* name, const Core::Matrix3& value );
-            void updateParameter( const char* name, const Core::Matrix4& value );
+            void addParameter( const std::string& name, const Core::Matrix2& value );
+            void addParameter( const std::string& name, const Core::Matrix3& value );
+            void addParameter( const std::string& name, const Core::Matrix4& value );
 
 
-            Texture* getTexParameter( const char* name );
+            void updateParameter( const std::string& name, int    value );
+            void updateParameter( const std::string& name, uint   value );
+            void updateParameter( const std::string& name, Scalar value );
 
-            int    getIntParameter   ( const char* name );
-            uint   getUintParameter  ( const char* name );
-            Scalar getScalarParameter( const char* name );
+            void updateParameter( const std::string& name, const Core::Vector2& value );
+            void updateParameter( const std::string& name, const Core::Vector3& value );
+            void updateParameter( const std::string& name, const Core::Vector4& value );
 
-            Core::Vector2& getVec2Parameter( const char* name );
-            Core::Vector3& getVec3Parameter( const char* name );
-            Core::Vector4& getVec4Parameter( const char* name );
+            void updateParameter( const std::string& name, const Core::Matrix2& value );
+            void updateParameter( const std::string& name, const Core::Matrix3& value );
+            void updateParameter( const std::string& name, const Core::Matrix4& value );
 
-            Core::Matrix2& getMat2Parameter( const char* name );
-            Core::Matrix3& getMat3Parameter( const char* name );
-            Core::Matrix4& getMat4Parameter( const char* name );
+
+            Texture* getTexParameter( const std::string& name );
+
+            int    getIntParameter   ( const std::string& name );
+            uint   getUintParameter  ( const std::string& name );
+            Scalar getScalarParameter( const std::string& name );
+
+            Core::Vector2& getVec2Parameter( const std::string& name );
+            Core::Vector3& getVec3Parameter( const std::string& name );
+            Core::Vector4& getVec4Parameter( const std::string& name );
+
+            Core::Matrix2& getMat2Parameter( const std::string& name );
+            Core::Matrix3& getMat3Parameter( const std::string& name );
+            Core::Matrix4& getMat4Parameter( const std::string& name );
 
 
             void concatParameters( const RenderParameters& params );

@@ -22,31 +22,31 @@ namespace Ra
             virtual void init() = 0;
 
             /// @brief set of functions used to set RenderParameters to a shader
-            void setIn(const char* name, Texture* tex              );
-            void setIn(const char* name, int      value            );
-            void setIn(const char* name, uint     value            );
-            void setIn(const char* name, Scalar   value            );
-            void setIn(const char* name, const Core::Vector2& value);
-            void setIn(const char* name, const Core::Vector3& value);
-            void setIn(const char* name, const Core::Vector4& value);
-            void setIn(const char* name, const Core::Matrix2& value);
-            void setIn(const char* name, const Core::Matrix3& value);
-            void setIn(const char* name, const Core::Matrix4& value);
+            void setIn(const std::string& name, Texture* tex              );
+            void setIn(const std::string& name, int      value            );
+            void setIn(const std::string& name, uint     value            );
+            void setIn(const std::string& name, Scalar   value            );
+            void setIn(const std::string& name, const Core::Vector2& value);
+            void setIn(const std::string& name, const Core::Vector3& value);
+            void setIn(const std::string& name, const Core::Vector4& value);
+            void setIn(const std::string& name, const Core::Matrix2& value);
+            void setIn(const std::string& name, const Core::Matrix3& value);
+            void setIn(const std::string& name, const Core::Matrix4& value);
 
             /// @brief output of a pass
-            Texture* getTex(const char* name);
+            Texture* getTex(const std::string& name);
 
-            int    getInt   (const char* name);
-            uint   getUint  (const char* name);
-            Scalar getScalar(const char* name);
+            int    getInt   (const std::string& name);
+            uint   getUint  (const std::string& name);
+            Scalar getScalar(const std::string& name);
 
-            Core::Vector2 getVec2(const char* name);
-            Core::Vector3 getVec3(const char* name);
-            Core::Vector4 getVec4(const char* name);
+            Core::Vector2 getVec2(const std::string& name);
+            Core::Vector3 getVec3(const std::string& name);
+            Core::Vector4 getVec4(const std::string& name);
 
-            Core::Matrix2 getMat2(const char* name);
-            Core::Matrix3 getMat3(const char* name);
-            Core::Matrix4 getMat4(const char* name);
+            Core::Matrix2 getMat2(const std::string& name);
+            Core::Matrix3 getMat3(const std::string& name);
+            Core::Matrix4 getMat4(const std::string& name);
 
             void setCanvas(Mesh* canvas);
             void setSizeModifier(Scalar w = 1.0, Scalar h = 1.0);

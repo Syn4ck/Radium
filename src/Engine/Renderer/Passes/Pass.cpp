@@ -45,104 +45,104 @@ namespace Ra
 
 
 
-        void Pass::setIn(const char* name, Texture* tex)
+        void Pass::setIn(const std::string& name, Texture* tex)
         {
             m_paramIn.addParameter(name, tex);
         }
 
-        void Pass::setIn(const char* name, int value)
+        void Pass::setIn(const std::string& name, int value)
         {
             m_paramIn.addParameter(name, value);
         }
 
-        void Pass::setIn(const char* name, uint value)
+        void Pass::setIn(const std::string& name, uint value)
         {
             m_paramIn.addParameter(name, value);
         }
 
-        void Pass::setIn(const char* name, Scalar value)
+        void Pass::setIn(const std::string& name, Scalar value)
         {
             m_paramIn.addParameter(name, value);
         }
 
-        void Pass::setIn(const char* name, const Core::Vector2& value)
+        void Pass::setIn(const std::string& name, const Core::Vector2& value)
         {
             m_paramIn.addParameter(name, value);
         }
 
-        void Pass::setIn(const char* name, const Core::Vector3& value)
+        void Pass::setIn(const std::string& name, const Core::Vector3& value)
         {
             m_paramIn.addParameter(name, value);
         }
 
-        void Pass::setIn(const char* name, const Core::Vector4& value)
+        void Pass::setIn(const std::string& name, const Core::Vector4& value)
         {
             m_paramIn.addParameter(name, value);
         }
 
-        void Pass::setIn(const char* name, const Core::Matrix2& value)
+        void Pass::setIn(const std::string& name, const Core::Matrix2& value)
         {
             m_paramIn.addParameter(name, value);
         }
 
-        void Pass::setIn(const char* name, const Core::Matrix3& value)
+        void Pass::setIn(const std::string& name, const Core::Matrix3& value)
         {
             m_paramIn.addParameter(name, value);
         }
 
-        void Pass::setIn(const char* name, const Core::Matrix4& value)
+        void Pass::setIn(const std::string& name, const Core::Matrix4& value)
         {
             m_paramIn.addParameter(name, value);
         }
 
 
 
-        Texture* Pass::getTex(const char* name)
+        Texture* Pass::getTex(const std::string& name)
         {
             return m_paramOut.getTexParameter( name );
         }
 
-        int Pass::getInt(const char* name)
+        int Pass::getInt(const std::string& name)
         {
             return m_paramOut.getIntParameter( name );
         }
 
-        uint Pass::getUint(const char* name)
+        uint Pass::getUint(const std::string& name)
         {
             return m_paramOut.getUintParameter( name );
         }
 
-        Scalar Pass::getScalar(const char* name)
+        Scalar Pass::getScalar(const std::string& name)
         {
             return m_paramOut.getScalarParameter( name );
         }
 
-        Core::Vector2 Pass::getVec2(const char* name)
+        Core::Vector2 Pass::getVec2(const std::string& name)
         {
             return m_paramOut.getVec2Parameter( name );
         }
 
-        Core::Vector3 Pass::getVec3(const char* name)
+        Core::Vector3 Pass::getVec3(const std::string& name)
         {
             return m_paramOut.getVec3Parameter( name );
         }
 
-        Core::Vector4 Pass::getVec4(const char* name)
+        Core::Vector4 Pass::getVec4(const std::string& name)
         {
             return m_paramOut.getVec4Parameter( name );
         }
 
-        Core::Matrix2 Pass::getMat2(const char* name)
+        Core::Matrix2 Pass::getMat2(const std::string& name)
         {
             return m_paramOut.getMat2Parameter( name );
         }
 
-        Core::Matrix3 Pass::getMat3(const char* name)
+        Core::Matrix3 Pass::getMat3(const std::string& name)
         {
             return m_paramOut.getMat3Parameter( name );
         }
 
-        Core::Matrix4 Pass::getMat4(const char* name)
+        Core::Matrix4 Pass::getMat4(const std::string& name)
         {
             return m_paramOut.getMat4Parameter( name );
         }
@@ -241,34 +241,34 @@ namespace Ra
                 switch (type_in)
                 {
                 case PARAM_TEX:
-                    b->setIn( name_in.c_str(), a->getTex(name_out.c_str()) );
+                    b->setIn( name_in, a->getTex(name_out.c_str()) );
                     break;
                 case PARAM_INT:
-                    b->setIn( name_in.c_str(), a->getInt(name_out.c_str()) );
+                    b->setIn( name_in, a->getInt(name_out.c_str()) );
                     break;
                 case PARAM_UINT:
-                    b->setIn( name_in.c_str(), a->getUint(name_out.c_str()) );
+                    b->setIn( name_in, a->getUint(name_out.c_str()) );
                     break;
                 case PARAM_SCALAR:
-                    b->setIn( name_in.c_str(), a->getScalar(name_out.c_str()) );
+                    b->setIn( name_in, a->getScalar(name_out.c_str()) );
                     break;
                 case PARAM_VEC2:
-                    b->setIn( name_in.c_str(), a->getVec2(name_out.c_str()) );
+                    b->setIn( name_in, a->getVec2(name_out.c_str()) );
                     break;
                 case PARAM_VEC3:
-                    b->setIn( name_in.c_str(), a->getVec3(name_out.c_str()) );
+                    b->setIn( name_in, a->getVec3(name_out.c_str()) );
                     break;
                 case PARAM_VEC4:
-                    b->setIn( name_in.c_str(), a->getVec4(name_out.c_str()) );
+                    b->setIn( name_in, a->getVec4(name_out.c_str()) );
                     break;
                 case PARAM_MAT2:
-                    b->setIn( name_in.c_str(), a->getMat2(name_out.c_str()) );
+                    b->setIn( name_in, a->getMat2(name_out.c_str()) );
                     break;
                 case PARAM_MAT3:
-                    b->setIn( name_in.c_str(), a->getMat3(name_out.c_str()) );
+                    b->setIn( name_in, a->getMat3(name_out.c_str()) );
                     break;
                 case PARAM_MAT4:
-                    b->setIn( name_in.c_str(), a->getMat4(name_out.c_str()) );
+                    b->setIn( name_in, a->getMat4(name_out.c_str()) );
                     break;
                 default:
                     break;
