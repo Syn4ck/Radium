@@ -133,6 +133,9 @@ namespace AnimationPlugin
         {            
             m_wasReset = false;
             Ra::Core::Animation::Pose currentPose = m_animations[m_animationID].getPose(m_animationTime);
+            
+            for (int i = 0; i < currentPose.size(); i++)
+                std::cout << "Anim " << i << std::endl << currentPose[i].matrix() << std::endl;
 
             // update the pose of the skeleton
             m_skel.setPose(currentPose, Ra::Core::Animation::Handle::SpaceType::LOCAL);
@@ -221,8 +224,27 @@ namespace AnimationPlugin
         createSkeleton( data, indexTable );
 
         createWeightMatrix( data, indexTable, duplicateTable );
+        
         m_refPose = m_skel.getPose( Ra::Core::Animation::Handle::SpaceType::MODEL);
-
+        for (int i = 0; i < m_refPose.size(); i++)
+        {
+            std::cout << i << std::endl;
+            Ra::Core::print(m_refPose[i].matrix());
+        }
+        
+        for (int i = 0; i < m_skel.size(); i++)
+        {
+            if (m_skel.m_graph.isRoot(i))
+               m_skel.setTransform(i, data->getFrame().inverse() * m_skel.getTransform(i, Ra::Core::Animation::Handle::SpaceType::LOCAL), Ra::Core::Animation::Handle::SpaceType::LOCAL);
+        }
+        m_refPose = m_skel.getPose( Ra::Core::Animation::Handle::SpaceType::MODEL);
+        for (int i = 0; i < m_refPose.size(); i++)
+        {
+            std::cout << i << std::endl;
+            Ra::Core::print(m_refPose[i].matrix());
+        }
+        
+        
         setupSkeletonDisplay();
         setupIO(m_contentName);
     }
@@ -254,7 +276,10 @@ namespace AnimationPlugin
             m_animations.push_back( Ra::Core::Animation::Animation() );
             for( const auto& t : keyTime ) {
                 for( const auto& it : table ) {
-                    pose[it.second] = ( m_skel.m_graph.isRoot( it.second ) ) ? m_skel.m_pose[it.second] : handleAnim[it.first].m_anim.at( t );
+                    pose[it.second] = handleAnim[it.first].m_anim.at( t );
+                    std::cout << "Animation Loading " << it.second << std::endl;
+                    Ra::Core::print(pose[it.second].matrix());
+//                    m_skel.m_graph.isRoot( it.second ) ) ? m_skel.m_pose[it.second] : 
                 }
                 m_animations.back().addKeyPose( pose, t );
                 keypose.insertKeyFrame( t, pose );
