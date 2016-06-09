@@ -70,8 +70,10 @@ namespace Ra
             RenderParameters m_paramOut;  /// output render parameters
 
         protected:
-            std::vector<std::pair<std::string, paramType>> m_nameIn;  /// mapping of names to inputs slots
-            std::vector<std::pair<std::string, paramType>> m_nameOut; /// mapping of names to outputs slots
+            /// mapping of names to inputs slots
+            std::vector<std::pair<std::string, paramType>> m_nameIn;
+            /// mapping of names to outputs slots
+            std::vector<std::pair<std::string, paramType>> m_nameOut;
 
             std::string m_name;
             uint        m_id;

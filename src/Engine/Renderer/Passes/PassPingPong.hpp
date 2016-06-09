@@ -1,4 +1,4 @@
-/*
+
 #ifndef RADIUMENGINE_RENDERER_PASS_PINGPONG_HPP
 #define RADIUMENGINE_RENDERER_PASS_PINGPONG_HPP
 
@@ -22,15 +22,13 @@ namespace Ra
         {
         public:
             PassPingPong(const std::string& name, uint w, uint h, uint nTexIn, uint nTexOut, uint loop,
-                         const std::string& shaderPingPong, const std::string& shaderPongPing = "");
+                         const std::string& shaderPingPong);
             virtual ~PassPingPong();
 
             virtual void renderPass();
             virtual void resizePass(uint w, uint h);
             virtual void resizePass();
             virtual void init();
-
-            virtual std::shared_ptr<Texture> getInternTextures(uint i) const override;
 
         protected:
             enum TextureInternalTags
@@ -50,20 +48,15 @@ namespace Ra
             std::unique_ptr<FBO> m_fbo;
             std::array<std::shared_ptr<Texture>,TEX_INTERNAL_COUNT> m_texIntern;
 
-            enum Shaders
-            {
-                SHADER_PINGPONG = 0,
-                SHADER_PONGPING,
-                SHADER_COUNT,
-            };
+            RenderParameters& m_paramPing;
+            RenderParameters  m_paramPong;
 
-            std::string     m_shadernames[SHADER_COUNT];
-            const ShaderProgram* m_shader[SHADER_COUNT];
-            //RenderParameters     m_params[SHADER_COUNT];
+            const ShaderProgram* m_shader;
+            std::string m_shadername;
         };
 
     }
 }
 
 #endif // RADIUMENGINE_RENDERER_PASS_PINGPONG_HPP
-*/
+

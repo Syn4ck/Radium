@@ -1,4 +1,4 @@
-/*
+
 #include "PassPingPong.hpp"
 
 namespace Ra
@@ -6,14 +6,13 @@ namespace Ra
     namespace Engine
     {
 
-        PassPingPong::PassPingPong(const std::string& name, uint w, uint h, uint nTexIn, uint nTexOut, uint loop,
-                                   const std::string& shaderPingPong, const std::string& shaderPongPing)
+        PassPingPong::PassPingPong(const std::string& name, uint w, uint h, uint nTexIn, uint nTexOut,
+                                   uint loop, const std::string& shaderPingPong)
             : Pass(name, w, h, nTexIn, nTexOut)
-            , m_loop( loop )
+            , m_loop      ( loop )
+            , m_paramPing ( m_paramIn )
+            , m_shadername( shaderPingPong )
         {
-            // shader names
-            m_shadernames[SHADER_PINGPONG] = shaderPingPong;
-            m_shadernames[SHADER_PONGPING] = shaderPingPong;
         }
 
         PassPingPong::~PassPingPong()
@@ -25,27 +24,25 @@ namespace Ra
             // internal FBO
             m_fbo.reset( new FBO( FBO::Components(FBO::COLOR), m_width, m_height ));
 
-            // textures
-            m_texOut   [TEX_PONG].reset( new Texture(m_name + "-pong", GL_TEXTURE_2D) );
-            m_texIntern[TEX_PING].reset( new Texture(m_name + "-ping", GL_TEXTURE_2D) );
-
-            // shaders
+            // shader
             ShaderProgramManager* shaderMgr = ShaderProgramManager::getInstance();
+            m_shader = shaderMgr->addShaderProgram(m_shadername, "../Shaders/Basic2D.vert.glsl",
+                                                   "../Shaders/" + m_shadername + ".frag.glsl");
 
-            // load the ping pong shader first
-            m_shader[SHADER_PINGPONG] = shaderMgr->addShaderProgram(m_shadernames[SHADER_PINGPONG], "../Shaders/Basic2D.vert.glsl",
-                                                                    "../Shaders/" + m_shadernames[SHADER_PINGPONG] + ".frag.glsl");
-            // now if a different shader is wanted on ping-pong, load it
+            // set inputs from shader
+            paramNamesFromShaderProgram(m_shader);
 
-            if (m_shadernames[SHADER_PONGPING].length() == 0)
+            // generate outputs
+            for (auto const& out : m_nameOut)
             {
-                m_shader[SHADER_PONGPING] = m_shader[SHADER_PINGPONG];
+                // only for textures
+                if (out.second == PARAM_TEX)
+                {
+                    m_outputs.push_back( std::unique_ptr<Texture>( new Texture(out.first, GL_TEXTURE_2D)) );
+                    m_paramOut.addParameter( out.first.c_str(), m_outputs.back().get() );
+                }
             }
-            else
-            {
-                m_shader[SHADER_PONGPING] = shaderMgr->addShaderProgram(m_shadernames[SHADER_PONGPING], "../Shaders/Basic2D.vert.glsl",
-                                                                        "../Shaders/" + m_shadernames[SHADER_PONGPING] + ".frag.glsl");
-            }
+            m_texIntern[TEX_PING].reset( new Texture("internal pong", GL_TEXTURE_2D));
         }
 
         void PassPingPong::resizePass(uint w, uint h)
@@ -58,12 +55,16 @@ namespace Ra
         void PassPingPong::resizePass()
         {
             m_texIntern[TEX_PING]->initGL(GL_RGBA32F, m_width, m_height, GL_RGBA, GL_FLOAT, nullptr);
-            m_texOut   [TEX_PONG]->initGL(GL_RGBA32F, m_width, m_height, GL_RGBA, GL_FLOAT, nullptr);
+
+            for (auto& texout : m_outputs)
+            {
+                texout->initGL(GL_RGBA32F, m_width, m_height, GL_RGBA, GL_FLOAT, nullptr);
+            }
 
             m_fbo->bind();
             m_fbo->setSize(m_width, m_height);
             m_fbo->attachTexture( GL_COLOR_ATTACHMENT0, m_texIntern[TEX_PING].get() );
-            m_fbo->attachTexture( GL_COLOR_ATTACHMENT1, m_texOut[TEX_PONG].get() );
+            m_fbo->attachTexture( GL_COLOR_ATTACHMENT1, m_outputs[TEX_PONG].get() );
             m_fbo->unbind( true );
 
             GL_CHECK_ERROR;
@@ -83,9 +84,8 @@ namespace Ra
 
             // first write to pong
             GL_ASSERT( glDrawBuffers(1, buffers + 1) );
-            m_shader[SHADER_PINGPONG]->bind();
-            m_params[SHADER_PINGPONG].bind(m_shader[SHADER_PINGPONG]);
-            m_shader[SHADER_PINGPONG]->setUniform("color", m_texIn[0]);
+            m_shader->bind();
+            m_paramPing.bind(m_shader);
             m_canvas->render();
 
             // actually do the ping-pong
@@ -93,27 +93,20 @@ namespace Ra
             {
                 // pong->ping
                 GL_ASSERT( glDrawBuffers(1, buffers) );
-                m_shader[SHADER_PONGPING]->bind();
-                m_params[SHADER_PONGPING].bind(m_shader[SHADER_PONGPING]);
-                m_shader[SHADER_PONGPING]->setUniform("color", m_texOut[TEX_PONG].get());
+                m_shader->bind();
+                m_paramPing.bind(m_shader);
+                //m_shader[SHADER_PONGPING]->setUniform("color", m_texOut[TEX_PONG].get());
                 m_canvas->render();
 
                 // ping->pong
                 GL_ASSERT( glDrawBuffers(1, buffers + 1) );
-                m_shader[SHADER_PINGPONG]->bind();
-                m_params[SHADER_PINGPONG].bind(m_shader[SHADER_PINGPONG]);
-                m_shader[SHADER_PINGPONG]->setUniform("color", m_texIntern[TEX_PING].get());
+                m_shader->bind();
+                m_paramPing.bind(m_shader);
+                //m_shader[SHADER_PINGPONG]->setUniform("color", m_texIntern[TEX_PING].get());
                 m_canvas->render();
             }
         }
 
-        std::shared_ptr<Texture> PassPingPong::getInternTextures(uint i) const
-        {
-            if (i < TEX_INTERNAL_COUNT)
-                return m_texIntern[i];
-            else
-                return m_texIntern[0];
-        }
     }
 }
-*/
+

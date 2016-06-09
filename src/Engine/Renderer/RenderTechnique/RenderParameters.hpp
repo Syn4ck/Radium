@@ -36,6 +36,7 @@ namespace Ra
             PARAM_MAT3,
             PARAM_MAT4,
             PARAM_TEX,
+            PARAM_UNKNOWN,
             PARAM_COUNT
         };
 
@@ -48,10 +49,10 @@ namespace Ra
             {
             public:
                 Parameter() = default;
-                Parameter( const char* name ) : m_name( name ) {}
+                Parameter( const std::string& name ) : m_name( name ) {}
                 virtual void bind(const ShaderProgram* shader ) const = 0;
                 
-                const char* m_name;
+                std::string m_name;
             };
 
             template <typename T>
@@ -59,7 +60,7 @@ namespace Ra
             {
             public:
                 TParameter() = default;
-                TParameter( const char* name, const T& value )
+                TParameter( const std::string& name, const T& value )
                     : Parameter( name ), m_value( value ) {}
                 virtual void bind(const ShaderProgram* shader ) const override;
 
@@ -70,7 +71,7 @@ namespace Ra
             {
             public:
                 TextureParameter() = default;
-                TextureParameter( const char* name, Texture* tex, int texUnit = -1 )
+                TextureParameter( const std::string& name, Texture* tex, int texUnit = -1 )
                     :  Parameter( name ), m_texture( tex ), m_texUnit( texUnit ) {}
                 virtual void bind( const ShaderProgram* shader ) const override;
 

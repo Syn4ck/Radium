@@ -18,12 +18,12 @@ namespace Ra
         template <typename T>
         inline void RenderParameters::TParameter<T>::bind(const ShaderProgram* shader ) const
         {
-            shader->setUniform( m_name, m_value );
+            shader->setUniform( m_name.c_str(), m_value );
         }
 
         inline void RenderParameters::TextureParameter::bind(const ShaderProgram* shader ) const
         {
-            shader->setUniform( m_name, m_texture ); // remove for auto management
+            shader->setUniform( m_name.c_str(), m_texture ); // remove for auto management
         }
 
     } // namespace Engine

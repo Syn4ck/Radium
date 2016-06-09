@@ -46,7 +46,7 @@ namespace Ra
 
         void RenderParameters::addParameter( const char* name, const Core::Vector3& value )
         {
-            m_vec3ParamsVector[name] = Vec3Parameter( name, value );
+            m_vec3ParamsVector[std::string(name)] = Vec3Parameter( name, value );
         }
 
         void RenderParameters::addParameter( const char* name, const Core::Vector4& value )

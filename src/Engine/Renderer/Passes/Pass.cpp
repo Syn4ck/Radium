@@ -178,10 +178,11 @@ namespace Ra
 
         std::string Pass::getName() const { return m_name; }
 
+        // TODO this function has to be refactored because of its ugliness - the author
         void Pass::paramNamesFromShaderProgram(const ShaderProgram* prog)
         {
             // perform introspection on the shader progam to tell which are the parameters
-            GLint i;
+            GLint i, intern = 0;
             GLint count;
 
             GLint  size;
@@ -193,11 +194,36 @@ namespace Ra
 
             // query the number of uniform
             glGetProgramiv(prog->getId(), GL_ACTIVE_UNIFORMS, &count);
+            //std::cout << "hello there are " << count << " uniforms in " << m_name << std::endl;
 
             for (i = 0; i < count; ++ i)
             {
                 glGetActiveUniform(prog->getId(), (GLuint)i, bufsize, &length, &size, &type, name);
-                setupParamIn((GLuint)i, name, (type == 35665) ? PARAM_VEC3 : PARAM_TEX);
+                //std::cout << "   " << i << ": " << name << std::endl;
+                if (strncmp(name, "_main", 5) != 0) // detect non-parametric uniforms
+                {
+                    paramType t;
+                    switch (type)
+                    {
+                    case 35664: t = PARAM_VEC2;   break;
+                    case 35665: t = PARAM_VEC3;   break;
+                    case 35666: t = PARAM_VEC4;   break;
+                    case 35674: t = PARAM_MAT2;   break;
+                    case 35675: t = PARAM_MAT3;   break;
+                    case 35676: t = PARAM_MAT4;   break;
+                    case 35678: t = PARAM_TEX ;   break;
+                    case 5124:  t = PARAM_INT ;   break;
+                    case 5125:  t = PARAM_UINT;   break;
+                    case 5126:  t = PARAM_SCALAR; break;
+                    default:    t = PARAM_UNKNOWN;
+                    }
+
+                    setupParamIn((GLuint)(i - intern), name, t);
+                }
+                else
+                {
+                    ++ intern;
+                }
             }
         }
 
@@ -251,6 +277,7 @@ namespace Ra
             }
             else
             {
+                std::cout << "uncompatible types " << type_in << " " << type_out << std::endl;
                 return false;
             }
         }
