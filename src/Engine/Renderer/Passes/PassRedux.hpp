@@ -1,4 +1,3 @@
-/*
 #ifndef RADIUMENGINE_RENDERER_PASS_REDUX_HPP
 #define RADIUMENGINE_RENDERER_PASS_REDUX_HPP
 
@@ -21,8 +20,8 @@ namespace Ra
         class RA_ENGINE_API PassRedux : public Pass
         {
         public:
-            PassRedux(const std::string& name, uint w, uint h, uint nTexIn, uint nTexOut, uint ratio,
-                      const std::string& shader);
+            PassRedux(const std::string& name, uint w, uint h, uint nTexIn, uint nTexOut,
+                      const std::string& shader, uint ratio = 2);
             virtual ~PassRedux();
 
             virtual void renderPass();
@@ -30,9 +29,8 @@ namespace Ra
             virtual void resizePass();
             virtual void init();
 
-            virtual Texture* getOut(uint slot) const override;
-
-            uint m_ratio;       // the ratio by which the size is divided each iteration
+        protected:
+            uint nbResizements() const;
 
         private:
             enum TextureOutTags
@@ -50,9 +48,10 @@ namespace Ra
             uint m_parentAttachOffset;
 
             // parameters for redux to know what to do
-            std::string      m_shadername;
+            std::string          m_shadername;
             const ShaderProgram* m_shader;
-            //RenderParameters     m_params;
+
+            uint m_ratio;       // the ratio by which the size is divided each iteration
 
             // ping-pong specific variable
             uint m_pingpong;
@@ -64,4 +63,4 @@ namespace Ra
 
 
 #endif // RADIUMENGINE_RENDERER_REDUX_HPP
-*/
+

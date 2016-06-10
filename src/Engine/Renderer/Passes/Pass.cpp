@@ -26,7 +26,7 @@ namespace Ra
                 };
 
 
-        Pass::Pass(const std::string& name, uint w, uint h, uint nbIn, uint nbOut)
+        Pass::Pass(const std::string& name, uint w, uint h, uint nbIn, uint nbOut, bool generate)
             : m_name     ( name )
             , m_nbin     ( nbIn )
             , m_nbout    ( nbOut )
@@ -35,6 +35,7 @@ namespace Ra
             , m_wModifier( 1.f )
             , m_hModifier( 1.f )
             , m_canvas   ( nullptr )
+            , m_isGenerator( generate )
         {
             // resize vectors of textures if necessary
             m_nameIn.resize  ( m_nbin,  std::pair<std::string, paramType>("", PARAM_TEX) );
@@ -194,12 +195,10 @@ namespace Ra
 
             // query the number of uniform
             glGetProgramiv(prog->getId(), GL_ACTIVE_UNIFORMS, &count);
-            //std::cout << "hello there are " << count << " uniforms in " << m_name << std::endl;
 
             for (i = 0; i < count; ++ i)
             {
                 glGetActiveUniform(prog->getId(), (GLuint)i, bufsize, &length, &size, &type, name);
-                //std::cout << "   " << i << ": " << name << std::endl;
                 if (strncmp(name, "_main", 5) != 0) // detect non-parametric uniforms
                 {
                     paramType t;
@@ -222,9 +221,15 @@ namespace Ra
                 }
                 else
                 {
+                    // increase the offset to use in parameters
                     ++ intern;
                 }
             }
+        }
+
+        bool Pass::generates() const
+        {
+            return m_isGenerator;
         }
 
 
@@ -290,6 +295,17 @@ namespace Ra
         const char* Pass::getParamNameOut ( Pass* p, uint slot )
         {
             return p->m_nameOut[slot].first.c_str();
+        }
+
+        void Pass::getVal( Pass* p, void** data, paramType* t )
+        {
+            p->getValAccess(data, t);
+        }
+
+        void Pass::getValAccess( void** data, paramType* t )
+        {
+            *data = nullptr;
+            *t    = PARAM_UNKNOWN;
         }
 
     }

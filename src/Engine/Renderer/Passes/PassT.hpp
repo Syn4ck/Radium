@@ -15,12 +15,14 @@ namespace Ra
         class PassT : public Pass
         {
         public:
-            PassT(const std::string& name, uint nbOut, const T& val, paramType t);
+            PassT(const std::string& name, const T& val, paramType t);
             ~PassT();
             virtual void renderPass() {}
             virtual void resizePass(uint w, uint h) {}
             virtual void resizePass() {}
             virtual void init();
+
+            virtual void getValAccess(void** data, paramType* t) override;
 
         public:
             T         m_value;
@@ -28,8 +30,8 @@ namespace Ra
         };
 
         template <typename T>
-        PassT<T>::PassT(const std::string& name, uint nbOut, const T& val, paramType t)
-                : Pass(name, 1, 1, 0, nbOut)
+        PassT<T>::PassT(const std::string& name, const T& val, paramType t)
+                : Pass(name, 1, 1, 0, 1, true)
                 , m_value(val)
                 , m_type ( t )
         {}
@@ -40,9 +42,15 @@ namespace Ra
         template <typename T>
         void PassT<T>::init()
         {
-            // TODO (hugo) add support for multiple outputs (for loop and distinct names)
             setupParamOut(0, "", m_type);
             m_paramOut.addParameter("", m_value);
+        }
+
+        template <typename T>
+        void PassT<T>::getValAccess(void** data, paramType* t)
+        {
+            *data = &(m_value);
+            *t    =   m_type;
         }
     }
 }

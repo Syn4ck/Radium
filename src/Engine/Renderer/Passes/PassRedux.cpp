@@ -1,4 +1,3 @@
-/*
 #include "PassRedux.hpp"
 
 namespace Ra
@@ -6,12 +5,12 @@ namespace Ra
     namespace Engine
     {
 
-        PassRedux::PassRedux(const std::string& name, uint w, uint h, uint nTexIn, uint nTexOut, uint ratio,
-                             const std::string& shader)
+        PassRedux::PassRedux(const std::string& name, uint w, uint h, uint nTexIn, uint nTexOut,
+                             const std::string& shader, uint ratio)
             : Pass(name, w, h, nTexIn, 2)
-            , m_ratio( ratio )
-            , m_shadername(shader)
-            , m_pingpong( 0 )
+            , m_shadername( shader )
+            , m_ratio     ( ratio  )
+            , m_pingpong  ( 0      )
         {
         }
 
@@ -24,13 +23,28 @@ namespace Ra
             // internal FBO
             m_fbo.reset( new FBO( FBO::Components(FBO::COLOR), 1, 1 ));
 
-            // textures
-            m_texOut[TEX_PING].reset( new Texture(m_name + "ping", GL_TEXTURE_2D) );
-            m_texOut[TEX_PONG].reset( new Texture(m_name + "pong", GL_TEXTURE_2D) );
-
             // get shader
             ShaderProgramManager* shaderMgr = ShaderProgramManager::getInstance();
             m_shader = shaderMgr->addShaderProgram(m_shadername, "../Shaders/Basic2D.vert.glsl", "../Shaders/" + m_shadername + ".frag.glsl");
+
+            // inputs
+            paramNamesFromShaderProgram(m_shader);
+
+            // outputs
+            m_outputs.push_back( std::unique_ptr<Texture>( new Texture("output_a", GL_TEXTURE_2D) ));
+            m_outputs.push_back( std::unique_ptr<Texture>( new Texture("output_b", GL_TEXTURE_2D) ));
+
+            // compute the required number of reductions and tell which texture will be the output
+            if ( (nbResizements() % 2) == 0 )
+            {
+                m_paramOut.addParameter( "",             m_outputs[TEX_PING].get() );
+                m_paramOut.addParameter( "intern_redux", m_outputs[TEX_PONG].get() );
+            }
+            else
+            {
+                m_paramOut.addParameter( "intern_redux", m_outputs[TEX_PING].get() );
+                m_paramOut.addParameter( "",             m_outputs[TEX_PONG].get() );
+            }
         }
 
         void PassRedux::resizePass(uint w, uint h)
@@ -44,13 +58,13 @@ namespace Ra
         {
             m_pingPongSize = std::pow(2.0, Scalar(uint(std::log2(std::min(m_width, m_height)))));
 
-            m_texOut[TEX_PING]->initGL(GL_RGBA32F, m_pingPongSize, m_pingPongSize, GL_RGBA, GL_FLOAT, nullptr);
-            m_texOut[TEX_PONG]->initGL(GL_RGBA32F, m_pingPongSize, m_pingPongSize, GL_RGBA, GL_FLOAT, nullptr);
+            m_outputs[TEX_PING]->initGL(GL_RGBA32F, m_pingPongSize, m_pingPongSize, GL_RGBA, GL_FLOAT, nullptr);
+            m_outputs[TEX_PONG]->initGL(GL_RGBA32F, m_pingPongSize, m_pingPongSize, GL_RGBA, GL_FLOAT, nullptr);
 
             m_fbo->bind();
             m_fbo->setSize(m_pingPongSize, m_pingPongSize);
-            m_fbo->attachTexture( GL_COLOR_ATTACHMENT0, m_texOut[TEX_PING].get() );
-            m_fbo->attachTexture( GL_COLOR_ATTACHMENT1, m_texOut[TEX_PONG].get() );
+            m_fbo->attachTexture( GL_COLOR_ATTACHMENT0, m_outputs[TEX_PING].get() );
+            m_fbo->attachTexture( GL_COLOR_ATTACHMENT1, m_outputs[TEX_PONG].get() );
             m_fbo->unbind( true );
 
             GL_CHECK_ERROR;
@@ -60,6 +74,18 @@ namespace Ra
 
             GL_ASSERT( glDrawBuffer( GL_BACK ) );
             GL_ASSERT( glReadBuffer( GL_BACK ) );
+
+//            // compute the required number of reductions and tell which texture will be the output
+//            if ( (nbResizements() % 2) == 0 )
+//            {
+//                m_paramOut.addParameter( "",             m_outputs[TEX_PING].get() );
+//                m_paramOut.addParameter( "intern_redux", m_outputs[TEX_PONG].get() );
+//            }
+//            else
+//            {
+//                m_paramOut.addParameter( "intern_redux", m_outputs[TEX_PING].get() );
+//                m_paramOut.addParameter( "",             m_outputs[TEX_PONG].get() );
+//            }
         }
 
         void PassRedux::renderPass()
@@ -70,13 +96,14 @@ namespace Ra
 
             m_fbo->useAsTarget();
 
-            uint size  = m_pingPongSize;
+            uint     size = m_pingPongSize;
+            Texture* tex  = m_paramIn.getTexParameter("color");
 
             // first write to ping
             GL_ASSERT( glDrawBuffers(1, buffers) );
             GL_ASSERT( glViewport(0, 0, size, size) );
             drawscreen->bind();
-            drawscreen->setUniform("screenTexture", m_texIn[0]);
+            drawscreen->setUniform("color", tex);
             m_canvas->render();
 
             m_shader->bind();
@@ -88,20 +115,29 @@ namespace Ra
                 size /= m_ratio;
 
                 ++ m_pingpong %= 2;
+                tex = m_outputs[(m_pingpong+1)%2].get();
 
                 GL_ASSERT( glViewport(0, 0, size, size) );
                 GL_ASSERT( glDrawBuffers(1, buffers + m_pingpong) );
-                m_shader->setUniform("color", m_texOut[(m_pingpong+1)%2].get());
-                // TODO(hugo) find a way to enable other uniform names
+                m_shader->setUniform("color", tex);
                 m_canvas->render();
             }
         }
 
-        Texture* PassRedux::getOut(uint slot) const
+        uint PassRedux::nbResizements() const
         {
-            return m_texOut[m_pingpong].get();
+            uint size = m_pingPongSize;
+            uint nb;
+
+            while (size > 1)
+            {
+                size /= m_ratio;
+                ++ nb;
+            }
+
+            return nb;
         }
 
     }
 }
-*/
+

@@ -46,7 +46,6 @@ namespace Ra
                 GL_COLOR_ATTACHMENT6,
                 GL_COLOR_ATTACHMENT7
             };
-
         }
 
         ForwardRenderer::ForwardRenderer( uint width, uint height )
@@ -73,6 +72,7 @@ namespace Ra
         void ForwardRenderer::initGraph()
         {
             // set useful callbacks
+            m_passgraph.m_val_access   = Pass::getVal;
             m_passgraph.m_connect      = Pass::connect;
             m_passgraph.m_slotname_in  = Pass::getParamNameIn;
             m_passgraph.m_slotname_out = Pass::getParamNameOut;
@@ -83,27 +83,41 @@ namespace Ra
             m_passgraph.addNode("DUMMY",  std::shared_ptr<Pass>(m_passes[2]), 2, 1);
             m_passgraph.addNode("BLUR",   std::shared_ptr<Pass>(m_passes[3]), 2, 1);
             m_passgraph.addNode("OFF",    std::shared_ptr<Pass>(m_passes[4]), 0, 1);
-
+//            m_passgraph.addNode("LUM",    std::shared_ptr<Pass>(m_passes[1]), 1, 1);
+//            m_passgraph.addNode("MMM",    std::shared_ptr<Pass>(m_passes[2]), 1, 1);
+//            m_passgraph.addNode("TON",    std::shared_ptr<Pass>(m_passes[3]), 3, 1);
+//            m_passgraph.addNode("PPS",    std::shared_ptr<Pass>(m_passes[4]), 0, 1);
 
             // connect them
             m_passgraph["BLUR" ]->setParent(0, m_passgraph["LIT" ], 0);
             m_passgraph["BLUR" ]->setParent(0, m_passgraph["OFF" ], 1);
             m_passgraph["DUMMY"]->setParent(0, m_passgraph["BLUR"], 0);
-            m_passgraph["DUMMY"]->setParent(0, m_passgraph["VEC"],  1);
+            m_passgraph["DUMMY"]->setParent(0, m_passgraph["VEC" ], 1);
+//            m_passgraph["LUM"  ]->setParent(0, m_passgraph["DUMMY"],0);
+//            m_passgraph["LUM"]->setParent(0, m_passgraph["LIT"],  0);
+//            m_passgraph["MMM"]->setParent(0, m_passgraph["LUM"],  0);
+//            m_passgraph["TON"]->setParent(0, m_passgraph["LIT"],  0);
+//            m_passgraph["TON"]->setParent(0, m_passgraph["MMM"],  1);
+//            m_passgraph["TON"]->setParent(0, m_passgraph["PPS"],  2);
 
             // levelize and sort on the same run
             m_passgraph.levelize(false);
-            //m_passgraph.print();
+//            m_passgraph.print();
         }
 
         void ForwardRenderer::initPasses()
         {
             // create passes
             m_passes.push_back( std::unique_ptr<Pass>( new PassRegular         ("source",    m_width, m_height, 1, 1,   "DrawScreen")) );
-            m_passes.push_back( std::unique_ptr<Pass>( new PassT<Core::Vector3>("vec3single",                      1,    Core::Vector3(0.f,0.4f,0.3f), PARAM_VEC3)) );
+//            m_passes.push_back( std::unique_ptr<Pass>( new PassT<Core::Vector3>("vec3single",                      1,    Core::Vector3(0.6f,0.6f,0.f), PARAM_VEC3)) );
+            m_passes.push_back( std::unique_ptr<Pass>( new PassT<Core::Vector3>("vec3single",                         Core::Vector3(0.f,0.4f,0.3f), PARAM_VEC3)) );
             m_passes.push_back( std::unique_ptr<Pass>( new PassRegular         ("dummy",     m_width, m_height, 2, 1,   "Dummy")) );
             m_passes.push_back( std::unique_ptr<Pass>( new PassPingPong        ("blur",      m_width, m_height, 2, 1, 8,"Blur" )) );
-            m_passes.push_back( std::unique_ptr<Pass>( new PassT<Core::Vector2>("offset",                          1,    Core::Vector2(0.0, 8.0 / m_height), PARAM_VEC2)) );
+            m_passes.push_back( std::unique_ptr<Pass>( new PassT<Core::Vector2>("offset",                             Core::Vector2(0.0, 8.0 / m_height), PARAM_VEC2)) );
+//            m_passes.push_back( std::unique_ptr<Pass>( new PassRegular         ("lumina",    m_width, m_height, 1, 1,   "Luminance")) );
+//            m_passes.push_back( std::unique_ptr<Pass>( new PassRedux           ("minmax",    m_width, m_height, 1, 1,   "MinMax")) );
+//            m_passes.push_back( std::unique_ptr<Pass>( new PassRegular         ("tonmap",    m_width, m_height, 3, 1,   "Tonemapping")) );
+//            m_passes.push_back( std::unique_ptr<Pass>( new PassT<uint>         ("ppsize",                          1, m_pingPongSize, PARAM_UINT)) );
 
             // init every passes
             for (auto const& pass: m_passes)

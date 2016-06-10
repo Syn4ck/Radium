@@ -62,6 +62,12 @@ const char* MultiGraph<T>::Node::getSlotNameOut(uint slot)
 }
 
 template <typename T>
+void MultiGraph<T>::Node::getValAddress(void** value, Ra::Engine::paramType* t)
+{
+    m_graph->m_val_access(this->m_data.get(), value, t);
+}
+
+template <typename T>
 void MultiGraph<T>::Node::updateLevel()
 {
     bool ok = true;

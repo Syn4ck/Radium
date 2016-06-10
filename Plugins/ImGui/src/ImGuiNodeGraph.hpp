@@ -4,6 +4,7 @@
 #include <imgui.h>
 
 #include <Core/GraphStructures/MultiGraph.hpp>
+#include <Core/Math/LinearAlgebra.hpp>
 
 
 /**
@@ -27,15 +28,17 @@ namespace ImGui {
         int    m_levelx, m_levely;
         ImVec2 m_pos   , m_size;
         int    m_nbout , m_nbin;
+        bool   m_draggable;
 
         /// @brief instantiate the struct required to draw a node on screen
         NodeProp(typename Ra::Core::MultiGraph<T>::Node* node, int level,
                  const char* name, int nbin, int nbout)
-            : m_node  ( node   )
-            , m_levelx( level  )
-            , m_size  ( 128,78 )
-            , m_nbout ( nbout  )
-            , m_nbin  ( nbin   )
+            : m_node  ( node    )
+            , m_levelx( level   )
+            , m_size  ( 128,78  )
+            , m_nbout ( nbout   )
+            , m_nbin  ( nbin    )
+            , m_draggable( true )
         {
             m_id = propsIds ++;
             strncpy(m_name, name, 32);
@@ -78,6 +81,11 @@ namespace ImGui {
         /// @brief window that displays nodes and links
         /// @warning init() must have been called prior to this
         void Show( bool* opened = nullptr );
+
+        /// @brief display a widget on outputs that would generate some data
+        /// for example, a slider could be a good option for a float
+        /// @return true if one of the created widget was clicked
+        bool drawOutputWidget( NodeProp& info, ImVec2& pos );
 
         /// @brief one node display
         void drawNode( NodeProp& prop );

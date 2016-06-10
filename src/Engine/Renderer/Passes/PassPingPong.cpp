@@ -33,16 +33,10 @@ namespace Ra
             paramNamesFromShaderProgram(m_shader);
 
             // generate outputs
-            for (auto const& out : m_nameOut)
-            {
-                // only for textures
-                if (out.second == PARAM_TEX)
-                {
-                    m_outputs.push_back( std::unique_ptr<Texture>( new Texture(out.first, GL_TEXTURE_2D)) );
-                    m_paramOut.addParameter( out.first.c_str(), m_outputs.back().get() );
-                }
-            }
-            m_texIntern[TEX_PING].reset( new Texture("internal pong", GL_TEXTURE_2D));
+            m_outputs.push_back( std::unique_ptr<Texture>( new Texture("output_pong", GL_TEXTURE_2D)) );
+            m_paramOut.addParameter( "", m_outputs.back().get() );
+
+            m_texIntern[TEX_PING].reset( new Texture("internal_pong", GL_TEXTURE_2D));
         }
 
         void PassPingPong::resizePass(uint w, uint h)
@@ -94,15 +88,13 @@ namespace Ra
                 // pong->ping
                 GL_ASSERT( glDrawBuffers(1, buffers) );
                 m_shader->bind();
-                m_paramPing.bind(m_shader);
-                //m_shader[SHADER_PONGPING]->setUniform("color", m_texOut[TEX_PONG].get());
+                m_paramPing.bind(m_shader); // here it should be a pong
                 m_canvas->render();
 
                 // ping->pong
                 GL_ASSERT( glDrawBuffers(1, buffers + 1) );
                 m_shader->bind();
                 m_paramPing.bind(m_shader);
-                //m_shader[SHADER_PINGPONG]->setUniform("color", m_texIntern[TEX_PING].get());
                 m_canvas->render();
             }
         }

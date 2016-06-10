@@ -144,6 +144,46 @@ void ImGui::GraphViewer<T>::Show(bool* opened)
 
 
 template <typename T>
+bool ImGui::GraphViewer<T>::drawOutputWidget(NodeProp& info, ImVec2& pos)
+{
+    // fetch data from the node TODO(hugo) make it only once
+    void* val;
+    Ra::Engine::paramType t;
+    info.m_node->getValAddress(&val, &t);
+
+    bool clicked = false;
+
+    static float truc[3];
+
+    Ra::Core::Vector3* v = (Ra::Core::Vector3*) val;
+
+    // display the appropriate widget
+    PushItemWidth(info.m_size.x * 0.9);
+    switch (t)
+    {
+    case Ra::Engine::PARAM_VEC3:
+
+        SetCursorPosY(pos.y - (GetTextLineHeightWithSpacing()/2.f));
+        SetCursorPosX(pos.x - (info.m_size.x));
+        DragFloat3("", truc, .01f, 0.f, 1.f);
+
+        clicked = clicked | IsItemHovered() | IsItemActive() | IsItemClicked();
+
+        (*(v))(0) = truc[0];
+        (*(v))(1) = truc[1];
+        (*(v))(2) = truc[2];
+
+        break;
+    default: break;
+    }
+    PopItemWidth();
+
+    return clicked;
+}
+
+
+
+template <typename T>
 void ImGui::GraphViewer<T>::drawNode(NodeProp& info)
 {
     PushID(info.m_id);
@@ -172,7 +212,7 @@ void ImGui::GraphViewer<T>::drawNode(NodeProp& info)
     }
 
     // actual background draw
-    draw_list->AddRectFilled(bottom, top, bgBox, 1.4f);
+    draw_list->AddRectFilled(bottom, top, (info.m_draggable) ? bgBox : ImColor(255,0,0), 2.4f);
 
     // the node labels
     SetCursorPos(info.m_pos + ImVec2(5.f,5.f));
@@ -191,6 +231,8 @@ void ImGui::GraphViewer<T>::drawNode(NodeProp& info)
         draw_list->AddCircleFilled(top + offset, nodeRadius, bgEdge);
     }
 
+    bool nodeIsGenerator = info.m_node->m_data->generates();
+
     // output connectors
     for (int i = 0; i < info.m_nbout; ++i)
     {
@@ -200,6 +242,13 @@ void ImGui::GraphViewer<T>::drawNode(NodeProp& info)
         Text("%s", info.m_node->getSlotNameOut(i));
 
         draw_list->AddCircleFilled(top + offset, nodeRadius, bgEdge);
+
+        // if the node is a simple generator
+        if (nodeIsGenerator)
+        {
+            // make undraggable if a widget is clicked
+            info.m_draggable = ! drawOutputWidget(info, top);
+        }
     }
 
     PopID();
@@ -445,6 +494,11 @@ void ImGui::GraphViewer<T>::updateDragging()
         {
             draggingState.m_type = DRAG_NODE;
             draggingState.m_node = prop;
+        }
+
+        if (! draggingState.m_node->m_draggable)
+        {
+            draggingState.m_type = DRAG_NONE;
         }
     }
 }
