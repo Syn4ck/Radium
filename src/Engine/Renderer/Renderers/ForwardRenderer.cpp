@@ -72,7 +72,7 @@ namespace Ra
         void ForwardRenderer::initGraph()
         {
             // set useful callbacks
-            m_passgraph.m_val_access   = Pass::getVal;
+//            m_passgraph.m_val_access   = Pass::getVal;
             m_passgraph.m_connect      = Pass::connect;
             m_passgraph.m_slotname_in  = Pass::getParamNameIn;
             m_passgraph.m_slotname_out = Pass::getParamNameOut;
@@ -378,8 +378,8 @@ namespace Ra
 
             if (m_postProcessEnabled)
             {
-                // special settings for shaders that do not depend on the graph
-                // ...
+                // update graph parameters
+                m_passgraph.updateNodes();
 
                 // render everything from the graph
                 for (auto const& nodePass: m_passgraph)

@@ -51,6 +51,15 @@ namespace Ra
                 /// disconnect other's slot from local if it was previously connected
                 void removeParent(uint local, Node* other, uint slot);
 
+                /// connect the local slot to other's slot
+                void setChild(uint local, Node* other, uint slot);
+
+                /// disconnect other's slot from local if it was previously connected
+                void removeChild(uint local, Node* other, uint slot);
+
+                /// update every parent parameters
+                void updateParameters() const;
+
                 /// get input slot's name
                 const char* getSlotNameIn(uint slot);
 
@@ -73,6 +82,7 @@ namespace Ra
             public:
                 std::shared_ptr<T>      m_data;    /// data stored by the node
                 std::vector<Connection> m_parents; /// parents of the node
+                std::vector<Connection> m_childs;  /// childs  of the node
                 std::string m_name;
                 uint m_level;
                 uint m_nbIn;
@@ -94,6 +104,9 @@ namespace Ra
 
             /// add a node to the graph
             void addNode(const std::string& name, const std::shared_ptr<T>& data, uint nb_in, uint nb_out);
+
+            /// update parameters of every node
+            void updateNodes() const;
 
             /// update the nodes' levels taking in account every source
             void levelize(bool sortByLevel = false);

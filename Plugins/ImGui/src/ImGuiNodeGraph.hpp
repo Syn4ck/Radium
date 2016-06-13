@@ -3,6 +3,8 @@
 
 #include <imgui.h>
 
+#include <Engine/Renderer/Passes/Passes.hpp>
+
 #include <Core/GraphStructures/MultiGraph.hpp>
 #include <Core/Math/LinearAlgebra.hpp>
 
@@ -19,17 +21,8 @@ namespace ImGui {
     {
 
     /// @brief the structure used to represent the graphic properties of a node
-    struct NodeProp {
-        typename Ra::Core::MultiGraph<T>::Node* m_node;
-
-        // graphic properties
-        int    m_id;
-        char   m_name[32];
-        int    m_levelx, m_levely;
-        ImVec2 m_pos   , m_size;
-        int    m_nbout , m_nbin;
-        bool   m_draggable;
-
+    class NodeProp {
+    public:
         /// @brief instantiate the struct required to draw a node on screen
         NodeProp(typename Ra::Core::MultiGraph<T>::Node* node, int level,
                  const char* name, int nbin, int nbout)
@@ -51,7 +44,130 @@ namespace ImGui {
             m_pos.x = (levelx+1)*60.f + ((levelx) * m_size.x);
             m_pos.y = (levely+1)*60.f + ((levely) * m_size.y);
         }
+
+        /// @brief one node display
+        virtual void drawNode();
+
+        /// @brief get input slot position
+        /// @warning the coordinates are unaware of window offset
+        ImVec2 getInputPos( unsigned int idx );
+
+        /// @brief get output slot position
+        /// @warning the coordinates are unaware of window offset
+        ImVec2 getOutputPos( unsigned int idx );
+
+        /// @brief get slot position on y-axis
+        float getSlotPosY( unsigned int idx, unsigned int total );
+
+    public:
+        typename Ra::Core::MultiGraph<T>::Node* m_node;
+
+        // graphic properties
+        int    m_id;
+        char   m_name[32];
+        int    m_levelx, m_levely;
+        ImVec2 m_pos   , m_size;
+        int    m_nbout , m_nbin;
+        bool   m_draggable;
     }; // end of NodeProp
+
+
+
+    class NodePropVec2 : public NodeProp {
+    public:
+        /// @brief instantiate the struct required to draw a node on screen
+        NodePropVec2( typename Ra::Core::MultiGraph<T>::Node* node, const char* name )
+            : NodeProp( node, 1, name , 0, 1)
+        {
+        }
+
+        virtual void drawNode() override;
+
+    public:
+        Scalar m_value[2];
+    }; // NodePropVec2
+
+
+
+    class NodePropVec3 : public NodeProp {
+    public:
+        /// @brief instantiate the struct required to draw a node on screen
+        NodePropVec3( typename Ra::Core::MultiGraph<T>::Node* node, const char* name )
+            : NodeProp( node, 1, name , 0, 1)
+        {
+        }
+
+        virtual void drawNode() override;
+
+    public:
+        Scalar m_value[3];
+    }; // NodePropVec3
+
+
+
+    class NodePropVec4 : public NodeProp {
+    public:
+        /// @brief instantiate the struct required to draw a node on screen
+        NodePropVec4( typename Ra::Core::MultiGraph<T>::Node* node, const char* name )
+            : NodeProp( node, 1, name , 0, 1)
+        {
+        }
+
+        virtual void drawNode() override;
+
+    public:
+        Scalar m_value[4];
+    }; // NodePropVec4
+
+
+
+    class NodePropMat2 : public NodeProp {
+    public:
+        /// @brief instantiate the struct required to draw a node on screen
+        NodePropMat2( typename Ra::Core::MultiGraph<T>::Node* node, const char* name )
+            : NodeProp( node, 1, name , 0, 1)
+        {
+        }
+
+        virtual void drawNode() override;
+
+    public:
+        Scalar m_value[4];
+    }; // NodePropMat2
+
+
+
+    class NodePropMat3 : public NodeProp {
+    public:
+        /// @brief instantiate the struct required to draw a node on screen
+        NodePropMat3( typename Ra::Core::MultiGraph<T>::Node* node, const char* name )
+            : NodeProp( node, 1, name , 0, 1)
+        {
+        }
+
+        virtual void drawNode() override;
+
+    public:
+        Scalar m_value[9];
+    }; // NodePropMat3
+
+
+
+    class NodePropMat4 : public NodeProp {
+    public:
+        /// @brief instantiate the struct required to draw a node on screen
+        NodePropMat4( typename Ra::Core::MultiGraph<T>::Node* node, const char* name )
+            : NodeProp( node, 1, name , 0, 1)
+        {
+        }
+
+        virtual void drawNode() override;
+
+    public:
+        Scalar m_value[16];
+    }; // NodePropMat4
+
+
 
     /// @brief dragging management
     enum dragtype : unsigned int {DRAG_NONE=0, DRAG_NODE, DRAG_SLOT};
@@ -63,7 +179,7 @@ namespace ImGui {
         NodeProp* m_node;    // the node concerned with current dragging
         int       m_slot;    // the slot associated when DRAG_SLOT
         int       m_side;    // the side of the slot (input/output)
-    } draggingState;
+    } dragstate;
 
     public:
         /// constructor
@@ -82,14 +198,6 @@ namespace ImGui {
         /// @warning init() must have been called prior to this
         void Show( bool* opened = nullptr );
 
-        /// @brief display a widget on outputs that would generate some data
-        /// for example, a slider could be a good option for a float
-        /// @return true if one of the created widget was clicked
-        bool drawOutputWidget( NodeProp& info, ImVec2& pos );
-
-        /// @brief one node display
-        void drawNode( NodeProp& prop );
-
         /// @brief display link between 2 nodes
         void drawLink( NodeProp& node_a, unsigned int slot_a, NodeProp& node_b, unsigned int slot_b );
 
@@ -107,17 +215,6 @@ namespace ImGui {
 
         /// @brief update the dragging state
         void updateDragging();
-
-        /// @brief get input slot position
-        /// @warning the coordinates are unaware of window offset
-        ImVec2 getInputPos(  const NodeProp& node, unsigned int idx );
-
-        /// @brief get output slot position
-        /// @warning the coordinates are unaware of window offset
-        ImVec2 getOutputPos( const NodeProp& node, unsigned int idx );
-
-        /// @brief get slot position on y-axis
-        float getSlotPosY( const NodeProp& info, unsigned int idx, unsigned int total );
 
         /// @brief draw a Hermite spline
         /// @note this function was written by
@@ -142,5 +239,6 @@ namespace ImGui {
 } // namespace ImGui
 
 #include "ImGuiNodeGraph.tpp"
+#include "ImGuiNodeDrawNodes.tpp"
 
 #endif // IMGUI_NODE_GRAPH_HPP

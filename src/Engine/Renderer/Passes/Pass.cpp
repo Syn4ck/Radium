@@ -26,7 +26,7 @@ namespace Ra
                 };
 
 
-        Pass::Pass(const std::string& name, uint w, uint h, uint nbIn, uint nbOut, bool generate)
+        Pass::Pass(const std::string& name, uint w, uint h, uint nbIn, uint nbOut)
             : m_name     ( name )
             , m_nbin     ( nbIn )
             , m_nbout    ( nbOut )
@@ -35,7 +35,6 @@ namespace Ra
             , m_wModifier( 1.f )
             , m_hModifier( 1.f )
             , m_canvas   ( nullptr )
-            , m_isGenerator( generate )
         {
             // resize vectors of textures if necessary
             m_nameIn.resize  ( m_nbin,  std::pair<std::string, paramType>("", PARAM_TEX) );
@@ -199,7 +198,7 @@ namespace Ra
             for (i = 0; i < count; ++ i)
             {
                 glGetActiveUniform(prog->getId(), (GLuint)i, bufsize, &length, &size, &type, name);
-                if (strncmp(name, "_main", 5) != 0) // detect non-parametric uniforms
+                if (strncmp(name, "_main", 5) != 0) // detect program uniforms
                 {
                     paramType t;
                     switch (type)
@@ -227,9 +226,9 @@ namespace Ra
             }
         }
 
-        bool Pass::generates() const
+        paramType Pass::generates() const
         {
-            return m_isGenerator;
+            return PARAM_UNKNOWN;
         }
 
 
@@ -297,15 +296,10 @@ namespace Ra
             return p->m_nameOut[slot].first.c_str();
         }
 
-        void Pass::getVal( Pass* p, void** data, paramType* t )
+        void* Pass::getDataPtr(paramType* t)
         {
-            p->getValAccess(data, t);
-        }
-
-        void Pass::getValAccess( void** data, paramType* t )
-        {
-            *data = nullptr;
-            *t    = PARAM_UNKNOWN;
+            *t = PARAM_UNKNOWN;
+            return nullptr;
         }
 
     }

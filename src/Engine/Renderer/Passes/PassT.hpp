@@ -17,12 +17,14 @@ namespace Ra
         public:
             PassT(const std::string& name, const T& val, paramType t);
             ~PassT();
-            virtual void renderPass() {}
+            virtual void renderPass() override;
             virtual void resizePass(uint w, uint h) {}
             virtual void resizePass() {}
             virtual void init();
 
-            virtual void getValAccess(void** data, paramType* t) override;
+            virtual void* getDataPtr(paramType *t) override;
+
+            virtual paramType generates() const override;
 
         public:
             T         m_value;
@@ -31,7 +33,7 @@ namespace Ra
 
         template <typename T>
         PassT<T>::PassT(const std::string& name, const T& val, paramType t)
-                : Pass(name, 1, 1, 0, 1, true)
+                : Pass(name, 1, 1, 0, 1)
                 , m_value(val)
                 , m_type ( t )
         {}
@@ -47,10 +49,22 @@ namespace Ra
         }
 
         template <typename T>
-        void PassT<T>::getValAccess(void** data, paramType* t)
+        void* PassT<T>::getDataPtr(paramType *t)
         {
-            *data = &(m_value);
-            *t    =   m_type;
+            *t = m_type;
+            return &m_value;
+        }
+
+        template <typename T>
+        void PassT<T>::renderPass()
+        {
+            m_paramOut.updateParameter("", m_value);
+        }
+
+        template <typename T>
+        paramType PassT<T>::generates() const
+        {
+            return m_type;
         }
     }
 }

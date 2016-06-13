@@ -9,11 +9,15 @@ MultiGraph<T>::Node::Node( MultiGraph<T>* host, const std::string& name, const s
 {
 }
 
+
+
 template <typename T>
 bool MultiGraph<T>::Node::Connection::operator==(const MultiGraph<T>::Node::Connection& other) const
 {
     return (m_slot == other.m_slot) && (m_source == other.m_source) && (m_local == other.m_local);
 }
+
+
 
 template <typename T>
 void MultiGraph<T>::Node::setParent(uint slot, Node* other, uint local)
@@ -28,12 +32,15 @@ void MultiGraph<T>::Node::setParent(uint slot, Node* other, uint local)
         {
             // add the new connection in case it didn't exist before
             m_parents.push_back(c);
+            other->setChild(local, this, slot);
 
             // set the graph to be updated
             m_graph->m_status = GRAPH_UPDATE;
         }
     }
 }
+
+
 
 template <typename T>
 void MultiGraph<T>::Node::removeParent(uint slot, Node* other, uint local)
@@ -45,9 +52,53 @@ void MultiGraph<T>::Node::removeParent(uint slot, Node* other, uint local)
     if (ref != m_parents.end())
     {
         m_parents.erase(ref);
+        other->removeChild(local, this, slot);
         m_graph->m_status = GRAPH_UPDATE;
     }
 }
+
+
+
+template <typename T>
+void MultiGraph<T>::Node::setChild(uint slot, Node* other, uint local)
+{
+    Connection c = {slot, other, local};
+
+    // if no existing connection is found
+    if (std::find(m_childs.begin(), m_childs.end(), c) == m_childs.end())
+    {
+        m_childs.push_back(c);
+    }
+}
+
+
+
+template <typename T>
+void MultiGraph<T>::Node::removeChild(uint slot, Node* other, uint local)
+{
+    Connection c = {slot, other, local};
+    auto ref = std::find(m_childs.begin(), m_childs.end(), c);
+
+    // remove the edge if existant
+    if (ref != m_childs.end())
+    {
+        m_childs.erase(ref);
+    }
+}
+
+
+
+template <typename T>
+void MultiGraph<T>::Node::updateParameters() const
+{
+    // reset every connections
+    for (auto const& c : m_parents)
+    {
+        m_graph->m_connect(c.m_source->m_data.get(), c.m_slot, this->m_data.get(), c.m_local);
+    }
+}
+
+
 
 template <typename T>
 const char* MultiGraph<T>::Node::getSlotNameIn(uint slot)
@@ -55,17 +106,23 @@ const char* MultiGraph<T>::Node::getSlotNameIn(uint slot)
     return m_graph->m_slotname_in(this->m_data.get(), slot);
 }
 
+
+
 template <typename T>
 const char* MultiGraph<T>::Node::getSlotNameOut(uint slot)
 {
     return m_graph->m_slotname_out(this->m_data.get(), slot);
 }
 
+
+
 template <typename T>
 void MultiGraph<T>::Node::getValAddress(void** value, Ra::Engine::paramType* t)
 {
     m_graph->m_val_access(this->m_data.get(), value, t);
 }
+
+
 
 template <typename T>
 void MultiGraph<T>::Node::updateLevel()
@@ -88,11 +145,15 @@ void MultiGraph<T>::Node::updateLevel()
     }
 }
 
+
+
 template <typename T>
 bool MultiGraph<T>::Node::operator<(const MultiGraph<T>::Node& other) const
 {
     return m_level < other.m_level;
 }
+
+
 
 template <typename T>
 void MultiGraph<T>::Node::print() const
@@ -105,6 +166,8 @@ void MultiGraph<T>::Node::print() const
     std::cout << m_name << "(level. " << m_level << ")" << std::endl;
 }
 
+
+
 template <typename T>
 void MultiGraph<T>::addNode(const std::string& name, const std::shared_ptr<T>& data, uint nb_in, uint nb_out)
 {
@@ -112,6 +175,26 @@ void MultiGraph<T>::addNode(const std::string& name, const std::shared_ptr<T>& d
     m_graph.push_back(std::unique_ptr<Node>(newNode));
     m_names[name] = newNode;
 }
+
+
+
+template <typename T>
+void MultiGraph<T>::updateNodes() const
+{
+    // Update every nodes in the graph.
+    //
+    // This is required in order to satisfy parameters propagation
+    // without doing recursive calls.
+    //
+    // This function assumes the graph was previously sorted.
+
+    for (auto const& node : m_graph)
+    {
+        node->updateParameters();
+    }
+}
+
+
 
 template <typename T>
 void MultiGraph<T>::levelize(bool sortByLevel)
@@ -165,6 +248,8 @@ void MultiGraph<T>::levelize(bool sortByLevel)
     }
 }
 
+
+
 template <typename T>
 void MultiGraph<T>::print() const
 {
@@ -175,11 +260,15 @@ void MultiGraph<T>::print() const
     }
 }
 
+
+
 template <typename T>
 typename MultiGraph<T>::Node* MultiGraph<T>::operator[](const std::string& name)
 {
     return m_names[name];
 }
+
+
 
 template <typename T>
 typename MultiGraph<T>::Node* MultiGraph<T>::operator[](const int index)
@@ -187,17 +276,23 @@ typename MultiGraph<T>::Node* MultiGraph<T>::operator[](const int index)
     return m_graph[index].get();
 }
 
+
+
 template <typename T>
 typename std::vector<std::unique_ptr<typename MultiGraph<T>::Node>>::iterator MultiGraph<T>::begin()
 {
     return m_graph.begin();
 }
 
+
+
 template <typename T>
 typename std::vector<std::unique_ptr<typename MultiGraph<T>::Node>>::iterator MultiGraph<T>::end()
 {
     return m_graph.end();
 }
+
+
 
 template <typename T>
 uint MultiGraph<T>::size() const

@@ -13,7 +13,7 @@ namespace Ra
         class RA_ENGINE_API Pass
         {
         public:
-            Pass(const std::string& name, uint w, uint h, uint nbIn, uint nbOut, bool generate = false);
+            Pass(const std::string& name, uint w, uint h, uint nbIn, uint nbOut);
             virtual ~Pass() = 0;
 
             virtual void renderPass() = 0;
@@ -62,15 +62,24 @@ namespace Ra
             void paramNamesFromShaderProgram(const ShaderProgram* prog);
 
             /// @brief tells if the pass generate data from nothing
-            bool generates() const;
+            virtual paramType generates() const;
 
-            static bool connect (Pass* a, uint ia, Pass* b, uint ib );
-            static const char* getParamNameIn  ( Pass* p, uint slot );
-            static const char* getParamNameOut ( Pass* p, uint slot );
 
-            // TEST
-            static  void getVal( Pass* p, void** data, paramType* t );
-            virtual void getValAccess( void** data, paramType* t );
+            /// @brief return nothing by default, used only for data generators
+            virtual void* getDataPtr(paramType* t);
+
+            /// @brief function pointer to be passed to a container that would need
+            /// to connect one pass to another with slot considerations
+            static bool connect( Pass* a, uint ia, Pass* b, uint ib );
+
+            /// @brief function pointer to get a parameter name
+            static const char* getParamNameIn( Pass* p, uint slot );
+
+            /// @brief function pointer to get a parameter name
+            static const char* getParamNameOut( Pass* p, uint slot );
+
+//            /// @brief return the value and type of a parameter
+//            static void getVal( Pass* p, void** data, paramType* t );
 
         public:
             RenderParameters m_paramIn;   /// input  render parameters
@@ -99,9 +108,6 @@ namespace Ra
 
             /// geometry for GL to render the fragment shader to
             Mesh* m_canvas;
-
-            /// will help determining if the pass only generates
-            bool  m_isGenerator;
 
             static const GLenum buffers[];
         };
