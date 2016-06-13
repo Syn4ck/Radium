@@ -78,6 +78,8 @@ void SkinningComponent::skin()
     else
     {
         m_frameData.m_currentPose = skel->getPose(SpaceType::MODEL);
+        
+        
         if ( !Ra::Core::Animation::areEqual( m_frameData.m_currentPose, m_frameData.m_previousPose))
         {
             m_frameData.m_doSkinning = true;

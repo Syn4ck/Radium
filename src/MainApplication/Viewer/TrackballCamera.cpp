@@ -237,7 +237,6 @@ namespace Ra
         Scalar f = m_isPressedW ? 1.0 : m_isPressedS ? -1.0 : 0.0;
         Scalar r = m_isPressedD ? 1.0 : m_isPressedA ? -1.0 : 0.0;
         Scalar u = m_isPressedE ? 1.0 : m_isPressedQ ? -1.0 : 0.0;
-
         
         Core::Vector3 F = m_camera->getDirection() * dt * f * m_cameraRadius;
         Core::Vector3 R = m_camera->getRightVector() * dt * r * m_cameraRadius;

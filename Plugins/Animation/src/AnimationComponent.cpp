@@ -114,15 +114,11 @@ namespace AnimationPlugin
     }
 
     void AnimationComponent::update(Scalar dt)
-    {
-        if( dt != 0.0 ) {
+    {   
+        if ( dt != 0.0 )
+        {
             const Scalar factor = ( m_slowMo ? 0.1 : 1.0 ) * m_speed;
             dt = factor * ( ( m_animationTimeStep ) ? m_dt[m_animationID] : dt );
-        }
-        // Ignore large dt that appear when the engine is paused (while loading a file for instance)
-        if( !m_animationTimeStep && ( dt > 0.5 ) )
-        {
-            dt = 0;
         }
 
         // Compute the elapsed time
@@ -130,12 +126,9 @@ namespace AnimationPlugin
 
         // get the current pose from the animation
         if ( dt > 0 && m_animations.size() > 0)
-        {            
+        {
             m_wasReset = false;
             Ra::Core::Animation::Pose currentPose = m_animations[m_animationID].getPose(m_animationTime);
-            
-            for (int i = 0; i < currentPose.size(); i++)
-                std::cout << "Anim " << i << std::endl << currentPose[i].matrix() << std::endl;
 
             // update the pose of the skeleton
             m_skel.setPose(currentPose, Ra::Core::Animation::Handle::SpaceType::LOCAL);
@@ -225,31 +218,16 @@ namespace AnimationPlugin
 
         createWeightMatrix( data, indexTable, duplicateTable );
         
-        m_refPose = m_skel.getPose( Ra::Core::Animation::Handle::SpaceType::MODEL);
-        for (int i = 0; i < m_refPose.size(); i++)
-        {
-            std::cout << i << std::endl;
-            Ra::Core::print(m_refPose[i].matrix());
-        }
-        
         for (int i = 0; i < m_skel.size(); i++)
         {
             if (m_skel.m_graph.isRoot(i))
                m_skel.setTransform(i, data->getFrame().inverse() * m_skel.getTransform(i, Ra::Core::Animation::Handle::SpaceType::LOCAL), Ra::Core::Animation::Handle::SpaceType::LOCAL);
         }
         m_refPose = m_skel.getPose( Ra::Core::Animation::Handle::SpaceType::MODEL);
-        for (int i = 0; i < m_refPose.size(); i++)
-        {
-            std::cout << i << std::endl;
-            Ra::Core::print(m_refPose[i].matrix());
-        }
-        
         
         setupSkeletonDisplay();
         setupIO(m_contentName);
     }
-
-
 
     void AnimationComponent::handleAnimationLoading( const std::vector< Ra::Asset::AnimationData* > data ) {
         m_animations.clear();
@@ -277,9 +255,6 @@ namespace AnimationPlugin
             for( const auto& t : keyTime ) {
                 for( const auto& it : table ) {
                     pose[it.second] = handleAnim[it.first].m_anim.at( t );
-                    std::cout << "Animation Loading " << it.second << std::endl;
-                    Ra::Core::print(pose[it.second].matrix());
-//                    m_skel.m_graph.isRoot( it.second ) ) ? m_skel.m_pose[it.second] : 
                 }
                 m_animations.back().addKeyPose( pose, t );
                 keypose.insertKeyFrame( t, pose );
@@ -290,8 +265,6 @@ namespace AnimationPlugin
         m_animationID = 0;
         m_animationTime = 0.0;
     }
-
-
 
     void AnimationComponent::createSkeleton( const Ra::Asset::HandleData* data, std::map< uint, uint >& indexTable ) {
         const uint size = data->getComponentDataSize();
@@ -312,7 +285,6 @@ namespace AnimationPlugin
             addBone( -1, r, component, edgeList, processed, indexTable );
         }
     }
-
 
     void AnimationComponent::addBone( const int parent,
                                       const uint dataID,
