@@ -60,8 +60,8 @@ namespace
     }
 }
 
-
 template <typename T> unsigned int ImGui::NodeProp<T>::id_prop = 0;
+
 
 
 template <typename T>
@@ -70,6 +70,7 @@ ImVec2 ImGui::NodeProp<T>::getInputPos( unsigned int idx )
     float posY = getSlotPosY(idx, m_nbin);
     return ImVec2(m_pos.x - 8.0f, posY);
 }
+
 
 
 template <typename T>
@@ -91,59 +92,186 @@ float ImGui::NodeProp<T>::getSlotPosY( unsigned int idx, unsigned int total )
     return m_pos.y + (0.5 * d) + (idx * d) + 16.f;
 }
 
+
+
 template <typename T>
-void ImGui::NodeProp<T>::drawNode()
+void ImGui::NodeProp<T>::drawBackground( const std::string& title,
+                                         const ImVec2&      offset,
+                                         const ImColor&     bg )
 {
-    PushID(m_id);
+    const ImColor edge( 180, 180, 180 );
+    const float   radius = 3.5f;
 
-    const float nodeRadius = 3.5f;
-    ImColor bgBox(40,40,40), bgEdge(180,180,180);
-    ImVec2 offset = GetWindowPos() - ImVec2(GetScrollX(), GetScrollY());
-
-    // draw the nodes on the foreground (on the top of links)
     ImDrawList* draw_list = ImGui::GetWindowDrawList();
-    draw_list->ChannelsSetCurrent(1);
-
+    ImVec2 slotPos;
+    ImVec2 cursorPos;
     ImVec2 bottom = offset + m_pos;
     ImVec2 top    = offset + m_pos + m_size;
 
+
+    // actual background draw
     // if hovered:
     if (IsMouseHoveringRect(bottom, top))
     {
-        bgBox = ImColor(60,60,60); // ligthen background
+        draw_list->AddRectFilled(bottom, top, ImColor(53,50,80,200), 2.4f);
+    }
+    else
+    {
+        draw_list->AddRectFilled(bottom, top, bg, 2.4f);
     }
 
-    // actual background draw
-    draw_list->AddRectFilled(bottom, top, (m_draggable) ? bgBox : ImColor(255,0,0), 2.4f);
-
-    SetCursorPos(m_pos + ImVec2(5.f,5.f));
-    BeginGroup();
-
     // the node labels
-    Text("(%d)  %s", m_node->m_level, m_name);
+    Text("%s", title.c_str());
+
+    cursorPos = GetCursorPos();
 
     // input connectors
     for (int i = 0; i < m_nbin; ++i)
     {
-        top = this->getInputPos(i);
+        slotPos = this->getInputPos(i);
 
-        SetCursorPos(top + ImVec2(14.f, -6.f));
-        Text("%s", m_node->getSlotNameIn(i));
+        SetCursorPos(slotPos + ImVec2(14.f, -6.f));
+        Text("%s", m_node->getSlotNameIn(i).c_str());
 
-        draw_list->AddCircleFilled(top + offset, nodeRadius, bgEdge);
+        draw_list->AddCircleFilled(slotPos + offset, radius, edge);
     }
 
     // output connectors
     for (int i = 0; i < m_nbout; ++i)
     {
-        top = this->getOutputPos(i);
+        slotPos = this->getOutputPos(i);
 
-        SetCursorPos(top + ImVec2(12.f, -6.f));
-        Text("%s", m_node->getSlotNameOut(i));
+        SetCursorPos(slotPos + ImVec2(12.f, -6.f));
+        Text("%s", m_node->getSlotNameOut(i).c_str());
 
-        draw_list->AddCircleFilled(top + offset, nodeRadius, bgEdge);
+        draw_list->AddCircleFilled(slotPos + offset, radius, edge);
     }
 
+
+    // reset cursor position
+    SetCursorPos(cursorPos);
+}
+
+
+
+template <typename T>
+void ImGui::NodeProp<T>::drawNode()
+{
+    const ImVec2  offset = GetWindowPos() - ImVec2(GetScrollX(), GetScrollY());
+    ImDrawList*   draw_list = ImGui::GetWindowDrawList();
+
+    SetCursorPos(m_pos + ImVec2(5.f,5.f));
+
+    PushID(m_id);
+    BeginGroup();
+    draw_list->ChannelsSetCurrent(1);
+
+    drawBackground( this->m_name, offset );
+
+    // do nothing for a basic node
+
+    draw_list->ChannelsSetCurrent(0);
+    EndGroup();
+    PopID();
+}
+
+
+
+template <typename T>
+void ImGui::NodePropInt<T>::drawNode()
+{
+    const ImVec2  offset = GetWindowPos() - ImVec2(GetScrollX(), GetScrollY());
+    ImDrawList*   draw_list = ImGui::GetWindowDrawList();
+
+    this->m_size.x = 128;
+    this->m_size.y = 2 * (GetTextLineHeightWithSpacing() + 6.f);
+
+    SetCursorPos(this->m_pos + ImVec2(5.f,5.f));
+
+    PushID(this->m_id);
+    BeginGroup();
+    draw_list->ChannelsSetCurrent(1);
+
+    this->drawBackground( this->m_name, offset );
+
+    // draw a slider
+    PushItemWidth(this->m_size.x - 10.f);
+    DragInt("", &m_value);
+    PopItemWidth();
+
+    // update data
+    Ra::Engine::paramType t;
+    int* x = static_cast<int*>( this->m_node->m_data->getDataPtr(&t) );
+    *x = m_value;
+
+    draw_list->ChannelsSetCurrent(0);
+    EndGroup();
+    PopID();
+}
+
+
+
+template <typename T>
+void ImGui::NodePropUint<T>::drawNode()
+{
+    const ImVec2  offset = GetWindowPos() - ImVec2(GetScrollX(), GetScrollY());
+    ImDrawList*   draw_list = ImGui::GetWindowDrawList();
+
+    this->m_size.x = 128;
+    this->m_size.y = 2 * (GetTextLineHeightWithSpacing() + 6.f);
+
+    SetCursorPos(this->m_pos + ImVec2(5.f,5.f));
+
+    PushID(this->m_id);
+    BeginGroup();
+    draw_list->ChannelsSetCurrent(1);
+
+    this->drawBackground( this->m_name, offset );
+
+    // draw a slider
+    PushItemWidth(this->m_size.x - 10.f);
+    DragInt("", &m_value, this->m_rangeStep, this->m_rangeMin, this->m_rangeMax);
+    PopItemWidth();
+
+    // update data
+    Ra::Engine::paramType t;
+    unsigned int* x = static_cast<unsigned int*>( this->m_node->m_data->getDataPtr(&t) );
+    *x = static_cast<unsigned int>(m_value);
+
+    draw_list->ChannelsSetCurrent(0);
+    EndGroup();
+    PopID();
+}
+
+
+
+template <typename T>
+void ImGui::NodePropScalar<T>::drawNode()
+{
+    const ImVec2  offset = GetWindowPos() - ImVec2(GetScrollX(), GetScrollY());
+    ImDrawList*   draw_list = ImGui::GetWindowDrawList();
+
+    this->m_size.x = 128;
+    this->m_size.y = 2 * (GetTextLineHeightWithSpacing() + 6.f);
+
+    SetCursorPos(this->m_pos + ImVec2(5.f,5.f));
+
+    PushID(this->m_id);
+    BeginGroup();
+    draw_list->ChannelsSetCurrent(1);
+
+    this->drawBackground( this->m_name, offset );
+
+    PushItemWidth(this->m_size.x - 10.f);
+    DragFloat("", &m_value, this->m_rangeStep, this->m_rangeMin, this->m_rangeMax);
+    PopItemWidth();
+
+    // update data
+    Ra::Engine::paramType t;
+    Scalar* x = static_cast<Scalar*>( this->m_node->m_data->getDataPtr(&t) );
+    *x = m_value;
+
+    draw_list->ChannelsSetCurrent(0);
     EndGroup();
     PopID();
 }
@@ -153,39 +281,22 @@ void ImGui::NodeProp<T>::drawNode()
 template <typename T>
 void ImGui::NodePropVec2<T>::drawNode()
 {
-    PushID(this->m_id);
-
-    const float nodeRadius = 3.5f;
-    ImColor bgBox(40,40,40), bgEdge(180,180,180);
-    ImVec2 offset = GetWindowPos() - ImVec2(GetScrollX(), GetScrollY());
-
-    // draw the nodes on the foreground (on the top of links)
-    ImDrawList* draw_list = ImGui::GetWindowDrawList();
-    draw_list->ChannelsSetCurrent(1);
+    const ImVec2  offset = GetWindowPos() - ImVec2(GetScrollX(), GetScrollY());
+    ImDrawList*   draw_list = ImGui::GetWindowDrawList();
 
     this->m_size.x = 220;
     this->m_size.y = 2 * (GetTextLineHeightWithSpacing() + 6.f);
 
-    ImVec2 bottom = offset + this->m_pos;
-    ImVec2 top    = offset + this->m_pos + this->m_size;
-
-    // if hovered:
-    if (IsMouseHoveringRect(bottom, top))
-    {
-        bgBox = ImColor(60,60,90); // ligthen background
-    }
-
-    // actual background draw
-    draw_list->AddRectFilled(bottom, top, bgBox, 2.4f);
-
     SetCursorPos(this->m_pos + ImVec2(5.f,5.f));
-    BeginGroup();
 
-    // the node labels
-    Text("%s", this->m_name);
+    PushID(this->m_id);
+    BeginGroup();
+    draw_list->ChannelsSetCurrent(1);
+
+    this->drawBackground( this->m_name, offset );
 
     PushItemWidth(this->m_size.x - 10.f);
-    DragFloat2("", m_value, 0.01f, 0.f, 1.f);
+    DragFloat2("", m_value, this->m_rangeStep, this->m_rangeMin, this->m_rangeMax);
     PopItemWidth();
 
     // update data
@@ -193,17 +304,7 @@ void ImGui::NodePropVec2<T>::drawNode()
     Ra::Core::Vector2* v = static_cast<Ra::Core::Vector2*>( this->m_node->m_data->getDataPtr(&t) );
     *v = createVec2(m_value);
 
-    // output connectors
-    for (int i = 0; i < this->m_nbout; ++i)
-    {
-        top = this->getOutputPos(i);
-
-        SetCursorPos(top + ImVec2(12.f, -6.f));
-        Text("%s", this->m_node->getSlotNameOut(i));
-
-        draw_list->AddCircleFilled(top + offset, nodeRadius, bgEdge);
-    }
-
+    draw_list->ChannelsSetCurrent(0);
     EndGroup();
     PopID();
 }
@@ -213,39 +314,22 @@ void ImGui::NodePropVec2<T>::drawNode()
 template <typename T>
 void ImGui::NodePropVec3<T>::drawNode()
 {
-    PushID(this->m_id);
-
-    const float nodeRadius = 3.5f;
-    ImColor bgBox(40,40,40), bgEdge(180,180,180);
-    ImVec2 offset = GetWindowPos() - ImVec2(GetScrollX(), GetScrollY());
-
-    // draw the nodes on the foreground (on the top of links)
-    ImDrawList* draw_list = ImGui::GetWindowDrawList();
-    draw_list->ChannelsSetCurrent(1);
+    const ImVec2  offset = GetWindowPos() - ImVec2(GetScrollX(), GetScrollY());
+    ImDrawList*   draw_list = ImGui::GetWindowDrawList();
 
     this->m_size.x = 238;
     this->m_size.y = 2 * (GetTextLineHeightWithSpacing() + 6.f);
 
-    ImVec2 bottom = offset + this->m_pos;
-    ImVec2 top    = offset + this->m_pos + this->m_size;
-
-    // if hovered:
-    if (IsMouseHoveringRect(bottom, top))
-    {
-        bgBox = ImColor(60,60,90); // ligthen background
-    }
-
-    // actual background draw
-    draw_list->AddRectFilled(bottom, top, bgBox, 2.4f);
-
     SetCursorPos(this->m_pos + ImVec2(5.f,5.f));
-    BeginGroup();
 
-    // the node labels
-    Text("%s", this->m_name);
+    PushID(this->m_id);
+    BeginGroup();
+    draw_list->ChannelsSetCurrent(1);
+
+    this->drawBackground( this->m_name, offset );
 
     PushItemWidth(this->m_size.x - 10.f);
-    DragFloat3("", m_value, 0.01f, 0.f, 1.f);
+    DragFloat3("", m_value, this->m_rangeStep, this->m_rangeMin, this->m_rangeMax);
     PopItemWidth();
 
     // update data
@@ -253,17 +337,7 @@ void ImGui::NodePropVec3<T>::drawNode()
     Ra::Core::Vector3* v = static_cast<Ra::Core::Vector3*>( this->m_node->m_data->getDataPtr(&t) );
     *v = createVec3(m_value);
 
-    // output connectors
-    for (int i = 0; i < this->m_nbout; ++i)
-    {
-        top = this->getOutputPos(i);
-
-        SetCursorPos(top + ImVec2(12.f, -6.f));
-        Text("%s", this->m_node->getSlotNameOut(i));
-
-        draw_list->AddCircleFilled(top + offset, nodeRadius, bgEdge);
-    }
-
+    draw_list->ChannelsSetCurrent(0);
     EndGroup();
     PopID();
 }
@@ -273,39 +347,22 @@ void ImGui::NodePropVec3<T>::drawNode()
 template <typename T>
 void ImGui::NodePropVec4<T>::drawNode()
 {
-    PushID(this->m_id);
-
-    const float nodeRadius = 3.5f;
-    ImColor bgBox(40,40,40), bgEdge(180,180,180);
-    ImVec2 offset = GetWindowPos() - ImVec2(GetScrollX(), GetScrollY());
-
-    // draw the nodes on the foreground (on the top of links)
-    ImDrawList* draw_list = ImGui::GetWindowDrawList();
-    draw_list->ChannelsSetCurrent(1);
+    const ImVec2  offset = GetWindowPos() - ImVec2(GetScrollX(), GetScrollY());
+    ImDrawList*   draw_list = ImGui::GetWindowDrawList();
 
     this->m_size.x = 256;
     this->m_size.y = 2 * (GetTextLineHeightWithSpacing() + 6.f);
 
-    ImVec2 bottom = offset + this->m_pos;
-    ImVec2 top    = offset + this->m_pos + this->m_size;
-
-    // if hovered:
-    if (IsMouseHoveringRect(bottom, top))
-    {
-        bgBox = ImColor(60,60,90); // ligthen background
-    }
-
-    // actual background draw
-    draw_list->AddRectFilled(bottom, top, bgBox, 2.4f);
-
     SetCursorPos(this->m_pos + ImVec2(5.f,5.f));
-    BeginGroup();
 
-    // the node labels
-    Text("%s", this->m_name);
+    PushID(this->m_id);
+    BeginGroup();
+    draw_list->ChannelsSetCurrent(1);
+
+    this->drawBackground( this->m_name, offset );
 
     PushItemWidth(this->m_size.x - 10.f);
-    DragFloat4("", m_value, 0.01f, 0.f, 1.f);
+    DragFloat4("", m_value, this->m_rangeStep, this->m_rangeMin, this->m_rangeMax);
     PopItemWidth();
 
     // update data
@@ -313,17 +370,7 @@ void ImGui::NodePropVec4<T>::drawNode()
     Ra::Core::Vector4* v = static_cast<Ra::Core::Vector4*>( this->m_node->m_data->getDataPtr(&t) );
     *v = createVec4(m_value);
 
-    // output connectors
-    for (int i = 0; i < this->m_nbout; ++i)
-    {
-        top = this->getOutputPos(i);
-
-        SetCursorPos(top + ImVec2(12.f, -6.f));
-        Text("%s", this->m_node->getSlotNameOut(i));
-
-        draw_list->AddCircleFilled(top + offset, nodeRadius, bgEdge);
-    }
-
+    draw_list->ChannelsSetCurrent(0);
     EndGroup();
     PopID();
 }
@@ -333,40 +380,23 @@ void ImGui::NodePropVec4<T>::drawNode()
 template <typename T>
 void ImGui::NodePropMat2<T>::drawNode()
 {
-    PushID(this->m_id);
-
-    const float nodeRadius = 3.5f;
-    ImColor bgBox(40,40,40), bgEdge(180,180,180);
-    ImVec2 offset = GetWindowPos() - ImVec2(GetScrollX(), GetScrollY());
-
-    // draw the nodes on the foreground (on the top of links)
-    ImDrawList* draw_list = ImGui::GetWindowDrawList();
-    draw_list->ChannelsSetCurrent(1);
+    const ImVec2  offset = GetWindowPos() - ImVec2(GetScrollX(), GetScrollY());
+    ImDrawList*   draw_list = ImGui::GetWindowDrawList();
 
     this->m_size.x = 220;
     this->m_size.y = 3 * (GetTextLineHeightWithSpacing() + 6.f);
 
-    ImVec2 bottom = offset + this->m_pos;
-    ImVec2 top    = offset + this->m_pos + this->m_size;
-
-    // if hovered:
-    if (IsMouseHoveringRect(bottom, top))
-    {
-        bgBox = ImColor(60,60,90); // ligthen background
-    }
-
-    // actual background draw
-    draw_list->AddRectFilled(bottom, top, bgBox, 2.4f);
-
     SetCursorPos(this->m_pos + ImVec2(5.f,5.f));
-    BeginGroup();
 
-    // the node labels
-    Text("%s", this->m_name);
+    PushID(this->m_id);
+    BeginGroup();
+    draw_list->ChannelsSetCurrent(1);
+
+    this->drawBackground( this->m_name, offset );
 
     PushItemWidth(this->m_size.x - 10.f);
-    DragFloat2("", m_value,   0.01f, 0.f, 1.f);
-    DragFloat2("", m_value+2, 0.01f, 0.f, 1.f);
+    DragFloat2("", m_value,   this->m_rangeStep, this->m_rangeMin, this->m_rangeMax);
+    DragFloat2("", m_value+2, this->m_rangeStep, this->m_rangeMin, this->m_rangeMax);
     PopItemWidth();
 
     // update data
@@ -374,17 +404,7 @@ void ImGui::NodePropMat2<T>::drawNode()
     Ra::Core::Matrix2* v = static_cast<Ra::Core::Matrix2*>( this->m_node->m_data->getDataPtr(&t) );
     *v = createMat2(m_value);
 
-    // output connectors
-    for (int i = 0; i < this->m_nbout; ++i)
-    {
-        top = this->getOutputPos(i);
-
-        SetCursorPos(top + ImVec2(12.f, -6.f));
-        Text("%s", this->m_node->getSlotNameOut(i));
-
-        draw_list->AddCircleFilled(top + offset, nodeRadius, bgEdge);
-    }
-
+    draw_list->ChannelsSetCurrent(0);
     EndGroup();
     PopID();
 }
@@ -394,41 +414,24 @@ void ImGui::NodePropMat2<T>::drawNode()
 template <typename T>
 void ImGui::NodePropMat3<T>::drawNode()
 {
-    PushID(this->m_id);
-
-    const float nodeRadius = 3.5f;
-    ImColor bgBox(40,40,40), bgEdge(180,180,180);
-    ImVec2 offset = GetWindowPos() - ImVec2(GetScrollX(), GetScrollY());
-
-    // draw the nodes on the foreground (on the top of links)
-    ImDrawList* draw_list = ImGui::GetWindowDrawList();
-    draw_list->ChannelsSetCurrent(1);
+    const ImVec2  offset = GetWindowPos() - ImVec2(GetScrollX(), GetScrollY());
+    ImDrawList*   draw_list = ImGui::GetWindowDrawList();
 
     this->m_size.x = 238;
     this->m_size.y = 4 * (GetTextLineHeightWithSpacing() + 6.f);
 
-    ImVec2 bottom = offset + this->m_pos;
-    ImVec2 top    = offset + this->m_pos + this->m_size;
-
-    // if hovered:
-    if (IsMouseHoveringRect(bottom, top))
-    {
-        bgBox = ImColor(60,60,90); // ligthen background
-    }
-
-    // actual background draw
-    draw_list->AddRectFilled(bottom, top, bgBox, 2.4f);
-
     SetCursorPos(this->m_pos + ImVec2(5.f,5.f));
-    BeginGroup();
 
-    // the node labels
-    Text("%s", this->m_name);
+    PushID(this->m_id);
+    BeginGroup();
+    draw_list->ChannelsSetCurrent(1);
+
+    this->drawBackground( this->m_name, offset );
 
     PushItemWidth(this->m_size.x - 10.f);
-    DragFloat3("", m_value,   0.01f, 0.f, 1.f);
-    DragFloat3("", m_value+3, 0.01f, 0.f, 1.f);
-    DragFloat3("", m_value+6, 0.01f, 0.f, 1.f);
+    DragFloat3("", m_value,   this->m_rangeStep, this->m_rangeMin, this->m_rangeMax);
+    DragFloat3("", m_value+3, this->m_rangeStep, this->m_rangeMin, this->m_rangeMax);
+    DragFloat3("", m_value+6, this->m_rangeStep, this->m_rangeMin, this->m_rangeMax);
     PopItemWidth();
 
     // update data
@@ -436,18 +439,8 @@ void ImGui::NodePropMat3<T>::drawNode()
     Ra::Core::Matrix3* v = static_cast<Ra::Core::Matrix3*>( this->m_node->m_data->getDataPtr(&t) );
     *v = createMat3(m_value);
 
-    // output connectors
-    for (int i = 0; i < this->m_nbout; ++i)
-    {
-        top = this->getOutputPos(i);
-
-        SetCursorPos(top + ImVec2(12.f, -6.f));
-        Text("%s", this->m_node->getSlotNameOut(i));
-
-        draw_list->AddCircleFilled(top + offset, nodeRadius, bgEdge);
-    }
-
-    EndGroup();
+    draw_list->ChannelsSetCurrent(0);
+    EndGroup();draw_list->ChannelsSetCurrent(1);
     PopID();
 }
 
@@ -456,42 +449,25 @@ void ImGui::NodePropMat3<T>::drawNode()
 template <typename T>
 void ImGui::NodePropMat4<T>::drawNode()
 {
-    PushID(this->m_id);
+    const ImVec2  offset = GetWindowPos() - ImVec2(GetScrollX(), GetScrollY());
+    ImDrawList*   draw_list = ImGui::GetWindowDrawList();
 
-    const float nodeRadius = 3.5f;
-    ImColor bgBox(40,40,40), bgEdge(180,180,180);
-    ImVec2 offset = GetWindowPos() - ImVec2(GetScrollX(), GetScrollY());
-
-    // draw the nodes on the foreground (on the top of links)
-    ImDrawList* draw_list = ImGui::GetWindowDrawList();
-    draw_list->ChannelsSetCurrent(1);
-
-    this->m_size.x = 256.f;
+    this->m_size.x = 256;
     this->m_size.y = 5 * (GetTextLineHeightWithSpacing() + 6.f);
 
-    ImVec2 bottom = offset + this->m_pos;
-    ImVec2 top    = offset + this->m_pos + this->m_size;
-
-    // if hovered:
-    if (IsMouseHoveringRect(bottom, top))
-    {
-        bgBox = ImColor(60,60,90); // ligthen background
-    }
-
-    // actual background draw
-    draw_list->AddRectFilled(bottom, top, bgBox, 2.4f);
-
     SetCursorPos(this->m_pos + ImVec2(5.f,5.f));
-    BeginGroup();
 
-    // the node labels
-    Text("%s", this->m_name);
+    PushID(this->m_id);
+    BeginGroup();
+    draw_list->ChannelsSetCurrent(1);
+
+    this->drawBackground( this->m_name, offset );
 
     PushItemWidth(this->m_size.x - 10.f);
-    DragFloat4("", m_value,    0.01f, 0.f, 1.f);
-    DragFloat4("", m_value+4,  0.01f, 0.f, 1.f);
-    DragFloat4("", m_value+8,  0.01f, 0.f, 1.f);
-    DragFloat4("", m_value+12, 0.01f, 0.f, 1.f);
+    DragFloat4("", m_value,    this->m_rangeStep, this->m_rangeMin, this->m_rangeMax);
+    DragFloat4("", m_value+4,  this->m_rangeStep, this->m_rangeMin, this->m_rangeMax);
+    DragFloat4("", m_value+8,  this->m_rangeStep, this->m_rangeMin, this->m_rangeMax);
+    DragFloat4("", m_value+12, this->m_rangeStep, this->m_rangeMin, this->m_rangeMax);
     PopItemWidth();
 
     // update data
@@ -499,17 +475,7 @@ void ImGui::NodePropMat4<T>::drawNode()
     Ra::Core::Matrix4* v = static_cast<Ra::Core::Matrix4*>( this->m_node->m_data->getDataPtr(&t) );
     *v = createMat4(m_value);
 
-    // output connectors
-    for (int i = 0; i < this->m_nbout; ++i)
-    {
-        top = this->getOutputPos(i);
-
-        SetCursorPos(top + ImVec2(12.f, -6.f));
-        Text("%s", this->m_node->getSlotNameOut(i));
-
-        draw_list->AddCircleFilled(top + offset, nodeRadius, bgEdge);
-    }
-
+    draw_list->ChannelsSetCurrent(0);
     EndGroup();
     PopID();
 }

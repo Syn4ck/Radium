@@ -286,14 +286,14 @@ namespace Ra
             }
         }
 
-        const char* Pass::getParamNameIn  ( Pass* p, uint slot )
+        const std::string& Pass::getParamNameIn  ( Pass* p, uint slot )
         {
-            return p->m_nameIn[slot].first.c_str();
+            return p->m_nameIn[slot].first;
         }
 
-        const char* Pass::getParamNameOut ( Pass* p, uint slot )
+        const std::string& Pass::getParamNameOut ( Pass* p, uint slot )
         {
-            return p->m_nameOut[slot].first.c_str();
+            return p->m_nameOut[slot].first;
         }
 
         void* Pass::getDataPtr(paramType* t)

@@ -61,13 +61,10 @@ namespace Ra
                 void updateParameters() const;
 
                 /// get input slot's name
-                const char* getSlotNameIn(uint slot);
+                const std::string& getSlotNameIn(uint slot);
 
                 /// get output slot's name
-                const char* getSlotNameOut(uint slot);
-
-                /// get some generated value's address from a node
-                void getValAddress(void** value, Ra::Engine::paramType* t);
+                const std::string& getSlotNameOut(uint slot);
 
                 /// update the level attribute of this if parents are all positively levelled
                 void updateLevel();
@@ -128,10 +125,11 @@ namespace Ra
             uint size() const;
 
             /// connection function pointer
-            bool        (*m_connect     )(T* a, uint ia, T* b, uint ib);
-            const char* (*m_slotname_in )(T* node, uint slot);
-            const char* (*m_slotname_out)(T* node, uint slot);
-            void        (*m_val_access  )(T* node, void** data, Ra::Engine::paramType* t);
+            bool (*m_connect     )(T* a, uint ia, T* b, uint ib);
+
+            /// fetch names
+            const std::string& (*m_slotname_in )(T* node, uint slot);
+            const std::string& (*m_slotname_out)(T* node, uint slot);
 
         public:
             int m_status;

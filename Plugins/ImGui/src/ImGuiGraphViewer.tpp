@@ -27,25 +27,34 @@ void ImGui::GraphViewer<T>::Init()
         switch (node->m_data->generates())
         {
         case Ra::Engine::PARAM_VEC2:
-            m_props.push_back(std::unique_ptr<NodePropVec2<T>>( new NodePropVec2<T>( node, node->m_name.c_str() )));
+            m_props.push_back(std::unique_ptr<NodePropVec2<T>>( new NodePropVec2<T>( node, node->m_name )));
             break;
         case Ra::Engine::PARAM_VEC3:
-            m_props.push_back(std::unique_ptr<NodePropVec3<T>>( new NodePropVec3<T>( node, node->m_name.c_str() )));
+            m_props.push_back(std::unique_ptr<NodePropVec3<T>>( new NodePropVec3<T>( node, node->m_name )));
             break;
         case Ra::Engine::PARAM_VEC4:
-            m_props.push_back(std::unique_ptr<NodePropVec4<T>>( new NodePropVec4<T>( node, node->m_name.c_str() )));
+            m_props.push_back(std::unique_ptr<NodePropVec4<T>>( new NodePropVec4<T>( node, node->m_name )));
             break;
         case Ra::Engine::PARAM_MAT2:
-            m_props.push_back(std::unique_ptr<NodePropMat2<T>>( new NodePropMat2<T>( node, node->m_name.c_str() )));
+            m_props.push_back(std::unique_ptr<NodePropMat2<T>>( new NodePropMat2<T>( node, node->m_name )));
             break;
         case Ra::Engine::PARAM_MAT3:
-            m_props.push_back(std::unique_ptr<NodePropMat3<T>>( new NodePropMat3<T>( node, node->m_name.c_str() )));
+            m_props.push_back(std::unique_ptr<NodePropMat3<T>>( new NodePropMat3<T>( node, node->m_name )));
             break;
         case Ra::Engine::PARAM_MAT4:
-            m_props.push_back(std::unique_ptr<NodePropMat4<T>>( new NodePropMat4<T>( node, node->m_name.c_str() )));
+            m_props.push_back(std::unique_ptr<NodePropMat4<T>>( new NodePropMat4<T>( node, node->m_name )));
+            break;
+        case Ra::Engine::PARAM_SCALAR:
+            m_props.push_back(std::unique_ptr<NodePropScalar<T>>( new NodePropScalar<T>( node, node->m_name )));
+            break;
+        case Ra::Engine::PARAM_INT:
+            m_props.push_back(std::unique_ptr<NodePropInt<T>>( new NodePropInt<T>( node, node->m_name )));
+            break;
+        case Ra::Engine::PARAM_UINT:
+            m_props.push_back(std::unique_ptr<NodePropUint<T>>( new NodePropUint<T>( node, node->m_name )));
             break;
         default:
-            m_props.push_back(std::unique_ptr<NodeProp<T>>( new NodeProp<T>( node, node->m_level, node->m_name.c_str(), node->m_nbIn, node->m_nbOut) ));
+            m_props.push_back(std::unique_ptr<NodeProp<T>>( new NodeProp<T>( node, node->m_level, node->m_name, node->m_nbIn, node->m_nbOut) ));
             break;
         }
 

@@ -73,10 +73,10 @@ namespace Ra
             static bool connect( Pass* a, uint ia, Pass* b, uint ib );
 
             /// @brief function pointer to get a parameter name
-            static const char* getParamNameIn( Pass* p, uint slot );
+            static const std::string& getParamNameIn( Pass* p, uint slot );
 
             /// @brief function pointer to get a parameter name
-            static const char* getParamNameOut( Pass* p, uint slot );
+            static const std::string& getParamNameOut( Pass* p, uint slot );
 
 //            /// @brief return the value and type of a parameter
 //            static void getVal( Pass* p, void** data, paramType* t );

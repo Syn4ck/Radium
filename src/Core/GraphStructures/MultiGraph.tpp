@@ -101,7 +101,7 @@ void MultiGraph<T>::Node::updateParameters() const
 
 
 template <typename T>
-const char* MultiGraph<T>::Node::getSlotNameIn(uint slot)
+const std::string& MultiGraph<T>::Node::getSlotNameIn(uint slot)
 {
     return m_graph->m_slotname_in(this->m_data.get(), slot);
 }
@@ -109,17 +109,9 @@ const char* MultiGraph<T>::Node::getSlotNameIn(uint slot)
 
 
 template <typename T>
-const char* MultiGraph<T>::Node::getSlotNameOut(uint slot)
+const std::string& MultiGraph<T>::Node::getSlotNameOut(uint slot)
 {
     return m_graph->m_slotname_out(this->m_data.get(), slot);
-}
-
-
-
-template <typename T>
-void MultiGraph<T>::Node::getValAddress(void** value, Ra::Engine::paramType* t)
-{
-    m_graph->m_val_access(this->m_data.get(), value, t);
 }
 
 

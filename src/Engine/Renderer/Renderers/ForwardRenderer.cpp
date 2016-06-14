@@ -79,20 +79,27 @@ namespace Ra
 
             // add nodes
             m_passgraph.addNode("LIT",    std::shared_ptr<Pass>(m_passes[0]), 0, 1);
-            m_passgraph.addNode("VEC",    std::shared_ptr<Pass>(m_passes[1]), 0, 1);
+            m_passgraph.addNode("VEC3",    std::shared_ptr<Pass>(m_passes[1]), 0, 1);
             m_passgraph.addNode("DUMMY",  std::shared_ptr<Pass>(m_passes[2]), 2, 1);
             m_passgraph.addNode("BLUR",   std::shared_ptr<Pass>(m_passes[3]), 2, 1);
-            m_passgraph.addNode("OFF",    std::shared_ptr<Pass>(m_passes[4]), 0, 1);
+            m_passgraph.addNode("VEC2",    std::shared_ptr<Pass>(m_passes[4]), 0, 1);
 //            m_passgraph.addNode("LUM",    std::shared_ptr<Pass>(m_passes[1]), 1, 1);
 //            m_passgraph.addNode("MMM",    std::shared_ptr<Pass>(m_passes[2]), 1, 1);
 //            m_passgraph.addNode("TON",    std::shared_ptr<Pass>(m_passes[3]), 3, 1);
 //            m_passgraph.addNode("PPS",    std::shared_ptr<Pass>(m_passes[4]), 0, 1);
+            m_passgraph.addNode("VEC4", std::shared_ptr<Pass>(m_passes[5]), 0, 1);
+            m_passgraph.addNode("MAT2", std::shared_ptr<Pass>(m_passes[6]), 0, 1);
+            m_passgraph.addNode("MAT3", std::shared_ptr<Pass>(m_passes[7]), 0, 1);
+            m_passgraph.addNode("MAT4", std::shared_ptr<Pass>(m_passes[8]), 0, 1);
+            m_passgraph.addNode("SCAL", std::shared_ptr<Pass>(m_passes[9]), 0, 1);
+            m_passgraph.addNode("INT",  std::shared_ptr<Pass>(m_passes[10]),0, 1);
+            m_passgraph.addNode("UINT", std::shared_ptr<Pass>(m_passes[11]),0, 1);
 
             // connect them
             m_passgraph["BLUR" ]->setParent(0, m_passgraph["LIT" ], 0);
-            m_passgraph["BLUR" ]->setParent(0, m_passgraph["OFF" ], 1);
+            m_passgraph["BLUR" ]->setParent(0, m_passgraph["VEC2"], 1);
             m_passgraph["DUMMY"]->setParent(0, m_passgraph["BLUR"], 0);
-            m_passgraph["DUMMY"]->setParent(0, m_passgraph["VEC" ], 1);
+            m_passgraph["DUMMY"]->setParent(0, m_passgraph["VEC3"], 1);
 //            m_passgraph["LUM"  ]->setParent(0, m_passgraph["DUMMY"],0);
 //            m_passgraph["LUM"]->setParent(0, m_passgraph["LIT"],  0);
 //            m_passgraph["MMM"]->setParent(0, m_passgraph["LUM"],  0);
@@ -118,6 +125,13 @@ namespace Ra
 //            m_passes.push_back( std::unique_ptr<Pass>( new PassRedux           ("minmax",    m_width, m_height, 1, 1,   "MinMax")) );
 //            m_passes.push_back( std::unique_ptr<Pass>( new PassRegular         ("tonmap",    m_width, m_height, 3, 1,   "Tonemapping")) );
 //            m_passes.push_back( std::unique_ptr<Pass>( new PassT<uint>         ("ppsize",                          1, m_pingPongSize, PARAM_UINT)) );
+            m_passes.push_back( std::unique_ptr<Pass>( new PassT<Core::Vector4>("truc4", Core::Vector4(), PARAM_VEC4)) ); // 5
+            m_passes.push_back( std::unique_ptr<Pass>( new PassT<Core::Matrix2>("matr2", Core::Matrix2(), PARAM_MAT2)) ); // 6
+            m_passes.push_back( std::unique_ptr<Pass>( new PassT<Core::Matrix3>("matr3", Core::Matrix3(), PARAM_MAT3)) ); // 7
+            m_passes.push_back( std::unique_ptr<Pass>( new PassT<Core::Matrix4>("matr4", Core::Matrix4(), PARAM_MAT4)) ); // 8
+            m_passes.push_back( std::unique_ptr<Pass>( new PassT<Scalar>("sf", 0.f, PARAM_SCALAR)) ); // 9
+            m_passes.push_back( std::unique_ptr<Pass>( new PassT<int>   ("si", 0, PARAM_INT     )) ); // 10
+            m_passes.push_back( std::unique_ptr<Pass>( new PassT<uint>  ("su", 0, PARAM_UINT    )) ); // 11
 
             // init every passes
             for (auto const& pass: m_passes)
