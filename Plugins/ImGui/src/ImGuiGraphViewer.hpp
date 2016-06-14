@@ -22,6 +22,7 @@ namespace ImGui {
         static struct DragStruct {
             dragtype     m_type;    // determines wether we are dragging node or link
             NodeProp<T>* m_node;    // the node concerned with current dragging
+            NodeProp<T>* m_last;    // the last dragged node, to delete for example
             int          m_slot;    // the slot associated when DRAG_SLOT
             int          m_side;    // the side of the slot (input/output)
         } dragstate;
@@ -48,6 +49,12 @@ namespace ImGui {
 
         /// @brief create a <br>new</br> link
         void createLink();
+
+        /// @brief create a <br>new</br> node with a small interface to ask shader name, parameters...
+        void createNode();
+
+        /// @brief remove a node
+        void removeNode( NodeProp<T>* node );
 
     private:
         /// @brief find a node and slot to connect to

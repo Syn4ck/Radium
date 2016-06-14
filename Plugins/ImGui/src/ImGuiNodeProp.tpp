@@ -179,6 +179,7 @@ void ImGui::NodeProp<T>::drawNode()
 
 template <typename T>
 void ImGui::NodePropInt<T>::drawNode()
+//void ImGui::NodeGeneratorProp<T,int>::drawNode()
 {
     const ImVec2  offset = GetWindowPos() - ImVec2(GetScrollX(), GetScrollY());
     ImDrawList*   draw_list = ImGui::GetWindowDrawList();
@@ -213,6 +214,7 @@ void ImGui::NodePropInt<T>::drawNode()
 
 template <typename T>
 void ImGui::NodePropUint<T>::drawNode()
+//void ImGui::NodeGeneratorProp<T,unsigned int>::drawNode()
 {
     const ImVec2  offset = GetWindowPos() - ImVec2(GetScrollX(), GetScrollY());
     ImDrawList*   draw_list = ImGui::GetWindowDrawList();
@@ -230,7 +232,7 @@ void ImGui::NodePropUint<T>::drawNode()
 
     // draw a slider
     PushItemWidth(this->m_size.x - 10.f);
-    DragInt("", &m_value, this->m_rangeStep, this->m_rangeMin, this->m_rangeMax);
+    DragInt("", &m_value, (int)this->m_rangeStep, (int)this->m_rangeMin, (int)this->m_rangeMax);
     PopItemWidth();
 
     // update data
@@ -247,6 +249,7 @@ void ImGui::NodePropUint<T>::drawNode()
 
 template <typename T>
 void ImGui::NodePropScalar<T>::drawNode()
+//void ImGui::NodeGeneratorProp<T,Scalar>::drawNode()
 {
     const ImVec2  offset = GetWindowPos() - ImVec2(GetScrollX(), GetScrollY());
     ImDrawList*   draw_list = ImGui::GetWindowDrawList();
@@ -280,6 +283,7 @@ void ImGui::NodePropScalar<T>::drawNode()
 
 template <typename T>
 void ImGui::NodePropVec2<T>::drawNode()
+//void ImGui::NodeGeneratorProp<T,Ra::Core::Vector2>::drawNode()
 {
     const ImVec2  offset = GetWindowPos() - ImVec2(GetScrollX(), GetScrollY());
     ImDrawList*   draw_list = ImGui::GetWindowDrawList();
@@ -313,6 +317,7 @@ void ImGui::NodePropVec2<T>::drawNode()
 
 template <typename T>
 void ImGui::NodePropVec3<T>::drawNode()
+//void ImGui::NodeGeneratorProp<T,Ra::Core::Vector3>::drawNode()
 {
     const ImVec2  offset = GetWindowPos() - ImVec2(GetScrollX(), GetScrollY());
     ImDrawList*   draw_list = ImGui::GetWindowDrawList();
@@ -346,6 +351,7 @@ void ImGui::NodePropVec3<T>::drawNode()
 
 template <typename T>
 void ImGui::NodePropVec4<T>::drawNode()
+//void ImGui::NodeGeneratorProp<T,Ra::Core::Vector4>::drawNode()
 {
     const ImVec2  offset = GetWindowPos() - ImVec2(GetScrollX(), GetScrollY());
     ImDrawList*   draw_list = ImGui::GetWindowDrawList();
@@ -379,6 +385,7 @@ void ImGui::NodePropVec4<T>::drawNode()
 
 template <typename T>
 void ImGui::NodePropMat2<T>::drawNode()
+//void ImGui::NodeGeneratorProp<T,Ra::Core::Matrix2>::drawNode()
 {
     const ImVec2  offset = GetWindowPos() - ImVec2(GetScrollX(), GetScrollY());
     ImDrawList*   draw_list = ImGui::GetWindowDrawList();
@@ -413,6 +420,7 @@ void ImGui::NodePropMat2<T>::drawNode()
 
 template <typename T>
 void ImGui::NodePropMat3<T>::drawNode()
+//void ImGui::NodeGeneratorProp<T,Ra::Core::Matrix3>::drawNode()
 {
     const ImVec2  offset = GetWindowPos() - ImVec2(GetScrollX(), GetScrollY());
     ImDrawList*   draw_list = ImGui::GetWindowDrawList();
@@ -448,6 +456,7 @@ void ImGui::NodePropMat3<T>::drawNode()
 
 template <typename T>
 void ImGui::NodePropMat4<T>::drawNode()
+//void ImGui::NodeGeneratorProp<T,Ra::Core::Matrix4>::drawNode()
 {
     const ImVec2  offset = GetWindowPos() - ImVec2(GetScrollX(), GetScrollY());
     ImDrawList*   draw_list = ImGui::GetWindowDrawList();

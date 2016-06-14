@@ -4,7 +4,7 @@
 
 // dragging state definition
 template <typename T> typename ImGui::GraphViewer<T>::DragStruct
-    ImGui::GraphViewer<T>::dragstate = {DRAG_NONE, nullptr, -1, false};
+    ImGui::GraphViewer<T>::dragstate = {DRAG_NONE, nullptr, nullptr, -1, false};
 
 
 
@@ -28,30 +28,39 @@ void ImGui::GraphViewer<T>::Init()
         {
         case Ra::Engine::PARAM_VEC2:
             m_props.push_back(std::unique_ptr<NodePropVec2<T>>( new NodePropVec2<T>( node, node->m_name )));
+//            m_props.push_back(std::unique_ptr<NodeGeneratorProp<T,Ra::Core::Vector2>>( new NodeGeneratorProp<T,Ra::Core::Vector2>( node, node->m_name )));
             break;
         case Ra::Engine::PARAM_VEC3:
             m_props.push_back(std::unique_ptr<NodePropVec3<T>>( new NodePropVec3<T>( node, node->m_name )));
+//            m_props.push_back(std::unique_ptr<NodeGeneratorProp<T,Ra::Core::Vector3>>( new NodeGeneratorProp<T,Ra::Core::Vector3>( node, node->m_name )));
             break;
         case Ra::Engine::PARAM_VEC4:
             m_props.push_back(std::unique_ptr<NodePropVec4<T>>( new NodePropVec4<T>( node, node->m_name )));
+//            m_props.push_back(std::unique_ptr<NodeGeneratorProp<T,Ra::Core::Vector4>>( new NodeGeneratorProp<T,Ra::Core::Vector4>( node, node->m_name )));
             break;
         case Ra::Engine::PARAM_MAT2:
             m_props.push_back(std::unique_ptr<NodePropMat2<T>>( new NodePropMat2<T>( node, node->m_name )));
+//            m_props.push_back(std::unique_ptr<NodeGeneratorProp<T,Ra::Core::Matrix2>>( new NodeGeneratorProp<T,Ra::Core::Matrix2>( node, node->m_name )));
             break;
         case Ra::Engine::PARAM_MAT3:
             m_props.push_back(std::unique_ptr<NodePropMat3<T>>( new NodePropMat3<T>( node, node->m_name )));
+//            m_props.push_back(std::unique_ptr<NodeGeneratorProp<T,Ra::Core::Matrix3>>( new NodeGeneratorProp<T,Ra::Core::Matrix3>( node, node->m_name )));
             break;
         case Ra::Engine::PARAM_MAT4:
             m_props.push_back(std::unique_ptr<NodePropMat4<T>>( new NodePropMat4<T>( node, node->m_name )));
+//            m_props.push_back(std::unique_ptr<NodeGeneratorProp<T,Ra::Core::Matrix4>>( new NodeGeneratorProp<T,Ra::Core::Matrix4>( node, node->m_name )));
             break;
         case Ra::Engine::PARAM_SCALAR:
             m_props.push_back(std::unique_ptr<NodePropScalar<T>>( new NodePropScalar<T>( node, node->m_name )));
+//            m_props.push_back(std::unique_ptr<NodeGeneratorProp<T,Scalar>>( new NodeGeneratorProp<T,Scalar>( node, node->m_name )));
             break;
         case Ra::Engine::PARAM_INT:
             m_props.push_back(std::unique_ptr<NodePropInt<T>>( new NodePropInt<T>( node, node->m_name )));
+//            m_props.push_back(std::unique_ptr<NodeGeneratorProp<T,int>>( new NodeGeneratorProp<T,int>( node, node->m_name )));
             break;
         case Ra::Engine::PARAM_UINT:
             m_props.push_back(std::unique_ptr<NodePropUint<T>>( new NodePropUint<T>( node, node->m_name )));
+//            m_props.push_back(std::unique_ptr<NodeGeneratorProp<T,unsigned int>>( new NodeGeneratorProp<T,unsigned int>( node, node->m_name )));
             break;
         default:
             m_props.push_back(std::unique_ptr<NodeProp<T>>( new NodeProp<T>( node, node->m_level, node->m_name, node->m_nbIn, node->m_nbOut) ));
@@ -141,7 +150,7 @@ void ImGui::GraphViewer<T>::Show(bool* opened)
     PushStyleColor(ImGuiCol_Button, ImVec4(0.f,0.9f,0.45f,0.7f));
 
     // update view
-    SetCursorPos(GetWindowPos() + ImVec2(-13 + GetScrollX(), GetWindowHeight() - 100 + GetScrollY()));
+    SetCursorPos(GetWindowPos() + ImVec2(-13 + GetScrollX(), GetWindowHeight() - 32 + GetScrollY()));
     Button("Reset view");
     if (IsItemClicked())
     {
@@ -149,18 +158,26 @@ void ImGui::GraphViewer<T>::Show(bool* opened)
     }
 
     // update graph
-    SetCursorPos(GetWindowPos() + ImVec2(GetScrollX() + 80, GetWindowHeight() - 100 + GetScrollY()));
+    SetCursorPos(GetWindowPos() + ImVec2(GetScrollX() + 80, GetWindowHeight() - 32 + GetScrollY()));
     Button("Req. levelize");
     if (IsItemClicked())
     {
         m_gr->levelize( true );
     }
 
+    // delete node
+    SetCursorPos(GetWindowPos() + ImVec2(GetScrollX() + 200, GetWindowHeight() - 32 + GetScrollY()));
+    Button("Delete node");
+    if (IsItemClicked())
+    {
+        removeNode(dragstate.m_last);
+    }
+
     // display if an error is detected
     if (m_gr->m_status == Ra::Core::GRAPH_ERROR)
     {
         PushStyleColor(ImGuiCol_Button, ImVec4(1.f,0.3f,0.3f,0.8f));
-        SetCursorPos(GetWindowPos() + ImVec2(GetScrollX() + 180, GetWindowHeight() - 100 + GetScrollY()));
+        SetCursorPos(GetWindowPos() + ImVec2(GetScrollX() + 320, GetWindowHeight() - 32 + GetScrollY()));
         Button("Error");
         PopStyleColor();
     }
@@ -217,6 +234,21 @@ void ImGui::GraphViewer<T>::createLink()
                  dragstate.m_node->getOutputPos(dragstate.m_slot) + offset,
                  GetMousePos(),
                  12, ImColor(200,200,200), 1.f);
+}
+
+
+
+template <typename T>
+void ImGui::GraphViewer<T>::createNode()
+{
+    //
+}
+
+/// @brief remove a node
+template <typename T>
+void ImGui::GraphViewer<T>::removeNode( NodeProp<T>* node )
+{
+    //
 }
 
 
@@ -409,6 +441,7 @@ void ImGui::GraphViewer<T>::updateDragging()
         {
             dragstate.m_type = DRAG_NODE;
             dragstate.m_node = prop;
+            dragstate.m_last = prop;
         }
 
         // if dragging disabled by other ImGui Widgets

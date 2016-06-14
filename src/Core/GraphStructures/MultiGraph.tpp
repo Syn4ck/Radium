@@ -20,22 +20,29 @@ bool MultiGraph<T>::Node::Connection::operator==(const MultiGraph<T>::Node::Conn
 
 
 template <typename T>
-void MultiGraph<T>::Node::setParent(uint slot, Node* other, uint local)
+void MultiGraph<T>::Node::setParent(uint slot, Node* other, uint local, bool reverse)
 {
     Connection c = {slot, other, local};
 
     // if no existing connection is found
     if (std::find(m_parents.begin(), m_parents.end(), c) == m_parents.end())
     {
-        // call a specific function to connect both T
-        if (m_graph->m_connect(other->m_data.get(), slot, this->m_data.get(), local))
+        if (reverse)
         {
-            // add the new connection in case it didn't exist before
-            m_parents.push_back(c);
-            other->setChild(local, this, slot);
+            // call a specific function to connect both T
+            if (m_graph->m_connect(other->m_data.get(), slot, this->m_data.get(), local))
+            {
+                // add the new connection in case it didn't exist before
+                m_parents.push_back(c);
+                other->setChild(local, this, slot);
 
-            // set the graph to be updated
-            m_graph->m_status = GRAPH_UPDATE;
+                // set the graph to be updated
+                m_graph->m_status = GRAPH_UPDATE;
+            }
+        }
+        else
+        {
+            m_parents.push_back(c);
         }
     }
 }
@@ -43,7 +50,7 @@ void MultiGraph<T>::Node::setParent(uint slot, Node* other, uint local)
 
 
 template <typename T>
-void MultiGraph<T>::Node::removeParent(uint slot, Node* other, uint local)
+void MultiGraph<T>::Node::removeParent(uint slot, Node* other, uint local, bool reverse)
 {
     Connection c = {slot, other, local};
     auto ref = std::find(m_parents.begin(), m_parents.end(), c);
@@ -52,29 +59,49 @@ void MultiGraph<T>::Node::removeParent(uint slot, Node* other, uint local)
     if (ref != m_parents.end())
     {
         m_parents.erase(ref);
-        other->removeChild(local, this, slot);
-        m_graph->m_status = GRAPH_UPDATE;
+
+        if (reverse)
+        {
+            other->removeChild(local, this, slot);
+            m_graph->m_status = GRAPH_UPDATE;
+        }
     }
 }
 
 
 
 template <typename T>
-void MultiGraph<T>::Node::setChild(uint slot, Node* other, uint local)
+void MultiGraph<T>::Node::setChild(uint slot, Node* other, uint local, bool reverse)
 {
     Connection c = {slot, other, local};
 
     // if no existing connection is found
     if (std::find(m_childs.begin(), m_childs.end(), c) == m_childs.end())
     {
-        m_childs.push_back(c);
+        if (reverse)
+        {
+            // call a specific function to connect both T
+            if (m_graph->m_connect(this->m_data.get(), local, other->m_data.get(), slot))
+            {
+                // add the new connection in case it didn't exist before
+                m_childs.push_back(c);
+                other->setParent(slot, this, local);
+
+                // set the graph to be updated
+                m_graph->m_status = GRAPH_UPDATE;
+            }
+        }
+        else
+        {
+            m_childs.push_back(c);
+        }
     }
 }
 
 
 
 template <typename T>
-void MultiGraph<T>::Node::removeChild(uint slot, Node* other, uint local)
+void MultiGraph<T>::Node::removeChild(uint slot, Node* other, uint local, bool reverse)
 {
     Connection c = {slot, other, local};
     auto ref = std::find(m_childs.begin(), m_childs.end(), c);
@@ -83,6 +110,12 @@ void MultiGraph<T>::Node::removeChild(uint slot, Node* other, uint local)
     if (ref != m_childs.end())
     {
         m_childs.erase(ref);
+
+        if (reverse)
+        {
+            other->removeParent(slot, this, local);
+            m_graph->m_status = GRAPH_UPDATE;
+        }
     }
 }
 
@@ -166,6 +199,35 @@ void MultiGraph<T>::addNode(const std::string& name, const std::shared_ptr<T>& d
     Node* newNode = new MultiGraph<T>::Node(this, name, data, nb_in, nb_out);
     m_graph.push_back(std::unique_ptr<Node>(newNode));
     m_names[name] = newNode;
+}
+
+
+
+template <typename T>
+void MultiGraph<T>::deleteNode(Node* node)
+{
+    // delete every connections from the node
+    for (auto const& conn : node->m_childs)
+    {
+         node->removeParent(conn->m_local, conn->m_source, conn->m_slot, false);
+    }
+
+    // delete every connections to the node
+    for (auto const& conn : node->m_childs)
+    {
+        node->removeChild(conn->m_local, conn->m_source, conn->m_slot, false);
+    }
+
+    m_names.erase(node->m_name);
+
+    // remove the unique ptr to this node
+    for (auto const& nodeptr : m_graph)
+    {
+        if (nodeptr.get() == node)
+        {
+            m_graph.erase(nodeptr);
+        }
+    }
 }
 
 
