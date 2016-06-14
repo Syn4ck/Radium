@@ -1,18 +1,10 @@
 #include <cstring>
 #include <vector>
 
-static inline ImVec2 operator+(const ImVec2& lhs, const ImVec2& rhs) { return ImVec2(lhs.x+rhs.x, lhs.y+rhs.y); }
-static inline ImVec2 operator-(const ImVec2& lhs, const ImVec2& rhs) { return ImVec2(lhs.x-rhs.x, lhs.y-rhs.y); }
-
-
 
 // dragging state definition
 template <typename T> typename ImGui::GraphViewer<T>::DragStruct
     ImGui::GraphViewer<T>::dragstate = {DRAG_NONE, nullptr, -1, false};
-
-
-
-template <typename T> int ImGui::GraphViewer<T>::propsIds = 0;
 
 
 
@@ -35,25 +27,25 @@ void ImGui::GraphViewer<T>::Init()
         switch (node->m_data->generates())
         {
         case Ra::Engine::PARAM_VEC2:
-            m_props.push_back(std::unique_ptr<NodePropVec2>( new NodePropVec2( node, node->m_name.c_str() )));
+            m_props.push_back(std::unique_ptr<NodePropVec2<T>>( new NodePropVec2<T>( node, node->m_name.c_str() )));
             break;
         case Ra::Engine::PARAM_VEC3:
-            m_props.push_back(std::unique_ptr<NodePropVec3>( new NodePropVec3( node, node->m_name.c_str() )));
+            m_props.push_back(std::unique_ptr<NodePropVec3<T>>( new NodePropVec3<T>( node, node->m_name.c_str() )));
             break;
         case Ra::Engine::PARAM_VEC4:
-            m_props.push_back(std::unique_ptr<NodePropVec4>( new NodePropVec4( node, node->m_name.c_str() )));
+            m_props.push_back(std::unique_ptr<NodePropVec4<T>>( new NodePropVec4<T>( node, node->m_name.c_str() )));
             break;
         case Ra::Engine::PARAM_MAT2:
-            m_props.push_back(std::unique_ptr<NodePropMat2>( new NodePropMat2( node, node->m_name.c_str() )));
+            m_props.push_back(std::unique_ptr<NodePropMat2<T>>( new NodePropMat2<T>( node, node->m_name.c_str() )));
             break;
         case Ra::Engine::PARAM_MAT3:
-            m_props.push_back(std::unique_ptr<NodePropMat3>( new NodePropMat3( node, node->m_name.c_str() )));
+            m_props.push_back(std::unique_ptr<NodePropMat3<T>>( new NodePropMat3<T>( node, node->m_name.c_str() )));
             break;
         case Ra::Engine::PARAM_MAT4:
-            m_props.push_back(std::unique_ptr<NodePropMat4>( new NodePropMat4( node, node->m_name.c_str() )));
+            m_props.push_back(std::unique_ptr<NodePropMat4<T>>( new NodePropMat4<T>( node, node->m_name.c_str() )));
             break;
         default:
-            m_props.push_back(std::unique_ptr<NodeProp>( new NodeProp( node, node->m_level, node->m_name.c_str(), node->m_nbIn, node->m_nbOut) ));
+            m_props.push_back(std::unique_ptr<NodeProp<T>>( new NodeProp<T>( node, node->m_level, node->m_name.c_str(), node->m_nbIn, node->m_nbOut) ));
             break;
         }
 
@@ -112,6 +104,7 @@ void ImGui::GraphViewer<T>::Show(bool* opened)
     for (auto const& nodeRepr : m_props)
     {
         // 1. actually draw the node
+        updateNodePos(nodeRepr.get());
         nodeRepr->drawNode();
 
         // 2. draw the connections to its parents
@@ -119,7 +112,7 @@ void ImGui::GraphViewer<T>::Show(bool* opened)
         {
             // for each parent find the corresponding prop
             typename Ra::Core::MultiGraph<T>::Node::Connection co = parent;
-            NodeProp* parentProp = m_reference[co.m_source];
+            NodeProp<T>* parentProp = m_reference[co.m_source];
 
             // and draw the links
             drawLink(*parentProp, co.m_slot, *(nodeRepr.get()), co.m_local);
@@ -170,8 +163,8 @@ void ImGui::GraphViewer<T>::Show(bool* opened)
 
 
 template <typename T>
-void ImGui::GraphViewer<T>::drawLink(NodeProp& node_a, unsigned int slot_a,
-                                     NodeProp& node_b, unsigned int slot_b)
+void ImGui::GraphViewer<T>::drawLink(NodeProp<T>& node_a, unsigned int slot_a,
+                                     NodeProp<T>& node_b, unsigned int slot_b)
 {
     ImVec2 offset = GetWindowPos() - ImVec2(GetScrollX(), GetScrollY());
     ImVec2 p_a, p_b;
@@ -220,7 +213,7 @@ void ImGui::GraphViewer<T>::createLink()
 
 
 template <typename T>
-bool ImGui::GraphViewer<T>::findMouseSlot( NodeProp** node, unsigned int* slot, unsigned int* side )
+bool ImGui::GraphViewer<T>::findMouseSlot( NodeProp<T>** node, unsigned int* slot, unsigned int* side )
 {
     // find the node or slot under mouse position.
     // will return true only if a slot was found, but node will be filled if a node OR a slot is found.
@@ -242,8 +235,8 @@ bool ImGui::GraphViewer<T>::findMouseSlot( NodeProp** node, unsigned int* slot, 
     // node iterator
     auto candidate = m_props.begin();
 
-    ImDrawList* draw_list = GetWindowDrawList();
-    NodeProp*   prop      = nullptr;
+    ImDrawList*  draw_list = GetWindowDrawList();
+    NodeProp<T>* prop      = nullptr;
 
     // iterate on nodes until a node or slot is found
     while ((! found) && (candidate != m_props.end()))
@@ -319,7 +312,7 @@ void ImGui::GraphViewer<T>::updateDragging()
     // update the dragging state
     // manage mouse release and mouse click
 
-    NodeProp*    prop = nullptr;
+    NodeProp<T>* prop = nullptr;
     unsigned int i    = 0;
     unsigned int side = DRAG_IN;
 
@@ -410,42 +403,25 @@ void ImGui::GraphViewer<T>::updateDragging()
         }
 
         // if dragging disabled by other ImGui Widgets
-        //if ((dragstate.m_node != nullptr) && (! dragstate.m_node->m_draggable))
         if (IsAnyItemHovered() || IsAnyItemActive())
         {
             dragstate.m_type = DRAG_NONE;
         }
+
     }
 }
 
 
 
 template <typename T>
-ImVec2 ImGui::GraphViewer<T>::NodeProp::getInputPos( unsigned int idx )
+inline void ImGui::GraphViewer<T>::updateNodePos(NodeProp<T>* prop)
 {
-    float posY = getSlotPosY(idx, m_nbin);
-    return ImVec2(m_pos.x - 8.0f, posY);
-}
-
-
-
-template <typename T>
-ImVec2 ImGui::GraphViewer<T>::NodeProp::getOutputPos( unsigned int idx )
-{
-    float posY = getSlotPosY(idx, m_nbout);
-    return ImVec2(m_pos.x + m_size.x + 8.0f, posY);
-}
-
-
-
-template <typename T>
-float ImGui::GraphViewer<T>::NodeProp::getSlotPosY( unsigned int idx, unsigned int total )
-{
-    // and the distance that will separe two connectors
-    float d = ((m_pos.y + m_size.y) - (m_pos.y + 16.f)) / ((float) total);
-
-    // process the real Y position of the connector
-    return m_pos.y + (0.5 * d) + (idx * d) + 16.f;
+    // move node
+    if ((dragstate.m_type == DRAG_NODE) && (dragstate.m_node == prop))
+    {
+        prop->m_pos = prop->m_pos + ImGui::GetMouseDragDelta();
+        ImGui::ResetMouseDragDelta();
+    }
 }
 
 

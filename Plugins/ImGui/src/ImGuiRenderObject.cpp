@@ -2,7 +2,6 @@
 
 #include <imgui.h>
 #include <ImGuiGl3.hpp>
-#include <ImGuiNodeGraph.hpp>
 #include <ImGuiComponent.hpp>
 
 #include <Engine/Managers/ComponentMessenger/ComponentMessenger.hpp>

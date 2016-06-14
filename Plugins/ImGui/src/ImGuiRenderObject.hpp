@@ -2,7 +2,7 @@
 #define IMGUIPLUGIN_RO_HPP_
 
 #include <ImGuiPlugin.hpp>
-#include <ImGuiNodeGraph.hpp>
+#include <ImGuiGraphViewer.hpp>
 
 #include <Engine/Component/Component.hpp>
 #include <Engine/Renderer/RenderTechnique/ShaderProgram.hpp>

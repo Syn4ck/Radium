@@ -3,7 +3,7 @@
 
 #include <ImGuiGl3.hpp>
 #include <ImGuiPlugin.hpp>
-#include <ImGuiNodeGraph.hpp>
+#include <ImGuiGraphViewer.hpp>
 #include <ImGuiRenderObject.hpp>
 
 #include <Engine/RaEngine.hpp>

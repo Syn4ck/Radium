@@ -1,5 +1,10 @@
 namespace
 {
+
+
+    inline ImVec2 operator+(const ImVec2& lhs, const ImVec2& rhs) { return ImVec2(lhs.x+rhs.x, lhs.y+rhs.y); }
+    inline ImVec2 operator-(const ImVec2& lhs, const ImVec2& rhs) { return ImVec2(lhs.x-rhs.x, lhs.y-rhs.y); }
+
     Ra::Core::Vector2 createVec2(float array[])
     {
         Ra::Core::Vector2 v;
@@ -55,8 +60,39 @@ namespace
     }
 }
 
+
+template <typename T> unsigned int ImGui::NodeProp<T>::id_prop = 0;
+
+
 template <typename T>
-void ImGui::GraphViewer<T>::NodeProp::drawNode()
+ImVec2 ImGui::NodeProp<T>::getInputPos( unsigned int idx )
+{
+    float posY = getSlotPosY(idx, m_nbin);
+    return ImVec2(m_pos.x - 8.0f, posY);
+}
+
+
+template <typename T>
+ImVec2 ImGui::NodeProp<T>::getOutputPos( unsigned int idx )
+{
+    float posY = getSlotPosY(idx, m_nbout);
+    return ImVec2(m_pos.x + m_size.x + 8.0f, posY);
+}
+
+
+
+template <typename T>
+float ImGui::NodeProp<T>::getSlotPosY( unsigned int idx, unsigned int total )
+{
+    // and the distance that will separe two connectors
+    float d = ((m_pos.y + m_size.y) - (m_pos.y + 16.f)) / ((float) total);
+
+    // process the real Y position of the connector
+    return m_pos.y + (0.5 * d) + (idx * d) + 16.f;
+}
+
+template <typename T>
+void ImGui::NodeProp<T>::drawNode()
 {
     PushID(m_id);
 
@@ -75,12 +111,6 @@ void ImGui::GraphViewer<T>::NodeProp::drawNode()
     if (IsMouseHoveringRect(bottom, top))
     {
         bgBox = ImColor(60,60,60); // ligthen background
-    }
-
-    // if dragged:
-    if ((dragstate.m_type == DRAG_NODE) && (dragstate.m_node == this)) {
-        m_pos = m_pos + ImGui::GetMouseDragDelta();
-        ImGui::ResetMouseDragDelta();
     }
 
     // actual background draw
@@ -121,7 +151,7 @@ void ImGui::GraphViewer<T>::NodeProp::drawNode()
 
 
 template <typename T>
-void ImGui::GraphViewer<T>::NodePropVec2::drawNode()
+void ImGui::NodePropVec2<T>::drawNode()
 {
     PushID(this->m_id);
 
@@ -143,12 +173,6 @@ void ImGui::GraphViewer<T>::NodePropVec2::drawNode()
     if (IsMouseHoveringRect(bottom, top))
     {
         bgBox = ImColor(60,60,90); // ligthen background
-    }
-
-    // if dragged:
-    if ((dragstate.m_type == DRAG_NODE) && (dragstate.m_node == this)) {
-        this->m_pos = this->m_pos + ImGui::GetMouseDragDelta();
-        ImGui::ResetMouseDragDelta();
     }
 
     // actual background draw
@@ -187,7 +211,7 @@ void ImGui::GraphViewer<T>::NodePropVec2::drawNode()
 
 
 template <typename T>
-void ImGui::GraphViewer<T>::NodePropVec3::drawNode()
+void ImGui::NodePropVec3<T>::drawNode()
 {
     PushID(this->m_id);
 
@@ -209,12 +233,6 @@ void ImGui::GraphViewer<T>::NodePropVec3::drawNode()
     if (IsMouseHoveringRect(bottom, top))
     {
         bgBox = ImColor(60,60,90); // ligthen background
-    }
-
-    // if dragged:
-    if ((dragstate.m_type == DRAG_NODE) && (dragstate.m_node == this)) {
-        this->m_pos = this->m_pos + ImGui::GetMouseDragDelta();
-        ImGui::ResetMouseDragDelta();
     }
 
     // actual background draw
@@ -253,7 +271,7 @@ void ImGui::GraphViewer<T>::NodePropVec3::drawNode()
 
 
 template <typename T>
-void ImGui::GraphViewer<T>::NodePropVec4::drawNode()
+void ImGui::NodePropVec4<T>::drawNode()
 {
     PushID(this->m_id);
 
@@ -275,12 +293,6 @@ void ImGui::GraphViewer<T>::NodePropVec4::drawNode()
     if (IsMouseHoveringRect(bottom, top))
     {
         bgBox = ImColor(60,60,90); // ligthen background
-    }
-
-    // if dragged:
-    if ((dragstate.m_type == DRAG_NODE) && (dragstate.m_node == this)) {
-        this->m_pos = this->m_pos + ImGui::GetMouseDragDelta();
-        ImGui::ResetMouseDragDelta();
     }
 
     // actual background draw
@@ -319,7 +331,7 @@ void ImGui::GraphViewer<T>::NodePropVec4::drawNode()
 
 
 template <typename T>
-void ImGui::GraphViewer<T>::NodePropMat2::drawNode()
+void ImGui::NodePropMat2<T>::drawNode()
 {
     PushID(this->m_id);
 
@@ -341,12 +353,6 @@ void ImGui::GraphViewer<T>::NodePropMat2::drawNode()
     if (IsMouseHoveringRect(bottom, top))
     {
         bgBox = ImColor(60,60,90); // ligthen background
-    }
-
-    // if dragged:
-    if ((dragstate.m_type == DRAG_NODE) && (dragstate.m_node == this)) {
-        this->m_pos = this->m_pos + ImGui::GetMouseDragDelta();
-        ImGui::ResetMouseDragDelta();
     }
 
     // actual background draw
@@ -386,7 +392,7 @@ void ImGui::GraphViewer<T>::NodePropMat2::drawNode()
 
 
 template <typename T>
-void ImGui::GraphViewer<T>::NodePropMat3::drawNode()
+void ImGui::NodePropMat3<T>::drawNode()
 {
     PushID(this->m_id);
 
@@ -408,12 +414,6 @@ void ImGui::GraphViewer<T>::NodePropMat3::drawNode()
     if (IsMouseHoveringRect(bottom, top))
     {
         bgBox = ImColor(60,60,90); // ligthen background
-    }
-
-    // if dragged:
-    if ((dragstate.m_type == DRAG_NODE) && (dragstate.m_node == this)) {
-        this->m_pos = this->m_pos + ImGui::GetMouseDragDelta();
-        ImGui::ResetMouseDragDelta();
     }
 
     // actual background draw
@@ -454,7 +454,7 @@ void ImGui::GraphViewer<T>::NodePropMat3::drawNode()
 
 
 template <typename T>
-void ImGui::GraphViewer<T>::NodePropMat4::drawNode()
+void ImGui::NodePropMat4<T>::drawNode()
 {
     PushID(this->m_id);
 
@@ -476,12 +476,6 @@ void ImGui::GraphViewer<T>::NodePropMat4::drawNode()
     if (IsMouseHoveringRect(bottom, top))
     {
         bgBox = ImColor(60,60,90); // ligthen background
-    }
-
-    // if dragged:
-    if ((dragstate.m_type == DRAG_NODE) && (dragstate.m_node == this)) {
-        this->m_pos = this->m_pos + ImGui::GetMouseDragDelta();
-        ImGui::ResetMouseDragDelta();
     }
 
     // actual background draw
