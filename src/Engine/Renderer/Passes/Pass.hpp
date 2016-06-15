@@ -54,8 +54,11 @@ namespace Ra
             void setupParamIn  (uint slot, const std::string& name, paramType t);
             void setupParamOut (uint slot, const std::string& name, paramType t);
 
-            uint getId() const;
-            std::string getName() const;
+            uint getId() const { return m_id; }
+            std::string getName() const { return m_name; }
+
+            uint getNbIn () const { return m_nbin;  }
+            uint getNbOut() const { return m_nbout; }
 
             /// @brief perform introspection on a shader program
             /// and set inputs/outputs names

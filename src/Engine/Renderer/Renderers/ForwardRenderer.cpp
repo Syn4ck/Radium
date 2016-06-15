@@ -63,12 +63,15 @@ namespace Ra
         {
             initShaders();
             initBuffers();
+            initPostProcess();
+            /*
             initPasses();
             initGraph();
+            */
             DebugRender::createInstance();
             DebugRender::getInstance()->initialize();
         }
-
+/*
         void ForwardRenderer::initGraph()
         {
             // set useful callbacks
@@ -110,7 +113,7 @@ namespace Ra
 
             // levelize and sort on the same run
             m_passgraph.levelize(false);
-//            _passgraph.print();
+//             passgraph.print();
         }
 
         void ForwardRenderer::initPasses()
@@ -147,6 +150,44 @@ namespace Ra
 
             // initiate the HDR source FIXME(hugo) find a better way without duplication
             m_passmap["source"]->setIn("screenTexture", m_textures[TEX_LIT].get());
+        }
+*/
+
+        void ForwardRenderer::initPostProcess()
+        {
+            // set useful callbacks
+            m_passgraph.m_connect      = Pass::connect;
+            m_passgraph.m_slotname_in  = Pass::getParamNameIn;
+            m_passgraph.m_slotname_out = Pass::getParamNameOut;
+
+            // set up the source for node processing
+            m_passgraph.addNode( new PassRegular("SOURCE", m_width, m_height, 1, 1, "DrawScreen") );
+
+            // add some post-processing passes
+            m_passgraph.addNode( new PassRegular         ("DUMMY", m_width, m_height, 2, 1,     "Dummy")     );
+            m_passgraph.addNode( new PassPingPong        ("BLUR",  m_width, m_height, 2, 1, 8  ,"Blur" )     );
+            m_passgraph.addNode( new PassT<Core::Vector3>("VEC3",  Core::Vector3(0.6f,0.6f,0.f), PARAM_VEC3) );
+            m_passgraph.addNode( new PassT<Core::Vector2>("VEC2",  Core::Vector2(),              PARAM_VEC2) );
+
+            // init every passes
+            for (auto const& node: m_passgraph)
+            {
+                // init
+                node->m_data->setCanvas(m_quadMesh.get());
+                node->m_data->init();
+            }
+
+            // connect them
+            m_passgraph["BLUR" ]->setParent(0, m_passgraph["SOURCE" ], 0);
+            m_passgraph["BLUR" ]->setParent(0, m_passgraph["VEC2"], 1);
+            m_passgraph["DUMMY"]->setParent(0, m_passgraph["BLUR"], 0);
+            m_passgraph["DUMMY"]->setParent(0, m_passgraph["VEC3"], 1);
+
+            // levelize and sort on the same run
+            m_passgraph.levelize(false);
+
+            // finally set up the source parameter
+            m_passgraph["SOURCE"]->m_data->setIn("screenTexture", m_textures[TEX_LIT].get());
         }
 
         void ForwardRenderer::initShaders()
@@ -434,9 +475,9 @@ namespace Ra
             m_fbo->check();
             m_fbo->unbind( true );
 
-            for (auto const& pass: m_passes)
+            for (auto const& pass: m_passgraph)
             {
-                pass->resizePass(m_width, m_height);
+                pass->m_data->resizePass(m_width, m_height);
             }
 
             // Reset framebuffer state
@@ -461,7 +502,10 @@ namespace Ra
             // 1. check every input of every node
             for (auto const& node: m_passgraph)
             {
-                valid = valid && (node->m_parents.size() == node->m_nbIn);
+                // the test basically check if a node has all it's inputs satisfied
+                // the test is biased if it is the source node
+                // TODO (hugo) find a more elegant way to deal with it
+                valid = valid && ((node->m_parents.size() == node->m_nbIn) || (node->m_name == "SOURCE") );
             }
 
             // 2. check it is not a forest TODO(hugo)

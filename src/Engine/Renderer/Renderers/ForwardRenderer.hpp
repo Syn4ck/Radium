@@ -42,8 +42,9 @@ namespace Ra
         private:
             void initShaders();
             void initBuffers();
-            void initPasses();
-            void initGraph();
+            void initPostProcess();
+            //void initPasses();
+            //void initGraph();
 
         private:
             enum RendererTextures
@@ -60,9 +61,6 @@ namespace Ra
             uint m_pingPongSize;
 
             std::array<std::unique_ptr<Texture>, TEX_COUNT> m_textures;
-
-            std::map<std::string, Pass*>       m_passmap;
-            std::vector<std::shared_ptr<Pass>> m_passes;
 
             Ra::Core::MultiGraph<Pass> m_passgraph;
         };

@@ -174,10 +174,6 @@ namespace Ra
         }
 
 
-        uint Pass::getId()   const { return m_id; }
-
-        std::string Pass::getName() const { return m_name; }
-
         // TODO this function has to be refactored because of its ugliness - the author
         void Pass::paramNamesFromShaderProgram(const ShaderProgram* prog)
         {

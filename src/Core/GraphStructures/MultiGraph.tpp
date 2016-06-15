@@ -1,5 +1,5 @@
 template <typename T>
-MultiGraph<T>::Node::Node( MultiGraph<T>* host, const std::string& name, const std::shared_ptr<T>& data, uint nbIn, uint nbOut)
+MultiGraph<T>::Node::Node( MultiGraph<T>* host, const std::string& name, T* data, uint nbIn, uint nbOut)
     : m_data (data)
     , m_name (name)
     , m_level(0)
@@ -201,11 +201,21 @@ void MultiGraph<T>::Node::print() const
 
 
 template <typename T>
-void MultiGraph<T>::addNode(const std::string& name, const std::shared_ptr<T>& data, uint nb_in, uint nb_out)
+void MultiGraph<T>::addNode(T* data)
 {
-    Node* newNode = new MultiGraph<T>::Node(this, name, data, nb_in, nb_out);
-    m_graph.push_back(std::unique_ptr<Node>(newNode));
-    m_names[name] = newNode;
+    // create a unique pointer to the data stored
+    //std::unique_ptr<Node> newNode = std::unique_ptr<Node>(
+    //            new MultiGraph<T>::Node(this, data->getName(), data, data->getNbIn(), data->getNbOut()) );
+
+    // push it to the list and give it to the map
+    //m_graph.push_back( newNode );
+    //m_names[data->getName()] = newNode.get();
+    // create a unique pointer to the data stored
+
+    Node* newNode = new MultiGraph<T>::Node(this, data->getName(), data, data->getNbIn(), data->getNbOut());
+
+    m_graph.push_back( std::unique_ptr<Node>(newNode) );
+    m_names[data->getName()] = newNode;
 }
 
 

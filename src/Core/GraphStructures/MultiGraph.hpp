@@ -41,7 +41,7 @@ namespace Ra
 
             public:
                 Node(MultiGraph<T>* host, const std::string& name,
-                     const std::shared_ptr<T>& data, uint nbIn, uint nbOut);
+                     T* data, uint nbIn, uint nbOut);
 
                 ~Node() {}
 
@@ -78,7 +78,7 @@ namespace Ra
 
 
             public:
-                std::shared_ptr<T>      m_data;    /// data stored by the node
+                std::unique_ptr<T>      m_data;    /// data stored by the node
                 std::vector<Connection> m_parents; /// parents of the node
                 std::vector<Connection> m_childs;  /// childs  of the node
                 std::string m_name;
@@ -101,7 +101,7 @@ namespace Ra
             ~MultiGraph() {}
 
             /// @brief add a node to the graph
-            void addNode(const std::string& name, const std::shared_ptr<T>& data, uint nb_in, uint nb_out);
+            void addNode(T* data);
 
             /// @brief delete a node from the graph
             /// @note handles the connections removal
@@ -141,7 +141,7 @@ namespace Ra
 
         private:
             std::vector<std::unique_ptr<Node>> m_graph;
-            std::map<std::string, Node*> m_names;
+            std::map<std::string, Node*>       m_names;
 
         }; // end of class MultiGraph
 
