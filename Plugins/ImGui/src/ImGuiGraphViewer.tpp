@@ -102,8 +102,8 @@ void ImGui::GraphViewer<T>::Show(bool* opened)
     SetNextWindowPos(ImVec2(26,26), ImGuiSetCond_FirstUseEver);
     SetNextWindowSize(ImVec2(1000,600), ImGuiSetCond_FirstUseEver);
 
-    if (! ImGui::Begin("This window is beautiful", opened, ImVec2(900,500), 0.3f,
-                       ImGuiWindowFlags_NoTitleBar|ImGuiWindowFlags_NoMove|ImGuiWindowFlags_HorizontalScrollbar))
+    if (! ImGui::Begin("Post-process node editor", opened, ImVec2(900,500), 0.3f,
+                       /*ImGuiWindowFlags_NoTitleBar|*/ImGuiWindowFlags_NoMove|ImGuiWindowFlags_HorizontalScrollbar))
     {
         ImGui::End();
         return;
@@ -165,22 +165,33 @@ void ImGui::GraphViewer<T>::Show(bool* opened)
         m_gr->levelize( true );
     }
 
-    // delete node
+    // create node
     SetCursorPos(GetWindowPos() + ImVec2(GetScrollX() + 200, GetWindowHeight() - 59 + GetScrollY()));
+    Button("Create node");
+    if (IsItemClicked())
+    {
+        std::cout << "this button was clicked, please Hugo do something smarter" << std::endl;
+    }
+
+    // delete node
+    SetCursorPos(GetWindowPos() + ImVec2(GetScrollX() + 300, GetWindowHeight() - 59 + GetScrollY()));
     Button("Delete node");
     if (IsItemClicked())
     {
         removeNode(dragstate.m_last);
+        dragstate.m_last = nullptr;
     }
 
     // display if an error is detected
     if (m_gr->m_status == Ra::Core::GRAPH_ERROR)
     {
         PushStyleColor(ImGuiCol_Button, ImVec4(1.f,0.3f,0.3f,0.8f));
-        SetCursorPos(GetWindowPos() + ImVec2(GetScrollX() + 320, GetWindowHeight() - 32 + GetScrollY()));
+        SetCursorPos(GetWindowPos() + ImVec2(GetScrollX() + 400, GetWindowHeight() - 59 + GetScrollY()));
         Button("Error");
         PopStyleColor();
     }
+
+    createNode();
 
     PopStyleColor();
     ImGui::End();
@@ -239,9 +250,37 @@ void ImGui::GraphViewer<T>::createLink()
 
 
 template <typename T>
-void ImGui::GraphViewer<T>::createNode()
+void ImGui::GraphViewer<T>::createNode( )
 {
-    //
+    const int namesize = 32;
+
+    // every needed informations to spawn a node
+    static int  nbParameters[2] = {0,0};  // in/out
+    static char name[namesize], shader[namesize];
+
+    SetNextWindowPos(GetMousePos(), ImGuiSetCond_FirstUseEver);
+
+    // create a (beautiful) window
+    if (! ImGui::Begin("Node creation", nullptr, ImVec2(400,400)))
+    {
+        ImGui::End();
+        return;
+    }
+
+    // widgets !!
+    InputText(" : name", name, namesize);
+    InputText(" : shader", shader, namesize);
+    InputInt2(" : parameters [in/out]", nbParameters);
+
+    Button("Create");
+    if (IsItemClicked())
+    {
+        std::cout << "TODO !" << std::endl;
+        //m_gr->addNode( new PassRegular(name, 512,512, nbParameters[0], nbParameters[1], shader) );
+        //m_props.push_back(std::unique_ptr<NodePropMat2<T>>( new NodePropMat2<T>( node, node->m_name )));
+    }
+
+    ImGui::End();
 }
 
 
