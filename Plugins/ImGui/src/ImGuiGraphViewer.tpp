@@ -150,7 +150,7 @@ void ImGui::GraphViewer<T>::Show(bool* opened)
     PushStyleColor(ImGuiCol_Button, ImVec4(0.f,0.9f,0.45f,0.7f));
 
     // update view
-    SetCursorPos(GetWindowPos() + ImVec2(-13 + GetScrollX(), GetWindowHeight() - 32 + GetScrollY()));
+    SetCursorPos(GetWindowPos() + ImVec2(-13 + GetScrollX(), GetWindowHeight() - 59 + GetScrollY()));
     Button("Reset view");
     if (IsItemClicked())
     {
@@ -158,7 +158,7 @@ void ImGui::GraphViewer<T>::Show(bool* opened)
     }
 
     // update graph
-    SetCursorPos(GetWindowPos() + ImVec2(GetScrollX() + 80, GetWindowHeight() - 32 + GetScrollY()));
+    SetCursorPos(GetWindowPos() + ImVec2(GetScrollX() + 80, GetWindowHeight() - 59 + GetScrollY()));
     Button("Req. levelize");
     if (IsItemClicked())
     {
@@ -166,7 +166,7 @@ void ImGui::GraphViewer<T>::Show(bool* opened)
     }
 
     // delete node
-    SetCursorPos(GetWindowPos() + ImVec2(GetScrollX() + 200, GetWindowHeight() - 32 + GetScrollY()));
+    SetCursorPos(GetWindowPos() + ImVec2(GetScrollX() + 200, GetWindowHeight() - 59 + GetScrollY()));
     Button("Delete node");
     if (IsItemClicked())
     {
@@ -244,11 +244,17 @@ void ImGui::GraphViewer<T>::createNode()
     //
 }
 
+
+
 /// @brief remove a node
 template <typename T>
-void ImGui::GraphViewer<T>::removeNode( NodeProp<T>* node )
+void ImGui::GraphViewer<T>::removeNode( NodeProp<T>* prop )
 {
-    //
+    if (prop != nullptr)
+    {
+        m_gr->deleteNode(prop->m_node);
+        Init();
+    }
 }
 
 

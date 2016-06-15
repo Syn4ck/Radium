@@ -54,7 +54,7 @@ namespace ImGui {
         void createNode();
 
         /// @brief remove a node
-        void removeNode( NodeProp<T>* node );
+        void removeNode( NodeProp<T>* prop );
 
     private:
         /// @brief find a node and slot to connect to

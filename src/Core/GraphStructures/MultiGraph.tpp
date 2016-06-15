@@ -34,7 +34,7 @@ void MultiGraph<T>::Node::setParent(uint slot, Node* other, uint local, bool rev
             {
                 // add the new connection in case it didn't exist before
                 m_parents.push_back(c);
-                other->setChild(local, this, slot);
+                other->setChild(local, this, slot, false);
 
                 // set the graph to be updated
                 m_graph->m_status = GRAPH_UPDATE;
@@ -62,7 +62,7 @@ void MultiGraph<T>::Node::removeParent(uint slot, Node* other, uint local, bool 
 
         if (reverse)
         {
-            other->removeChild(local, this, slot);
+            other->removeChild(local, this, slot, false);
             m_graph->m_status = GRAPH_UPDATE;
         }
     }
@@ -85,7 +85,7 @@ void MultiGraph<T>::Node::setChild(uint slot, Node* other, uint local, bool reve
             {
                 // add the new connection in case it didn't exist before
                 m_childs.push_back(c);
-                other->setParent(slot, this, local);
+                other->setParent(local, this, slot, false);
 
                 // set the graph to be updated
                 m_graph->m_status = GRAPH_UPDATE;
@@ -113,7 +113,7 @@ void MultiGraph<T>::Node::removeChild(uint slot, Node* other, uint local, bool r
 
         if (reverse)
         {
-            other->removeParent(slot, this, local);
+            other->removeParent(slot, this, local, false);
             m_graph->m_status = GRAPH_UPDATE;
         }
     }
@@ -184,11 +184,18 @@ template <typename T>
 void MultiGraph<T>::Node::print() const
 {
     // print parents
+    std::cout << "   ";
     for (Connection const& c : m_parents)
     {
         std::cout << c.m_source->m_name << "(" << c.m_slot << "," << c.m_local << ") -> ";
     }
-    std::cout << m_name << "(level. " << m_level << ")" << std::endl;
+    std::cout << std::endl << m_name << "(level. " << m_level << ")" << std::endl << "   ";
+    // print children
+    for (Connection const& c : m_childs)
+    {
+        std::cout << " -> " << c.m_source->m_name << " (" << c.m_slot << "," << c.m_local << ")";
+    }
+    std::cout << std::endl;
 }
 
 
@@ -206,27 +213,33 @@ void MultiGraph<T>::addNode(const std::string& name, const std::shared_ptr<T>& d
 template <typename T>
 void MultiGraph<T>::deleteNode(Node* node)
 {
+    // notify the graph has been updated
+    m_status = GRAPH_UPDATE;
+
     // delete every connections from the node
     for (auto const& conn : node->m_childs)
     {
-         node->removeParent(conn->m_local, conn->m_source, conn->m_slot, false);
+         conn.m_source->removeParent(conn.m_local, node, conn.m_slot, false);
     }
 
     // delete every connections to the node
-    for (auto const& conn : node->m_childs)
+    for (auto const& conn : node->m_parents)
     {
-        node->removeChild(conn->m_local, conn->m_source, conn->m_slot, false);
+        conn.m_source->removeChild(conn.m_local, node, conn.m_slot, false);
     }
 
     m_names.erase(node->m_name);
 
     // remove the unique ptr to this node
-    for (auto const& nodeptr : m_graph)
+    auto nodeitr = m_graph.begin();
+    while (nodeitr != m_graph.end())
     {
-        if (nodeptr.get() == node)
+        if (nodeitr->get() == node)
         {
-            m_graph.erase(nodeptr);
+            m_graph.erase(nodeitr);
+            break;
         }
+        ++ nodeitr;
     }
 }
 

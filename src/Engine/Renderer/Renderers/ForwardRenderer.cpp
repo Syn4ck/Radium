@@ -110,7 +110,7 @@ namespace Ra
 
             // levelize and sort on the same run
             m_passgraph.levelize(false);
-//            m_passgraph.print();
+//            _passgraph.print();
         }
 
         void ForwardRenderer::initPasses()
