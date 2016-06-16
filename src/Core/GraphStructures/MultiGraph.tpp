@@ -201,21 +201,19 @@ void MultiGraph<T>::Node::print() const
 
 
 template <typename T>
-void MultiGraph<T>::addNode(T* data)
+typename MultiGraph<T>::Node* MultiGraph<T>::addNode(T* data)
 {
-    // create a unique pointer to the data stored
-    //std::unique_ptr<Node> newNode = std::unique_ptr<Node>(
-    //            new MultiGraph<T>::Node(this, data->getName(), data, data->getNbIn(), data->getNbOut()) );
-
-    // push it to the list and give it to the map
-    //m_graph.push_back( newNode );
-    //m_names[data->getName()] = newNode.get();
-    // create a unique pointer to the data stored
-
     Node* newNode = new MultiGraph<T>::Node(this, data->getName(), data, data->getNbIn(), data->getNbOut());
 
+    // create a unique pointer to the data stored
+    // push it to the list and give it to the map
     m_graph.push_back( std::unique_ptr<Node>(newNode) );
     m_names[data->getName()] = newNode;
+
+    // set update status
+    m_status = GRAPH_NEW;
+
+    return newNode;
 }
 
 
@@ -277,6 +275,9 @@ template <typename T>
 void MultiGraph<T>::levelize(bool sortByLevel)
 {
     uint total = m_graph.size();
+
+    // set the graph to update status
+    m_status = GRAPH_UPDATE;
 
     // first detect every sources and set level to 1 else reset to 0
     auto is_source = [](Node* n) { return n->m_nbIn == 0; };
@@ -375,4 +376,12 @@ template <typename T>
 uint MultiGraph<T>::size() const
 {
     return m_graph.size();
+}
+
+
+
+template <typename T>
+T& MultiGraph<T>::back()
+{
+    return *(m_graph.back()->m_data.get());
 }

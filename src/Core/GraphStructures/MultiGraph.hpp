@@ -15,7 +15,7 @@ namespace Ra
     namespace Core
     {
 
-        enum graphstatus {GRAPH_VALID=0, GRAPH_ERROR, GRAPH_UPDATE};
+        enum graphstatus {GRAPH_VALID=0, GRAPH_ERROR, GRAPH_UPDATE, GRAPH_NEW};
 
         /// @brief MultiGraph is an oriented and acyclic graph
         /// whose edges are represented by each node knowing the whole
@@ -101,7 +101,7 @@ namespace Ra
             ~MultiGraph() {}
 
             /// @brief add a node to the graph
-            void addNode(T* data);
+            Node* addNode(T* data);
 
             /// @brief delete a node from the graph
             /// @note handles the connections removal
@@ -120,7 +120,7 @@ namespace Ra
             Node* operator[](const std::string& name);
             Node* operator[](const int index);
 
-            /// @brief eedefine iterator begin to map over m_graph
+            /// @brief redefine iterator begin to map over m_graph
             typename std::vector<std::unique_ptr<Node>>::iterator begin();
 
             /// @brief redefine iterator end to map over m_graph
@@ -128,6 +128,9 @@ namespace Ra
 
             /// @brief redefine size() function
             uint size() const;
+
+            /// @brief redefine non-const access to the last node
+            T& back();
 
             /// @brief connection function pointer
             bool (*m_connect)(T* a, uint ia, T* b, uint ib);

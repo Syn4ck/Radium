@@ -24,48 +24,7 @@ void ImGui::GraphViewer<T>::Init()
         typename Ra::Core::MultiGraph<T>::Node* node = (*m_gr)[i];
 
         // construct the node in function of the returned type
-        switch (node->m_data->generates())
-        {
-        case Ra::Engine::PARAM_VEC2:
-            m_props.push_back(std::unique_ptr<NodePropVec2<T>>( new NodePropVec2<T>( node, node->m_name )));
-//            m_props.push_back(std::unique_ptr<NodeGeneratorProp<T,Ra::Core::Vector2>>( new NodeGeneratorProp<T,Ra::Core::Vector2>( node, node->m_name )));
-            break;
-        case Ra::Engine::PARAM_VEC3:
-            m_props.push_back(std::unique_ptr<NodePropVec3<T>>( new NodePropVec3<T>( node, node->m_name )));
-//            m_props.push_back(std::unique_ptr<NodeGeneratorProp<T,Ra::Core::Vector3>>( new NodeGeneratorProp<T,Ra::Core::Vector3>( node, node->m_name )));
-            break;
-        case Ra::Engine::PARAM_VEC4:
-            m_props.push_back(std::unique_ptr<NodePropVec4<T>>( new NodePropVec4<T>( node, node->m_name )));
-//            m_props.push_back(std::unique_ptr<NodeGeneratorProp<T,Ra::Core::Vector4>>( new NodeGeneratorProp<T,Ra::Core::Vector4>( node, node->m_name )));
-            break;
-        case Ra::Engine::PARAM_MAT2:
-            m_props.push_back(std::unique_ptr<NodePropMat2<T>>( new NodePropMat2<T>( node, node->m_name )));
-//            m_props.push_back(std::unique_ptr<NodeGeneratorProp<T,Ra::Core::Matrix2>>( new NodeGeneratorProp<T,Ra::Core::Matrix2>( node, node->m_name )));
-            break;
-        case Ra::Engine::PARAM_MAT3:
-            m_props.push_back(std::unique_ptr<NodePropMat3<T>>( new NodePropMat3<T>( node, node->m_name )));
-//            m_props.push_back(std::unique_ptr<NodeGeneratorProp<T,Ra::Core::Matrix3>>( new NodeGeneratorProp<T,Ra::Core::Matrix3>( node, node->m_name )));
-            break;
-        case Ra::Engine::PARAM_MAT4:
-            m_props.push_back(std::unique_ptr<NodePropMat4<T>>( new NodePropMat4<T>( node, node->m_name )));
-//            m_props.push_back(std::unique_ptr<NodeGeneratorProp<T,Ra::Core::Matrix4>>( new NodeGeneratorProp<T,Ra::Core::Matrix4>( node, node->m_name )));
-            break;
-        case Ra::Engine::PARAM_SCALAR:
-            m_props.push_back(std::unique_ptr<NodePropScalar<T>>( new NodePropScalar<T>( node, node->m_name )));
-//            m_props.push_back(std::unique_ptr<NodeGeneratorProp<T,Scalar>>( new NodeGeneratorProp<T,Scalar>( node, node->m_name )));
-            break;
-        case Ra::Engine::PARAM_INT:
-            m_props.push_back(std::unique_ptr<NodePropInt<T>>( new NodePropInt<T>( node, node->m_name )));
-//            m_props.push_back(std::unique_ptr<NodeGeneratorProp<T,int>>( new NodeGeneratorProp<T,int>( node, node->m_name )));
-            break;
-        case Ra::Engine::PARAM_UINT:
-            m_props.push_back(std::unique_ptr<NodePropUint<T>>( new NodePropUint<T>( node, node->m_name )));
-//            m_props.push_back(std::unique_ptr<NodeGeneratorProp<T,unsigned int>>( new NodeGeneratorProp<T,unsigned int>( node, node->m_name )));
-            break;
-        default:
-            m_props.push_back(std::unique_ptr<NodeProp<T>>( new NodeProp<T>( node, node->m_level, node->m_name, node->m_nbIn, node->m_nbOut) ));
-            break;
-        }
+        createNode(node);
 
         // set position and update levely
         if (levely.size() < node->m_level)
@@ -77,16 +36,13 @@ void ImGui::GraphViewer<T>::Init()
         {
             m_props.back()->setAutoPos(node->m_level - 1, levely[node->m_level - 1] ++);
         }
-
-        // add to hashmap
-        m_reference[node] = m_props.back().get();
     }
 }
 
 
 
 template <typename T>
-void ImGui::GraphViewer<T>::Show(bool* opened)
+void ImGui::GraphViewer<T>::Show( bool* open )
 {
     // function used to display a graph viewer
     // 1. create a window
@@ -98,12 +54,14 @@ void ImGui::GraphViewer<T>::Show(bool* opened)
     // 5. draw buttons
 
 
+    static bool openCreator = false;
+
     // try to create a window
     SetNextWindowPos(ImVec2(26,26), ImGuiSetCond_FirstUseEver);
     SetNextWindowSize(ImVec2(1000,600), ImGuiSetCond_FirstUseEver);
 
-    if (! ImGui::Begin("Post-process node editor", opened, ImVec2(900,500), 0.3f,
-                       /*ImGuiWindowFlags_NoTitleBar|*/ImGuiWindowFlags_NoMove|ImGuiWindowFlags_HorizontalScrollbar))
+    if (! ImGui::Begin("Post-process node editor", open, ImVec2(900,500), 0.3f,
+                       ImGuiWindowFlags_NoTitleBar|ImGuiWindowFlags_NoMove|ImGuiWindowFlags_HorizontalScrollbar))
     {
         ImGui::End();
         return;
@@ -147,35 +105,36 @@ void ImGui::GraphViewer<T>::Show(bool* opened)
 
 
     // drawing some buttons
-    PushStyleColor(ImGuiCol_Button, ImVec4(0.f,0.9f,0.45f,0.7f));
+    PushStyleColor(ImGuiCol_Button, ImVec4(0.f,0.8f,0.45f,0.75f));
+
+    SetCursorPos(GetWindowPos() + ImVec2(GetScrollX(), GetWindowHeight() + GetScrollY() - (6*24)));
+    BeginGroup();
+
+    ImVec2 buttonSize(100,16);
 
     // update view
-    SetCursorPos(GetWindowPos() + ImVec2(-13 + GetScrollX(), GetWindowHeight() - 59 + GetScrollY()));
-    Button("Reset view");
+    Button("Reset view", buttonSize);
     if (IsItemClicked())
     {
         Init();
     }
 
     // update graph
-    SetCursorPos(GetWindowPos() + ImVec2(GetScrollX() + 80, GetWindowHeight() - 59 + GetScrollY()));
-    Button("Req. levelize");
+    Button("Req. levelize", buttonSize);
     if (IsItemClicked())
     {
         m_gr->levelize( true );
     }
 
     // create node
-    SetCursorPos(GetWindowPos() + ImVec2(GetScrollX() + 200, GetWindowHeight() - 59 + GetScrollY()));
-    Button("Create node");
+    Button("Create node", buttonSize);
     if (IsItemClicked())
     {
-        std::cout << "this button was clicked, please Hugo do something smarter" << std::endl;
+        openCreator = true;
     }
 
     // delete node
-    SetCursorPos(GetWindowPos() + ImVec2(GetScrollX() + 300, GetWindowHeight() - 59 + GetScrollY()));
-    Button("Delete node");
+    Button("Delete node", buttonSize);
     if (IsItemClicked())
     {
         removeNode(dragstate.m_last);
@@ -186,14 +145,126 @@ void ImGui::GraphViewer<T>::Show(bool* opened)
     if (m_gr->m_status == Ra::Core::GRAPH_ERROR)
     {
         PushStyleColor(ImGuiCol_Button, ImVec4(1.f,0.3f,0.3f,0.8f));
-        SetCursorPos(GetWindowPos() + ImVec2(GetScrollX() + 400, GetWindowHeight() - 59 + GetScrollY()));
-        Button("Error");
+        Button("Error", buttonSize);
         PopStyleColor();
     }
 
-    createNode();
+    EndGroup();
+
+    if (openCreator)
+    {
+        NodeCreator(&openCreator);
+    }
 
     PopStyleColor();
+    ImGui::End();
+}
+
+
+
+template <typename T>
+void ImGui::GraphViewer<T>::NodeCreator( bool* open )
+{
+    using Ra::Engine::PARAM_INT;
+    using Ra::Engine::PARAM_UINT;
+    using Ra::Engine::PARAM_VEC2;
+    using Ra::Engine::PARAM_VEC3;
+    using Ra::Engine::PARAM_VEC4;
+    using Ra::Engine::PARAM_MAT2;
+    using Ra::Engine::PARAM_MAT3;
+    using Ra::Engine::PARAM_MAT4;
+    using Ra::Engine::PARAM_SCALAR;
+
+    using Ra::Engine::PassT;
+
+    // every needed informations to spawn a node
+
+    Ra::Engine::Pass* p = nullptr;
+
+    const  ImGuiIO io       = ImGui::GetIO();
+    const  unsigned int w = io.DisplaySize.x, h = io.DisplaySize.y;
+
+    const  int     namesize = 32;
+    const  char*   pass[]   = {"Regular", "Ping-Pong", "Redux", "Generator"};
+    const  char*   type[]   = {"Int",     "Uint",    "Scalar",
+                               "Vector2", "Vector3", "Vector4",
+                               "Matrix2", "Matrix3", "Matrix4"};
+
+    // selection of a type and type of pass
+    static int selectedPass, selectedType;
+
+    static int  nbParameters[2] = {0,0};  // in/out
+    static char name[namesize], shader[namesize];
+
+    SetNextWindowPos(GetMousePos(), ImGuiSetCond_FirstUseEver);
+
+    // create a (beautiful) window
+    if (! ImGui::Begin("Node creation", open, ImVec2(400,400)))
+    {
+        ImGui::End();
+        return;
+    }
+
+    // widgets !!
+    InputText(" :  name", name, namesize);
+    InputText(" :  shader", shader, namesize);
+    InputInt2(" : [in/out]", nbParameters);
+
+    Combo(" : pass", &selectedPass, pass, 4);
+    Combo(" : type", &selectedType, type, 9);
+
+    Button("Create");
+    if (IsItemClicked())
+    {
+        if (selectedPass == 0) // regular
+        {
+            p = new Ra::Engine::PassRegular(name, w, h, nbParameters[0], nbParameters[1], shader);
+        }
+        else if (selectedPass == 1) // ping pong
+        {
+            p = new Ra::Engine::PassPingPong(name, w, h, nbParameters[0], nbParameters[1], 1, shader);
+        }
+        else if (selectedPass == 2) // redux
+        {
+            p = new Ra::Engine::PassRedux(name, w, h, nbParameters[0], nbParameters[1], shader);
+        }
+        else // generator
+        {
+            switch (selectedType)
+            {
+            case PARAM_INT:
+                p = new PassT<int>(name, 0, PARAM_INT);
+                break;
+            case PARAM_UINT:
+                p = new PassT<unsigned int>(name, 0, PARAM_UINT);
+                break;
+            case PARAM_VEC2:
+                p = new PassT<Ra::Core::Vector2>(name, Ra::Core::Vector2(), PARAM_VEC2);
+                break;
+            case PARAM_VEC3:
+                p = new PassT<Ra::Core::Vector3>(name, Ra::Core::Vector3(), PARAM_VEC3);
+                break;
+            case PARAM_VEC4:
+                p = new PassT<Ra::Core::Vector4>(name, Ra::Core::Vector4(), PARAM_VEC4);
+                break;
+            case PARAM_MAT2:
+                p = new PassT<Ra::Core::Matrix2>(name, Ra::Core::Matrix2(), PARAM_MAT2);
+                break;
+            case PARAM_MAT3:
+                p = new PassT<Ra::Core::Matrix3>(name, Ra::Core::Matrix3(), PARAM_MAT3);
+                break;
+            case PARAM_MAT4:
+                p = new PassT<Ra::Core::Matrix4>(name, Ra::Core::Matrix4(), PARAM_MAT4);
+                break;
+            case PARAM_SCALAR:
+                p = new PassT<Scalar>(name, 0, PARAM_SCALAR);
+                break;
+            }
+        }
+
+        createNode( m_gr->addNode( p ) );
+    }
+
     ImGui::End();
 }
 
@@ -250,37 +321,45 @@ void ImGui::GraphViewer<T>::createLink()
 
 
 template <typename T>
-void ImGui::GraphViewer<T>::createNode( )
+void ImGui::GraphViewer<T>::createNode( typename Ra::Core::MultiGraph<T>::Node* node )
 {
-    const int namesize = 32;
-
-    // every needed informations to spawn a node
-    static int  nbParameters[2] = {0,0};  // in/out
-    static char name[namesize], shader[namesize];
-
-    SetNextWindowPos(GetMousePos(), ImGuiSetCond_FirstUseEver);
-
-    // create a (beautiful) window
-    if (! ImGui::Begin("Node creation", nullptr, ImVec2(400,400)))
+    // construct the property in function of the returned type
+    switch (node->m_data->generates())
     {
-        ImGui::End();
-        return;
+    case Ra::Engine::PARAM_VEC2:
+        m_props.push_back(std::unique_ptr<NodePropVec2<T>>( new NodePropVec2<T>( node, node->m_name )));
+        break;
+    case Ra::Engine::PARAM_VEC3:
+        m_props.push_back(std::unique_ptr<NodePropVec3<T>>( new NodePropVec3<T>( node, node->m_name )));
+        break;
+    case Ra::Engine::PARAM_VEC4:
+        m_props.push_back(std::unique_ptr<NodePropVec4<T>>( new NodePropVec4<T>( node, node->m_name )));
+        break;
+    case Ra::Engine::PARAM_MAT2:
+        m_props.push_back(std::unique_ptr<NodePropMat2<T>>( new NodePropMat2<T>( node, node->m_name )));
+        break;
+    case Ra::Engine::PARAM_MAT3:
+        m_props.push_back(std::unique_ptr<NodePropMat3<T>>( new NodePropMat3<T>( node, node->m_name )));
+        break;
+    case Ra::Engine::PARAM_MAT4:
+        m_props.push_back(std::unique_ptr<NodePropMat4<T>>( new NodePropMat4<T>( node, node->m_name )));
+        break;
+    case Ra::Engine::PARAM_SCALAR:
+        m_props.push_back(std::unique_ptr<NodePropScalar<T>>( new NodePropScalar<T>( node, node->m_name )));
+        break;
+    case Ra::Engine::PARAM_INT:
+        m_props.push_back(std::unique_ptr<NodePropInt<T>>( new NodePropInt<T>( node, node->m_name )));
+        break;
+    case Ra::Engine::PARAM_UINT:
+        m_props.push_back(std::unique_ptr<NodePropUint<T>>( new NodePropUint<T>( node, node->m_name )));
+        break;
+    default:
+        m_props.push_back(std::unique_ptr<NodeProp<T>>( new NodeProp<T>( node, node->m_level, node->m_name, node->m_nbIn, node->m_nbOut) ));
+        break;
     }
 
-    // widgets !!
-    InputText(" : name", name, namesize);
-    InputText(" : shader", shader, namesize);
-    InputInt2(" : parameters [in/out]", nbParameters);
-
-    Button("Create");
-    if (IsItemClicked())
-    {
-        std::cout << "TODO !" << std::endl;
-        //m_gr->addNode( new PassRegular(name, 512,512, nbParameters[0], nbParameters[1], shader) );
-        //m_props.push_back(std::unique_ptr<NodePropMat2<T>>( new NodePropMat2<T>( node, node->m_name )));
-    }
-
-    ImGui::End();
+    // add to hashmap
+    m_reference[node] = m_props.back().get();
 }
 
 

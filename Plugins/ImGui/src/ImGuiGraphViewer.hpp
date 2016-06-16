@@ -42,7 +42,10 @@ namespace ImGui {
 
         /// @brief window that displays nodes and links
         /// @warning init() must have been called prior to this
-        void Show( bool* opened = nullptr );
+        void Show( bool* open = nullptr );
+
+        /// @brief window used as Node factory
+        void NodeCreator( bool* open );
 
         /// @brief display link between 2 nodes
         void drawLink( NodeProp<T>& node_a, unsigned int slot_a, NodeProp<T>& node_b, unsigned int slot_b );
@@ -50,8 +53,8 @@ namespace ImGui {
         /// @brief create a <br>new</br> link
         void createLink();
 
-        /// @brief create a <br>new</br> node with a small interface to ask shader name, parameters...
-        void createNode();
+        /// @brief create a <br>new</br> NodeProp with attributes of the Multigraph::Node passed
+        void createNode( typename Ra::Core::MultiGraph<T>::Node* node );
 
         /// @brief remove a node
         void removeNode( NodeProp<T>* prop );

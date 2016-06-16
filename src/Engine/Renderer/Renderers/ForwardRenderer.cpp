@@ -64,94 +64,9 @@ namespace Ra
             initShaders();
             initBuffers();
             initPostProcess();
-            /*
-            initPasses();
-            initGraph();
-            */
             DebugRender::createInstance();
             DebugRender::getInstance()->initialize();
         }
-/*
-        void ForwardRenderer::initGraph()
-        {
-            // set useful callbacks
-//            m_passgraph.m_val_access   = Pass::getVal;
-            m_passgraph.m_connect      = Pass::connect;
-            m_passgraph.m_slotname_in  = Pass::getParamNameIn;
-            m_passgraph.m_slotname_out = Pass::getParamNameOut;
-
-            // add nodes
-            m_passgraph.addNode("LIT",    std::shared_ptr<Pass>(m_passes[0]), 0, 1);
-            m_passgraph.addNode("VEC3",    std::shared_ptr<Pass>(m_passes[1]), 0, 1);
-            m_passgraph.addNode("DUMMY",  std::shared_ptr<Pass>(m_passes[2]), 2, 1);
-            m_passgraph.addNode("BLUR",   std::shared_ptr<Pass>(m_passes[3]), 2, 1);
-            m_passgraph.addNode("VEC2",    std::shared_ptr<Pass>(m_passes[4]), 0, 1);
-//            m_passgraph.addNode("LUM",    std::shared_ptr<Pass>(m_passes[1]), 1, 1);
-//            m_passgraph.addNode("MMM",    std::shared_ptr<Pass>(m_passes[2]), 1, 1);
-//            m_passgraph.addNode("TON",    std::shared_ptr<Pass>(m_passes[3]), 3, 1);
-//            m_passgraph.addNode("PPS",    std::shared_ptr<Pass>(m_passes[4]), 0, 1);
-
-//            m_passgraph.addNode("VEC4", std::shared_ptr<Pass>(m_passes[5]), 0, 1);
-//            m_passgraph.addNode("MAT2", std::shared_ptr<Pass>(m_passes[6]), 0, 1);
-//            m_passgraph.addNode("MAT3", std::shared_ptr<Pass>(m_passes[7]), 0, 1);
-//            m_passgraph.addNode("MAT4", std::shared_ptr<Pass>(m_passes[8]), 0, 1);
-//            m_passgraph.addNode("SCAL", std::shared_ptr<Pass>(m_passes[9]), 0, 1);
-//            m_passgraph.addNode("INT",  std::shared_ptr<Pass>(m_passes[10]),0, 1);
-//            m_passgraph.addNode("UINT", std::shared_ptr<Pass>(m_passes[11]),0, 1);
-
-            // connect them
-            m_passgraph["BLUR" ]->setParent(0, m_passgraph["LIT" ], 0);
-            m_passgraph["BLUR" ]->setParent(0, m_passgraph["VEC2"], 1);
-            m_passgraph["DUMMY"]->setParent(0, m_passgraph["BLUR"], 0);
-            m_passgraph["DUMMY"]->setParent(0, m_passgraph["VEC3"], 1);
-//            m_passgraph["LUM"  ]->setParent(0, m_passgraph["DUMMY"],0);
-//            m_passgraph["LUM"]->setParent(0, m_passgraph["LIT"],  0);
-//            m_passgraph["MMM"]->setParent(0, m_passgraph["LUM"],  0);
-//            m_passgraph["TON"]->setParent(0, m_passgraph["LIT"],  0);
-//            m_passgraph["TON"]->setParent(0, m_passgraph["MMM"],  1);
-//            m_passgraph["TON"]->setParent(0, m_passgraph["PPS"],  2);
-
-            // levelize and sort on the same run
-            m_passgraph.levelize(false);
-//             passgraph.print();
-        }
-
-        void ForwardRenderer::initPasses()
-        {
-            // create passes
-            m_passes.push_back( std::unique_ptr<Pass>( new PassRegular         ("source",    m_width, m_height, 1, 1,   "DrawScreen")) );
-//            m_passes.push_back( std::unique_ptr<Pass>( new PassT<Core::Vector3>("vec3single",                      1,    Core::Vector3(0.6f,0.6f,0.f), PARAM_VEC3)) );
-            m_passes.push_back( std::unique_ptr<Pass>( new PassT<Core::Vector3>("vec3single",                         Core::Vector3(0.f,0.4f,0.3f), PARAM_VEC3)) );
-            m_passes.push_back( std::unique_ptr<Pass>( new PassRegular         ("dummy",     m_width, m_height, 2, 1,   "Dummy")) );
-            m_passes.push_back( std::unique_ptr<Pass>( new PassPingPong        ("blur",      m_width, m_height, 2, 1, 8,"Blur" )) );
-            m_passes.push_back( std::unique_ptr<Pass>( new PassT<Core::Vector2>("offset",                             Core::Vector2(0.0, 8.0 / m_height), PARAM_VEC2)) );
-//            m_passes.push_back( std::unique_ptr<Pass>( new PassRegular         ("lumina",    m_width, m_height, 1, 1,   "Luminance")) );
-//            m_passes.push_back( std::unique_ptr<Pass>( new PassRedux           ("minmax",    m_width, m_height, 1, 1,   "MinMax")) );
-//            m_passes.push_back( std::unique_ptr<Pass>( new PassRegular         ("tonmap",    m_width, m_height, 3, 1,   "Tonemapping")) );
-//            m_passes.push_back( std::unique_ptr<Pass>( new PassT<uint>         ("ppsize",                          1, m_pingPongSize, PARAM_UINT)) );
-
-//            m_passes.push_back( std::unique_ptr<Pass>( new PassT<Core::Vector4>("truc4", Core::Vector4(), PARAM_VEC4)) ); // 5
-//            m_passes.push_back( std::unique_ptr<Pass>( new PassT<Core::Matrix2>("matr2", Core::Matrix2(), PARAM_MAT2)) ); // 6
-//            m_passes.push_back( std::unique_ptr<Pass>( new PassT<Core::Matrix3>("matr3", Core::Matrix3(), PARAM_MAT3)) ); // 7
-//            m_passes.push_back( std::unique_ptr<Pass>( new PassT<Core::Matrix4>("matr4", Core::Matrix4(), PARAM_MAT4)) ); // 8
-//            m_passes.push_back( std::unique_ptr<Pass>( new PassT<Scalar>("sf", 0.f, PARAM_SCALAR)) ); // 9
-//            m_passes.push_back( std::unique_ptr<Pass>( new PassT<int>   ("si", 0, PARAM_INT     )) ); // 10
-//            m_passes.push_back( std::unique_ptr<Pass>( new PassT<uint>  ("su", 0, PARAM_UINT    )) ); // 11
-
-            // init every passes
-            for (auto const& pass: m_passes)
-            {
-                m_passmap[pass->getName()] = pass.get();
-
-                // init
-                pass->setCanvas(m_quadMesh.get());
-                pass->init();
-            }
-
-            // initiate the HDR source FIXME(hugo) find a better way without duplication
-            m_passmap["source"]->setIn("screenTexture", m_textures[TEX_LIT].get());
-        }
-*/
 
         void ForwardRenderer::initPostProcess()
         {
@@ -164,10 +79,10 @@ namespace Ra
             m_passgraph.addNode( new PassRegular("SOURCE", m_width, m_height, 1, 1, "DrawScreen") );
 
             // add some post-processing passes
-            m_passgraph.addNode( new PassRegular         ("DUMMY", m_width, m_height, 2, 1,     "Dummy")     );
-            m_passgraph.addNode( new PassPingPong        ("BLUR",  m_width, m_height, 2, 1, 8  ,"Blur" )     );
-            m_passgraph.addNode( new PassT<Core::Vector3>("VEC3",  Core::Vector3(0.6f,0.6f,0.f), PARAM_VEC3) );
-            m_passgraph.addNode( new PassT<Core::Vector2>("VEC2",  Core::Vector2(),              PARAM_VEC2) );
+            m_passgraph.addNode( new PassRegular         ("DUMMY", m_width, m_height, 2, 1,     "Dummy") );
+            m_passgraph.addNode( new PassPingPong        ("BLUR",  m_width, m_height, 2, 1, 8  ,"Blur" ) );
+            m_passgraph.addNode( new PassT<Core::Vector3>("VEC3",  Core::Vector3(0,0,0), PARAM_VEC3) );
+            m_passgraph.addNode( new PassT<Core::Vector2>("VEC2",  Core::Vector2(0,0), PARAM_VEC2) );
 
             // init every passes
             for (auto const& node: m_passgraph)
@@ -178,7 +93,7 @@ namespace Ra
             }
 
             // connect them
-            m_passgraph["BLUR" ]->setParent(0, m_passgraph["SOURCE" ], 0);
+            m_passgraph["BLUR" ]->setParent(0, m_passgraph["SOURCE"], 0);
             m_passgraph["BLUR" ]->setParent(0, m_passgraph["VEC2"], 1);
             m_passgraph["DUMMY"]->setParent(0, m_passgraph["BLUR"], 0);
             m_passgraph["DUMMY"]->setParent(0, m_passgraph["VEC3"], 1);
@@ -404,6 +319,16 @@ namespace Ra
 
         void ForwardRenderer::postProcessInternal( const RenderData& renderData )
         {
+            // init() a node that would have been added after initPostProcess()
+            if (m_passgraph.m_status == Core::GRAPH_NEW)
+            {
+                m_passgraph.back().setCanvas(m_quadMesh.get());
+                m_passgraph.back().init();
+                m_passgraph.back().resizePass(m_width, m_height);
+
+                m_passgraph.m_status = Core::GRAPH_UPDATE;
+            }
+
             // a first check is to be performed to know wether or not the graph
             // has changed and thus is still valid, and abort on error
             if (m_passgraph.m_status == Core::GRAPH_UPDATE)
@@ -435,7 +360,7 @@ namespace Ra
 
             if (m_postProcessEnabled)
             {
-                // update graph parameters
+                // update graph parameters (refresh)
                 m_passgraph.updateNodes();
 
                 // render everything from the graph

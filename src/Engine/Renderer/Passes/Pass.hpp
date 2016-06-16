@@ -81,8 +81,6 @@ namespace Ra
             /// @brief function pointer to get a parameter name
             static const std::string& getParamNameOut( Pass* p, uint slot );
 
-//            /// @brief return the value and type of a parameter
-//            static void getVal( Pass* p, void** data, paramType* t );
 
         public:
             RenderParameters m_paramIn;   /// input  render parameters
