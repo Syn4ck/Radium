@@ -99,6 +99,8 @@ static char keymap(int key, Ra::Engine::InputStatus& inputstts)
     // control
     switch (key)
     {
+    case 48: return ','; break;
+    case 49: return '.'; break;
     case 58: return ' '; break;
     default: return -1;
     }
@@ -411,11 +413,11 @@ void newFrame(Ra::Engine::RadiumEngine* engine, int w, int h)
     // input characters
     for ( int i = 0; i < 103; ++ i )
     {
+        // if the key wasn't previously pressed or was for more than 20 frames :
         if ((io.KeysDown[i] = inputstts.keyIsPressed[i])
             && ((io.KeysDownDurationPrev[i] == 0.f)
             ||  (io.KeysDownDurationPrev[i] > (20*io.DeltaTime))))
         {
-            //std::cout << "pressed " << i << std::endl;
             symbol = keymap(i, inputstts);
             if (symbol != -1)
                 io.AddInputCharacter(symbol);

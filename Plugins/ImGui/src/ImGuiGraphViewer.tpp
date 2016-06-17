@@ -103,7 +103,6 @@ void ImGui::GraphViewer<T>::Show( bool* open )
 
     draw_list->ChannelsMerge();
 
-
     // drawing some buttons
     PushStyleColor(ImGuiCol_Button, ImVec4(0.f,0.8f,0.45f,0.75f));
 
@@ -216,25 +215,21 @@ void ImGui::GraphViewer<T>::NodeCreator( bool* open )
     switch (selectedPass)
     {
     case 0: // regular
-        Separator();
         Text("Regular");
         InputText(" : shader", shader, namesize);
         InputInt2(" : in/out", nbParameters);
         break;
     case 1: // blur
-        Separator();
         Text("Blur");
         SliderInt(" : amount", &loops, 1, 1024);
         break;
     case 2: // ping-pong
-        Separator();
         Text("Ping-Pong");
         SliderInt(" : loops", &loops, 1, 1024);
         InputText(" : shader", shader, namesize);
         InputInt2(" : in/out", nbParameters);
         break;
     case 3: // redux
-        Separator();
         Text("Redux");
         SliderFloat(" : size factor", &ratio, 0.f, 1.f);
         InputText(" : shader", shader, namesize);

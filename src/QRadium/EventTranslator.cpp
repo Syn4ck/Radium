@@ -18,6 +18,10 @@ namespace QRadium
                 return Key_Escape;
             case Qt::Key_Tab:
                 return Key_Tab;
+            case Qt::Key_Period:
+                return Key_Period;
+            case Qt::Key_Comma:
+                return Key_Comma;
             case Qt::Key_Backtab:
                 return Key_BackTab;
             case Qt::Key_Backspace:

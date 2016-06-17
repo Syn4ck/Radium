@@ -75,14 +75,13 @@ namespace Ra
             m_passgraph.m_slotname_in  = Pass::getParamNameIn;
             m_passgraph.m_slotname_out = Pass::getParamNameOut;
 
-            // set up the source for node processing
-            m_passgraph.addNode( new PassRegular("SOURCE", m_width, m_height, 1, 1, "DrawScreen") );
+            // set up the source and composite nodes
+            m_passgraph.addNode( new PassRegular("SOURCE",    m_width, m_height, 1, 1, "DrawScreen") );
+            //m_passgraph.addNode( new PassRegular("COMPOSITE", m_width, m_height, 1, 1, "DrawScreen") );
 
             // add some post-processing passes
             m_passgraph.addNode( new PassRegular         ("DUMMY", m_width, m_height, 2, 1,     "Dummy") );
-            m_passgraph.addNode( new PassPingPong        ("BLUR",  m_width, m_height, 2, 1, 8  ,"Blur" ) );
             m_passgraph.addNode( new PassT<Core::Vector3>("VEC3",  Core::Vector3(0,0,0), PARAM_VEC3) );
-            m_passgraph.addNode( new PassT<Core::Vector2>("VEC2",  Core::Vector2(0,0), PARAM_VEC2) );
 
             // init every passes
             for (auto const& node: m_passgraph)
@@ -93,10 +92,9 @@ namespace Ra
             }
 
             // connect them
-            m_passgraph["BLUR" ]->setParent(0, m_passgraph["SOURCE"], 0);
-            m_passgraph["BLUR" ]->setParent(0, m_passgraph["VEC2"], 1);
-            m_passgraph["DUMMY"]->setParent(0, m_passgraph["BLUR"], 0);
-            m_passgraph["DUMMY"]->setParent(0, m_passgraph["VEC3"], 1);
+            m_passgraph["DUMMY"    ]->setParent(0, m_passgraph["SOURCE"], 0);
+            m_passgraph["DUMMY"    ]->setParent(0, m_passgraph["VEC3"  ], 1);
+            //m_passgraph["COMPOSITE"]->setParent(0, m_passgraph["DUMMY" ], 0);
 
             // levelize and sort on the same run
             m_passgraph.levelize(false);
@@ -370,6 +368,7 @@ namespace Ra
                     last = nodePass->m_data->getTex("");
                 }
             }
+
 
             m_fbo->useAsTarget( m_width, m_height );
             GL_ASSERT( glDrawBuffers(1, buffers + 2) );

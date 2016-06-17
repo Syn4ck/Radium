@@ -43,6 +43,7 @@ namespace ImGuiPlugin
          * - multigraph
          * - width
          * - height
+         * - ...
          */
 
         ComponentMessenger::CallbackTypes<uint>::Setter wIn = std::bind( &ImGuiComponent::setWidthIn, this, std::placeholders::_1 );
