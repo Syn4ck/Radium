@@ -37,13 +37,13 @@ namespace Ra
             // compute the required number of reductions and tell which texture will be the output
             if ( (nbResizements() % 2) == 0 )
             {
-                m_paramOut.addParameter( "",             m_outputs[TEX_PING].get() );
-                m_paramOut.addParameter( "intern_redux", m_outputs[TEX_PONG].get() );
+                m_paramOut.addParameter( "0", m_outputs[TEX_PING].get() );
+                m_paramOut.addParameter( "1", m_outputs[TEX_PONG].get() );
             }
             else
             {
-                m_paramOut.addParameter( "intern_redux", m_outputs[TEX_PING].get() );
-                m_paramOut.addParameter( "",             m_outputs[TEX_PONG].get() );
+                m_paramOut.addParameter( "1", m_outputs[TEX_PING].get() );
+                m_paramOut.addParameter( "0", m_outputs[TEX_PONG].get() );
             }
         }
 

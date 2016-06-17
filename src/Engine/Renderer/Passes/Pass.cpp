@@ -39,6 +39,14 @@ namespace Ra
             // resize vectors of textures if necessary
             m_nameIn.resize  ( m_nbin,  std::pair<std::string, paramType>("", PARAM_TEX) );
             m_nameOut.resize ( m_nbout, std::pair<std::string, paramType>("", PARAM_TEX) );
+
+            int i = 0;
+
+            // name outputs with their index
+            for (auto& p : m_nameOut)
+            {
+                p.first = std::to_string(i++);
+            }
         }
 
         Pass::~Pass() {}

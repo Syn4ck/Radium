@@ -365,7 +365,7 @@ namespace Ra
                 for (auto const& nodePass: m_passgraph)
                 {
                     nodePass->m_data->renderPass();
-                    last = nodePass->m_data->getTex("");
+                    last = nodePass->m_data->getTex("0");
                 }
             }
 

@@ -34,7 +34,7 @@ namespace Ra
 
             // generate outputs
             m_outputs.push_back( std::unique_ptr<Texture>( new Texture("output_pong", GL_TEXTURE_2D)) );
-            m_paramOut.addParameter( "", m_outputs.back().get() );
+            m_paramOut.addParameter( "0", m_outputs.back().get() );
 
             m_texIntern[TEX_PING].reset( new Texture("internal_pong", GL_TEXTURE_2D));
         }
