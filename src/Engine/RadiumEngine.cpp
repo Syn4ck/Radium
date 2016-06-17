@@ -53,6 +53,7 @@ namespace Ra
 
         void RadiumEngine::cleanup()
         {
+            m_signalManager->setOn( false );
             m_entityManager.reset();
             m_renderObjectManager.reset();
 

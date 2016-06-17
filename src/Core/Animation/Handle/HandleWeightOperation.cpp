@@ -47,13 +47,13 @@ WeightMatrix partitionOfUnity( const WeightMatrix& weights ) {
     W.reserve( weights.nonZeros() );
     Ra::Core::Vector1Array norm( weights.rows() );
     #pragma omp parallel for
-    for( uint i = 0; i < weights.rows(); ++i ) {
+    for( int i = 0; i < weights.rows(); ++i ) {
         Ra::Core::VectorN row = weights.row( i );
         norm[i] = row.lpNorm<1>();
         norm[i] = ( norm[i] == 0.0 ) ? 1.0 : norm[i];
     }
     #pragma omp parallel for
-    for( uint k = 0; k < weights.outerSize(); ++k ) {
+    for( int k = 0; k < weights.outerSize(); ++k ) {
         for( WeightMatrix::InnerIterator it( weights, k ); it; ++it ) {
             const uint   i = it.row();
             const uint   j = it.col();
@@ -100,21 +100,21 @@ void checkWeightMatrix( const WeightMatrix& matrix, const bool FAIL_ON_ASSERT, c
 
 
 bool RA_CORE_API check_NAN( const WeightMatrix& matrix, const bool FAIL_ON_ASSERT, const bool MT ) {
-    bool status = true;
+    int status = 1;
     LOG( logDEBUG ) << "Searching for nans in the matrix...";
     if( MT ) {
         #pragma omp parallel for
         for( int k = 0; k < matrix.outerSize(); ++k ) {
             for( WeightMatrix::InnerIterator it( matrix, k ); it; ++it ) {
                 const Scalar      value = it.value();
-                const bool        check = isnan( value );
+                const int check = std::isnan( value ) ? 0 : 1;
                 #pragma omp atomic
-                status &= check;
+                status &= check ;
             }
         }
-        if( !status ) {
+        if( status == 0 ) {
             if( FAIL_ON_ASSERT ) {
-                CORE_ASSERT( status, "At least an element is nan" );
+                CORE_ASSERT( false, "At least an element is nan" );
             } else {
                 LOG( logDEBUG ) << "At least an element is nan";
             }
@@ -127,33 +127,33 @@ bool RA_CORE_API check_NAN( const WeightMatrix& matrix, const bool FAIL_ON_ASSER
                 const Scalar      value = it.value();
                 const std::string text  = "Element (" + std::to_string( i ) + "," + std::to_string(j) + ") is nan.";
                 if( FAIL_ON_ASSERT ) {
-                    CORE_ASSERT( !isnan( value ), text.c_str() );
+                    CORE_ASSERT( !std::isnan( value ), text.c_str() );
                 } else {
-                    if( isnan( value ) ) {
+                    if( std::isnan( value ) ) {
                         LOG( logDEBUG ) << text;
-                        status = false;
+                        status = 0;
                     }
                 }
             }
         }
     }
-    return status;
+    return status != 0;
 }
 
 bool RA_CORE_API check_NoWeightVertex( const WeightMatrix& matrix, const bool FAIL_ON_ASSERT, const bool MT ) {
-    bool status = true;
+    int status = 1;
     LOG( logDEBUG ) << "Searching for empty rows in the matrix...";
     if( MT ) {
         #pragma omp parallel for
         for( int i = 0; i < matrix.rows(); ++i ) {
             Sparse row = matrix.row( i );
-            const bool check = ( row.nonZeros() == 0 );
+            const int check = ( row.nonZeros() > 0 ) ? 1 : 0;
             #pragma omp atomic
             status &= check;
         }
-        if( !status ) {
+        if( status == 0 ) {
             if( FAIL_ON_ASSERT ) {
-                CORE_ASSERT( status, "At least a vertex as no weights" );
+                CORE_ASSERT( false, "At least a vertex as no weights" );
             } else {
                 LOG( logDEBUG ) << "At least a vertex as no weights";
             }
@@ -166,13 +166,13 @@ bool RA_CORE_API check_NoWeightVertex( const WeightMatrix& matrix, const bool FA
                 if( FAIL_ON_ASSERT ) {
                     CORE_ASSERT( false, text.c_str() );
                 } else {
-                    status = false;
+                    status = 0;
                     LOG( logDEBUG ) << text;
                 }
             }
         }
     }
-    return status;
+    return status != 0;
 }
 
 

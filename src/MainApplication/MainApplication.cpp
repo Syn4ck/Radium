@@ -47,6 +47,7 @@ namespace Ra
         , m_viewer( nullptr )
         , m_frameTimer( new QTimer( this ) )
         , m_frameCounter( 0 )
+        , m_numFrames( 0 )
         , m_isAboutToQuit( false )
         //, m_timerData(TIMER_AVERAGE)
     {
@@ -62,13 +63,15 @@ namespace Ra
         QCommandLineOption fpsOpt(QStringList{"r", "framerate", "fps"}, "Control the application framerate, 0 to disable it (and run as fast as possible)", "60");
         QCommandLineOption pluginOpt(QStringList{"p", "plugins", "pluginsPath"}, "Set the path to the plugin dlls", "../Plugins/bin");
         QCommandLineOption fileOpt(QStringList{"f", "file", "scene"}, "Open a scene file at startup", "foo.bar");
+        QCommandLineOption numFramesOpt(QStringList{"n", "numframes"}, "Run for a fixed number of frames", "0");
         // NOTE(Charly): Add other options here
 
-        parser.addOptions({fpsOpt, pluginOpt, fileOpt});
+        parser.addOptions({fpsOpt, pluginOpt, fileOpt, numFramesOpt });
         parser.process(*this);
 
-        if (parser.isSet(fpsOpt))      m_targetFPS = parser.value(fpsOpt).toUInt();
-        if (parser.isSet(pluginOpt))   pluginsPath = parser.value(pluginOpt).toStdString();
+        if (parser.isSet(fpsOpt))       m_targetFPS = parser.value(fpsOpt).toUInt();
+        if (parser.isSet(pluginOpt))    pluginsPath = parser.value(pluginOpt).toStdString();
+        if (parser.isSet(numFramesOpt)) m_numFrames = parser.value(numFramesOpt).toUInt();
 
         // Boilerplate print.
         LOG( logINFO ) << "*** Radium Engine Main App  ***";
@@ -104,9 +107,6 @@ namespace Ra
 
         LOG(logINFO) << "Qt Version: " << qVersion();
 
-        // Handle command line arguments.
-        // TODO ( e.g fps limit ) / Keep or not timer data .
-
         // Create default format for Qt.
         QSurfaceFormat format;
         format.setVersion( 4, 4 );
@@ -135,7 +135,7 @@ namespace Ra
         // Load plugins
         if ( !loadPlugins( pluginsPath ) )
         {
-            LOG( logERROR ) << "An error occured while trying to load plugins.";
+            LOG( logERROR ) << "An error occurred while trying to load plugins.";
         }
 
         m_viewer = m_mainWindow->getViewer();
@@ -213,7 +213,7 @@ namespace Ra
         emit loadComplete();
     }
 
-    void MainApplication::framesCountForStatsChanged( int count )
+    void MainApplication::framesCountForStatsChanged( uint count )
     {
         m_frameCountBeforeUpdate = count;
     }
@@ -266,13 +266,10 @@ namespace Ra
 
         // ----------
         // 1. Gather user input and dispatch it.
-        auto keyEvents = m_mainWindow->getKeyEvents();
-        auto mouseEvents = m_mainWindow->getMouseEvents();
 
         // Get picking results from last frame and forward it to the selection.
         m_viewer->processPicking();
 
-        m_mainWindow->flushEvents();
 
         timerData.tasksStart = Core::Timer::Clock::now();
 
@@ -310,6 +307,11 @@ namespace Ra
         m_timerData.push_back( timerData );
         ++m_frameCounter;
 
+        if (m_numFrames > 0  &&  m_frameCounter > m_numFrames )
+        {
+            appNeedsToQuit();
+        }
+
         if ( m_frameCounter % m_frameCountBeforeUpdate == 0 )
         {
             emit( updateFrameStats( m_timerData ) );
@@ -345,6 +347,10 @@ namespace Ra
         for (const auto& filename : pluginsDir.entryList(QDir::Files))
 //        foreach (QString filename, pluginsDir.entryList( QDir::Files ) )
         {
+            PluginContext context;
+            context.m_engine = m_engine.get();
+            context.m_selectionManager = m_mainWindow->getSelectionManager();
+
             std::string ext = Core::StringUtils::getFileExt( filename.toStdString() );
 #if defined( OS_WINDOWS )
             std::string sysDllExt = "dll";
@@ -372,7 +378,7 @@ namespace Ra
                     if ( loadedPlugin )
                     {
                         ++pluginCpt;
-                        loadedPlugin->registerPlugin( m_engine.get() );
+                        loadedPlugin->registerPlugin( context );
                         m_mainWindow->updateUi( loadedPlugin );
                     }
                     else
