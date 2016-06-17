@@ -78,9 +78,9 @@ namespace Ra
 
 
             public:
-                std::unique_ptr<T>      m_data;    /// data stored by the node
-                std::vector<Connection> m_parents; /// parents of the node
-                std::vector<Connection> m_childs;  /// childs  of the node
+                std::unique_ptr<T>      m_data;    ///< data stored by the node
+                std::vector<Connection> m_parents; ///< parents of the node
+                std::vector<Connection> m_childs;  ///< childs  of the node
                 std::string m_name;
                 uint m_level;
                 uint m_nbIn;

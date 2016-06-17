@@ -10,12 +10,16 @@ namespace Ra
     namespace Engine
     {
 
+        /**
+         * \class Pass TODO change name
+         */
         class RA_ENGINE_API Pass
         {
         public:
             Pass(const std::string& name, uint w, uint h, uint nbIn, uint nbOut);
             virtual ~Pass() = 0;
 
+            ///
             virtual void renderPass() = 0;
             virtual void resizePass() = 0;
             virtual void resizePass( uint w, uint h ) = 0;
