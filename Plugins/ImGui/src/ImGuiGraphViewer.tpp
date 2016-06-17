@@ -185,7 +185,7 @@ void ImGui::GraphViewer<T>::NodeCreator( bool* open )
     const  unsigned int w = io.DisplaySize.x, h = io.DisplaySize.y;
 
     const  int     namesize = 32;
-    const  char*   pass[]   = {"Regular", "Ping-Pong", "Redux", "Generator"};
+    const  char*   pass[]   = {"Regular", "Blur", "Redux", "Generator"};
     const  char*   type[]   = {"Int",     "Uint",    "Scalar",
                                "Vector2", "Vector3", "Vector4",
                                "Matrix2", "Matrix3", "Matrix4"};
@@ -220,9 +220,9 @@ void ImGui::GraphViewer<T>::NodeCreator( bool* open )
         {
             p = new Ra::Engine::PassRegular(name, w, h, nbParameters[0], nbParameters[1], shader);
         }
-        else if (selectedPass == 1) // ping pong
+        else if (selectedPass == 1) // blur
         {
-            p = new Ra::Engine::PassPingPong(name, w, h, nbParameters[0], nbParameters[1], 1, shader);
+            p = new Ra::Engine::PassBlur(name, w, h, 1);
         }
         else if (selectedPass == 2) // redux
         {
