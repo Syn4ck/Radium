@@ -185,7 +185,7 @@ void ImGui::GraphViewer<T>::NodeCreator( bool* open )
     const  unsigned int w = io.DisplaySize.x, h = io.DisplaySize.y;
 
     const  int     namesize = 32;
-    const  char*   pass[]   = {"Regular", "Blur", "Redux", "Generator"};
+    const  char*   pass[]   = {"Regular", "Blur", "PingPong", "Redux", "Generator"};
     const  char*   type[]   = {"Int",     "Uint",    "Scalar",
                                "Vector2", "Vector3", "Vector4",
                                "Matrix2", "Matrix3", "Matrix4"};
@@ -196,6 +196,9 @@ void ImGui::GraphViewer<T>::NodeCreator( bool* open )
     static int  nbParameters[2] = {0,0};  // in/out
     static char name[namesize], shader[namesize];
 
+    static int   loops = 1;
+    static float ratio = 0.5f;
+
     SetNextWindowPos(GetMousePos(), ImGuiSetCond_FirstUseEver);
 
     // create a (beautiful) window
@@ -205,14 +208,44 @@ void ImGui::GraphViewer<T>::NodeCreator( bool* open )
         return;
     }
 
+
     // widgets !!
+    Combo(" : pass", &selectedPass, pass, 5);
     InputText(" :  name", name, namesize);
-    InputText(" :  shader", shader, namesize);
-    InputInt2(" : [in/out]", nbParameters);
 
-    Combo(" : pass", &selectedPass, pass, 4);
-    Combo(" : type", &selectedType, type, 9);
+    switch (selectedPass)
+    {
+    case 0: // regular
+        Separator();
+        Text("Regular");
+        InputText(" : shader", shader, namesize);
+        InputInt2(" : in/out", nbParameters);
+        break;
+    case 1: // blur
+        Separator();
+        Text("Blur");
+        SliderInt(" : amount", &loops, 1, 1024);
+        break;
+    case 2: // ping-pong
+        Separator();
+        Text("Ping-Pong");
+        SliderInt(" : loops", &loops, 1, 1024);
+        InputText(" : shader", shader, namesize);
+        InputInt2(" : in/out", nbParameters);
+        break;
+    case 3: // redux
+        Separator();
+        Text("Redux");
+        SliderFloat(" : size factor", &ratio, 0.f, 1.f);
+        InputText(" : shader", shader, namesize);
+        InputInt2(" : in/out", nbParameters);
+        break;
+    default:
+        Combo(" : type", &selectedType, type, 9);
+        break;
+    }
 
+    // creation part
     Button("Create");
     if (IsItemClicked())
     {
@@ -222,11 +255,15 @@ void ImGui::GraphViewer<T>::NodeCreator( bool* open )
         }
         else if (selectedPass == 1) // blur
         {
-            p = new Ra::Engine::PassBlur(name, w, h, 1);
+            p = new Ra::Engine::PassBlur(name, w, h, loops);
         }
-        else if (selectedPass == 2) // redux
+        else if (selectedPass == 2) // ping-pong
         {
-            p = new Ra::Engine::PassRedux(name, w, h, nbParameters[0], nbParameters[1], shader);
+            p = new Ra::Engine::PassPingPong(name, w, h, nbParameters[0], nbParameters[1], loops, shader);
+        }
+        else if (selectedPass == 3) // redux
+        {
+            p = new Ra::Engine::PassRedux(name, w, h, nbParameters[0], nbParameters[1], shader, ratio);
         }
         else // generator
         {
