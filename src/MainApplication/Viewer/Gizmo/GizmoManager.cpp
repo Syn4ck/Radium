@@ -34,6 +34,10 @@ namespace Ra
             if (canEdit())
             {
                 Core::Transform worldTransform = getWorldTransform();
+                std::cout << "SpawnGizmo: " << std::endl;
+                std::cout << worldTransform.matrix() << std::endl << std::endl;
+                std::cout << m_transform.matrix() << std::endl << std::endl;
+                std::cout << (worldTransform * m_transform).matrix() << std::endl;
                 switch (m_currentGizmoType)
                 {
                     case NONE:

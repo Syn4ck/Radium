@@ -82,8 +82,16 @@ namespace Ra
 
             for (auto roIdx : m_renderObjects)
             {
-                Engine::RadiumEngine::getInstance()->getRenderObjectManager()->getRenderObject(
-                        roIdx)->setLocalTransform( m_worldTo * displayTransform);
+                Ra::Core::Transform transform = m_worldTo * displayTransform;
+                Ra::Core::Matrix3 rotation = transform.linear();
+//                Ra::Core::Vector3 scaling = Ra::Core::Vector3(rotation.col(0).normalize(), rotation.col(1).norm(), rotation.col(2).norm());
+                rotation.normalize();
+                Ra::Core::Transform worldNoScaling;
+                worldNoScaling.linear() = rotation;
+                worldNoScaling.translate(transform.translation());
+                std::cout << "WorldNoScaling" << std::endl << worldNoScaling.matrix() << std::endl;
+                
+                Engine::RadiumEngine::getInstance()->getRenderObjectManager()->getRenderObject(roIdx)->setLocalTransform(worldNoScaling);
             }
         }
 
