@@ -73,8 +73,11 @@ namespace Ra
 
             for (auto roIdx : m_renderObjects)
             {
-                Engine::RadiumEngine::getInstance()->getRenderObjectManager()->getRenderObject(
-                        roIdx)->setLocalTransform(m_worldTo * displayTransform);
+                Ra::Core::Transform worldNoScaling = m_worldTo * displayTransform;
+                for (int i = 0; i < 3; i++)
+                    worldNoScaling.matrix().col(i).normalize();
+                
+                Engine::RadiumEngine::getInstance()->getRenderObjectManager()->getRenderObject(roIdx)->setLocalTransform(worldNoScaling);
             }
         }
 
