@@ -11,15 +11,28 @@ namespace Ra
     namespace Engine
     {
 
+        /**
+         * \class PassRegular
+         *
+         * @brief The Regular Pass that will apply its shader once.
+         *
+         * Basic post-processing pass who applies its shader one-shot
+         * and output directly the textures associated with its FBO.
+         *
+         */
+
         class RA_ENGINE_API PassRegular : public Pass
         {
         public:
             PassRegular(const std::string& name, uint w, uint h, uint nTexIn, uint nTexOut, std::string shader);
             ~PassRegular();
+
+            virtual void init();
+
             virtual void renderPass();
+
             virtual void resizePass(uint w, uint h);
             virtual void resizePass();
-            virtual void init();
 
         public:
             std::string      m_shadername;

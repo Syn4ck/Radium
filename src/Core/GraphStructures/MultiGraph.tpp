@@ -181,26 +181,6 @@ bool MultiGraph<T>::Node::operator<(const MultiGraph<T>::Node& other) const
 
 
 template <typename T>
-void MultiGraph<T>::Node::print() const
-{
-    // print parents
-    std::cout << "   ";
-    for (Connection const& c : m_parents)
-    {
-        std::cout << c.m_source->m_name << "(" << c.m_slot << "," << c.m_local << ") -> ";
-    }
-    std::cout << std::endl << m_name << "(level. " << m_level << ")" << std::endl << "   ";
-    // print children
-    for (Connection const& c : m_childs)
-    {
-        std::cout << " -> " << c.m_source->m_name << " (" << c.m_slot << "," << c.m_local << ")";
-    }
-    std::cout << std::endl;
-}
-
-
-
-template <typename T>
 typename MultiGraph<T>::Node* MultiGraph<T>::addNode(T* data)
 {
     Node* newNode = new MultiGraph<T>::Node(this, data->getName(), data, data->getNbIn(), data->getNbOut());
@@ -323,18 +303,6 @@ void MultiGraph<T>::levelize(bool sortByLevel)
         };
 
         std::sort(m_graph.begin(), m_graph.end(), comp);
-    }
-}
-
-
-
-template <typename T>
-void MultiGraph<T>::print() const
-{
-    std::cout << std::endl << "DEBUG - printing graph -" << std::endl;
-    for (auto const& node : m_graph)
-    {
-        node->print();
     }
 }
 

@@ -17,6 +17,19 @@ namespace Ra
     namespace Engine
     {
 
+        /**
+         * \class
+         *
+         * @brief The PassPingPong class applying a shader n times back and
+         * forth. Behavior defined by m_loop.
+         *
+         * The PingPong pass will apply n times the shader where n is m_loop,
+         * giving 1 + 2n draw calls.
+         *
+         * The texture given in output will always the pong side, named '0'.
+         *
+         */
+
         class RA_ENGINE_API PassPingPong : public Pass
         {
         public:
@@ -24,10 +37,12 @@ namespace Ra
                          const std::string& shaderPingPong);
             virtual ~PassPingPong();
 
+            virtual void init();
+
             virtual void renderPass();
+
             virtual void resizePass(uint w, uint h);
             virtual void resizePass();
-            virtual void init();
 
         protected:
             enum TextureInternalTags
@@ -42,13 +57,16 @@ namespace Ra
                 TEX_OUT_COUNT,
             };
 
+            /// The number of ping-pongs.
             uint m_loop;
 
             std::unique_ptr<FBO> m_fbo;
+
+            /// Storage for internal textures.
             std::array<std::shared_ptr<Texture>,TEX_INTERNAL_COUNT> m_texIntern;
 
+            /// Define an alias to m_paramIn.
             RenderParameters& m_paramPing;
-            RenderParameters  m_paramPong;
 
             const ShaderProgram* m_shader;
             std::string m_shadername;

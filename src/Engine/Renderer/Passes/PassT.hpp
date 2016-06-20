@@ -11,24 +11,34 @@ namespace Ra
     namespace Engine
     {
 
+        /**
+         * \class PassT<T>
+         *
+         * @brief The PassT class generates a T value on output.
+         *
+         */
+
         template <typename T>
         class PassT : public Pass
         {
         public:
             PassT(const std::string& name, const T& val, paramType t);
             ~PassT();
+
+            virtual void init();
+
             virtual void renderPass() override;
+
             virtual void resizePass(uint w, uint h) {}
             virtual void resizePass() {}
-            virtual void init();
 
             virtual void* getDataPtr(paramType *t) override;
 
             virtual paramType generates() const override;
 
         public:
-            T         m_value;
-            paramType m_type;
+            T         m_value;  ///< value to be output
+            paramType m_type;  ///< type of this value
         };
 
         template <typename T>

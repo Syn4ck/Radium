@@ -9,6 +9,19 @@ namespace Ra
     namespace Engine
     {
 
+        /**
+         * \class PassBlur
+         *
+         * @brief The PassBlur class is a specialization of PassPingPong
+         * to achieve blur.
+         *
+         * This pass, <b>not fully working</b>, applies the X blur on
+         * ping->pong and the Y blur on pong->ping.
+         *
+         * The shader applied is "Blur.frag.glsl".
+         *
+         */
+
         class RA_ENGINE_API PassBlur : public PassPingPong
         {
         public:

@@ -17,6 +17,20 @@ namespace Ra
     namespace Engine
     {
 
+        /**
+         * \class PassRedux
+         *
+         * @brief The PassRedux class iteratively applies the shader on a
+         * reduction of the precedent texture.
+         *
+         * The Redux Pass provides the mechanism to draw a smaller-and-smaller
+         * texture. The resize divisor is m_ratio which default to 2.
+         *
+         * The pass computes the number of required steps before size is 1, and
+         * outputs the good textures at '0' and the other at '1'.
+         *
+         */
+
         class RA_ENGINE_API PassRedux : public Pass
         {
         public:
@@ -24,12 +38,15 @@ namespace Ra
                       const std::string& shader, uint ratio = 2);
             virtual ~PassRedux();
 
-            virtual void renderPass();
-            virtual void resizePass(uint w, uint h);
-            virtual void resizePass();
             virtual void init();
 
+            virtual void renderPass();
+
+            virtual void resizePass(uint w, uint h);
+            virtual void resizePass();
+
         protected:
+            /// Compute the number of steps required to get to size 1.
             uint nbResizements() const;
 
         private:
@@ -40,22 +57,20 @@ namespace Ra
                 TEX_OUT_COUNT,
             };
 
-            // internal fbo
+            /// internal fbo.
             std::unique_ptr<FBO> m_fbo;
 
-            // external fbo and attachment offset to know where to write back
-            FBO* m_parentFbo;
-            uint m_parentAttachOffset;
-
-            // parameters for redux to know what to do
+            /// Parameters for redux to know what to do.
             std::string          m_shadername;
             const ShaderProgram* m_shader;
 
-            uint m_ratio;       // the ratio by which the size is divided each iteration
+            uint m_ratio;    ///< The ratio by which the size is divided each iteration.
 
-            // ping-pong specific variable
-            uint m_pingpong;
+            /// Size of the drawn textures.
             uint m_pingPongSize;
+
+            /// Be able to know where to pick textures in the FBO.
+            uint m_pingpong;
         };
 
     }

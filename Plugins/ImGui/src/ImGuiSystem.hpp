@@ -8,16 +8,26 @@
 
 namespace ImGuiPlugin
 {
+
+    /**
+     *
+     * \class ImGuiSystem
+     *
+     * @brief The ImGuiSystem class
+     *
+     */
+
     class IMGUI_PLUGIN_API ImGuiSystem :  public Ra::Engine::System
     {
     public:
 
-        /// @brief Create a new im-gui system
+        /// Create a new ImGui system.
         ImGuiSystem();
 
-        /// @brief Task generator that generate nothing
+        /// Task generator that asks <b>no</b> new thread
         virtual void generateTasks( Ra::Core::TaskQueue* taskQueue,
-                                    const Ra::Engine::FrameInfo& frameInfo ) override;
+                                    const Ra::Engine::FrameInfo& frameInfo
+                                  ) override;
 
     };
 

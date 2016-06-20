@@ -17,51 +17,70 @@
 namespace ImGuiPlugin
 {
 
+    /**
+     *
+     * \class ImGuiComponent
+     *
+     * @brief The ImGuiComponent class communicates with others plugins or
+     * with the Radium.
+     *
+     * Will try to get width, height and post-process graph from the renderer.
+     *
+     */
+
+
     class IMGUI_PLUGIN_API ImGuiComponent : public Ra::Engine::Component
     {
     public:
-        /// @brief handle the initialization process of ImGui
+        /// Handle the initialization process of ImGui.
         ImGuiComponent(const std::string& name) : Component(name), m_contentName(name)
         {
         }
 
-        /// @brief handle the destruction of ImGui
+        /// Handle the destruction of ImGui.
         virtual ~ImGuiComponent()
         {
             ImGuiGL3::shutdown();
         }
 
-        /// @brief instantiate the RenderObject on which we will draw imgui
+        /// Instantiate the RenderObject on which we will draw imgui.
         virtual void initialize() override;
 
-        /// @brief get the renderer's data from the engine
+        /// Get the renderer's data from the engine.
         void setupIO( const std::string& id );
 
-        /// @brief State of displaying pass editor
+        /// Display or not pass editor.
         void setPassesEditor( bool state );
 
-        /// @brief State of displaying demo code
+        /// Display or not demo code.
         void setDemoUI(bool state);
 
-        //Ra::Core::MultiGraph<Ra::Engine::Pass>& getPassGraph();
+        ///{@
+        /// Functions used by the ComponentMessenger.
         void setWidthIn( const uint* w );
         void setHeightIn( const uint* h );
+        ///@}
 
+        /// Fetch width and height from the Renderer
         void updateSize(const std::string& id);
 
     public:
         std::shared_ptr<Ra::Engine::Mesh> m_quadMesh;
 
-        // renderer data
+        ///{@
+        /// Renderer data
         uint m_width;
         uint m_height;
+        ///@}
 
         Ra::Engine::RadiumEngine* m_engine;
 
     private:
+        /// Prefix to fetch data
         std::string m_contentName;
-        std::unique_ptr<ImGuiRenderObject> m_ro;
 
+        /// ImGuiRenderObject
+        std::unique_ptr<ImGuiRenderObject> m_ro;
     };
 
 } // namespace ImGuiPlugin

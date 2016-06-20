@@ -14,7 +14,6 @@
 
 namespace ImGuiPlugin {
 
-    /// @brief registration to the plugin system
     void ImGuiPlugin::registerPlugin( Ra::Engine::RadiumEngine *engine )
     {
         m_system    = new ImGuiSystem();
@@ -29,15 +28,12 @@ namespace ImGuiPlugin {
         m_system->registerComponent( ent, m_component );
     }
 
-    /// @brief tells wether the plugin add a tab or not and set its name
     bool ImGuiPlugin::doAddWidget( QString &name )
     {
         name = "On-display UI";
         return true;
     }
 
-    /// @brief create the widget with this magnificient checkbox...
-    /// @note on the long run, this could host a QList with multiple ImGui widgets
     QWidget* ImGuiPlugin::getWidget()
     {
         QWidget* widget = new QWidget();

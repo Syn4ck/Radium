@@ -16,6 +16,16 @@
 namespace ImGuiPlugin
 {
 
+    /**
+     * \class ImGuiRenderObject
+     *
+     * @brief The ImGuiRenderObject class exports a render object with its
+     * own render() method to render ImGui interface.
+     *
+     * blabla
+     *
+     */
+
     class IMGUI_PLUGIN_API ImGuiRenderObject : public Ra::Engine::RenderObject
     {
     public:
@@ -25,25 +35,31 @@ namespace ImGuiPlugin
 
         virtual ~ImGuiRenderObject() {}
 
+        /// Initialize the viewer with the graph.
+        /// @warning The graph must have been fetched prior to this.
         void init();
 
-        /// @brief override method render of renderObject to get a custom behavior at rendering
+        /// Override method render of RenderObject to get a custom behavior at rendering.
         virtual void render(const Ra::Engine::RenderParameters& lightParams,
                             Ra::Core::Matrix4 viewMatrix,
                             Ra::Core::Matrix4 projMatrix,
                             const Ra::Engine::ShaderProgram* altShader = nullptr) override;
 
     public:
-        // component for the callbacks
+        /// Parent component for the callbacks.
         ImGuiComponent* m_imguicomp;
 
-        // node viewer
+        /// Node graph
         Ra::Core::MultiGraph<Ra::Engine::Pass>& m_passgraph;
+
+        /// Node viewer
         ImGui::GraphViewer<Ra::Engine::Pass>    m_viewgraph;
 
-        // statuses of imgui
+        ///{@
+        /// Display status of ImGui windows
         bool m_displayPassGraph;
         bool m_demoUI;
+        ///@}
 
         Ra::Engine::RadiumEngine* m_engine;
     };
