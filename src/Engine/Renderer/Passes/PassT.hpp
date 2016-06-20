@@ -27,14 +27,16 @@ namespace Ra
 
             virtual void init();
 
-            virtual void renderPass() override;
-
-            virtual void resizePass(uint w, uint h) {}
-            virtual void resizePass() {}
+            virtual void renderPass( const RenderData& renderData ) override;
 
             virtual void* getDataPtr(paramType *t) override;
 
             virtual paramType generates() const override;
+
+            virtual void resizePass(uint w, uint h) {}
+
+        protected:
+            virtual void resizePass() {}
 
         public:
             T         m_value;  ///< value to be output
@@ -66,7 +68,7 @@ namespace Ra
         }
 
         template <typename T>
-        void PassT<T>::renderPass()
+        void PassT<T>::renderPass( const RenderData& renderData )
         {
             m_paramOut.updateParameter("", m_value);
         }

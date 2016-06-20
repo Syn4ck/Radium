@@ -29,9 +29,11 @@ namespace Ra
 
             virtual void init();
 
-            virtual void renderPass();
+            virtual void renderPass( const RenderData& renderData );
 
             virtual void resizePass(uint w, uint h);
+
+        protected:
             virtual void resizePass();
 
         public:

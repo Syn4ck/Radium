@@ -5,7 +5,7 @@ namespace Ra
 {
     namespace Engine
     {
-        void PassBlur::renderPass()
+        void PassBlur::renderPass( const RenderData& renderData )
         {
             m_fbo->useAsTarget(m_width, m_height);
 

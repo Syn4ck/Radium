@@ -196,7 +196,7 @@ void ImGui::GraphViewer<T>::NodeCreator( bool* open )
     static char name[namesize], shader[namesize];
 
     static int   loops = 1;
-    static float ratio = 0.5f;
+    static float ratio = 2.f;
 
     SetNextWindowPos(GetMousePos(), ImGuiSetCond_FirstUseEver);
 
@@ -231,7 +231,7 @@ void ImGui::GraphViewer<T>::NodeCreator( bool* open )
         break;
     case 3: // redux
         Text("Redux");
-        SliderFloat(" : size factor", &ratio, 0.f, 1.f);
+        SliderFloat(" : size factor", &ratio, 1.f, 16.f);
         InputText(" : shader", shader, namesize);
         InputInt2(" : in/out", nbParameters);
         break;

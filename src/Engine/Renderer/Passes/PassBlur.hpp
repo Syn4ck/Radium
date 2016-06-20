@@ -32,7 +32,7 @@ namespace Ra
 
             virtual ~PassBlur() {}
 
-            virtual void renderPass() override;
+            virtual void renderPass( const RenderData& renderData ) override;
         };
 
     }

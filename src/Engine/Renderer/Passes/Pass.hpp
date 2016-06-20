@@ -39,15 +39,11 @@ namespace Ra
 
             virtual void init() = 0;
 
-            virtual void renderPass() = 0;
+            virtual void renderPass( const RenderData& renderData ) = 0;
 
             /// Function to be called by the renderer when resizing.
             /// Basically what really modify m_width and m_height.
             virtual void resizePass( uint w, uint h ) = 0;
-
-            /// Will reinitialize every textures and reattach to fbo.
-            /// Called by resizePass(uint w, uint h).
-            virtual void resizePass() = 0;
 
             ///{@
             /// Set of functions used to set RenderParameter value to a shader.
@@ -122,6 +118,12 @@ namespace Ra
 
             /// Function pointer to get a parameter name.
             static const std::string& getParamNameOut( Pass* p, uint slot );
+
+        protected:
+            /// Will reinitialize every textures and reattach to fbo.
+            /// Called by resizePass(uint w, uint h).
+            virtual void resizePass() = 0;
+
 
 
         public:

@@ -79,7 +79,7 @@ namespace Ra
             m_fbo->unbind(true); // TODO(Hugo) remove when fbo bound status merged ?*/
         }
 
-        void PassRegular::renderPass()
+        void PassRegular::renderPass( const RenderData& renderData )
         {
             m_fbo->useAsTarget(m_width, m_height);
 

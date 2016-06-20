@@ -70,7 +70,7 @@ namespace Ra
             GL_ASSERT( glReadBuffer( GL_BACK ) );
         }
 
-        void PassPingPong::renderPass()
+        void PassPingPong::renderPass( const RenderData& renderData )
         {
             m_fbo->useAsTarget(m_width, m_height);
 

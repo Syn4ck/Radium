@@ -40,12 +40,13 @@ namespace Ra
 
             virtual void init();
 
-            virtual void renderPass();
+            virtual void renderPass( const RenderData& renderData );
 
             virtual void resizePass(uint w, uint h);
-            virtual void resizePass();
 
         protected:
+            virtual void resizePass();
+
             /// Compute the number of steps required to get to size 1.
             uint nbResizements() const;
 

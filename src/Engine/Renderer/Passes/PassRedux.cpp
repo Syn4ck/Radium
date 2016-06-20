@@ -74,21 +74,9 @@ namespace Ra
 
             GL_ASSERT( glDrawBuffer( GL_BACK ) );
             GL_ASSERT( glReadBuffer( GL_BACK ) );
-
-//            // compute the required number of reductions and tell which texture will be the output
-//            if ( (nbResizements() % 2) == 0 )
-//            {
-//                m_paramOut.addParameter( "",             m_outputs[TEX_PING].get() );
-//                m_paramOut.addParameter( "intern_redux", m_outputs[TEX_PONG].get() );
-//            }
-//            else
-//            {
-//                m_paramOut.addParameter( "intern_redux", m_outputs[TEX_PING].get() );
-//                m_paramOut.addParameter( "",             m_outputs[TEX_PONG].get() );
-//            }
         }
 
-        void PassRedux::renderPass()
+        void PassRedux::renderPass( const RenderData& renderData )
         {
             // locally load the drawscreen shader
             ShaderProgramManager* shaderMgr = ShaderProgramManager::getInstance();

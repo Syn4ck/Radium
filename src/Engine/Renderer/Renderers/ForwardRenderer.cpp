@@ -364,7 +364,7 @@ namespace Ra
                 // render everything from the graph
                 for (auto const& nodePass: m_passgraph)
                 {
-                    nodePass->m_data->renderPass();
+                    nodePass->m_data->renderPass( renderData );
                     last = nodePass->m_data->getTex("0");
                 }
             }
