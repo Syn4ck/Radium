@@ -1,4 +1,4 @@
-#include <MainApplication/Viewer/Viewer.hpp>
+#include <GuiBase/Viewer/Viewer.hpp>
 
 #include <iostream>
 
@@ -9,7 +9,6 @@
 #include <Core/String/StringUtils.hpp>
 #include <Core/Log/Log.hpp>
 #include <Core/Math/ColorPresets.hpp>
-#include <Core/Containers/MakeShared.hpp>
 
 #include <Engine/Renderer/OpenGL/OpenGL.hpp>
 #include <Engine/Component/Component.hpp>
@@ -19,13 +18,16 @@
 #include <Engine/Managers/SystemDisplay/SystemDisplay.hpp>
 #include <Engine/Renderer/Renderers/ForwardRenderer.hpp>
 
-#include <MainApplication/Viewer/TrackballCamera.hpp>
-#include <MainApplication/Viewer/Gizmo/GizmoManager.hpp>
-#include <MainApplication/Gui/MainWindow.hpp>
-#include <MainApplication/MainApplication.hpp>
-#include <MainApplication/Utils/Keyboard.hpp>
+#include <GuiBase/Viewer/TrackballCamera.hpp>
+#include <GuiBase/Viewer/Gizmo/GizmoManager.hpp>
+#include <GuiBase/Utils/Keyboard.hpp>
 
+/*
+#include <MainApplication/MainApplication.hpp>
+#include <MainApplication/Gui/MainWindow.hpp>
+*/
 /// Helper functions
+/*
 namespace
 {
     class RenderThread : public QThread, protected QOpenGLFunctions
@@ -74,8 +76,8 @@ namespace
         Ra::Engine::Renderer* m_renderer;
         bool isInit;
     };
-
 }
+*/
 
 namespace Ra
 {
@@ -157,9 +159,8 @@ namespace Ra
         m_renderThread = new RenderThread( this, m_renderer.get() );
 #endif
         // FIXME (Mathias) : according to modern C++ guidelines (Stroustrup), prefer the following
-        // NOTE(Charly) : Indeed, but on MSVC std::make_shared does not guarantee alignement, hence making Eigen crash. 
-        //                We introduced Ra::Core::make_shared later and I still have to change all this calls.
-        auto light = Ra::Core::make_shared<Engine::DirectionalLight>();
+        // auto light = std::make_shared<Engine::DirectionalLight>();
+        auto light = std::shared_ptr<Engine::DirectionalLight>(new Engine::DirectionalLight);
 
         for ( auto& renderer : m_renderers )
         {
@@ -231,7 +232,7 @@ namespace Ra
                 }
 #endif
                 if ( isKeyPressed( Key_Space ) )
-                {
+                {/*
                     LOG( logINFO ) << "Raycast query launched";
                     Core::Ray r = m_camera->getCamera()->getRayFromScreen(Core::Vector2(event->x(), event->y()));
                     RA_DISPLAY_POINT(r.origin(), Core::Colors::Cyan(), 0.1f);
@@ -240,7 +241,7 @@ namespace Ra
                     for (auto e : ents)
                     {
                         e->rayCastQuery(r);
-                    }
+                    }*/
                 }
                 else
                 {
@@ -429,11 +430,6 @@ namespace Ra
     void Gui::Viewer::enablePostProcess(int enabled)
     {
         m_currentRenderer->enablePostProcess(enabled);
-    }
-
-    void Gui::Viewer::enableDebugDraw(int enabled)
-    {
-        m_currentRenderer->enableDebugDraw(enabled);
     }
 
 } // namespace Ra
