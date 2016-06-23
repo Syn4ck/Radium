@@ -10,6 +10,7 @@
 #include <Engine/Assets/AssimpGeometryDataLoader.hpp>
 #include <Engine/Assets/AssimpHandleDataLoader.hpp>
 #include <Engine/Assets/AssimpAnimationDataLoader.hpp>
+#include <Engine/Assets/AssimpWrapper.hpp>
 
 namespace Ra {
 namespace Asset {
@@ -84,6 +85,32 @@ void FileData::loadFile( const bool FORCE_RELOAD ) {
 
     AssimpAnimationDataLoader animationLoader( m_verbose );
     animationLoader.loadData( scene, m_animationData );
+    
+//    int meshCount = scene->mNumMeshes;
+//    for (int i = 0; i < meshCount; i++)
+//    {
+//        std::string objectName = getObjectName(scene, i);
+//        m_geometryData[i]->setName(objectName);
+//    }
+    
+//    std::cout << "Animations: " << m_animationData.size() << std::endl;
+//    for (int i = 0; i < m_animationData.size(); i++)
+//    {
+//        std::cout << "Animation #" << i << " " << m_animationData[i]->getName() << " : " << m_animationData[i]->getFramesSize() << std::endl; 
+//    }
+    
+//    std::cout << "Skeletons: " << m_handleData.size() << std::endl;
+//    for (int i = 0; i < m_handleData.size(); i++)
+//    {
+//        std::cout << "Skeleton #" << i << " " << m_handleData[i]->getName() << std::endl;
+//        m_handleData[i]->
+//    }
+    
+//    std::cout << "Meshes: " << m_geometryData.size() << std::endl;
+//    for (int i = 0; i < m_geometryData.size(); i++)
+//    {
+//        std::cout << "Mesh #" << i << " " << m_geometryData[i]->getName() << std::endl; 
+//    }
 
     m_loadingTime = ( std::clock() - startTime ) / Scalar( CLOCKS_PER_SEC );
 
@@ -95,7 +122,30 @@ void FileData::loadFile( const bool FORCE_RELOAD ) {
     m_processed = true;
 }
 
-
+std::string FileData::getObjectName(const aiScene* scene, int i)
+{
+    std::vector<aiNode*> nodesToVisit;
+    nodesToVisit.push_back(scene->mRootNode);
+    
+    while (nodesToVisit.size() > 0)
+    {
+        aiNode* currentNode = nodesToVisit.back();
+        nodesToVisit.pop_back();
+        
+        for (int j = 0; j < currentNode->mNumMeshes; j++)
+        {
+            if (currentNode->mMeshes[j] == i)
+            {
+                return assimpToCore(currentNode->mName);
+            }
+        }
+        
+        for (int j = 0; j < currentNode->mNumChildren; j++)
+            nodesToVisit.push_back(currentNode->mChildren[j]);
+    }
+    
+    return "NameNotFound";
+}
 
 } // namespace Asset
 } // namespace Ra

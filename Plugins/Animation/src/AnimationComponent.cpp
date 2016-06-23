@@ -155,12 +155,18 @@ namespace AnimationPlugin
         if( data.empty() ) return;
         std::map< uint, uint > table;
         std::set< Ra::Asset::Time > keyTime;
-
-        for( uint n = 0; n < data.size(); ++n ) {
+        
+        std::cout << "Animation component " << getName() << " receives " << data.size() << " animations." << std::endl;
+        for( uint n = 0; n < data.size(); ++n )
+        {
             auto handleAnim = data[n]->getFrames();
-            for( uint i = 0; i < m_skel.size(); ++i ) {
-                for( uint j = 0; j < handleAnim.size(); ++j ) {
-                    if( m_skel.getLabel( i ) == handleAnim[j].m_name ) {
+            std::cout << "Anim: #" << n << " " << data[n]->getName() << std::endl;
+            for( uint i = 0; i < m_skel.size(); ++i )
+            {
+                for( uint j = 0; j < handleAnim.size(); ++j )
+                {
+                    if (m_skel.getLabel( i ) == handleAnim[j].m_name)
+                    {
                         table[j] = i;
                         auto set = handleAnim[j].m_anim.timeSchedule();
                         keyTime.insert( set.begin(), set.end() );

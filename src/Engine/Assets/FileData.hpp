@@ -6,6 +6,7 @@
 #include <string>
 #include <vector>
 #include <memory>
+#include <assimp/scene.h>
 
 namespace Ra {
 namespace Asset {
@@ -61,6 +62,8 @@ public:
     int getGeometryDataSize() { return m_geometryData.size(); }
 
 protected:
+    std::string getObjectName(const aiScene* scene, int i);
+    
     /// VARIABLE
     std::string                                     m_filename;
     Scalar                                          m_loadingTime;

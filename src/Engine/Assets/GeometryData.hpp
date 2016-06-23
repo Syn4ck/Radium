@@ -126,9 +126,9 @@ public:
     /// DEBUG
     inline void displayInfo() const;
 
+    inline void setName( const std::string& name );
 protected:
     /// NAME
-    inline void setName( const std::string& name );
 
     /// TYPE
     inline void setType( const GeometryType& type );

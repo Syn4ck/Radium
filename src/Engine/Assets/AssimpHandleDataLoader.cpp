@@ -72,9 +72,11 @@ uint AssimpHandleDataLoader::sceneHandleSize( const aiScene* scene ) const {
 void AssimpHandleDataLoader::loadHandleData( const aiScene* scene, std::vector< std::unique_ptr< HandleData > >& data ) const {
     const uint meshSize = scene->mNumMeshes;
     std::map< uint, uint > indexTable;
-    for( uint n = 0; n < meshSize; ++n ) {
+    for ( uint n = 0; n < meshSize; ++n )
+    {
         aiMesh* mesh = scene->mMeshes[n];
-        if( mesh->HasBones() ) {
+        if ( mesh->HasBones() )
+        {
             HandleData* handle = new HandleData();
             fetchName( *mesh, *handle );
             fetchType( *mesh, *handle );
@@ -83,7 +85,8 @@ void AssimpHandleDataLoader::loadHandleData( const aiScene* scene, std::vector< 
             fetchVertexSize( *handle );
 
             // Remove scale from transform.
-            for( auto& component : handle->m_component ) {
+            for( auto& component : handle->m_component )
+            {
                 Core::Transform& frame = component.m_frame;
                 Core::Vector3 t = frame.translation();
                 Core::Matrix3 R = frame.rotation();
@@ -94,7 +97,8 @@ void AssimpHandleDataLoader::loadHandleData( const aiScene* scene, std::vector< 
 
             data.push_back( std::unique_ptr< HandleData >( handle ) );
             indexTable[n] = data.size() - 1;
-            if( m_verbose ) {
+            if ( m_verbose )
+            {
                 handle->displayInfo();
             }
         }

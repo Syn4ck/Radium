@@ -44,7 +44,7 @@ protected:
     /// LOADING
     void loadGeometryData( const aiScene* scene, std::vector< std::unique_ptr< GeometryData > >& data );
 
-    void loadMeshData( const aiMesh& mesh, GeometryData& data );
+    void loadMeshData(const aiMesh& mesh, GeometryData& data );
 
     void loadMeshFrame( const aiNode*                                   node,
                         const Core::Transform&                          parentFrame,
