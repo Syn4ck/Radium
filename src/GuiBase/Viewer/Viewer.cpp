@@ -209,7 +209,20 @@ namespace Ra
         m_camera->resizeViewport( width, height );
         m_currentRenderer->resize( width, height );
     }
+/*
+    void Gui::Viewer::paintGL()
+    {
+        makeCurrent();
+        std::cout << "hello" << std::endl;
+        Engine::RenderData data;
+        data.dt = m_dt;
+        data.projMatrix = m_camera->getProjMatrix();
+        data.viewMatrix = m_camera->getViewMatrix();
 
+        m_currentRenderer->render( data );
+        doneCurrent();
+    }
+*/
     void Gui::Viewer::mousePressEvent( QMouseEvent* event )
     {
         switch ( event->button() )

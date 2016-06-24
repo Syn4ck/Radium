@@ -114,6 +114,9 @@ namespace Ra
 
             std::vector<std::string> getRenderersName() const;
 
+        //protected:
+            //virtual void paintGL() override;
+
         signals:
             void rendererReady();
             void leftClickPicking( int id );
@@ -159,6 +162,8 @@ namespace Ra
             virtual void mouseMoveEvent( QMouseEvent* event ) override;
             virtual void wheelEvent( QWheelEvent* event ) override;
 
+        public:
+            Scalar m_dt;
 
         private:
             /// Owning pointer to the renderer.
