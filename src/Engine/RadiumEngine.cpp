@@ -124,10 +124,14 @@ namespace Ra
                     comp->initialize();
                 }
                 
-                // Re-center the entities
-                
                 Asset::GeometryData* gData = fileData.getGeometryData()[0];
-                entity->setTransform(gData->getFrame());
+                Ra::Core::Transform rootTransform = gData->getFrame();
+                for (int i = 0; i < 3; i++)
+                    rootTransform.matrix().col(i).normalize();
+                
+                entity->setTransform(rootTransform);
+                
+                std::cout << "EntityMatrix: " << std::endl << entity->getTransformAsMatrix() << std::endl;
             }
 
             return true;

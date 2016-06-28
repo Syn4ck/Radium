@@ -138,11 +138,11 @@ namespace AnimationPlugin
 
         createWeightMatrix( data, indexTable, duplicateTable );
         
-        for (int i = 0; i < m_skel.size(); i++)
-        {
-            if (m_skel.m_graph.isRoot(i))
-               m_skel.setTransform(i, data->getFrame().inverse() * m_skel.getTransform(i, Ra::Core::Animation::Handle::SpaceType::LOCAL), Ra::Core::Animation::Handle::SpaceType::LOCAL);
-        }
+//        for (int i = 0; i < m_skel.size(); i++)
+//        {
+//            if (m_skel.m_graph.isRoot(i))
+//               m_skel.setTransform(i, data->getFrame().inverse() * m_skel.getTransform(i, Ra::Core::Animation::Handle::SpaceType::LOCAL), Ra::Core::Animation::Handle::SpaceType::LOCAL);
+//        }
         m_refPose = m_skel.getPose( Ra::Core::Animation::Handle::SpaceType::MODEL);
         
         setupSkeletonDisplay();

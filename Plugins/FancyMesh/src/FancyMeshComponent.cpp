@@ -72,17 +72,17 @@ namespace FancyMeshPlugin
         std::shared_ptr<Ra::Engine::Mesh> displayMesh( new Ra::Engine::Mesh( meshName ) );
 
         Ra::Core::TriangleMesh mesh;
-//        Ra::Core::Transform T = data->getFrame();
-//        Ra::Core::Transform N;
-//        N.matrix() = (T.matrix()).inverse().transpose();
-//
-//        for (size_t i = 0; i < data->getVerticesSize(); ++i)
-//        {
-//            mesh.m_vertices.push_back(T * data->getVertices()[i]);
-//            mesh.m_normals.push_back((N * data->getNormals()[i]).normalized());
-//        }
-        mesh.m_vertices = data->getVertices();
-        mesh.m_normals = data->getNormals();
+        Ra::Core::Transform T = data->getFrame();
+        Ra::Core::Transform N;
+        N.matrix() = (T.matrix()).inverse().transpose();
+
+        for (size_t i = 0; i < data->getVerticesSize(); ++i)
+        {
+            mesh.m_vertices.push_back(T * data->getVertices()[i]);
+            mesh.m_normals.push_back((N * data->getNormals()[i]).normalized());
+        }
+//        mesh.m_vertices = data->getVertices();
+//        mesh.m_normals = data->getNormals();
 
         for (const auto& face : data->getFaces())
         {
