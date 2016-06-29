@@ -130,8 +130,6 @@ namespace Ra
                     rootTransform.matrix().col(i).normalize();
                 
                 entity->setTransform(rootTransform);
-                
-                std::cout << "EntityMatrix: " << std::endl << entity->getTransformAsMatrix() << std::endl;
             }
 
             return true;

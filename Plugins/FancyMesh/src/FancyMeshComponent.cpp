@@ -87,7 +87,7 @@ namespace FancyMeshPlugin
 
         for (size_t i = 0; i < data->getVerticesSize(); ++i)
         {
-            mesh.m_vertices.push_back(scalings * data->getVertices()[i]);
+            mesh.m_vertices.push_back(scaling * data->getVertices()[i]);
             mesh.m_normals.push_back((N * data->getNormals()[i]).normalized());
         }
 //        mesh.m_vertices = data->getVertices();
@@ -139,8 +139,7 @@ namespace FancyMeshPlugin
         Ra::Engine::RenderObject* renderObject = Ra::Engine::RenderObject::createRenderObject(roName, this, Ra::Engine::RenderObjectType::Fancy, displayMesh, config, mat);
         m_meshIndex = addRenderObject(renderObject);
         
-        renderObject->setVisible(true);
-//        renderObject->setGlobal(true);
+        renderObject->setVisible(false);
     }
 
     Ra::Core::Index FancyMeshComponent::getRenderObjectIndex() const
