@@ -33,8 +33,14 @@ namespace AnimationPlugin
     }
 
     void AnimationComponent::update(Scalar dt)
-    {   
-        if ( dt != 0.0 )
+    {
+        if( dt != 0.0 ) {
+            const Scalar factor = ( m_slowMo ? 0.1f : 1.0f ) * m_speed;
+            // Use the animation dt if required AND if we actually have animations.
+            dt = factor * ( ( m_animationTimeStep && m_dt.size()>0 ) ? m_dt[m_animationID] : dt );
+        }
+        // Ignore large dt that appear when the engine is paused (while loading a file for instance)
+        if( !m_animationTimeStep && ( dt > 0.5f ) )
         {
             const Scalar factor = ( m_slowMo ? 0.1 : 1.0 ) * m_speed;
             dt = factor * ( ( m_animationTimeStep ) ? m_dt[m_animationID] : dt );
@@ -43,10 +49,22 @@ namespace AnimationPlugin
         // Compute the elapsed time
         m_animationTime += dt;
 
+        if (m_wasReset)
+        {
+            if (!m_resetDone)
+            {
+                m_resetDone = true;
+            }
+            else
+            {
+                m_resetDone = false;
+                m_wasReset = false;
+            }
+        }
+
         // get the current pose from the animation
         if ( dt > 0 && m_animations.size() > 0)
         {
-            m_wasReset = false;
             Ra::Core::Animation::Pose currentPose = m_animations[m_animationID].getPose(m_animationTime);
 
             // update the pose of the skeleton

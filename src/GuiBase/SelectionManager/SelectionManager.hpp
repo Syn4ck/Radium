@@ -1,8 +1,8 @@
 #ifndef RADIUMENGINE_SELECTION_MANAGER_HPP_
 #define RADIUMENGINE_SELECTION_MANAGER_HPP_
+#include <GuiBase/RaGuiBase.hpp>
 
 #include <QItemSelectionModel>
-
 #include <Engine/ItemModel/ItemEntry.hpp>
 #include <GuiBase/TreeModel/EntityTreeModel.hpp>
 
@@ -20,7 +20,7 @@ namespace Ra
     namespace GuiBase
     {
 
-        class SelectionManager : public QItemSelectionModel
+        class RA_GUIBASE_API SelectionManager : public QItemSelectionModel
         {
         Q_OBJECT
         public:
@@ -42,25 +42,7 @@ namespace Ra
             /// Select an item through an item entry. @see QItemSelectionModel::Select
             void select( const Engine::ItemEntry& ent,  QItemSelectionModel::SelectionFlags command );
 
-            /// Select an item through an item entry. @see QItemSelectionModel::Select
-            void select( const QModelIndex& idx, QItemSelectionModel::SelectionFlags command ) override
-            {
-                Engine::ItemEntry ent = itemModel()->getEntry(idx);
-                QItemSelectionModel::select( idx, command );
-            }
-
-            void select( const QItemSelection& selection, QItemSelectionModel::SelectionFlags command) override
-            {
-                std::vector<Engine::ItemEntry> entries;
-                for ( const auto& idx : selection.indexes())
-                {
-                    entries.push_back(itemModel()->getEntry(idx));
-                }
-
-                QItemSelectionModel::select(selection , command );
-            }
-
-            /// Set an item as current through an item entry. @see QItemSelectionModen::setCurrent
+            /// Set an item as current through an item entry. @see QItemSelectionModel::setCurrent
             void setCurrentEntry( const Engine::ItemEntry& ent, QItemSelectionModel::SelectionFlags command);
 
         protected slots:
