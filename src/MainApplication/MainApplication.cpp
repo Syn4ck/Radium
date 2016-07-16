@@ -96,13 +96,11 @@ namespace Ra
 #else
         config << "single precision" ;
 #endif
-
         LOG( logINFO ) << config.str();
 
         config.str( std::string() );
         config<<"build: "<<Version::compiler<<" - "<<Version::compileDate<<" "<<Version::compileTime;
-
-
+        
         LOG( logINFO ) << config.str();
 
         LOG(logINFO) << "Qt Version: " << qVersion();
