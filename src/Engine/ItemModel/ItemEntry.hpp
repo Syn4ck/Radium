@@ -9,12 +9,10 @@
 
 namespace Ra
 {
-namespace Engine
-{
-    class RadiumEngine;
-    class Entity;
-    class Component;
-}
+    namespace Engine
+    {
+        class RadiumEngine;
+    }
 }
 
 namespace Ra
@@ -24,23 +22,23 @@ namespace Ra
         /// This represent a handle for an entity, component or render object.
         /// There are 4 possible states for this object :
         /// * All members are invalid -> No object.
-        /// * Entity pointer valid, all others invalid -> Entity
-        /// * Entity and component pointers valid, RO index invalid -> Component
-        /// * Entity, component and RO index valid : -> RO
+        /// * Entity index valid, all others invalid -> Entity
+        /// * Entity and component indices valid, RO index invalid -> Component
+        /// * Entity, component and RO indices valid : -> RO
         struct RA_ENGINE_API ItemEntry
         {
             /// Create an invalid entry.
             ItemEntry()
-            : m_entity(nullptr), m_component(nullptr), m_roIndex() { }
+                : m_entity(), m_component(), m_renderObject() { }
 
             /// Create an entry.
             /// ItemEntry(entity) creates an entity entry.
             /// ItemEntry(entity, component) creates a component entry
             /// ItemEntry(entity, component, RO) creates a render object entity.
-            explicit ItemEntry( Ra::Engine::Entity* ent,
-                       Ra::Engine::Component* comp = nullptr,
-                       Ra::Core::Index ro = Ra::Core::Index::INVALID_IDX())
-                    : m_entity(ent), m_component(comp), m_roIndex(ro) { }
+            explicit ItemEntry(Ra::Core::Index entity,
+                               Ra::Core::Index component = Ra::Core::Index::INVALID_IDX(),
+                               Ra::Core::Index ro = Ra::Core::Index::INVALID_IDX())
+                : m_entity(entity), m_component(component), m_renderObject(ro) { }
 
             /// Compare two items.
             inline bool operator==( const ItemEntry& rhs ) const;
@@ -51,7 +49,7 @@ namespace Ra
 
             /// Returns true if the item can be selected.
             bool isSelectable() const;
-
+            
             /// Returns true if the item represents an entity.
             inline bool isEntityNode() const;
 
@@ -59,7 +57,7 @@ namespace Ra
             inline bool isComponentNode() const;
 
             /// Returns true if the item represents a render object.
-            inline bool isRoNode() const;
+            inline bool isRoNode() const;            
 
 
             /// Debug checks.
@@ -67,15 +65,14 @@ namespace Ra
 
 
             /// The entity represented by the item, or owning the object represented.
-            Ra::Engine::Entity* m_entity;
+            Ra::Core::Index m_entity;
 
             /// Component represented by the item or owning the represented RO.
             /// If null, the item represents an entity.
-            Ra::Engine::Component* m_component;
+            Ra::Core::Index m_component;
 
             /// RO index of the represented object.
-            Ra::Core::Index m_roIndex;
-
+            Ra::Core::Index m_renderObject;
         };
 
         /// Returns the name associated to the given item.

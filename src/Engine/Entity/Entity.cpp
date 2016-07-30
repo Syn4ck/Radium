@@ -39,8 +39,9 @@ namespace Ra
             m_components.emplace_back( std::unique_ptr<Component>(component));
             component->setEntity( this );
 
+            /*
             RadiumEngine::getInstance()->getSignalManager()->fireComponentAdded( ItemEntry(this, component) );
-
+            */
         }
 
         Component* Entity::getComponent( const std::string& name )
@@ -75,7 +76,9 @@ namespace Ra
                         [ name ] (const auto& c){ return c->getName() == name;} );
 
             CORE_ASSERT( pos != m_components.end(), "Component not found in entity" );
+            /*
             RadiumEngine::getInstance()->getSignalManager()->fireComponentRemoved(ItemEntry(this,pos->get()));
+            */
             m_components.erase(pos);
         }
 

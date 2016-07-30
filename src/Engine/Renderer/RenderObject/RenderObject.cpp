@@ -6,6 +6,7 @@
 
 #include <Engine/Assets/GeometryData.hpp>
 
+#include <Engine/Managers/ObjectsManager/ObjectsManager.hpp>
 #include <Engine/Component/Component.hpp>
 #include <Engine/Entity/Entity.hpp>
 #include <Engine/Renderer/RenderTechnique/Material.hpp>
@@ -23,21 +24,17 @@ namespace Ra
 {
     namespace Engine
     {
-        RenderObject::RenderObject( const std::string& name, Component* comp,
-                                    const RenderObjectType& type, int lifetime )
+        RenderObject::RenderObject( const std::string& name, const RenderObjectType& type)
             : IndexedObject()
             , m_localTransform( Core::Transform::Identity() )
-            , m_component( comp )
             , m_name( name )
             , m_type( type )
             , m_renderTechnique( nullptr )
             , m_mesh( nullptr )
-            , m_lifetime( lifetime )
             , m_visible( true )
             , m_xray( false )
             , m_transparent( false )
             , m_dirty( true )
-            , m_hasLifetime( lifetime > 0 )
         {
         }
 
@@ -45,16 +42,18 @@ namespace Ra
         {
         }
 
-        RenderObject* RenderObject::createRenderObject(const std::string& name, Component* comp,
-                                                       const RenderObjectType& type, const std::shared_ptr<Mesh> &mesh,
-                                                       const ShaderConfiguration &shaderConfig, Material *material)
+        RenderObject* RenderObject::createRenderObject(const std::string& name,
+                                                       const RenderObjectType& type,
+                                                       const std::shared_ptr<Mesh> &mesh,
+                                                       const ShaderConfiguration &shaderConfig,
+                                                       Material *material)
         {
-            RenderObject* obj = new RenderObject(name, comp, type);
+            RenderObject* obj = new RenderObject(name, type);
             obj->setMesh(mesh);
             obj->setVisible(true);
-
+            
             RenderTechnique* rt = new RenderTechnique;
-
+            
             if (shaderConfig.isComplete())
             {
                 rt->shaderConfig = shaderConfig;
@@ -81,7 +80,7 @@ namespace Ra
             return obj;
         }
 
-        RenderObject* RenderObject::createFancyFromAsset(const std::string& name, Component* comp, Asset::GeometryData* asset)
+        RenderObject* RenderObject::createFancyFromAsset(const std::string& name, Asset::GeometryData* asset)
         {
             auto displayMesh = Core::make_shared<Ra::Engine::Mesh>(name);
 
@@ -181,7 +180,20 @@ namespace Ra
 
             auto shaderConfig = ShaderConfigurationFactory::getConfiguration("BlinnPhong");
 
-            return createRenderObject(name, comp, RenderObjectType::Fancy, displayMesh, shaderConfig, mat);
+            return createRenderObject(name, RenderObjectType::Fancy, displayMesh, shaderConfig, mat);
+        }
+
+        void RenderObject::setComponent(ItemEntry entry)
+        {
+            m_component = entry;
+            m_entry = m_component;
+            m_entry.m_renderObject = m_index;
+        }
+
+        void RenderObject::setIndex(Index index)
+        {
+            m_index = index;
+            m_entry.m_renderObject = m_index;
         }
 
         void RenderObject::updateGL()
@@ -268,16 +280,6 @@ namespace Ra
             return m_dirty;
         }
 
-        const Component* RenderObject::getComponent() const
-        {
-            return m_component;
-        }
-
-        Component* RenderObject::getComponent()
-        {
-            return m_component;
-        }
-
         void RenderObject::setRenderTechnique( RenderTechnique* technique )
         {
             CORE_ASSERT( technique, "Passing a nullptr as render technique" );
@@ -311,7 +313,10 @@ namespace Ra
 
         Core::Transform RenderObject::getTransform() const
         {
-            return m_component->getEntity()->getTransform() * m_localTransform;
+            Core::Transform result;
+            Entity* entity = RadiumEngine::getInstance()->getObjectsManager()->getEntity(m_component);
+           
+            return entity->getTransform() * m_localTransform;
         }
 
         Core::Matrix4 RenderObject::getTransformAsMatrix() const
@@ -369,22 +374,6 @@ namespace Ra
         const Core::Matrix4& RenderObject::getLocalTransformAsMatrix() const
         {
             return m_localTransform.matrix();
-        }
-
-        void RenderObject::hasBeenRenderedOnce()
-        {
-            if ( m_hasLifetime )
-            {
-                if ( --m_lifetime <= 0 )
-                {
-                    RadiumEngine::getInstance()->getRenderObjectManager()->renderObjectExpired( idx );
-                }
-            }
-        }
-
-        void RenderObject::hasExpired()
-        {
-            m_component->notifyRenderObjectExpired( idx );
         }
 
         void RenderObject::render( const RenderParameters& lightParams, const RenderData& rdata, const ShaderProgram* altShader )

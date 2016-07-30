@@ -59,7 +59,7 @@ namespace Ra
             Component* getComponent( const std::string& name );
             const Component* getComponent( const std::string& name ) const;
 
-            const std::vector<std::unique_ptr<Component>>& getComponents() const;
+            const std::vector<ItemEntry>& getComponents() const;
 
             /// Get component belonging to a given system.
             //Component* getComponent( const System& system);
@@ -75,7 +75,7 @@ namespace Ra
 
             std::string m_name;
 
-            std::vector<std::unique_ptr<Component>> m_components;
+            std::vector<ItemEntry> m_components;
 
             bool m_transformChanged;
             mutable std::mutex m_transformMutex;

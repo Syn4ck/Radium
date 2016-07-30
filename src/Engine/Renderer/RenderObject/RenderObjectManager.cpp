@@ -39,10 +39,12 @@ namespace Ra
             if (type == RenderObjectType::Fancy)
                 m_fancyBVH.insertLeaf(newRenderObject);
 
+            /*
             Engine::RadiumEngine::getInstance()->getSignalManager()->fireRenderObjectAdded(
-                    ItemEntry( renderObject->getComponent()->getEntity(),
-                               renderObject->getComponent(),
+                    ItemEntry( renderObject->getComponent()->getEntity().idx,
+                               renderObject->getComponent()->idx,
                                index ));
+            */
             return index;
         }
 
@@ -53,11 +55,12 @@ namespace Ra
             // FIXME(Charly): Should we check if the render object is in the double buffer map ?
             std::shared_ptr<RenderObject> renderObject = m_renderObjects.at( index );
 
-
+            /*
             Engine::RadiumEngine::getInstance()->getSignalManager()->fireRenderObjectRemoved(
                     ItemEntry( renderObject->getComponent()->getEntity(),
                                renderObject->getComponent(),
                                index ));
+            */
 
             // Lock after signal has been fired (as this signal can cause another RO to be deleted)
             std::lock_guard<std::mutex> lock( m_doubleBufferMutex );
@@ -108,20 +111,5 @@ namespace Ra
             }
         }
 
-        void RenderObjectManager::renderObjectExpired( const Core::Index& idx )
-        {
-            std::lock_guard<std::mutex> lock( m_doubleBufferMutex );
-
-            auto ro = m_renderObjects.at( idx );
-            m_renderObjects.remove( idx );
-
-            auto type = ro->getType();
-
-            m_renderObjectByType[(int)type].erase( idx );
-
-            ro->hasExpired();
-
-            ro.reset();
-        }
     }
 } // namespace Ra

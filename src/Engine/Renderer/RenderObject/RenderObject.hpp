@@ -12,6 +12,7 @@
 #include <Engine/Renderer/RenderTechnique/Material.hpp>
 #include <Engine/Renderer/RenderTechnique/RenderParameters.hpp>
 #include <Engine/Renderer/RenderObject/RenderObjectTypes.hpp>
+#include <Engine/ItemModel/ItemEntry.hpp>
 
 namespace Ra
 {
@@ -47,12 +48,11 @@ namespace Ra
             /// 0 is an "invalid value" (would mean the render object has to die immediatly),
             /// hence it's considered as infinite,
             /// any other positive value will be taken into account.
-            RenderObject( const std::string& name, Component* comp,
-                          const RenderObjectType& type, int lifetime = -1 );
+            RenderObject( const std::string& name, const RenderObjectType& type);
             ~RenderObject();
 
-            static RenderObject* createRenderObject(const std::string& name, Component* comp, const RenderObjectType& type, const std::shared_ptr<Mesh>& mesh, const ShaderConfiguration& shaderConfig = ShaderConfiguration(), Material* material = nullptr);
-            static RenderObject* createFancyFromAsset(const std::string& name, Component* comp, Ra::Asset::GeometryData* asset);
+            static RenderObject* createRenderObject(const std::string& name, const RenderObjectType& type, const std::shared_ptr<Mesh>& mesh, const ShaderConfiguration& shaderConfig = ShaderConfiguration(), Material* material = nullptr);
+            static RenderObject* createFancyFromAsset(const std::string& name, Ra::Asset::GeometryData* asset);
 
             // FIXME(Charly): Remove this
             void updateGL();
@@ -61,8 +61,10 @@ namespace Ra
             // Getters and setters.
             //
             const std::string& getName() const;
-            const Component* getComponent() const;
-                  Component* getComponent();
+
+            virtual void setIndex(Index index) override;
+            
+            void setComponent(ItemEntry entry);
 
             const RenderObjectType& getType() const;
             void setType( const RenderObjectType& t);
@@ -99,18 +101,14 @@ namespace Ra
             const Core::Transform& getLocalTransform() const;
             const Core::Matrix4& getLocalTransformAsMatrix() const;
 
-            /// Basically just decreases lifetime counter.
-            /// If it goes to zero, then render object notifies the manager that it needs to be deleted.
-            /// Does nothing if lifetime is set to -1
-            void hasBeenRenderedOnce();
-            void hasExpired();
-
             virtual void render( const RenderParameters& lightParams, const RenderData& rdata, const ShaderProgram* altShader = nullptr );
 
         private:
             Core::Transform m_localTransform;
 
-            Component* m_component;
+            ItemEntry m_component;
+            ItemEntry m_entry;
+            
             std::string m_name;
 
             RenderObjectType m_type;
@@ -121,8 +119,6 @@ namespace Ra
             RenderParameters m_renderParameters;
 
             mutable std::mutex m_updateMutex;
-
-            int m_lifetime;
 
             bool m_visible;
             bool m_xray;

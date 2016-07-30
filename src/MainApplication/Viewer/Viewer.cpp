@@ -10,6 +10,7 @@
 #include <Core/Log/Log.hpp>
 #include <Core/Math/ColorPresets.hpp>
 
+#include <Engine/Managers/EntityManager/EntityManager.hpp>
 #include <Engine/Renderer/OpenGL/OpenGL.hpp>
 #include <Engine/Component/Component.hpp>
 #include <Engine/Renderer/Renderer.hpp>

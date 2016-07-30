@@ -4,6 +4,7 @@
 #include <Engine/Entity/Entity.hpp>
 #include <Engine/System/System.hpp>
 #include <Engine/Renderer/RenderObject/RenderObject.hpp>
+#include <Engine/Managers/ObjectsManager/ObjectsManager.hpp>
 
 namespace Ra
 {
@@ -18,42 +19,24 @@ namespace Ra
 
         Component::~Component()
         {
-            for (const auto& ro : m_renderObjects )
+            auto mgr = RadiumEngine::getInstance()->getObjectsManager();            
+
+            for (auto entry : m_renderObjects)
             {
-                getRoMgr()->removeRenderObject( ro );
+                mgr->removeRenderObject(entry);
             }
+
+            m_renderObjects.clear();
         }
 
-        RenderObjectManager* Component::getRoMgr()
-        {
-            return RadiumEngine::getInstance()->getRenderObjectManager();
+        void Component::removeRenderObject(Core::Index roIdx)
+        {          
         }
 
-        Core::Index Component::addRenderObject( RenderObject* renderObject )
+        void Component::deactivate()
         {
-            m_renderObjects.push_back( getRoMgr()->addRenderObject( renderObject ) );
-            return m_renderObjects.back();
+//            auto mgr = 
         }
-
-        void Component::removeRenderObject( Core::Index roIdx )
-        {
-            auto found = std::find(m_renderObjects.cbegin(), m_renderObjects.cend(),roIdx);
-            CORE_WARN_IF(found == m_renderObjects.cend(), " Render object not found in component");
-            if (found != m_renderObjects.cend() && getRoMgr() )
-            {
-                getRoMgr()->removeRenderObject(*found);
-                m_renderObjects.erase(found);
-            }
-        }
-
-        void Component::notifyRenderObjectExpired( const Core::Index& idx )
-        {
-            auto found = std::find( m_renderObjects.cbegin(), m_renderObjects.cend(), idx );
-            CORE_WARN_IF( found == m_renderObjects.cend(), " Render object not found in component" );
-            if ( found != m_renderObjects.cend() )
-            {
-                m_renderObjects.erase( found );
-            }
-        }
+        
     }
 } // namespace Ra

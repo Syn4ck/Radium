@@ -7,7 +7,7 @@
 #include <Core/Math/Ray.hpp>
 #include <Core/Index/IndexedObject.hpp>
 
-#include <Engine/Renderer/RenderObject/RenderObjectManager.hpp>
+#include <Engine/ItemModel/ItemEntry.hpp>
 
 namespace Ra
 {
@@ -29,7 +29,7 @@ namespace Ra
          * It is also linked to some other components in an entity.
          * Each component share a transform through their entity.
          */
-        class RA_ENGINE_API Component
+        class RA_ENGINE_API Component : public Core::IndexedObject
         {
         public:
             /// CONSTRUCTOR
@@ -46,15 +46,12 @@ namespace Ra
             * have been loaded.
             */
             virtual void initialize() = 0;
-            /**
-             * @brief Set entity the component is part of.
-             * This method is called by the entity.
-             * @param entity The entity the component is part of.
-             */
-            virtual void setEntity( Entity* entity );
+
+            /// Set entity
+            virtual void setEntity(Core::Index entity);
 
             /// Return the entity the component belongs to
-            virtual Entity* getEntity() const;
+            virtual Core::Index getEntity() const;
 
             /// Return the component's name
             virtual const std::string& getName() const;
@@ -66,9 +63,10 @@ namespace Ra
             virtual System* getSystem() const;
 
             /// Add a new render object to the component. This adds the RO to the manager for drawing.
-            virtual Core::Index addRenderObject( RenderObject* renderObject ) final;
+            virtual void addRenderObject(Core::Index roIdx) final;
 
             /// Remove the render object from the component.
+            /// This tells the ObjectsManager to remove the RenderObject.           
             virtual void removeRenderObject( Core::Index roIdx ) final;
 
             /// Perform a ray cast query.
@@ -88,20 +86,21 @@ namespace Ra
             /// Set the new transform associated with the RO index key.
             virtual void setTransform ( Core::Index roIdx, const Core::Transform& transform ) {};
 
-            void notifyRenderObjectExpired( const Core::Index& idx );
+            // NOTE(Charly): I marked this as final but if some extra behaviour is required
+            //               I just did not think about it, and it can be removed.
+            /// Deactivate the component. This sets all owned ROs visible to false.
+            virtual void deactivate() final;
 
         protected:
             /// Shortcut to access the render object manager.
             static RenderObjectManager* getRoMgr();
 
-
         public:
-            std::vector<Core::Index> m_renderObjects;
+            std::vector<ItemEntry> m_renderObjects;
 
         protected:
-
             std::string m_name;
-            Entity* m_entity;
+            Core::Index m_entity;
             System* m_system;
 
         };

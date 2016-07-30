@@ -6,6 +6,7 @@
 #include <assimp/Importer.hpp>
 
 #include <Engine/RadiumEngine.hpp>
+#include <Engine/Managers/SignalManager/SignalManager.hpp>
 #include <Engine/Component/Component.hpp>
 #include <Engine/Entity/Entity.hpp>
 #include <Engine/Renderer/Renderer.hpp>
@@ -197,7 +198,10 @@ namespace Ra
             Ra::Engine::Entity* ent = comp->getEntity();
 
             // For now we don't enable group selection.
+            // FIXME(charly): New objects model
+            /*
             m_selectionManager->setCurrentEntry(ItemEntry(ent, comp, roIndex), QItemSelectionModel::ClearAndSelect | QItemSelectionModel::Current);
+            */
         }
         else
         {
@@ -207,6 +211,8 @@ namespace Ra
 
     void Gui::MainWindow::onSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected)
     {
+        // FIXME(charly): New object model
+#if 0
         if (m_selectionManager->hasSelection())
         {
             const ItemEntry& ent = m_selectionManager->currentItem();
@@ -217,7 +223,7 @@ namespace Ra
             if (ent.isRoNode())
             {
                 m_editRenderObjectButton->setEnabled(true);
-
+                
                 m_materialEditor->changeRenderObject(ent.m_roIndex);
                 const std::string& shaderName = mainApp->m_engine->getRenderObjectManager()->getRenderObject(
                                                                ent.m_roIndex)
@@ -242,6 +248,7 @@ namespace Ra
             m_editRenderObjectButton->setEnabled(false);
             m_materialEditor->hide();
         }
+#endif
     }
 
     void Gui::MainWindow::closeEvent(QCloseEvent* event)
@@ -268,6 +275,8 @@ namespace Ra
 
     void Gui::MainWindow::changeRenderObjectShader(const QString& shaderName)
     {
+        // FIXME(charly): New object model
+#if 0
         std::string name = shaderName.toStdString();
         if (name == "")
         {
@@ -287,10 +296,13 @@ namespace Ra
         }
         Engine::ShaderConfiguration config = Ra::Engine::ShaderConfigurationFactory::getConfiguration(name);
         ro->getRenderTechnique()->changeShader(config);
+#endif
     }
 
     void Gui::MainWindow::toggleVisisbleRO()
     {
+        // FIXME(charly): New object model
+#if 0
         const ItemEntry& item = m_selectionManager->currentItem();
         // If at least one RO is visible, turn them off.
         bool hasVisible = false;
@@ -306,16 +318,20 @@ namespace Ra
         {
             mainApp->m_engine->getRenderObjectManager()->getRenderObject(roIdx)->setVisible(!hasVisible);
         }
+#endif
     }
 
     void Gui::MainWindow::editRO()
     {
+        // FIXME(charly): New object model
+#if 0
         ItemEntry item = m_selectionManager->currentItem();
         if (item.isRoNode())
         {
             m_materialEditor->changeRenderObject(item.m_roIndex);
             m_materialEditor->show();
         }
+#endif
     }
 
     void Gui::MainWindow::openMaterialEditor()

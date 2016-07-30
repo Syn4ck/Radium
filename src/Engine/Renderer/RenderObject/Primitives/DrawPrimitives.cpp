@@ -29,8 +29,7 @@ namespace Ra {
                 rt->shaderConfig = config;
                 rt->material = new Material("Default material");
 
-                RenderObject* ro = new RenderObject(mesh->getName(), component,
-                                                    RenderObjectType::Debug);
+                RenderObject* ro = new RenderObject(mesh->getName(), RenderObjectType::Debug);
 
                 ro->setRenderTechnique(rt);
                 ro->setMesh(mesh);

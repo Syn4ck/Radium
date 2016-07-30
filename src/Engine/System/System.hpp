@@ -49,6 +49,7 @@ namespace Ra
         {
         public:
             System();
+            
             virtual ~System();
 
             /**
@@ -63,13 +64,13 @@ namespace Ra
 
 
             /// Registers a component belonging to an entity, making it active within the system.
-            void registerComponent( const Entity* entity, Component* component );
+            void registerComponent(ItemEntry component);
 
             /// Unregisters a component. The system will not update it.
-            void unregisterComponent(const Entity* entity, Component* component);
+            void unregisterComponent(ItemEntry component);
 
             /// Removes all components belonging to a given entity.
-            void unregisterAllComponents( const Entity* entity );
+            void unregisterAllComponents(ItemEntry entity);
 
 
             /**
@@ -77,11 +78,14 @@ namespace Ra
              * Given a given file and the corresponding entity, the system will create the
              * corresponding components ,add them to the entity.
              */
-            virtual void handleAssetLoading( Entity* entity, const Asset::FileData* data) {}
+            virtual void handleAssetLoading(ItemEntry entity, const Asset::FileData* data) {}
+
+        protected:
+            inline ObjectsManager* getMgr() const { return RadiumEngine::getInstance()->getObjectsManager(); }
 
         protected:
             /// List of active components.
-            std::vector<std::pair< const Entity*, Component*> > m_components;
+            std::vector<ItemEntry> m_components;
         };
 
     } // namespace Engine

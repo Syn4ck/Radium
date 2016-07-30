@@ -13,13 +13,15 @@ namespace Ra
 
         EntityManager::EntityManager()
         {
-            #if !defined (RA_DISABLE_DEBUG_DISPLAY)
+#if !defined (RA_DISABLE_DEBUG_DISPLAY)
             std::shared_ptr<Entity> ent( SystemEntity::createInstance() );
             ent->idx = m_entities.insert( ent );
             CORE_ASSERT( ent.get() == SystemEntity::getInstance(), "Invalid singleton instanciation");
             m_entitiesName.insert( std::pair< std::string, Core::Index> (ent->getName(),ent->idx ));
+            /*
             RadiumEngine::getInstance()->getSignalManager()->fireEntityCreated( ItemEntry(SystemEntity::getInstance()));
-            #endif
+            */
+#endif
         }
 
         EntityManager::~EntityManager()
@@ -57,7 +59,9 @@ namespace Ra
             m_entitiesName.insert( std::pair<std::string, Core::Index> (
                                        ent->getName(), ent->idx ) );
 
+            /*
             RadiumEngine::getInstance()->getSignalManager()->fireEntityCreated(ItemEntry(ent.get()));
+            */
             return ent.get();
         }
 
@@ -76,7 +80,9 @@ namespace Ra
 
             CORE_ASSERT( ent.unique(), "Non-unique entity about to be removed." );
 
+            /*
             RadiumEngine::getInstance()->getSignalManager()->fireEntityDestroyed(ItemEntry(ent.get()));
+            */
             ent.reset();
             m_entities.remove( idx );
             m_entitiesName.erase( name );

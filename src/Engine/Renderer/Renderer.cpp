@@ -12,6 +12,9 @@
 #include <Core/Mesh/MeshPrimitives.hpp>
 
 #include <Engine/RadiumEngine.hpp>
+
+#include <Engine/Managers/ObjectsManager/ObjectsManager.hpp>
+
 #include <Engine/Renderer/OpenGL/OpenGL.hpp>
 #include <Engine/Renderer/OpenGL/FBO.hpp>
 #include <Engine/Renderer/RenderTechnique/ShaderProgramManager.hpp>
@@ -69,7 +72,7 @@ namespace Ra
         {
             // Initialize managers
             m_shaderMgr = ShaderProgramManager::createInstance("../Shaders/Default.vert.glsl", "../Shaders/Default.frag.glsl");
-            m_roMgr = RadiumEngine::getInstance()->getRenderObjectManager();
+            m_mgr = RadiumEngine::getInstance()->getObjectsManager();
             TextureManager::createInstance();
 
             m_shaderMgr->addShaderProgram("DrawScreen", "../Shaders/Basic2D.vert.glsl", "../Shaders/DrawScreen.frag.glsl");

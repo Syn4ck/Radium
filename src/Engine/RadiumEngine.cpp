@@ -23,6 +23,8 @@
 #include <Engine/Managers/EntityManager/EntityManager.hpp>
 #include <Engine/Managers/ComponentMessenger/ComponentMessenger.hpp>
 #include <Engine/Managers/SystemDisplay/SystemDisplay.hpp>
+#include <Engine/Managers/ObjectsManager/ObjectsManager.hpp>
+#include <Engine/Managers/SignalManager/SignalManager.hpp>
 
 #include <Engine/Assets/FileData.hpp>
 
@@ -43,17 +45,14 @@ namespace Ra
         {
             LOG(logINFO) << "*** Radium Engine ***";
             m_signalManager.reset( new SignalManager );
-            m_entityManager.reset( new EntityManager );
-            m_renderObjectManager.reset( new RenderObjectManager );
+            m_objectsManager.reset(new ObjectsManager);
             ComponentMessenger::createInstance();
-
         }
 
         void RadiumEngine::cleanup()
         {
             m_signalManager->setOn( false );
-            m_entityManager.reset();
-            m_renderObjectManager.reset();
+            m_objectsManager.reset();
 
             for ( auto& system : m_systems )
             {
@@ -65,7 +64,8 @@ namespace Ra
 
         void RadiumEngine::endFrameSync()
         {
-            m_entityManager->swapBuffers();
+            // FIXME(Charly): New Objects model
+            //m_entityManager->swapBuffers();
         }
 
         void RadiumEngine::getTasks( Core::TaskQueue* taskQueue,  Scalar dt )
@@ -107,35 +107,30 @@ namespace Ra
             Asset::FileData fileData( filename, true );
 
             std::string entityName = Core::StringUtils::getBaseName( filename, false );
-
-            Entity* entity = m_entityManager->createEntity( entityName );
+            
+            ItemEntry entity = m_objectsManager->createEntity( entityName );
 
             for( auto& system : m_systems ) {
                 system.second->handleAssetLoading( entity, &fileData );
             }
 
-            for (auto& comp :entity->getComponents())
+            for (auto comp : m_objectsManager->getEntity(entity)->getComponents())
             {
-                comp->initialize();
+                m_objectsManager->getComponent(comp)->initialize();
             }
 
             return true;
         }
 
-        RenderObjectManager* RadiumEngine::getRenderObjectManager() const
-        {
-            return m_renderObjectManager.get();
-        }
-
-        EntityManager* RadiumEngine::getEntityManager() const
-        {
-            return m_entityManager.get();
-        }
-
         SignalManager *RadiumEngine::getSignalManager() const
-        {
-           return m_signalManager.get();
+        {            
+            return m_signalManager.get();
         }
+
+        ObjectsManager* RadiumEngine::getObjectsManager() const
+        {
+            return m_objectsManager.get();
+        }        
 
         RA_SINGLETON_IMPLEMENTATION( RadiumEngine );
     } // Namespace engine

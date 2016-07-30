@@ -36,7 +36,7 @@ namespace Ra
         class ShaderProgramManager;
         class Texture;
         class TextureManager;
-        class RenderObjectManager;
+        class ObjectsManager;
     }
 }
 
@@ -279,7 +279,7 @@ namespace Ra
             uint m_height;
 
             ShaderProgramManager* m_shaderMgr;
-            RenderObjectManager* m_roMgr;
+            ObjectsManager* m_mgr;
 
             // FIXME(Charly): Should we change "displayedTexture" to "debuggedTexture" ?
             //                It would make more sense if we are able to show the

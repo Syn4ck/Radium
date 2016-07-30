@@ -4,12 +4,12 @@ namespace Ra
 {
     namespace Engine
     {
-        inline void Component::setEntity( Entity* entity )
+        inline void Component::setEntity(Core::Index entity)
         {
             m_entity = entity;
         }
 
-        inline Entity* Component::getEntity() const
+        inline Core::Index Component::getEntity() const
         {
             return m_entity;
         }
@@ -17,6 +17,11 @@ namespace Ra
         inline const std::string& Component::getName() const
         {
             return m_name;
+        }
+        
+        inline void Component::addRenderObject(Core::Index roIdx)
+        {
+            m_renderObjects.push_back(ItemEntry{m_entity, idx, roIdx});
         }
 
         inline void Component::setSystem( System* system )

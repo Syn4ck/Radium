@@ -4,8 +4,7 @@
 
 #include <Engine/Entity/Entity.hpp>
 #include <Engine/Component/Component.hpp>
-
-
+#include <Engine/Managers/EntityManager/EntityManager.hpp>
 
 using Ra::Engine::ItemEntry;
 
@@ -16,6 +15,7 @@ namespace Ra
 
         void ItemModel::buildModel()
         {
+#if 0
             m_rootItem.reset(new EngineTreeItem);
             m_rootItem->m_parent = nullptr;
             for (const auto& ent : m_engine->getEntityManager()->getEntities())
@@ -42,6 +42,7 @@ namespace Ra
                 }
                 m_rootItem->m_children.emplace_back(entityItem);
             }
+#endif
         }
 
         const ItemEntry& ItemModel::getEntry(const QModelIndex& index) const

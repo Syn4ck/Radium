@@ -44,6 +44,8 @@ namespace SkinningPlugin
 
     void SkinningPluginC::onCurrentChanged( const QModelIndex& current, const QModelIndex& prev )
     {
+        // FIXME(charly): New object model
+#if 0
         Ra::Engine::ItemEntry it = m_selectionManager->currentItem();
         if (it.isComponentNode() || it.isRoNode() )
         {
@@ -56,6 +58,7 @@ namespace SkinningPlugin
                 m_widget->setCurrent(it, nullptr);
             }
         }
+#endif
     }
 
     SkinningWidget::SkinningWidget( QWidget * parent ) : QFrame( parent ),

@@ -51,8 +51,6 @@ namespace Ra
 
             bool isDirty() const;
 
-            void renderObjectExpired( const Ra::Core::Index& idx );
-
         private:
             Core::IndexMap<std::shared_ptr<RenderObject>> m_renderObjects;
 

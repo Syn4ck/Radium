@@ -13,20 +13,25 @@ namespace Ra
         {
         public:
             /// CONSTRUCTOR
-            explicit inline  IndexedObject( const Index& idx = Index::INVALID_IDX() )
+            explicit inline  IndexedObject( const Index& index = Index::INVALID_IDX() )
+                : m_index(index)
             {
-                this->idx = idx;
             }
             inline IndexedObject( const IndexedObject& id_obj )
             {
-                idx = id_obj.idx;
+                m_index = id_obj.m_index;
+            }
+
+            virtual void setIndex(Index index)
+            {
+                m_index = index;
             }
 
             /// DESTRUCTOR
             virtual inline ~IndexedObject() { }
 
             /// VARIABLE
-            Index idx;
+            Index m_index;
         };
 
     }
