@@ -26,11 +26,18 @@ inline Scalar FileData::getLoadingTime() const {
 /// DATA
 inline std::vector< GeometryData* > FileData::getGeometryData() const {
     std::vector< GeometryData* > list;
-//    list.reserve( m_geometryData.size() );
-//    for( const auto& item : m_geometryData ) {
-//        list.push_back( item.get() );
-//    }
-    list.push_back(m_geometryData[m_currentIndex].get());
+    
+    if (m_currentIndex < 0)
+    {
+        list.reserve( m_geometryData.size() );
+        for (const auto& item : m_geometryData)
+        {
+            list.push_back( item.get() );
+        }
+    }
+    else
+        list.push_back(m_geometryData[m_currentIndex].get());
+    
     return list;
 }
 
