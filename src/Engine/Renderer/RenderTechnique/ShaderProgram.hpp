@@ -15,6 +15,46 @@ namespace Ra
 {
     namespace Engine
     {
+#if 1
+        enum ShaderType
+        {
+            ShaderType_Vertex = 0,
+            ShaderType_Fragment,
+            ShaderType_Geometry,
+            ShaderType_TessControl,
+            ShaderType_TessEvaluation,
+            ShaderType_Compute,
+            ShaderType_Count,
+        };
+                
+        class RA_ENGINE_API ShaderProgram
+        {
+        public:
+            ShaderProgram();
+            ~ShaderProgram();
+            
+            bool addShaderFile(ShaderType type, const std::string& filename);
+            bool addShaderString(ShaderType type, const std::string& shader);
+            bool link();
+            
+            void bind() const;
+            uint getId() const { return m_id; }
+            
+            void reload();
+            
+        private:
+            GLenum getOpenGLShaderType(ShaderType) const;
+            
+            static bool checkShader(int shader_id);
+            static bool checkProgram(int program_id);
+            
+        private:
+            uint m_id;
+            
+            std::array<std::string, ShaderType_Count> m_shaders;
+            std::array<std::string, ShaderType_Count> m_shaderStrings;
+        };
+#else
         class Texture;
 
         enum ShaderType : uint
@@ -82,10 +122,10 @@ namespace Ra
             ShaderObject();
             ~ShaderObject();
 
-            bool loadAndCompile( uint type,
-                                 const std::string& filename,
-                                 const std::set<std::string>& properties );
-
+            bool loadAndCompile(uint type,
+                                const std::string& filename,
+                                const std::set<std::string>& properties );
+            
             bool reloadAndCompile( const std::set<std::string>& properties );
 
             uint getId() const;
@@ -121,7 +161,7 @@ namespace Ra
         {
         public:
             ShaderProgram();
-            explicit ShaderProgram( const ShaderConfiguration& shaderConfig );
+            explicit ShaderProgram(const ShaderConfiguration& shaderConfig);
             virtual ~ShaderProgram();
 
             void load( const ShaderConfiguration& shaderConfig );
@@ -178,7 +218,7 @@ namespace Ra
             std::array<ShaderObject*, ShaderType_COUNT> m_shaderObjects;
             std::array<bool, ShaderType_COUNT> m_shaderStatus;
         };
-
+#endif
     } // namespace Engine
 } // namespace Ra
 

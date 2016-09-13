@@ -22,7 +22,136 @@ namespace Ra
 {
     namespace Engine
     {
-        // From OpenGL Shading Language 3rd Edition, p215-216
+#if 1
+        ShaderProgram::ShaderProgram()
+        {
+            m_id = glCreateProgram();
+        }
+        
+        ShaderProgram::~ShaderProgram()
+        {
+            glDeleteProgram(m_id);
+        }
+        
+        bool ShaderProgram::addShaderFile(ShaderType type, const std::string& filename)
+        {
+            
+        }
+        
+        bool ShaderProgram::addShaderString(ShaderType type, const std::string& shader)
+        {
+            GLuint shader_id = glCreateShader(getOpenGLShaderType(type));
+            GL_ASSERT(glShaderSource(shader_id, 1, shader.c_str(), nullptr));
+            GL_ASSERT(glCompileShader());
+            
+            bool result = checkShader(shader_id);
+            return result;
+        }
+        
+        bool ShaderProgram::link()
+        {
+            GL_ASSERT(glLinkProgram(m_id));
+            
+            bool result = checkProgram(m_id);
+            return result;
+        }
+        
+        void ShaderProgram::bind() const
+        {
+            GL_ASSERT(glUseProgram(m_id));
+        }
+        
+        void ShaderProgram::reload()
+        {
+            for (int i = 0; i < ShaderType_Count; ++i)
+            {
+                if (!m_shaders[i].empty())
+                {
+                    addShaderFile((ShaderType)i, m_shaders[i]);
+                }
+                
+                if (!m_shaderStrings[i].empty())
+                {
+                    addShaderString((ShaderType)i, m_shaders[i]);
+                }
+            }
+            
+            link();
+        }
+        
+        bool ShaderProgram::checkShader(int id)
+        {
+            GLint CompileStatus;
+            
+            GLchar InfoLog[512];
+            glGetShaderiv(Shader, GL_COMPILE_STATUS, &CompileStatus);
+            
+            if (!CompileStatus)
+            {
+                glGetShaderInfoLog(Shader, 512, nullptr, InfoLog);
+                fprintf(stderr, "Shader compilation error : %s\n", InfoLog);
+            }
+            
+            return CompileStatus != 0;
+        }
+        
+        bool ShaderProgram::checkProgram(int id)
+        {
+            GLint LinkStatus;
+            
+            GLchar InfoLog[512];
+            glGetProgramiv(Program, GL_LINK_STATUS, &LinkStatus);
+            
+            if (!LinkStatus)
+            {
+                glGetProgramInfoLog(Program, 512, nullptr, InfoLog);
+                fprintf(stderr, "Program link error : %s\n", InfoLog);
+            }
+            
+            return LinkStatus != 0;
+        }
+        
+        GLenum ShaderProgram::getOpenGLShaderType(ShaderType type) const
+        {
+            GLenum result;
+            
+            switch (type)
+            {
+                case ShaderType_Vertex:
+                {
+                    result = GL_VERTEX_SHADER;
+                } break;
+                
+                case ShaderType_Fragment:
+                {
+                    result = GL_FRAGMENT_SHADER;
+                } break;
+                
+                case ShaderType_Geometry:
+                {
+                    result = GL_GEOMETRY_SHADER;
+                } break;
+                
+                case ShaderType_TessControl:
+                {
+                    result = GL_TESS_CONTROL_SHADER;
+                } break;
+                
+                case ShaderType_TessEvaluation:
+                {
+                    result = GL_TESS_EVALUATION_SHADER;
+                } break;
+                
+                case ShaderType_Compute:
+                {
+                    result = GL_COMPUTE_SHADER;
+                } break;
+            }
+            
+            return result;
+        }
+        
+#else
         std::string getShaderInfoLog( GLuint shader )
         {
             int infoLogLen = 0;
@@ -656,6 +785,6 @@ namespace Ra
             GL_ASSERT( glUniform1i( glGetUniformLocation( m_shaderId, name ), texUnit ) );
         }
 
-
+#endif
     }
 } // namespace Ra
