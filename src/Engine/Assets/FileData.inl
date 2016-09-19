@@ -43,17 +43,25 @@ inline std::vector< GeometryData* > FileData::getGeometryData() const {
 
 inline std::vector< HandleData* > FileData::getHandleData() const {
     std::vector< HandleData* > list;
-//    list.reserve( m_handleData.size() );
-//    for( const auto& item : m_handleData ) {
-//        list.push_back( item.get() );
-//    }
-    std::string currentName = m_geometryData[m_currentIndex]->getName();
-    for( const auto& item : m_handleData )
+
+    if (m_currentIndex < 0)
     {
-        if (item->getName() == currentName)
+        list.reserve(m_handleData.size());
+        for( const auto& item : m_handleData )
         {
-            list.push_back( item.get() );
-            break;
+            list.push_back(item.get());
+        }
+    }
+    else
+    {
+        std::string currentName = m_geometryData[m_currentIndex]->getName();
+        for( const auto& item : m_handleData )
+        {
+            if (item->getName() == currentName)
+            {
+                list.push_back( item.get() );
+                break;
+            }
         }
     }
     
