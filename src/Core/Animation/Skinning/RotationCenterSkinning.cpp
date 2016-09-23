@@ -196,8 +196,6 @@ namespace Ra
                 Animation::linearBlendSkinning(CoR, pose, weight, transformedCoR);
 
 
-                uint sgn = Ra::Core::Math::signNZ( 43u);
-
 #pragma omp parallel for
                 for (int i = 0; i < int(size); ++i)
                 {
