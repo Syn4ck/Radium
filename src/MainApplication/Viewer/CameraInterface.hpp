@@ -33,7 +33,6 @@ namespace Ra
 {
     namespace Gui
     {
-
         class CameraInterface : public QObject
         {
             Q_OBJECT
@@ -68,9 +67,7 @@ namespace Ra
             {
                 m_light = light;
                 m_hasLightAttached = true;
-            }                             
-
-            virtual void update( Scalar dt ) = 0;
+            }
 
         public slots:
             void setCameraSensitivity( double sensitivity );
@@ -106,7 +103,6 @@ namespace Ra
             std::shared_ptr<Engine::Light> m_light;
             bool m_hasLightAttached;
         };
-
     } // namespace Ra
 } // namespace Engine
 
