@@ -34,7 +34,6 @@ namespace Ra
 {
     namespace Engine
     {
-
         namespace
         {
             const GLenum buffers[] =

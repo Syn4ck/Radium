@@ -11,7 +11,6 @@
 #include <GuiBase/SelectionManager/SelectionManager.hpp>
 #include <MainApplication/TimerData/FrameTimerData.hpp>
 
-
 namespace Ra
 {
     namespace Engine
@@ -42,7 +41,6 @@ namespace Ra
 {
     namespace Gui
     {
-
         /// This class manages most of the GUI of the application :
         /// top menu, side toolbar and side dock.
         class MainWindow : public QMainWindow, private Ui::MainWindow
@@ -51,7 +49,7 @@ namespace Ra
 
         public:
             /// Constructor and destructor.
-            explicit MainWindow( QWidget* parent = nullptr );
+            MainWindow(uint fps, std::string pluginsPath, uint numFrames, std::string fileToLoad = "", QWidget* parent = nullptr );
             virtual ~MainWindow();
 
             /// Access the viewer, i.e. the rendering widget.
@@ -66,6 +64,11 @@ namespace Ra
             /// Update the UI ( most importantly gizmos ) to the modifications of the engine/
             void onFrameComplete();
 
+            void loadFile(std::string file);
+            bool loadPlugins();
+            void setupScene();
+            void addBasicShaders();
+
         public slots:
             /// Callback to rebuild the item model when the engine objects change.
             void onItemAdded( const Engine::ItemEntry& ent );
@@ -73,7 +76,7 @@ namespace Ra
             void onItemRemoved( const Engine::ItemEntry& ent );
 
             // Frame timers ui slots
-            void onUpdateFramestats( const std::vector<FrameTimerData>& stats );
+            void updateFrameStats( const std::vector<FrameTimerData>& stats );
 
             // Selection tools
             void onSelectionChanged( const QItemSelection& selected, const QItemSelection& deselected );
@@ -97,9 +100,6 @@ namespace Ra
             /// Emitted when the closed button has been hit.
             void closed();
 
-            /// Emitted when the frame loads
-            void fileLoading( const QString path );
-
             /// Emitted when the user changes the timer box ("Frame average over count")
             void framescountForStatsChanged( int count );
 
@@ -114,7 +114,7 @@ namespace Ra
 
         private slots:
             /// Slot for the "load file" menu.
-            void loadFile();
+            void openMesh();
 
             /// Slot for the "material editor"
             void openMaterialEditor();
@@ -128,6 +128,22 @@ namespace Ra
             /// Slot to accept a new renderer
             void onRendererReady();
 
+            void setRealFrameRate(bool on) { m_useRealFramerate = on; }
+
+            /// Main loop
+            void radiumFrame();
+
+            void framesCountForStatsChanged(uint value)
+            {
+                m_frameCountBeforeUpdate = value;
+            }
+
+        public:
+            std::unique_ptr<Engine::RadiumEngine> m_engine;
+            std::unique_ptr<Core::TaskQueue> m_taskQueue;
+
+            uint m_targetFPS;
+
         private:
             /// Stores the internal model of engine objects for selection.
             GuiBase::ItemModel* m_itemModel;
@@ -137,8 +153,22 @@ namespace Ra
 
             /// Widget to allow material edition.
             MaterialEditor* m_materialEditor;
-        };
 
+            /// Timer
+            QTimer* m_timer;
+
+            Ra::Core::Timer::TimePoint m_lastFrameStart;
+
+            uint m_frameCounter;
+            uint m_frameCountBeforeUpdate;
+            uint m_numFrames;
+
+            std::string m_pluginsPath;
+
+            std::vector<FrameTimerData> m_timerData;
+
+            bool m_useRealFramerate;
+        };
     } // namespace Gui
 } // namespace Ra
 

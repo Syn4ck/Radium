@@ -114,9 +114,8 @@ namespace Ra
             std::lock_guard<std::mutex> renderLock( m_renderMutex );
             CORE_UNUSED( renderLock );
 
-            m_timerData.renderStart = Core::Timer::Clock::now();
-
             // 0. Save eventual already bound FBO (e.g. QtOpenGLWidget)
+            m_timerData.renderStart = Core::Timer::Clock::now();
             saveExternalFBOInternal();
 
             // 1. Gather render objects if needed
@@ -165,7 +164,7 @@ namespace Ra
 
         void Renderer::saveExternalFBOInternal()
         {
-            GL_ASSERT( glGetIntegerv( GL_FRAMEBUFFER_BINDING, &m_qtPlz ) );
+            //GL_ASSERT( glGetIntegerv( GL_FRAMEBUFFER_BINDING, &m_qtPlz ) );
         }
 
         void Renderer::updateRenderObjectsInternal( const RenderData& renderData )
@@ -315,7 +314,6 @@ namespace Ra
                     }
                 }
             }
-
 
             // Always draw ui stuff on top of everything
             GL_ASSERT( glClear( GL_DEPTH_BUFFER_BIT ) );
@@ -538,7 +536,6 @@ namespace Ra
                         light->setDirection( finalDir );
 
                         addLight( light );
-
                     }
                     break;
 
@@ -558,7 +555,6 @@ namespace Ra
                                                ailight->mAttenuationQuadratic );
 
                         addLight( light );
-
                     }
                     break;
 
@@ -591,7 +587,6 @@ namespace Ra
                         light->setOuterAngleInRadians( ailight->mAngleOuterCone );
 
                         addLight( light );
-
                     }
                     break;
 
@@ -603,6 +598,5 @@ namespace Ra
                 }
             }
         }
-
     }
 } // namespace Ra

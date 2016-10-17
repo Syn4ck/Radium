@@ -1,3 +1,5 @@
+#if 0
+
 #include <chrono>
 #include <memory>
 #include <vector>
@@ -51,9 +53,6 @@ namespace Ra
         MainApplication( int argc, char** argv );
         ~MainApplication();
 
-        /// Advance the engine for one frame.
-        void radiumFrame();
-
         bool isRunning() const { return !m_isAboutToQuit; }
 
         const Engine::RadiumEngine* getEngine () const { return m_engine.get();}
@@ -70,14 +69,15 @@ namespace Ra
 
         void updateFrameStats( const std::vector<FrameTimerData>& );
 
-        void loadComplete();
-
     public slots:
 
         void loadFile( QString path );
         void framesCountForStatsChanged( uint count );
         void appNeedsToQuit();
         void setRealFrameRate( bool on);
+
+        /// Advance the engine for one frame.
+        void radiumFrame();
 
     private:
         /// Create signal / slots connections
@@ -90,7 +90,6 @@ namespace Ra
 
         void setupScene();
         void addBasicShaders();
-
 
         // Public variables, accessible through the mainApp singleton.
     public:
@@ -127,4 +126,4 @@ namespace Ra
     };
 }
 
-
+#endif 
