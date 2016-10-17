@@ -8,9 +8,7 @@
 
 #include <memory>
 
-#include <QOpenGLWidget>
-#include <QOpenGLFunctions>
-#include <QThread>
+#include <QGLWidget>
 
 #include <Core/Math/LinearAlgebra.hpp>
 #include <Engine/RadiumEngine.hpp>
@@ -52,11 +50,9 @@ namespace Ra
 {
     namespace Gui
     {
-
         // FIXME (Charly) : Which way do we want to be able to change renderers ?
         //                  Can it be done during runtime ? Must it be at startup ? ...
         //                  For now, default ForwardRenderer is used.
-
 
         /// The Viewer is the main display class. It's the central screen QWidget.
         /// Its acts as a bridge between the interface, the engine and the renderer
@@ -67,7 +63,7 @@ namespace Ra
         /// * catching user interaction (mouse clicks) at the lowest level and forward it to
         /// the camera and the rest of the application
         /// * Expose the asynchronous rendering interface
-        class Viewer : public QOpenGLWidget, protected QOpenGLFunctions
+        class Viewer : public QGLWidget
         {
             Q_OBJECT
 
@@ -77,8 +73,6 @@ namespace Ra
 
             /// DESTRUCTOR
             ~Viewer();
-
-            void initRenderer();
 
             /// Access to camera interface.
             CameraInterface* getCameraInterface()
@@ -114,6 +108,9 @@ namespace Ra
 
             std::vector<std::string> getRenderersName() const;
 
+        protected:
+            virtual void paintGL() override;
+
         signals:
             void rendererReady();
             void leftClickPicking( int id );
@@ -125,15 +122,7 @@ namespace Ra
             void displayTexture( const QString& tex );
             void changeRenderer( int index );
             void enablePostProcess(int enabled);
-            void enableDebugDraw(int enabled);                                               
-
-        private slots:
-            /// These slots are connected to the base class signals to properly handle
-            /// concurrent access to the renderer.
-            void onAboutToCompose();
-            void onAboutToResize();
-            void onFrameSwapped();
-            void onResized();
+            void enableDebugDraw(int enabled);
 
         private:
             /// QOpenGlWidget primitives
@@ -160,7 +149,6 @@ namespace Ra
             virtual void mouseMoveEvent( QMouseEvent* event ) override;
             virtual void wheelEvent( QWheelEvent* event ) override;
 
-
         private:
             /// Owning pointer to the renderer.
             std::vector<std::unique_ptr<Engine::Renderer>> m_renderers;
@@ -175,7 +163,6 @@ namespace Ra
             /// Thread in which rendering is done.
             QThread* m_renderThread; // We have to use a QThread for MT rendering
         };
-
     } // namespace Gui
 } // namespace Ra
 
